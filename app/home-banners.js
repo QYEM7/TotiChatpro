@@ -101,5 +101,5 @@
     setInterval(()=>{if(document.visibilityState!=='hidden')refresh();},90000);
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});
   });
-  window.TotiBannerData=Object.freeze({renderBanner,renderAnnouncements,refresh,advance,getStatus:()=>state.status});
+  window.TotiBannerData=Object.freeze({renderBanner,renderAnnouncements,refresh,advance,getStatus:()=>state.status,getItems:()=>state.items.map(x=>({...x}))});
 })();
