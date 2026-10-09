@@ -166,7 +166,7 @@ vVIP=function(){
    scenario(n);
  }
  return '<div class="rvip-root vip-royal" dir="rtl">'+
- '<header class="rvip-header"><button data-vip15="back" aria-label="رجوع">❯</button><div><span>♛ TotiChat</span><h1>المملكة الملكية VIP</h1></div><span class="rvip-crown">👑</span></header>'+
+ '<header class="rvip-header"><button data-vip15="back" aria-label="رجوع">❯</button><div><span>♛ TotiChat</span><h1>عالم VIP المميز</h1></div><span class="rvip-crown">👑</span></header>'+
  hero+chooser+'<nav class="rvip-tabs" aria-label="صفحات VIP">'+tabs.map(tab=>
  '<button data-vip15="tab" data-tab="'+tab+'" class="'+(activeView===tab?'active':'')+'" aria-pressed="'+(activeView===tab)+'">'+tab+'</button>').join('')+'</nav>'+
  '<div class="rvip-content">'+content+'</div>'+
