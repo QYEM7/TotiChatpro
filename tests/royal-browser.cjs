@@ -44,11 +44,13 @@ async function shot(page,name){
  await shot(page,'02-room');
  await load(page,'?screen=room&view=share&owner=1');
  assert.ok(await page.$('.royal-feature-share'));
+ assert.ok(await page.$('.royal-feature-share .rp-unified-close'));
  await page.click('[data-tc="friend"]');
  assert.equal(await page.$eval('#tc-share-count',e=>e.textContent),'1');
  await shot(page,'03-share');
  await load(page,'?screen=room&view=settings&owner=1');
  assert.ok(await page.$('.royal-feature-settings'));
+ assert.ok(await page.$('.royal-feature-settings .rp-unified-close'));
  await page.click('[data-royal="seat-select"][data-count="8"]');
  assert.equal(await page.$eval('#tc-seat-count',e=>e.value),'8');
  await shot(page,'04-settings');
@@ -65,6 +67,45 @@ async function shot(page,name){
  await shot(page,'06-minimized');
  await page.click('[data-a="restoreRoom"]');
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'room');
+
+ // Unified X must be part of the room menu, not floating outside.
+ await page.evaluate(()=>sheet('roomExitMenu'));
+ await page.waitForSelector('.rp-room-menu-head .rp-unified-close');
+ assert.ok(await page.$('.rp-room-menu-head .rp-unified-close svg'));
+ const closeLocation=await page.$eval('.rp-room-menu-head .rp-unified-close',b=>{
+  const a=b.getBoundingClientRect(),p=b.closest('.room-glass').getBoundingClientRect();
+  return {inside:a.top>=p.top&&a.bottom<=p.bottom&&a.left>=p.left&&a.right<=p.right,w:a.width,h:a.height};
+ });
+ assert.equal(closeLocation.inside,true,'Room X must be INSIDE dialog');
+ assert.equal(closeLocation.w,42);
+ assert.equal(closeLocation.h,42);
+ await shot(page,'07-room-menu-close');
+ await page.click('.rp-room-menu-head .rp-unified-close');
+ assert.equal(await page.$eval('#overlay',el=>el.classList.contains('show')),false);
+ // Every level has its own generated vector emblem, with 100 selectable levels.
+ await page.evaluate(()=>go('level'));
+ assert.equal(await page.$eval('.rp-level-groups button',xs=>xs.length),10);
+ assert.equal(await page.$eval('.rp-level-card',xs=>xs.length),10);
+ assert.equal(await page.$eval('.rp-level-card svg',xs=>xs.length),10);
+ assert.ok(await page.$('.rp-level-card[data-level="45"]'));
+ await shot(page,'08-royal-level-badges-41-to-50');
+ await page.click('.rp-level-groups button[data-group="9"]');
+ assert.ok(await page.$('.rp-level-card[data-level="100"]'));
+ assert.equal(await page.$eval('.rp-level-card[data-level] svg',els=>new Set(els.map(e=>e.getAttribute('aria-label'))).size),10);
+ await shot(page,'09-royal-level-badges-91-to-100');
+ await page.click('.rp-level-card[data-level="100"]');
+ assert.ok(await page.$('.rp-badge-detail .rp-unified-close'));
+ await page.click('.rp-badge-detail .rp-unified-close');
+ assert.equal(await page.$eval('#overlay',el=>el.classList.contains('show')),false);
+ await page.evaluate(()=>go('honor'));
+ assert.equal(await page.$eval('.rp-honor-card',xs=>xs.length),9);
+ assert.equal(await page.$eval('.rp-honor-icon svg',xs=>xs.length),9);
+ await shot(page,'10-royal-achievement-badges');
+ await page.click('.rp-honor-card');
+ assert.ok(await page.$('#overlay .rp-unified-close'));
+ await page.click('#overlay .rp-unified-close');
+ assert.equal(await page.$eval('#overlay',el=>el.classList.contains('show')),false);
+
  const routes=[
  'me','profilePreview','profileEdit','messages','chatPreview','settings','storage','honor','level','ranks','agency','agencyPreview',
  'agencyApply','agencyStatusPreview','agencyJoinPreview','vip','wallet','rechargePreview','storePreview','bagPreview','friendsPreview',
