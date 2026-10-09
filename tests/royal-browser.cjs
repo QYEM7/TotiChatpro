@@ -34,7 +34,25 @@ async function shot(page,name){
  await load(page,'?view=royal-home');
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'home');
  assert.ok(await page.$('.royal-home'));
- assert.equal(await page.$$eval('.royal-room-tile',x=>x.length),6);
+ assert.equal(await page.$eval('.royal-room-tile',x=>x.length),6);
+ // Five bottom destinations and the original falcon are shared by Home and Me.
+ assert.equal(await page.$eval('.royal-nav button',x=>x.length),5);
+ assert.ok(await page.$('.royal-nav [data-v="me"] .tc-falcon-nav'));
+ assert.equal(await page.$eval('.tc-banner-controls .tc-banner-dot',x=>x.length)>=3,true);
+ const firstHero=await page.$eval('.royal-hero img',img=>img.src);
+ await page.click('.tc-banner-controls .tc-banner-dot:nth-child(2)');
+ await page.waitForFunction((src)=>document.querySelector('.royal-hero img')?.src!==src,{timeout:3000},firstHero);
+ assert.equal(await page.$eval('.tc-banner-dot:nth-child(2)',x=>x.getAttribute('aria-pressed')),'true');
+ await shot(page,'01-home-banner-second-slide');
+ await page.click('.royal-nav [data-v="me"]');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'me');
+ assert.equal(await page.$eval('.tc-unified-nav button',x=>x.length),5);
+ assert.equal(await page.$eval('.me-royal .me-links .me-link',x=>x.length),4);
+ assert.equal(await page.$eval('.me-royal .me-more button',x=>x.length),5);
+ assert.ok(await page.$('.tc-unified-nav [data-v="me"] .tc-falcon-nav'));
+ await shot(page,'01a-me-unified');
+ await page.click('.tc-unified-nav [data-v="home"]');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'home');
  await shot(page,'01-home');
  await page.evaluate(()=>go('room'));
  await page.waitForSelector('.roomview.room-v2');
