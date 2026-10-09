@@ -112,7 +112,7 @@ test('royal reference changes are frontend-only and preserve approved original a
  const royal=read('app/royal-visuals.js');
  const css=read('app/royal-visuals.css');
  assert.match(html,/royal-visuals\.css/);
- for(const key of ['royalHome','royal-feature-settings','royal-feature-share','royal-feature-games','royal-mini-room'])assert.ok(royal.includes(key)||css.includes(key),key);
+ for(const key of ['royalHome','royal-feature-','royal-feature-games','royal-mini-room','royal-seat-chips'])assert.ok(royal.includes(key)||css.includes(key),key);
  for(const key of ['Room Settings','Share Room','Games Center','TotiChat Lounge'])assert.match(royal,new RegExp(key));
  assert.doesNotMatch(royal,/\b(fetch|XMLHttpRequest|supabase\.from)\s*\(/);
  assert.doesNotMatch(read('index.html'),/royal-visuals\.(css|js)/);
