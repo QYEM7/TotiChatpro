@@ -8,6 +8,7 @@ on:
       - "tests/royal-browser.cjs"
       - "tests/agency-flow-browser.cjs"
       - "tests/bloom-design-browser.cjs"
+      - "tests/royal-reference-browser.cjs"
       - "tests/frontend-finish-browser.cjs"
       - ".github/workflows/royal-preview-qa.yml"
   workflow_dispatch:
@@ -39,6 +40,8 @@ jobs:
         run: node tests/bloom-design-browser.cjs
       - name: Verify completed frontend journeys
         run: node tests/frontend-finish-browser.cjs
+      - name: Verify reference #1 at Android widths and all major routes
+        run: node tests/royal-reference-browser.cjs
       - name: Save browser review screenshots
         if: always()
         uses: actions/upload-artifact@v4
