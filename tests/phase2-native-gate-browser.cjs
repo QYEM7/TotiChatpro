@@ -25,6 +25,8 @@ if(!executablePath)throw Error('System chromium unavailable');
    const path=new URL(url).pathname;
    const response=path==='/auth/v1/token'?authResult:
     path==='/rest/v1/profiles'?[userProfile]:
+    path==='/rest/v1/wallets'?[{user_id:uid,coins:0,diamonds:0,updated_at:'2026-10-10T00:00:00Z'}]:
+    path==='/rest/v1/wallet_ledger'?[]:
     path==='/rest/v1/rooms'||path==='/rest/v1/room_members'||path==='/rest/v1/home_banners'?[]:
     path==='/auth/v1/user'?authResult.user:[];
    return r.respond({status:200,contentType:'application/json',headers:{
@@ -65,7 +67,12 @@ if(!executablePath)throw Error('System chromium unavailable');
   assert.notEqual(fakeBio,'هذا المستخدم غامض، ولم يترك شيئاً');
   assert.equal(await page.$('.pr-agencywide'),null);
   await page.evaluate(()=>go('wallet'));
-  await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='home');
-  console.log('PASS: Android real mode requires login, labels demo explicitly, uses true empty rooms and profile, blocks fake wallet');
+  await page.waitForFunction(()=>window.TotiPhase2Wallet?.status()?.loaded===true);
+  assert.equal(await page.$eval('#app',e=>e.dataset.route),'wallet','Real wallet must be accessible');
+  assert.match(await page.$eval('.visual-hero h2',e=>e.textContent),/^0 🪙$/);
+  assert.match(await page.$eval('.visual-hero p',e=>e.textContent),/^0 ماسة/);
+  assert.ok(await page.$('#tc-live-wallet-records'),'Journal is from server, no demo entries');
+  assert.equal(await page.$('.visual-product-grid'),null,'Never show fake coin packages');
+  console.log('PASS: Android real mode requires login, labels demo, reads real zero wallet and empty rooms');
  }finally{await browser.close();}
 })().catch(err=>{console.error(err.stack||err);process.exitCode=1;});
