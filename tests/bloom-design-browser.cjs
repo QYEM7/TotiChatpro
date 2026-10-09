@@ -29,7 +29,7 @@ try{
  const roomBg=await p.$eval('.roomview',el=>getComputedStyle(el).backgroundImage);
  assert.ok(roomBg.includes('gradient'),'voice room has ambient stage atmosphere');
  assert.ok(roomBg.includes('room_wallpaper_crown_queen_1790560306491.jpg'),'preserve original room wallpaper under tonal lighting');
- assert.equal(await p.$eval('.seats .seat',es=>es.filter(e=>getComputedStyle(e).display==='none').length),0,'never hide microphone seats');
+ assert.equal(await p.$$eval('.seats .seat',es=>es.filter(e=>getComputedStyle(e).display==='none').length),0,'never hide microphone seats');
  await p.evaluate(()=>go('vip'));
  await p.waitForSelector('.rvip-tier .rvip-crest');
  assert.equal(await p.$$eval('.rvip-tier .rvip-crest',els=>els.length),15);
