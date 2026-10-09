@@ -164,3 +164,20 @@ html,body{background:#0b0616!important}
 @media(max-height:580px){.rf-room-royal-ribbon{height:30px;min-height:30px}#app.rf-room .seats{height:33dvh}#app.rf-room .seatface{width:clamp(30px,9vw,43px);height:clamp(30px,9vw,43px)}#app.rf-room .chatArea{padding-bottom:2px}#app.rf-room .roomevents{height:26px}}
 @media(max-width:350px){#app.rf-room .roomidentity{max-width:calc(100% - 94px)}#app.rf-room .roomidentity img{width:37px;height:37px}.rf-room-owner{font-size:7px}#app.rf-room .seatname{font-size:9px}}
 @media(prefers-reduced-motion:reduce){#app.rf-app *{scroll-behavior:auto!important}}
+
+/* Complete the royal identity for existing gift, user, music and information dialogs. */
+#overlay:not(.room-glass-show):not(.royal-mode-games):not(.royal-mode-share):not(.royal-mode-settings) .sheet:not(.room-glass){background:linear-gradient(140deg,#23103aea,#100920f7),url('../assets/images/room_screen_bg_1790556227206.jpg') center/cover!important;border:1.5px solid #e2ae7e!important;border-radius:24px 24px 8px 8px!important;color:#ffe9d3!important;box-shadow:0 0 18px #b549df83,0 0 50px #000c!important}
+#overlay .sheet:not(.room-glass) .sheethead{background:linear-gradient(90deg,#55176a,#180b2b)!important;border-bottom:1px solid #e0ad7b;color:#ffe1ac}
+#overlay .sheet:not(.room-glass) .sheethead h3{color:#ffe5b4!important;text-shadow:0 0 8px #fdc286a3}
+#overlay .sheet:not(.room-glass) :is(.primary,.xbtn){background:linear-gradient(100deg,#7728a8,#cc35d1)!important;border:1px solid #edba81!important;color:#ffedd2!important;border-radius:15px}
+#overlay .sheet:not(.room-glass) :is(.recipient,.giftTabs,.giftgrid,.toolgrid,.roominfo){color:#f4e6d8}
+#overlay .sheet:not(.room-glass) .giftitem{background:linear-gradient(120deg,#451955,#1c0c32)!important;border:1px solid #a46ab7!important;border-radius:15px;color:#ffe3b4!important}
+#overlay .sheet:not(.room-glass) .giftitem.selected{border-color:#ffd58a!important;box-shadow:0 0 12px #cb53f0b7!important}
+#overlay .sheet:not(.room-glass) .giftTabs button{background:#331446!important;border:1px solid #ae6bb3!important;color:#ebc8f3!important;border-radius:17px}
+#overlay .sheet:not(.room-glass) .giftTabs button.active{background:#a531c2!important;color:#ffe4b4!important}
+#overlay .sheet:not(.room-glass) .tool{background:linear-gradient(135deg,#48135d,#160b2b)!important;border:1px solid #e4b37d!important;color:#ffdfb2!important;border-radius:15px}
+#overlay .sheet:not(.room-glass) :is(.minirow,.userCardHero,.roominfo,.sendrow){background:#1b0c2ee6!important;color:#ffe6d6;border-color:#c18fba}
+#overlay .sheet:not(.room-glass) input,#overlay .sheet:not(.room-glass) select{background:#321642!important;border:1px solid #a977ae!important;color:#fff1e6!important;border-radius:13px}
+#overlay .sheet:not(.room-glass) .roominfo button{color:#ffe4b2}
+#overlay .sheet:not(.room-glass) .tool>span{filter:drop-shadow(0 0 10px #db6eff)}
+#overlay .sheet:not(.room-glass) .recipient button.selected{border-color:#ffd88d!important;box-shadow:0 0 9px #f2bb7d}
