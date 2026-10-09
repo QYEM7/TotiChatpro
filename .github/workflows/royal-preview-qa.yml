@@ -37,6 +37,9 @@ jobs:
         run: node tests/bloom-design-browser.cjs
       - name: Verify completed frontend journeys
         run: node tests/frontend-finish-browser.cjs
+      - name: Verify real Auth and room integration (mock server, no data mutations)
+        if: github.ref == 'refs/heads/develop/phase-2'
+        run: node tests/phase2-browser.cjs
       - name: Save browser review screenshots
         if: always()
         uses: actions/upload-artifact@v4
