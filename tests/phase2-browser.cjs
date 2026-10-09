@@ -19,6 +19,7 @@ const token={access_token:'test-access-token',refresh_token:'test-refresh-token'
 let profile={id:owner,display_name:'Room Test User',bio:'مرحبا',
  avatar_url:null,created_at:today,updated_at:today};
 let room=null,joined=false,seat=null,messages=[];
+const calls=[];
 let browser;
 async function waitUntil(page,fn){
   try{await page.waitForFunction(fn,{timeout:13000,polling:150});}
@@ -26,6 +27,8 @@ async function waitUntil(page,fn){
     const text=await page.$eval('#fc-form-status',x=>x.textContent).catch(()=>null);
     const route=await page.$eval('#app',x=>x.dataset.route).catch(()=>null);
     console.error('UI timeout diagnostics:',JSON.stringify({route,formStatus:text}));
+    console.error('Recent backend endpoints:',JSON.stringify(calls.slice(-15)));
+    console.error('Last UI toast:',await page.$eval('#toast',x=>x.textContent).catch(()=>''));
     throw error;
   }
 }
@@ -59,6 +62,7 @@ function json(data,status=200){
    'access-control-allow-methods':'GET,POST,PATCH,OPTIONS'},body:''
   });
   const u=new URL(url),route=u.pathname;
+  calls.push(method+' '+route);
   const body=(()=>{try{return JSON.parse(req.postData()||'null')}catch{return null}})();
   let result;
   if(route==='/rest/v1/home_banners'){result=json([]);}
