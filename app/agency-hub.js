@@ -46,7 +46,7 @@ function createOrder(agentId){
  if(!agent||agent.balance<state.pack)return notify('الوكيل ليس متاحاً الآن');
  const id='TC-'+String(now()).slice(-9);
  const o={id,agentId,qty:state.pack,uid:'7273804',status:'waiting',created:now(),accepted:null,paidAt:null,assignee:staffAssigned(),messages:[{by:'system',text:'تم إنشاء طلب الشحن. انتظر قبول الوكيل قبل الدفع.',at:now()}],history:['إنشاء طلب تجريبي'],rating:0};
- state.orders.unshift(o);state.selectedOrder=id;state.section='orders';closeSheet();go('agencyDesk');persist();notify('تم إنشاء طلب محلي للتجربة، بدون أي دفع حقيقي');
+ state.orders.unshift(o);state.selectedOrder=id;state.section='order';closeSheet();go('agencyDesk');persist();notify('تم إنشاء طلب محلي للتجربة، بدون أي دفع حقيقي');
 }
 const homeMenu=[
  ['طلبات الشحن','orders','📋'],['محادثات الشحن','chats','💬'],
