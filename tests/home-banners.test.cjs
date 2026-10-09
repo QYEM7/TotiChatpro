@@ -56,6 +56,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
     ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
   ];
+  assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css">/);
+  assert.match(app, /<script src="\.\/royal-vip15\.js"><\/script>/);
+  app=app.replace('<link rel="stylesheet" href="./royal-vip15.css">','');
+  app=app.replace('<script src="./royal-vip15.js"></script>','');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-badges-close\.css">/);
   assert.match(app, /<script src="\.\/royal-badges-close\.js"><\/script>/);
   app=app.replace('<link rel="stylesheet" href="./royal-badges-close.css">','');
@@ -80,7 +84,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js','app/royal-vip15.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
@@ -152,4 +156,16 @@ test('unique royal badges and close controls are isolated to frontend preview',(
  assert.match(app,/royal-badges-close\.css/);
  assert.doesNotMatch(js,/\b(fetch|XMLHttpRequest|supabase\.from|socket\.emit)\s*\(/);
  assert.doesNotMatch(read('index.html'),/royal-badges-close/);
+});
+
+test('VIP 1 to 15 gallery is frontend-only and preserves other app sections',()=>{
+ const app=read('app/index.html'),js=read('app/royal-vip15.js'),css=read('app/royal-vip15.css');
+ assert.match(app,/royal-vip15\.css/);
+ assert.match(app,/royal-vip15\.js/);
+ for(const key of ['const tiers=[','length:15','Array.from({length:15}','vVIP=function','rvip-tier','rvip-hero','rvip-benefit','rvip-scenario','view','royal-vip','TotiChatVIPPreview']){
+  assert.ok(js.includes(key)||css.includes(key),key);
+ }
+ assert.doesNotMatch(js,/\b(fetch|XMLHttpRequest|supabase\.from|socket\.emit)\s*\(/);
+ assert.doesNotMatch(read('index.html'),/royal-vip15/);
+ assert.match(read('app/index.html'),/const seats=Array.from\(\{length:15\}/);
 });
