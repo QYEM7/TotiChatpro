@@ -26,8 +26,8 @@ create table if not exists public.home_banners (
   ),
   constraint home_banners_valid_link check (
     (link_kind = 'none' and link_target is null)
-    or (link_kind = 'external' and link_target ~ '^https://[^[:space:]]+$' and char_length(link_target) <= 2048)
-    or (link_kind = 'screen' and link_target in (
+    or (link_kind = 'external' and link_target is not null and link_target ~ '^https://[^[:space:]]+$' and char_length(link_target) <= 2048)
+    or (link_kind = 'screen' and link_target is not null and link_target in (
       'home','room','ranks','cp','agencyPreview','agency','storePreview',
       'vip','wallet','me','tour','profilePreview','rechargePreview','discoverPreview'
     ))
