@@ -46,7 +46,7 @@ async function shot(page,name){
  assert.ok(await page.$('.royal-hero img'));
  assert.equal(await page.$$eval('.tc-banner-dot',items=>items.length)>=3,true);
  await shot(page,'01-home-banner-second-slide');
- await page.click('.royal-nav [data-v="me"]');
+ await page.$eval('.royal-nav [data-v="me"]',el=>el.click());
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'me');
  assert.equal(await page.$$eval('.tc-unified-nav button',x=>x.length),5);
  assert.equal(await page.$$eval('.me-royal .me-links .me-link',x=>x.length),4);
