@@ -1,0 +1,9 @@
+/* Real wallet ledger: same established visual language, no fabricated numbers. */
+#app .tc-live-wallet-records{display:flex;flex-direction:column;gap:10px;
+  text-align:right;padding:18px;border-radius:18px;line-height:1.7;}
+#app .tc-wallet-journal-line{display:flex;justify-content:space-between;
+  gap:12px;border-bottom:1px solid #c99ad155;padding:9px 0;}
+#app .tc-wallet-read-only{font-size:12px;color:#684b73;}
+#app .tc-live-wallet-records button{padding:10px 15px;min-height:43px;
+  border-radius:14px;align-self:stretch;font-weight:900;background:#653076;color:#fff3d0;}
+#app .tc-live-wallet-records button:disabled{opacity:.65}
