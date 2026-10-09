@@ -13,7 +13,7 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const go=async name=>{await page.evaluate(route=>window.go(route),name);await page.waitForSelector('#app[data-route="'+name+'"]');};
 const click=async(selector)=>{await page.$eval(selector,el=>el.click());await wait(35)};
 try{
- await page.goto(base+'?view=royal-home',{waitUntil:'domcontentloaded'});
+ await page.goto(base+'?view=royal-home&phase2Demo=1',{waitUntil:'domcontentloaded'});
  await page.waitForSelector('.royal-home');
  assert.equal(await page.$$eval('.royal-room-tile',es=>es.length),6);
  await go('loginPreview');
