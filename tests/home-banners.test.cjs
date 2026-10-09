@@ -80,6 +80,8 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   app=app.replace(/\n<link rel="stylesheet" href="\.\/phase2-rooms\.css\?v=[^"]+">/,'');
   assert.match(app,/phase2-live-mode\.css\?v=/);
   app=app.replace(/\n<link rel="stylesheet" href="\.\/phase2-live-mode\.css\?v=[^"]+">/,'');
+  assert.match(app,/phase2-wallet\.css\?v=/);
+  app=app.replace(/\n<link rel="stylesheet" href="\.\/phase2-wallet\.css\?v=[^"]+">/,'');
 
   app=app.replace(/<script src="\.\/toti-nav-banner-refine\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app,/phase2-auth\.js\?v=/);
@@ -90,6 +92,8 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   app=app.replace(/<script src="\.\/phase2-rooms\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app,/phase2-live-mode\.js\?v=/);
   app=app.replace(/<script src="\.\/phase2-live-mode\.js\?v=[^"]+"><\/script>/,'');
+  assert.match(app,/phase2-wallet\.js\?v=/);
+  app=app.replace(/<script src="\.\/phase2-wallet\.js\?v=[^"]+"><\/script>/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
   assert.match(app, /<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/);
