@@ -34,7 +34,7 @@ function royalHome(){
  '<div class="royal-room-gallery">'+roomItems.map(roomCard).join('')+'</div>'+
  '<div class="royal-section-label"><h2>👑 غرف قريبة منك</h2><button data-royal="view-all">عرض الكل ❮</button></div>'+
  '<div class="royal-near">'+near.map(x=>'<button data-a="go" data-v="room" class="royal-near-tile"><img src="'+esc(imgs(x[0]))+'" alt=""><span>🟢 '+x[1]+'</span></button>').join('')+'</div>'+
- '<div class="royal-official"><p>📣 الإعلانات الرسمية</p>'+window.TotiBannerData.renderBanner()+'</div>'+
+ /* End home feed after nearby rooms: top hero banner stays unchanged. */
  '</main>'+
  (minimizedRoom?'<button class="mini-room-pill tc-mini-room royal-mini-room" data-a="restoreRoom" aria-label="العودة إلى الغرفة المصغرة">🎙️ الغرفة المصغرة</button>':'')+
  '<nav class="royal-nav"><button data-a="go" data-v="home" class="selected"><span>⌂</span><small>الرئيسية</small></button>'+
