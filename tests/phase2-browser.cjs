@@ -152,7 +152,7 @@ function json(data,status=200){
  await page.evaluate(()=>go('me'));
  await page.click('[data-phase2="account"]');
  await page.waitForSelector('.tc-phase2-account-sheet [data-phase2="logout"]');
- await page.click('.tc-phase2-account-sheet [data-phase2="logout"]');
+ await page.$eval('.tc-phase2-account-sheet [data-phase2="logout"]',el=>el.click());
  await waitUntil(page,()=>window.TotiPhase2Auth?.state()?.signedIn===false);
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'loginPreview');
  console.log('PASS: real UI Auth -> profile -> rooms -> seat -> chat -> profile edit -> logout, all mocked/isolated');
