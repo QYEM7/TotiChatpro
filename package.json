@@ -2,7 +2,6 @@
   "name": "totichat-approved-phase2",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
   "description": "Approved TotiChat UI packaged unchanged for a clean Android backend integration",
   "scripts": {
     "build": "node scripts/build-approved-web.mjs",
