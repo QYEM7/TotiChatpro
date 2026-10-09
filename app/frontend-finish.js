@@ -239,5 +239,55 @@ document.addEventListener('click',event=>{
    note+btn('إغلاق المراجعة','close','','wide')+'</div>',true);return;
  }
 },true);
+/* Settings buttons that previously only produced a toast now have meaningful
+   local UI feedback. These preferences affect the preview only, never live accounts. */
+const prefKey='totichat.frontend.preferences.v1';
+let pref={};
+try{const candidate=JSON.parse(localStorage.getItem(prefKey)||'{}');if(candidate&&typeof candidate==='object'&&!Array.isArray(candidate))pref=candidate;}catch(e){}
+function applySettingToggles(){
+ if(screen!=='settings')return;
+ document.querySelectorAll('#app button[data-a="option"][data-v="switch"]').forEach(b=>{
+  const key=b.textContent.replace(/\s+/g,' ').trim();
+  const state=pref[key];
+  if(typeof state!=='boolean')return;
+  b.querySelector('.switch')?.classList.toggle('on',state);
+  b.setAttribute('aria-pressed',String(state));
+ });
+}
+const prevPreferenceRender=render;
+render=function(){prevPreferenceRender();applySettingToggles()};
+function preferenceInfo(title,info,extra=''){
+ showSheet('<div class="fc-sheet" dir="rtl">'+head(H(title))+note+
+  card('<p>'+H(info)+'</p>'+extra)+btn('إغلاق','close','','wide')+'</div>',true);
+}
+document.addEventListener('click',event=>{
+ const el=event.target.closest('button[data-a="option"],[data-hard]');
+ if(!el)return;
+ const a=el.dataset.hard||el.dataset.v;
+ event.preventDefault();event.stopImmediatePropagation();
+ if(a==='switch'){
+  const label=el.textContent.replace(/\s+/g,' ').trim();
+  const sw=el.querySelector('.switch');if(!sw)return;
+  const next=!sw.classList.contains('on');
+  sw.classList.toggle('on',next);el.setAttribute('aria-pressed',String(next));
+  pref[label]=next;
+  try{localStorage.setItem(prefKey,JSON.stringify(pref))}catch(e){}
+  showToast('تغير التفضيل داخل المعاينة فقط');
+  return;
+ }
+ if(a==='security'){go('accountSafetyPreview');return;}
+ if(a==='permission'){preferenceInfo('أذونات TotiChat','أذونات المايك والإشعارات والصور يحددها نظام Android. عند بناء النسخة الأصلية يجب طلب الإذن وقت الاستخدام وإظهار الخطأ عند الرفض.');return;}
+ if(a==='network'){preferenceInfo('تشخيص الشبكة','هذه معاينة ويب. حالة اتصال المتصفح الحالية: '+(navigator.onLine?'يبلغ أنه متصل':'يبلغ أنه غير متصل')+'. هذا لا يؤكد اتصال خادم الغرف أو خدمة الصوت.');return;}
+ if(a==='version'){preferenceInfo('نسخة الواجهة','Bloom Signature — نموذج Frontend متقدم، لم تُعتمد نسخة تشغيل خلفي أو مدفوعات حقيقية.');return;}
+ if(a==='legal'){preferenceInfo('السياسات الرسمية','يجب نشر شروط الاستخدام وسياسة الخصوصية القانونيتين قبل إطلاق المنتج. لا يعرض التطبيق نصوصاً قانونية مخترعة ضمن المعاينة.');return;}
+ if(a==='cache'){showSheet('<div class="fc-sheet" dir="rtl">'+head('مسح تفضيلات المعاينة')+note+
+  card('<p>هل تريد حذف التفضيلات المحلية الخاصة بهذه المعاينة فقط؟ لن يُمس أي حساب أو محفظة حقيقية، ولن نحذف سجلات الوكالات التجريبية.</p>')+
+  '<button class="fc-btn fc-wide" data-hard="confirm-clear">تأكيد حذف التفضيلات</button>'+
+  btn('إلغاء','close','','soft wide')+'</div>',true);return;}
+ if(a==='confirm-clear'){try{localStorage.removeItem(prefKey)}catch(e){}pref={};closeSheet();render();showToast('تمت إعادة تفضيلات المعاينة الافتراضية');return;}
+ if(a==='toast'){preferenceInfo('خيارات البث','خيارات البث والموسيقى مرتبطة بالغرفة. يمكن معاينتها من أدوات إدارة الغرفة، لكن التفعيل الحقيقي يحتاج صلاحيات وصوتاً متصلاً.');return;}
+},true);
+applySettingToggles();
+
 window.TotiChatFrontendFinish=Object.freeze({version:'1.0-ui-handoff',routes:Object.keys(extraRoutes).concat(['storePreview','bagPreview','friendsPreview','notificationsPreview','signupPreview','loginPreview','welcomePreview'])});
 })();
