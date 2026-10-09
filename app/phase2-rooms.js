@@ -207,6 +207,7 @@ async function createRoom(){
     if(!UUID.test(String(roomId)))throw new Error('لم يؤكد الخادم إنشاء الغرفة');
     if(typeof closeSheet==='function')closeSheet();
     rooms=null;await listRooms();
+    entering=false;
     await enterRoom(roomId);
   }catch(err){toast(failure(err));}
   finally{entering=false;}
