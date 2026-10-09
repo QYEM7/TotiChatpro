@@ -1,0 +1,101 @@
+/* TotiChat Royal VIP 1–15. Self-contained visual layer; no changes to other screens. */
+#app .rvip-root{--rvGold:#f2c77d;--rvPlum:#250b33;--rvPink:#c33ddc;--rvText:#fff1d8;min-height:100dvh;padding:0 10px 32px!important;overflow:hidden;color:var(--rvText)!important;background:
+radial-gradient(ellipse 90% 27% at 48% 6%,#9c29c449,transparent 90%),
+linear-gradient(180deg,#180923e9,#12081ff5 52%,#090513f8),
+url('../assets/images/room_wallpaper_crown_queen_1790560306491.jpg') top center/cover!important;font-family:Cairo,system-ui,sans-serif;direction:rtl}
+#app .rvip-root *{box-sizing:border-box}
+#app .rvip-root button{font-family:inherit;cursor:pointer}
+#app .rvip-header{margin:0 -10px 10px;padding:18px 14px 8px;display:flex;justify-content:space-between;align-items:center;gap:9px;border-bottom:1px solid #f1bd7159;background:linear-gradient(180deg,#1e0b2dd8,#240b38a8)}
+#app .rvip-header>button{height:40px;width:40px;flex:0 0 40px;color:#ffe1ac;background:#421857;border:1px solid #e8c07d;border-radius:50%;box-shadow:0 0 9px #be4dd47c;font-size:25px}
+#app .rvip-header>div{text-align:center}
+#app .rvip-header>div>span{font-size:10px;color:#ffdea2;letter-spacing:1px}
+#app .rvip-header h1{font-size:21px;margin:1px 0;color:#ffe0a5;text-shadow:0 0 12px #edb17c}
+#app .rvip-crown{font-size:27px;filter:drop-shadow(0 0 8px #edb16f);min-width:40px;text-align:center}
+#app .rvip-hero{position:relative;min-height:251px;overflow:hidden;border-radius:22px;border:2px solid #f3c37db3;box-shadow:inset 0 0 18px #f7bd923b,0 0 21px #bc44ea7c,0 9px 24px #0009;background:
+linear-gradient(120deg,#28103fd9,#1c0c31e9 62%,#54115bde),
+url('../assets/images/room_cover_majlis_1790226059300.jpg') 48% center/cover;margin:7px 0 14px}
+#app .rvip-hero:before{content:'';pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at 50% 5%,#f8b96c31,transparent 45%),linear-gradient(125deg,#1e0a3452,#120b2391 68%,#350d5680)}
+#app .rvip-hero-header{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffdfb2;font-size:9px;letter-spacing:.8px;padding:11px 13px}
+#app .rvip-hero-center{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 9px}
+#app .rvip-hero-crest{flex:0 0 145px;max-width:47%;height:166px;filter:drop-shadow(0 0 16px #e7c378ac)}
+#app .rvip-crest{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 2px 6px #000b)}
+#app .rvip-hero-copy{flex:1;min-width:0;direction:rtl;text-align:right}
+#app .rvip-hero-copy>small{font-size:10px;color:#d9b4ea;font-weight:800}
+#app .rvip-hero-copy h2{font-size:clamp(27px,9vw,38px);margin:2px 0;color:#ffe4aa;line-height:1.25;text-shadow:0 2px 9px #000,0 0 12px #edae75;white-space:nowrap}
+#app .rvip-hero-copy strong{display:block;font-size:13px;color:#ffedc8;text-shadow:0 2px 5px #000}
+#app .rvip-hero-copy p{color:#ecc8e9;font-size:10px;margin:5px 0 8px}
+#app .rvip-hero-tag{display:inline-block;padding:4px 7px;font-size:9px;border-radius:14px;border:1px solid #efcb8c;background:#662d7d7d;color:#ffe5bc}
+#app .rvip-hero-footer{position:relative;text-align:center;color:#f8cc88;border-top:1px solid #ffcb6f5e;margin-top:8px;padding:8px 4px 11px;font-size:9px;letter-spacing:1px}
+#app .rvip-subheading{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:0 3px;margin:15px 0 10px}
+#app .rvip-subheading h3{font-size:16px;margin:0;color:#ffe0a0;text-shadow:0 0 10px #eac16c70}
+#app .rvip-subheading span,#app .rvip-subheading button{color:#e9c1ee;font-size:10px}
+#app .rvip-subheading button{background:#44135c88;border:1px solid #ad79bf;border-radius:12px;padding:5px 7px}
+#app .rvip-tier-list{display:flex;flex-direction:row;gap:9px;overflow-x:auto;padding:5px 3px 15px;scrollbar-width:thin;scrollbar-color:#c065db #220e33;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+#app .rvip-tier{scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 108px;min-height:144px;padding:6px 6px 9px;color:#ffe3be;border:1.3px solid #d19a79b3;border-radius:17px;background:linear-gradient(150deg,#451458d8,#200e38f4);box-shadow:inset 0 0 15px #a640d331,0 5px 13px #0009}
+#app .rvip-tier.selected{border:2px solid #ffe1a0;background:linear-gradient(140deg,#672084ea,#351044);box-shadow:0 0 14px #c744e7b3,inset 0 0 13px #ffc36c36}
+#app .rvip-tier>span{display:block;width:85px;height:91px;flex:0 0 91px}
+#app .rvip-tier b{font-size:13px;line-height:1.3;color:#ffe4a1}
+#app .rvip-tier small{font-size:9px;color:#e9c9ed;text-align:center;line-height:1.5;white-space:nowrap}
+#app .rvip-tabs{position:sticky;top:0;z-index:7;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:5px;margin:6px 0 14px;border:1px solid #c18cbd9e;border-radius:18px;background:#1d0d31f2;backdrop-filter:blur(10px)}
+#app .rvip-tabs button{font-size:11px;min-height:39px;color:#d4aedc;background:#2c123d;border-radius:14px;border:1px solid transparent;font-weight:900;padding:5px 1px;white-space:nowrap}
+#app .rvip-tabs button.active{border-color:#ffe5a3;background:linear-gradient(120deg,#7c20af,#ce3ad7);color:#fff0b9;box-shadow:0 0 11px #d74cee8c}
+#app .rvip-content{padding:0 2px}
+#app .rvip-feature-focus{display:flex;align-items:center;gap:13px;min-height:122px;padding:11px;border-radius:18px;border:1px solid #edbf7e9d;background:linear-gradient(120deg,#501d5fbe,#1a0e30e9),url('../assets/images/room_cover_majlis_1790226059300.jpg') center/cover;box-shadow:0 0 13px #bc59e85c}
+#app .rvip-feature-focus>.rvip-crest{width:91px;height:101px;flex:0 0 91px;filter:drop-shadow(0 0 9px #e9b278aa)}
+#app .rvip-feature-focus>div{flex:1}
+#app .rvip-feature-focus strong{display:block;font-size:16px;color:#ffe3a2}
+#app .rvip-feature-focus p{font-size:12px;color:#efd6e8;line-height:1.7;margin:5px 0}
+#app .rvip-benefits{display:grid;grid-template-columns:1fr;gap:8px;margin:7px 0 16px}
+#app .rvip-benefit{display:flex;align-items:center;gap:11px;min-height:68px;padding:10px 12px;border-radius:15px;border:1px solid #ca9c9f8c;background:linear-gradient(110deg,#39134ad5,#1b0e31f0);box-shadow:inset 0 1px #ffffff10}
+#app .rvip-benefit.featured{border:1.6px solid #f0d29b;background:linear-gradient(110deg,#691f83d6,#260f3ae9);box-shadow:0 0 11px #e6aa5f70}
+#app .rvip-benefit.locked{opacity:.58;filter:saturate(.72)}
+#app .rvip-benefit-ico{width:39px;height:39px;display:grid;place-items:center;flex:0 0 39px;border-radius:12px;border:1px solid #e0b278;background:#6022817c;font-size:23px}
+#app .rvip-benefit>div{flex:1;min-width:0}
+#app .rvip-benefit b{font-size:12px;display:block;color:#ffe4b0}
+#app .rvip-benefit small{font-size:10px;display:block;color:#dfc6e9;line-height:1.7}
+#app .rvip-benefit-status{color:#ffe4a4;font-weight:900;font-size:14px}
+#app .rvip-scenario{padding:10px 11px 14px;border:1.2px solid #cda377a0;border-radius:19px;background:linear-gradient(145deg,#451456c7,#170a2ceb),url('../assets/images/room_screen_bg_1790556227206.jpg') center/cover;margin:15px 0}
+#app .rvip-scenario>h3{margin:5px 0 11px;font-size:14px;color:#ffe5a8}
+#app .rvip-scenario-avatar{display:flex;align-items:center;gap:7px;min-height:66px;padding:8px;border:1px solid #f4bd7899;border-radius:15px;background:#170c24ca}
+#app .rvip-scenario-avatar>img{width:49px;height:49px;border-radius:50%;border:2px solid #ffcf80;object-fit:cover}
+#app .rvip-scenario-avatar>.rvip-crest{height:51px;width:48px;flex:0 0 48px}
+#app .rvip-scenario-avatar>span{font-weight:900;font-size:11px;color:#ffe2a5}
+#app .rvip-scenario-chat{display:flex;align-items:center;gap:8px;margin:9px 0;padding:8px;border-radius:14px;border:1px solid #b85fd69c;background:linear-gradient(130deg,#4d1a6bd6,#210d2bdd)}
+#app .rvip-scenario-chat>.rvip-crest{height:37px;width:38px;flex:0 0 38px}
+#app .rvip-scenario-chat>span{font-size:11px;color:#f5d9ef}
+#app .rvip-enter-line{display:flex;align-items:center;gap:9px;border:1px solid #eed28d;border-radius:15px;background:linear-gradient(110deg,#501465,#2e0d3cc9);padding:7px;min-height:65px;box-shadow:0 0 11px #b13dd85e}
+#app .rvip-enter-line>.rvip-crest{height:46px;width:45px;flex:0 0 45px}
+#app .rvip-enter-line>div{flex:1}
+#app .rvip-enter-line b{display:block;font-size:11px;color:#ffe2a4}
+#app .rvip-enter-line small{display:block;font-size:10px;color:#e6c0ec}
+#app .rvip-scenario>p{margin:11px 3px 0;font-size:9px;color:#dcc7e1;line-height:1.6}
+#app .rvip-effect-action,#app .rvip-upgrade,#overlay .rvip-upgrade{display:block;width:100%;min-height:46px;border-radius:15px;border:1.5px solid #f8d294;color:#ffe8b9;font-weight:900;background:linear-gradient(115deg,#7b25b3,#cf36e6,#7422a6);box-shadow:0 0 12px #c44cefa3;padding:10px}
+#app .rvip-effect-overlay{position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,#ad41c996,#080515de 74%);animation:rvipReveal 1.8s ease-in-out both}
+#app .rvip-effect-overlay>div{text-align:center;filter:drop-shadow(0 0 22px #ffcd9b)}
+#app .rvip-effect-overlay .rvip-crest{height:230px;width:210px;margin:auto;animation:rvipFloat 1s ease-in-out infinite alternate}
+#app .rvip-effect-overlay h2{font-size:37px;color:#ffdf9a;margin:0;text-shadow:0 0 15px #b949e7}
+#app .rvip-effect-overlay span{font-size:14px;color:#fce7d4}
+@keyframes rvipReveal{0%{opacity:0;transform:scale(.85)}20%,80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.13)}}
+@keyframes rvipFloat{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+#app .rvip-buy-panel{padding:15px;border:1px solid #e4b780a9;border-radius:18px;background:linear-gradient(120deg,#321141eb,#180a2bea)}
+#app .rvip-buy-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#app .rvip-buy-row>div{padding:10px;border:1px solid #af77ba83;border-radius:13px;background:#1c0b2fcf;min-width:0}
+#app .rvip-buy-row small{font-size:9px;display:block;color:#e4c4e2}
+#app .rvip-buy-row b{display:block;color:#ffe1a6;font-size:13px;margin-top:3px}
+#app .rvip-buy-actions{display:grid;grid-template-columns:1.2fr .8fr;gap:8px;margin-top:14px}
+#app .rvip-buy-actions button:last-child{border:1px solid #dbb986;background:#35164ae8;color:#ffe7b4;border-radius:15px;font-size:11px;font-weight:850}
+#app .rvip-buy-panel>p{font-size:10px;line-height:1.8;color:#dac4e8;margin:12px 0 0}
+#app .rvip-privacy{color:#c8add1;font-size:10px;line-height:1.8;text-align:center;margin:17px 8px 14px}
+#app .rvip-navback{display:flex;justify-content:center;margin-bottom:18px}
+#app .rvip-navback button{border:1px solid #d09dab;background:#241234;color:#ffe0ac;border-radius:13px;padding:10px 22px;font-size:12px}
+#overlay .rvip-detail{text-align:center;padding:10px 13px;color:#ffe5bd;background:transparent}
+#overlay .rvip-detail .sheethead{margin:0 -3px;text-align:right}
+#overlay .rvip-detail-crest{width:190px;height:215px;margin:3px auto 10px;filter:drop-shadow(0 0 14px #e0a4778c)}
+#overlay .rvip-detail h3{color:#ffe5af;margin:6px;font-size:17px}
+#overlay .rvip-detail p{color:#ebc9e8;font-size:11px;line-height:1.8}
+#overlay .rvip-detail .rvip-feature-focus{min-height:96px;text-align:right;margin:8px 0}
+#overlay .rvip-detail .rvip-feature-focus>.rvip-crest{height:76px;width:74px;flex:0 0 74px}
+#overlay .rvip-detail .rvip-feature-focus strong{font-size:13px}
+#overlay .rvip-detail .rvip-feature-focus p{font-size:10px}
+@media(max-width:360px){#app .rvip-hero-crest{flex-basis:115px;height:150px}#app .rvip-hero-copy h2{font-size:26px}#app .rvip-hero-copy strong{font-size:11px}#app .rvip-tier{flex-basis:99px}#app .rvip-tier>span{width:79px}#app .rvip-header h1{font-size:18px}}
+@media(prefers-reduced-motion:reduce){#app .rvip-effect-overlay,#app .rvip-effect-overlay .rvip-crest{animation:none!important}#app .rvip-root *{scroll-behavior:auto!important}}
