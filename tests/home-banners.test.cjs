@@ -56,10 +56,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
     ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
   ];
-  assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css">/);
-  assert.match(app, /<script src="\.\/royal-vip15\.js"><\/script>/);
-  app=app.replace('<link rel="stylesheet" href="./royal-vip15.css">','');
-  app=app.replace('<script src="./royal-vip15.js"></script>','');
+  assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
+  assert.match(app, /<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/);
+  app=app.replace(/<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/,'');
+  app=app.replace(/<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-badges-close\.css">/);
   assert.match(app, /<script src="\.\/royal-badges-close\.js"><\/script>/);
   app=app.replace('<link rel="stylesheet" href="./royal-badges-close.css">','');
