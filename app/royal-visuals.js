@@ -22,7 +22,7 @@ function royalHome(){
  const cat=[['🔥','الأكثر رواجاً','popular'],['👑','غرف VIP','vip'],['💗','تعارف','friends'],['♫','موسيقى','music'],['🎮','ألعاب','games'],['🌐','دولي','world'],['▦','جميع الفئات','all']];
  const near=[['room4','312'],['room3','288'],['room5','265'],['room2','198']];
  return '<div class="royal-home" dir="rtl"><div class="royal-home-haze"></div>'+
- '<header class="royal-topbar"><div class="royal-brand">👑 <strong>TotiChat</strong></div>'+
+ '<header class="royal-topbar"><div class="royal-brand">✦ <strong>TotiChat</strong></div>'+
  '<div class="royal-top-actions"><button data-a="go" data-v="vip" aria-label="VIP" class="royal-vip-chip">👑 VIP</button><button data-royal="search" aria-label="بحث">⌕</button><button data-royal="friends" aria-label="الأصدقاء">♟</button><button data-royal="notify" aria-label="الإشعارات">♧<i></i></button></div></header>'+
  '<main class="royal-home-main">'+
  '<button class="royal-hero" data-royal="hero" aria-label="تفاصيل الغرفة المميزة"><img src="'+esc(imgs('room5'))+'" alt="ليلة ساحرة في TotiChat">'+
