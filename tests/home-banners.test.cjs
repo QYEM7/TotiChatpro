@@ -56,6 +56,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
     ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
   ];
+  assert.match(app, /<link rel="stylesheet" href="\.\/royal-badges-close\.css">/);
+  assert.match(app, /<script src="\.\/royal-badges-close\.js"><\/script>/);
+  app=app.replace('<link rel="stylesheet" href="./royal-badges-close.css">','');
+  app=app.replace('<script src="./royal-badges-close.js"></script>','');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-final\.css">/);
   assert.match(app, /<script src="\.\/royal-final\.js"><\/script>/);
   app=app.replace('<link rel="stylesheet" href="./royal-final.css">','');
@@ -76,7 +80,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
@@ -137,4 +141,15 @@ test('royal-wide UI makeover covers existing screens, preserves voice seats and 
  assert.doesNotMatch(royalty,/\b(fetch|XMLHttpRequest|supabase\.from|socket\.emit)\s*\(/);
  assert.doesNotMatch(original,/royal-final/);
  assert.doesNotMatch(read('index.html'),/royal-final/);
+});
+
+test('unique royal badges and close controls are isolated to frontend preview',()=>{
+ const js=read('app/royal-badges-close.js'),css=read('app/royal-badges-close.css'),app=read('app/index.html');
+ for(const part of ['level=function()','honor=function()','badgeSvg(','rp-level-groups','rp-honor-grid','room-glass-close','rp-unified-close'])assert.ok((js+css).includes(part),part);
+ assert.match(js,/length:10/); // 10 groups × 10 levels
+ assert.match(js,/currentGroup\*10\+1/);
+ assert.match(js,/achievements\.map/);
+ assert.match(app,/royal-badges-close\.css/);
+ assert.doesNotMatch(js,/\b(fetch|XMLHttpRequest|supabase\.from|socket\.emit)\s*\(/);
+ assert.doesNotMatch(read('index.html'),/royal-badges-close/);
 });
