@@ -236,5 +236,11 @@ document.addEventListener('change',e=>{
  reader.readAsDataURL(file);
 });
 overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('tc-feature-overlay')},true);
+/* Direct review links for each finished UI flow. */
+const reviewView=params.get('view');
+if(reviewView==='minimized'){minimizedRoom=true;go('home');}
+else if(reviewView==='share')shareRoom();
+else if(reviewView==='settings')settingsRoom();
+else if(reviewView==='games')games();
 applyRoom();
 })();
