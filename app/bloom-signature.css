@@ -407,7 +407,7 @@ html,body,body.royal-home-body{background:#f1eaf5!important;color:var(--bloom-in
 #app .rvip-feature-focus>.rvip-crest,#app .rvip-crest{filter:none!important;-webkit-filter:none!important;transform:none!important}
 /* Voice room: immersive night stage, full detail, no photo wallpaper, no hidden components. */
 #app.rf-app.rf-room{background:#170d2e!important}
-#app.rf-room .roomview.room-v2,#app .roomview{
+#app.rf-app.rf-room .roomview.room-v2,#app.rf-room .roomview.room-v2,#app .roomview{
  background:
  radial-gradient(ellipse 84% 38% at 52% 8%,#8345b666 0%,transparent 80%),
  radial-gradient(ellipse 64% 28% at 5% 45%,#e53f8536,transparent 80%),
