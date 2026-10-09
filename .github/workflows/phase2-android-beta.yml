@@ -1,0 +1,57 @@
+name: Build TotiChat Phase 2 Android debug APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'app/**'
+      - 'assets/**'
+      - 'scripts/build-approved-web.mjs'
+      - 'tests/phase2-foundation.test.mjs'
+      - 'tests/phase2-auth.test.cjs'
+      - 'supabase/migrations/**'
+      - 'package.json'
+      - 'capacitor.config.ts'
+      - '.github/workflows/phase2-android-beta.yml'
+permissions:
+  contents: read
+jobs:
+  build-android-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Install pinned Capacitor dependencies
+        run: npm install --no-audit --no-fund
+      - name: Verify original approved HTML, assets, Auth and RLS contracts
+        run: |
+          node --test tests/phase2-foundation.test.mjs tests/phase2-auth.test.cjs
+          node --test tests/home-banners.test.cjs tests/live-supabase.test.cjs
+      - name: Generate Android shell from exact approved UI
+        run: |
+          npm run build
+          npx cap add android
+          npx cap sync android
+      - name: Build independently-installable debug APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew --no-daemon --stacktrace assembleDebug
+      - name: Assert real APK built and display checksum
+        run: |
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          sha256sum android/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: totichat-phase2-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
