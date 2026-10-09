@@ -52,7 +52,7 @@ function crest(n,small=false){
  const cacheKey=n+':'+(small?'small':'large');
  const ariaLabel='شارة VIP '+n+' '+tiers[n-1][0];
  const cached=crestImageCache.get(cacheKey);
- if(cached)return '<img class="rvip-crest" src="'+cached+'" alt="'+e(ariaLabel)+'" aria-label="'+e(ariaLabel)+'" width="120" height="142" draggable="false" decoding="async" loading="eager">';
+ if(cached)return '<img class="rvip-crest" src="'+cached+'" alt="'+e(ariaLabel)+'" aria-label="'+e(ariaLabel)+'" width="120" height="142" draggable="false" decoding="sync" loading="eager">';
  const [name,, , ,kind,accent]=tiers[n-1],id='rvip'+n+(small?'s':'b');
  const arches=Array.from({length:n<5?5:n<10?7:9},(_,i)=>{
   const x=15+i*(90/(n<5?4:n<10?6:8));
@@ -91,7 +91,7 @@ function crest(n,small=false){
  // of rebuilding many gradient SVG subtrees during route transitions.
  const src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
  crestImageCache.set(cacheKey,src);
- return '<img class="rvip-crest" src="'+src+'" alt="'+e(ariaLabel)+'" aria-label="'+e(ariaLabel)+'" width="120" height="142" draggable="false" decoding="async" loading="eager">';
+ return '<img class="rvip-crest" src="'+src+'" alt="'+e(ariaLabel)+'" aria-label="'+e(ariaLabel)+'" width="120" height="142" draggable="false" decoding="sync" loading="eager">';
 }
 function uniqueAdvantages(n){
  const benefitRows=[
