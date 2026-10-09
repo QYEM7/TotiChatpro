@@ -1,0 +1,34 @@
+/* Only applies after a *real* authenticated room list has loaded.
+ * The approved room gallery and microphone grid shapes remain unchanged.
+ */
+#app .tc-phase2-empty{
+  min-height:160px;grid-column:1/-1;border:1px dashed #db9bd4;
+  border-radius:18px;background:#f8efff;color:#63366c;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:18px;text-align:center;font-size:12px;
+}
+#app .tc-phase2-empty b{font-size:14px}
+#app .tc-phase2-empty button{
+  border-radius:16px;background:#803fa0;color:#fff0ff;
+  border:1px solid #e0ace4;padding:8px 15px;font-weight:800;
+}
+#app .tc-phase2-near-note{
+  grid-column:1/-1;width:100%;padding:12px;color:#724b84;
+  text-align:center;font-size:11px;
+}
+.tc-phase2-create{display:flex;flex-direction:column;gap:14px;
+  padding:19px;color:#f5d9ff}
+.tc-phase2-create h3{text-align:center;color:#fff0cf}
+.tc-phase2-create label{display:flex;flex-direction:column;gap:7px;font-weight:800}
+.tc-phase2-create label input:not([type="checkbox"]){
+  background:#fff7ff;color:#42284c;padding:10px 12px;
+  border-radius:12px;border:1px solid #d7afe0;min-height:44px;font-size:14px
+}
+.tc-phase2-create .tc-phase2-private{
+  flex-direction:row;align-items:center;font-size:12px;font-weight:700
+}
+.tc-phase2-create p{font-size:11px;color:#ebcbef;line-height:1.6}
+.tc-phase2-create .primary{min-height:43px}
+#app.rf-room .seats .seat.occupied .seatface{
+  box-shadow:0 0 12px #efbcf3bb,0 0 6px #ffe1a1b1!important;
+}
