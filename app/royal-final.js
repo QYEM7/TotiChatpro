@@ -169,7 +169,7 @@ function action(e){
  e.preventDefault();e.stopImmediatePropagation();
  const a=button.dataset.rf,idx=Number(button.dataset.track);
  if(a==='rf-room-settings'){
-  go('room');sheet('roomExitMenu');showToast('افتح إعدادات الغرفة من قائمة المالك');
+  go('room');sheet('roomExitMenu');queueMicrotask(()=>{const ownerControl=document.querySelector('#sheet [data-tc="owner-open"]');if(ownerControl)ownerControl.click();else showToast('إعدادات الغرفة متاحة للمالك فقط في هذه المعاينة');});
  }else if(a==='rf-room-games'){go('room');const b=$('[data-a="sheet"][data-v="games"]');if(b)b.click();}
  else if(a==='rf-room-music')go('musicPreview');
  else if(a==='rf-room-members'){go('room');sheet('roomInfo');}
