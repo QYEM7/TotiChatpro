@@ -88,7 +88,7 @@ function miniView(){
    pill.addEventListener('pointercancel',endDrag);
  }
  const markup='<img src="'+E(roomPhoto())+'" alt=""><span><b>'+E(settings.name)+'</b><small>🔴 داخل الغرفة · اضغط للعودة</small></span><span class="tc-restore">↗</span>';
- if(pill.innerHTML!==markup)pill.innerHTML=markup;
+ if(pill.dataset.tcName!==settings.name||pill.dataset.tcPhoto!==roomPhoto()){pill.dataset.tcName=settings.name;pill.dataset.tcPhoto=roomPhoto();pill.innerHTML=markup;}
 }
 let drag=null,blockClick=false;
 function startDrag(e){
