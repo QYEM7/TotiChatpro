@@ -81,3 +81,50 @@ The current integration stays on `develop/phase-2`. Do NOT deploy it over the
 approved public Pages site or merge to `main` until signed-in journeys have been
 tested with actual accounts, backend RLS adversarial cases, APK on Android device,
 and the owner reviews the new live behavior.
+
+
+## Continuation: private rooms, safer chat and audit
+
+Completed on `develop/phase-2` and applied to the **independent** Supabase
+project without deleting any data:
+
+- Owners of **private rooms only** can generate a 24-byte randomly generated,
+  SHA-256-hashed invitation token. It expires after 30 minutes, is single-use,
+  and reissuing it invalidates the old one.
+- A member must sign in and enter the complete `room UUID:secret` code to
+  accept. Membership is inserted transactionally and the invitation marked
+  redeemed under a row lock. An invalid token cannot reveal a private room.
+- Private room RLS now allows only the owner, its joined members and no other
+  authenticated account to load room details. Public rooms remain discoverable.
+- Real chat now uses the server send RPC for both the Send button and the
+  keyboard Enter key; the old guest-only preview message path is bypassed.
+  Concurrent per-account send RPCs serialize so 1-second rate limiting cannot
+  be bypassed by sending multiple requests at the same moment.
+- Indexes added to previously unindexed foreign keys on invites and messages,
+  based on the project's performance advisor.
+
+Evidence:
+- Phase 2 foundation + security contracts:
+  https://github.com/QYEM7/TotiChatpro/actions/runs/38003585730 (**PASS**)
+- Full mobile browser QA, including mocked **two-account private invitation
+  redemption** and previous Auth/profile/chat/15-seat flows:
+  https://github.com/QYEM7/TotiChatpro/actions/runs/38003585738 (**PASS**)
+- Supabase schema inspection confirms RLS enabled, no anonymous RPC execution,
+  and no anonymous or authenticated direct reading of invitation secrets.
+
+Known limitations remain unchanged: no live voice media, no production-quality
+multi-device Android verification, no wallet/gift/agency ledger completion.
+Mocked E2E journeys validate client integration and route behavior, not actual
+multi-person streaming or real account signup delivery.
+
+## Risk note for security advisors
+
+Supabase security advisor flags **8** authenticated `SECURITY DEFINER`
+functions as warnings. This is currently intentional: the browser gets no
+direct writes to protected room tables, and authenticated RPC functions make
+the caller checks. Those functions still need adversarial live-account
+penetration tests before production. The `phase2_room_invites` table has RLS
+with no direct read policy **intentionally** (all access through RPC).
+
+The public site and frozen UI remain on `main` unchanged. All work here is
+isolated to `develop/phase-2`.
