@@ -56,6 +56,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
     ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
   ];
+  assert.match(app, /<link rel="stylesheet" href="\.\/room-ui-enhancements\.css">/);
+  assert.match(app, /<script src="\.\/room-ui-enhancements\.js"><\/script>/);
+  app=app.replace('<link rel="stylesheet" href="./room-ui-enhancements.css">','');
+  app=app.replace('<script src="./room-ui-enhancements.js"></script>','');
   app=app.replaceAll('../assets/images/','assets/images/');
   for(const [oldCode,newCode] of substitutions){
     assert.equal(app.split(newCode).length,2,'replacement missing or duplicated');
@@ -64,7 +68,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
@@ -89,4 +93,12 @@ test('database schema exposes only active published ads, never enables public wr
   assert.match(sql,/grant select on table public.home_banners to anon, authenticated/i);
   assert.doesNotMatch(sql,/grant\s+(insert|update|delete|all)\s+on\s+table\s+public.home_banners\s+to\s+anon/i);
   assert.doesNotMatch(sql,/insert\s+into\s+public.home_banners\s*\(/i);
+});
+
+test('room preview completion leaves server and approved root untouched',()=>{
+ const source=read('app/room-ui-enhancements.js');
+ for(const item of ['minimizeRoom','shareRoom','settingsRoom','games','startDrag','friendRows','xoMove','ownerPreview'])assert.ok(source.includes(item),item);
+ assert.doesNotMatch(source,/\b(fetch|XMLHttpRequest|supabase\.from|navigator\.share)\s*\(/);
+ assert.match(read('app/index.html'),/room-ui-enhancements\.js/);
+ assert.doesNotMatch(read('index.html'),/room-ui-enhancements\.js/);
 });
