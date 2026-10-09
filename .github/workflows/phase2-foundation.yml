@@ -31,8 +31,10 @@ jobs:
           node --check app/phase2-rooms.js
           node --check app/phase2-auth.js
           node --check app/phase2-ui.js
+          node --check app/phase2-live-mode.js
+          node --check app/phase2-wallet.js
           node --check tests/phase2-browser.cjs
       - name: Verify exact UI/asset Android payload and independent backend
-        run: node --test tests/phase2-foundation.test.mjs tests/phase2-auth.test.cjs tests/phase2-private-security.test.cjs
+        run: node --test tests/phase2-foundation.test.mjs tests/phase2-auth.test.cjs tests/phase2-private-security.test.cjs tests/phase2-wallet-security.test.cjs
       - name: Run approved-banner + UI integrity regression contracts
         run: node --test tests/home-banners.test.cjs tests/live-supabase.test.cjs
