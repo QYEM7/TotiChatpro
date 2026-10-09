@@ -597,3 +597,9 @@ html,body,body.royal-home-body{background:#f1eaf5!important;color:var(--bloom-in
 @media(prefers-reduced-motion:reduce){
  .royal-home *,#app.rf-app .tca-tile{animation:none!important;transition:none!important}
 }
+/* Precision-stroked icons replace emoji in agency dashboard without changing actions. */
+#app.rf-app .tca-tile .tca-icon-wrap{color:#8650ce!important}
+#app.rf-app .tca-tile:nth-child(4n+2) .tca-icon-wrap{color:#cf4d8b!important}
+#app.rf-app .tca-tile:nth-child(4n+3) .tca-icon-wrap{color:#6b67d1!important}
+#app.rf-app .tca-tile:nth-child(4n) .tca-icon-wrap{color:#d98565!important}
+#app.rf-app .tca-tile .tca-svg{width:25px;height:25px;display:block;overflow:visible;stroke:currentColor;fill:none}
