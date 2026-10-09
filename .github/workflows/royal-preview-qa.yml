@@ -7,6 +7,8 @@ on:
       - "assets/**"
       - "tests/royal-browser.cjs"
       - "tests/phase2-browser.cjs"
+      - "tests/phase2-android-root-browser.cjs"
+      - "scripts/build-approved-web.mjs"
       - "tests/agency-flow-browser.cjs"
       - "tests/bloom-design-browser.cjs"
       - "tests/frontend-finish-browser.cjs"
@@ -41,6 +43,11 @@ jobs:
       - name: Verify real Auth and room integration (mock server, no data mutations)
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase2-browser.cjs
+      - name: Verify Capacitor Android startup renders the actual Home page
+        if: github.ref == 'refs/heads/develop/phase-2'
+        run: |
+          npm run build
+          node tests/phase2-android-root-browser.cjs
       - name: Save browser review screenshots
         if: always()
         uses: actions/upload-artifact@v4
