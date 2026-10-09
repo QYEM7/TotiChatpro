@@ -175,6 +175,21 @@ function action(e){
  else if(a==='rf-room-members'){go('room');sheet('roomInfo');}
  else if(a==='rf-room-seats'){go('room');showToast('اضغط على أحد المقاعد لعرض خياراته');}
  else if(a==='rf-room-gifts'){go('room');sheet('gift');}
+ else if(a==='review-list'){
+  const routes=[
+   ['الرئيسية','home'],['الغرفة الصوتية','room'],['حسابي','me'],['الملف الشخصي','profilePreview'],
+   ['تعديل الملف','profileEdit'],['الرسائل','messages'],['الدردشة','chatPreview'],['الأصدقاء','friendsPreview'],
+   ['اكتشف','discoverPreview'],['المهام','missionsPreview'],['الكنز','treasurePreview'],['الإشعارات','notificationsPreview'],
+   ['مركز الألعاب','gamesPreview'],['إدارة الغرفة','roomAdminPreview'],['موسيقى الغرفة','musicPreview'],['الهدايا','giftsPreview'],
+   ['VIP','vip'],['المستويات','level'],['CP','cp'],['المتجر','storePreview'],['الحقيبة','bagPreview'],
+   ['المحفظة','wallet'],['الشحن','rechargePreview'],['الوكالات','agencyPreview'],['طلب وكالة','agencyApply'],
+   ['حالة الوكالة','agencyStatusPreview'],['الانضمام لوكالة','agencyJoinPreview'],['الترتيب','ranks'],
+   ['الميداليات','honor'],['الإعدادات','settings'],['اللغة','languages'],['تسجيل الدخول','loginPreview'],
+   ['إنشاء حساب','signupPreview'],['المكافآت','welcomePreview'],['القائمة السوداء','block'],['الإبلاغ','report']
+  ];
+  const overlay=$('#overlay');overlay.classList.remove('tc-feature-overlay','royal-mode-share','royal-mode-settings','royal-mode-games');
+  showSheet('<div class="rf-review-dialog" dir="rtl"><div class="tc-feature-head"><h3>👑 مراجعة واجهات TotiChat</h3><button class="xbtn" data-a="close">✕</button></div><p>36 شاشة للاختبار البصري. اختر واجهة للانتقال إليها دون تشغيل أي Backend.</p><div class="rf-review-grid">'+routes.map(x=>'<button data-rf="review-route" data-target="'+x[1]+'">'+x[0]+'</button>').join('')+'</div></div>');
+ }else if(a==='review-route'){closeSheet();go(button.dataset.target);}
  else if(a==='music-select')selectSong(idx);
  else if(a==='music-delete')deleteSong(idx);
  else if(a==='music-prev'||a==='music-next'){
@@ -192,4 +207,10 @@ document.addEventListener('click',action,true);
 document.addEventListener('change',e=>{if(e.target.id==='rf-music-file')addSongs([...e.target.files])});
 songs();
 render();
+if(new URLSearchParams(location.search).get('review')==='1'){
+ const fab=document.createElement('button');
+ fab.className='rf-review-fab';fab.dataset.rf='review-list';
+ fab.textContent='♛ مراجعة الشاشات';fab.setAttribute('aria-label','فتح خريطة مراجعة الشاشات');
+ document.body.appendChild(fab);
+}
 })();
