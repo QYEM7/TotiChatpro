@@ -70,6 +70,9 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.match(app,/toti-nav-banner-refine\.css\?v=/);
   assert.match(app,/toti-nav-banner-refine\.js\?v=/);
   app=app.replace(/<link rel="stylesheet" href="\.\/toti-nav-banner-refine\.css\?v=[^"]+">/,'');
+  assert.match(app,/profile-stats-luxe\.css\?v=/);
+  app=app.replace(/<link rel="stylesheet" href="\.\/profile-stats-luxe\.css\?v=[^"]+">/,'');
+
   app=app.replace(/<script src="\.\/toti-nav-banner-refine\.js\?v=[^"]+"><\/script>/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
@@ -217,4 +220,19 @@ test('home banner slot rotates independently and only labels validated live bann
   assert.match(script,/data-royal/);
   assert.match(read('index.html'),/const A=/);
   assert.doesNotMatch(read('index.html'),/toti-nav-banner-refine/);
+});
+
+test('profile stats makeover is isolated, truly distinctive and retains the four counters',()=>{
+ const css=read('app/profile-stats-luxe.css');
+ const js=read('app/toti-nav-banner-refine.js');
+ const html=read('app/index.html');
+ assert.match(html,/profile-stats-luxe\.css\?v=/);
+ assert.match(css,/\.tc-stats-luxe/);
+ assert.match(css,/linear-gradient\(121deg,#251137/);
+ assert.match(css,/color:#ffe3aa!important/);
+ assert.match(js,/function enhanceProfileStats/);
+ assert.match(js,/button\.insertBefore\(glyph,button\.firstChild\)/);
+ assert.match(html,/const stats='<div class="me-statcard">/);
+ assert.match(html,/act\('go','friendsPreview'\)/);
+ assert.doesNotMatch(read('index.html'),/profile-stats-luxe/);
 });
