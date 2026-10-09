@@ -1,0 +1,71 @@
+/* Android beta honesty check: default first launch MUST NOT show fake accounts,
+ * demo rooms, VIP balances or pretend to be connected. No real user is created.
+ */
+'use strict';
+const puppeteer=require('puppeteer-core');
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const executablePath=process.env.CHROME_BIN||
+ ['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser']
+ .find(p=>fs.existsSync(p));
+if(!executablePath)throw Error('System chromium unavailable');
+(async()=>{
+ const browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox','--disable-setuid-sandbox']});
+ try{
+  const page=await browser.newPage();await page.setViewport({width:390,height:844});
+  const uid='94c0e8fb-126e-4149-ad30-6f25e3c99c33';
+  const authResult={access_token:'test-access',refresh_token:'test-refresh',expires_in:3600,
+   user:{id:uid,email:'newuser@test.invalid'}};
+  const userProfile={id:uid,display_name:'الحساب الحقيقي',bio:'',
+   avatar_url:null,created_at:'2026-10-10T00:00:00Z',updated_at:'2026-10-10T00:00:00Z'};
+  await page.setRequestInterception(true);
+  page.on('request',r=>{
+   const url=r.url(),method=r.method();
+   if(!url.startsWith('https://sqedsnyvjblvbjbizcay.supabase.co/'))return r.continue();
+   const path=new URL(url).pathname;
+   const response=path==='/auth/v1/token'?authResult:
+    path==='/rest/v1/profiles'?[userProfile]:
+    path==='/rest/v1/rooms'||path==='/rest/v1/room_members'||path==='/rest/v1/home_banners'?[]:
+    path==='/auth/v1/user'?authResult.user:[];
+   return r.respond({status:200,contentType:'application/json',headers:{
+    'access-control-allow-origin':'*','access-control-allow-headers':'authorization,apikey,content-type,prefer',
+    'access-control-allow-methods':'GET,POST,PATCH,OPTIONS'
+   },body:JSON.stringify(response)});
+  });
+  // Force the identical live startup behavior on the local HTTP test origin.
+  await page.goto('http://127.0.0.1:8765/dist/?mode=live',{waitUntil:'domcontentloaded'});
+  await page.waitForSelector('#app.rf-app');
+  await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='loginPreview');
+  assert.equal(await page.$('.royal-room-tile'),null,'No fake rooms may display before sign in');
+  assert.ok(await page.$('#tc-phase2-login-banner'),'Explain new empty backend at first launch');
+  await page.$eval('[data-live-entry="signup"]',b=>b.click());
+  await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='signupPreview');
+  await page.evaluate(()=>go('loginPreview'));
+  await page.$eval('[data-live-entry="preview"]',b=>b.click());
+  await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='home');
+  assert.ok(await page.$('#tc-phase2-demo-indicator'),'Guest preview must carry unmistakable sample-data warning');
+  await page.$eval('[data-live-entry="login"]',b=>b.click());
+  await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='loginPreview');
+  await page.type('#fc-email','newuser@test.invalid');
+  await page.type('#fc-pass','strong-password');
+  await page.$eval('[data-fc="validate-auth"]',b=>b.click());
+  await page.waitForFunction(()=>window.TotiPhase2Auth?.state()?.profile?.display_name==='الحساب الحقيقي');
+  await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='home');
+  await page.waitForFunction(()=>window.TotiPhase2Rooms?.getStatus()?.roomCount===0);
+  assert.equal(await page.$$eval('.royal-room-gallery .royal-room-tile',i=>i.length),0,
+   'Signed-in user sees zero real rooms instead of six fake ones');
+  assert.ok(await page.$('#tc-phase2-online-state'),'Live UI states supported capabilities clearly');
+  await page.evaluate(()=>go('me'));
+  const numbers=await page.$$eval('.me-royal .me-statcard button b',e=>e.map(x=>x.textContent.trim()));
+  assert.equal(numbers.length,4);
+  assert.ok(numbers.every(x=>x==='—'),'Never show demo follower counts as real');
+  assert.equal(await page.$('.me-agency'),null,'Fake agency membership must be hidden');
+  await page.evaluate(()=>go('profilePreview'));
+  const fakeBio=await page.$eval('.pr-about',e=>e.textContent);
+  assert.notEqual(fakeBio,'هذا المستخدم غامض، ولم يترك شيئاً');
+  assert.equal(await page.$('.pr-agencywide'),null);
+  await page.evaluate(()=>go('wallet'));
+  await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='home');
+  console.log('PASS: Android real mode requires login, labels demo explicitly, uses true empty rooms and profile, blocks fake wallet');
+ }finally{await browser.close();}
+})().catch(err=>{console.error(err.stack||err);process.exitCode=1;});
