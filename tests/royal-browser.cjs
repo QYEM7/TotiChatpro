@@ -125,13 +125,49 @@ async function shot(page,name){
  assert.equal(await page.$eval('#app',el=>el.dataset.route),'vip');
  assert.equal(await page.$$eval('.rvip-tier',els=>els.length),15);
  assert.equal(await page.$$eval('.rvip-tier .rvip-crest',els=>els.length),15);
- assert.equal(await page.$$eval('.rvip-tier .rvip-crest',els=>new Set(els.map(el=>el.getAttribute('aria-label'))).size),15);
+ assert.equal(await page.$eval('.rvip-tier .rvip-crest',els=>new Set(els.map(el=>el.getAttribute('aria-label'))).size),15);
+
+ // SVG elements are deliberately isolated as cached image surfaces, not
+ // duplicated inline defs. This targets Android checkerboard artifacts.
+ const imagesStable=async()=>{
+  return page.$eval('.rvip-root img.rvip-crest',els=>({
+   count:els.length,allDecoded:els.every(el=>el.complete&&el.naturalWidth>0&&el.naturalHeight>0),
+   selfContained:els.every(el=>el.src.startsWith('data:image/svg+xml;charset=utf-8,')),
+   dimensions:els.map(el=>({w:el.naturalWidth,h:el.naturalHeight})),
+   duplicates:document.querySelectorAll('.rvip-root [id^="rvip"]').length
+  }));
+ };
+ await page.evaluate(()=>Promise.all([...document.querySelectorAll('.rvip-root img.rvip-crest')].map(el=>el.decode())));
+ let vipImgCheck=await imagesStable();
+ assert.equal(vipImgCheck.selfContained,true,'VIP artwork must have private image namespace');
+ assert.equal(vipImgCheck.allDecoded,true,'All 15 VIP crests must decode');
+ assert.equal(vipImgCheck.duplicates,0,'No inline SVG gradient IDs should collide');
+ assert.ok(vipImgCheck.count>=15);
+
  assert.ok(await page.$('.rvip-hero-crest .rvip-crest[aria-label^="شارة VIP 1 "]'));
  await shot(page,'11-vip-01-royal');
  await page.click('[data-vip15="select"][data-level="15"]');
  assert.ok(await page.$('.rvip-hero-crest .rvip-crest[aria-label^="شارة VIP 15 "]'));
  assert.equal(await page.$eval('[data-vip15="select"][data-level="15"]',el=>el.getAttribute('aria-pressed')),'true');
  await shot(page,'12-vip-15-supreme');
+
+ // Stress the original intermittent repro: switch tiers and pages while the
+ // horizontal gallery scrolls, then force an image decode after the transition.
+ for(let k=0;k<24;k++){
+  const t=[13,1,15,8,9,12][k%6];
+  await page.evaluate(level=>document.querySelector('[data-vip15="select"][data-level="'+level+'"]')?.click(),t);
+  if(k%4===0)await page.evaluate(()=>document.querySelector('[data-vip15="tab"][data-tab="المميزات"]')?.click());
+  else if(k%4===1)await page.evaluate(()=>document.querySelector('[data-vip15="tab"][data-tab="معلومات"]')?.click());
+  await page.evaluate(()=>Promise.all([...document.querySelectorAll('.rvip-root img.rvip-crest')].map(el=>el.decode())));
+  vipImgCheck=await imagesStable();
+  assert.equal(vipImgCheck.allDecoded,true,'A VIP crest failed after redraw '+k);
+  assert.equal(vipImgCheck.duplicates,0,'Duplicate SVG gradient after redraw '+k);
+ }
+ await page.evaluate(()=>document.querySelector('[data-vip15="select"][data-level="13"]')?.click());
+ await page.evaluate(()=>Promise.all([...document.querySelectorAll('.rvip-root img.rvip-crest')].map(el=>el.decode())));
+ await shot(page,'12b-vip-13-after-24-transitions');
+ await page.evaluate(()=>document.querySelector('[data-vip15="select"][data-level="15"]')?.click());
+
  await page.click('[data-vip15="tab"][data-tab="المميزات"]');
  assert.equal(await page.$$eval('.rvip-benefit:not(.locked)',els=>els.length),15);
  await shot(page,'13-vip-15-perks');
