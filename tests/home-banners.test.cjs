@@ -61,6 +61,8 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.match(app,/identity-return\.css\?v=/);
   assert.match(app,/agency-hub\.js\?v=/);
   app=app.replace(/<link rel="stylesheet" href="\.\/identity-return\.css\?v=[^"]+">\n/,'');
+  assert.match(app,/bloom-signature\.css\?v=/);
+  app=app.replace(/<link rel="stylesheet" href="\.\/bloom-signature\.css\?v=[^"]+">\n/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
   assert.match(app, /<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/);
