@@ -1,0 +1,148 @@
+/* TotiChat | Final targeted room layout adjustment
+ * Remove ONLY the outlined panel around the 15 microphone seats.
+ * Preserve all seat buttons, user avatars, VIP frames, names, levels,
+ * locks, moderator markers, events, gifts, audio and click handlers.
+ */
+#app.rf-app.rf-room .roomview.room-v2 .seats{
+  position:relative!important;
+  z-index:2!important;
+  margin:4px 8px 1px!important;
+  padding:1px 0 0!important;
+  column-gap:3px!important;
+  row-gap:3px!important;
+  background:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  overflow:visible!important;
+}
+/* Keep the original five-column / three-row seat arrangement and full hit areas. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat{
+  position:relative!important;
+  isolation:isolate;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  gap:2px!important;
+  min-width:0!important;
+  min-height:0!important;
+  padding:2px 0 1px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  transition:transform .17s ease,filter .17s ease;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat:not(.locked) .seatface{
+  position:relative!important;
+  isolation:isolate;
+  background:radial-gradient(circle at 35% 22%,#9045b780,#201035ee 90%)!important;
+  box-shadow:0 2px 12px #1105229c,0 0 11px #d883d963!important;
+  transition:box-shadow .2s ease,transform .2s ease;
+}
+/* Thin glowing halo beyond the avatar: expressive but no seat-card rectangle. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat:not(.locked) .seatface::after{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border:1px solid #f4b0dd76;
+  border-radius:50%;
+  pointer-events:none;
+  box-shadow:0 0 8px #c966de36,inset 0 0 4px #ffd0f633;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.vip5 .seatface,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.vip8 .seatface{
+  border-color:#f7d99d!important;
+  box-shadow:0 0 12px #eeb777aa,0 0 14px #c154ed70!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.vip5 .seatface::after,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.vip8 .seatface::after{
+  border-color:#ffe4acb0;
+  box-shadow:0 0 9px #fbd5a06e,inset 0 0 6px #e3a1dc36;
+}
+/* Muted locked seats remain clearly recognizable and do not look occupied. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.locked .seatface{
+  border:1.5px solid #9b79b09c!important;
+  background:linear-gradient(150deg,#4832565a,#1d1732bb)!important;
+  color:#d9a7d9!important;
+  box-shadow:inset 0 1px 6px #c08bd025,0 2px 5px #0902125c!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatname{
+  max-width:100%!important;
+  display:block!important;
+  margin:4px 0 0!important;
+  padding:0 2px!important;
+  line-height:1.35!important;
+  font-size:clamp(9px,2.55vw,11px)!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  color:#ffe7f2!important;
+  text-shadow:0 1px 3px #11081dcc!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatname.vipGold{
+  color:#ffdda8!important;
+  text-shadow:0 1px 5px #2c0e2e,0 0 6px #e6b87955!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.locked .seatname{
+  color:#d1bdd4!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatlv{
+  display:block!important;
+  max-width:100%!important;
+  margin:2px 0 0!important;
+  padding:2px 5px!important;
+  border:1px solid #b58cbe46!important;
+  border-radius:11px!important;
+  background:linear-gradient(100deg,#251234ca,#42204cb8)!important;
+  box-shadow:0 2px 5px #0b041b4f!important;
+  color:#f7e4fc!important;
+  line-height:1.2!important;
+  font-size:clamp(7px,2.1vw,9px)!important;
+  white-space:nowrap!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.locked .seatlv:empty{
+  display:none!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat:not(.locked):active .seatface{
+  transform:scale(.95)!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat:focus-visible{
+  outline:2px solid #ffdfa9!important;
+  outline-offset:2px;
+}
+@media (hover:hover){
+  #app.rf-app.rf-room .roomview.room-v2 .seats > .seat:not(.locked):hover .seatface{
+    box-shadow:0 0 16px #efb2f5c9,0 0 12px #edc58d86!important;
+  }
+}
+@media (max-width:355px){
+  #app.rf-app.rf-room .roomview.room-v2 .seats{
+    margin-inline:5px!important;
+    column-gap:1px!important;
+  }
+  #app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatname{
+    font-size:9px!important;
+  }
+}
+@media (max-height:590px){
+  #app.rf-app.rf-room .roomview.room-v2 .seats{
+    margin-top:0!important;
+    row-gap:0!important;
+  }
+  #app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatlv{
+    margin-top:0!important;
+    padding:1px 3px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #app.rf-app.rf-room .roomview.room-v2 .seats > .seat,
+  #app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface{
+    transition:none!important;
+  }
+}
