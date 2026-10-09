@@ -51,6 +51,32 @@ jobs:
           chmod +x android/gradlew
           cd android
           ./gradlew --no-daemon --stacktrace assembleDebug
+      - name: Verify the actual APK contains the full original UI at WebView root
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          apk=Path('android/app/build/outputs/apk/debug/app-debug.apk')
+          assert apk.is_file() and apk.stat().st_size>1_000_000, 'APK missing'
+          with zipfile.ZipFile(apk) as bundle:
+              files=set(bundle.namelist())
+              assert 'assets/public/index.html' in files, 'Missing Android launch page'
+              root=bundle.read('assets/public/index.html').decode('utf-8')
+              app=bundle.read('assets/public/app/index.html').decode('utf-8')
+              original_head='<html lang="ar" dir="rtl"><head>'
+              assert root==app.replace(original_head,original_head+'<base href="./app/">'), (
+                'APK root is not the complete approved TotiChat app'
+              )
+              assert 'window.location.replace(\'./app/\')' not in root, (
+                'Android root must NEVER redirect to the folder URL'
+              )
+              assert 'assets/public/app/phase2-auth.js' in files, 'Auth adapter missing'
+              assert 'assets/public/app/phase2-rooms.js' in files, 'Room adapter missing'
+              assert any(n.startswith('assets/public/assets/images/toti_falcon_logo_') for n in files), (
+                'Branding assets missing'
+              )
+              print('PASS: APK launches full approved TotiChat UI directly; all assets bundled')
+          PY
       - name: Assert real APK built and display checksum
         run: |
           test -s android/app/build/outputs/apk/debug/app-debug.apk
