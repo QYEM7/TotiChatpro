@@ -1,0 +1,20 @@
+# Derived, not source-of-truth assets
+node_modules/
+dist/
+coverage/
+playwright-report/
+royal-preview-screenshots/
+*.log
+.DS_Store
+# Android generated artifacts
+android/.gradle/
+android/local.properties
+android/**/build/
+*.apk
+*.aab
+# Keep credentials out of the repository
+.env
+.env.local
+.env.*.local
+*.keystore
+*.jks
