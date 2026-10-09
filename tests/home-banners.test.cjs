@@ -67,6 +67,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.match(app,/frontend-finish\.js\?v=/);
   app=app.replace(/<link rel="stylesheet" href="\.\/frontend-finish\.css\?v=[^"]+">\n/,'');
   app=app.replace(/<script src="\.\/frontend-finish\.js\?v=[^"]+"><\/script>/,'');
+  assert.match(app,/toti-nav-banner-refine\.css\?v=/);
+  assert.match(app,/toti-nav-banner-refine\.js\?v=/);
+  app=app.replace(/<link rel="stylesheet" href="\.\/toti-nav-banner-refine\.css\?v=[^"]+">/,'');
+  app=app.replace(/<script src="\.\/toti-nav-banner-refine\.js\?v=[^"]+"><\/script>/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
   assert.match(app, /<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/);
@@ -96,7 +100,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js','app/royal-vip15.js','app/agency-hub.js','app/frontend-finish.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js','app/royal-vip15.js','app/agency-hub.js','app/frontend-finish.js','app/toti-nav-banner-refine.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
@@ -180,4 +184,37 @@ test('VIP 1 to 15 gallery is frontend-only and preserves other app sections',()=
  assert.doesNotMatch(js,/\b(fetch|XMLHttpRequest|supabase\.from|socket\.emit)\s*\(/);
  assert.doesNotMatch(read('index.html'),/royal-vip15/);
  assert.match(read('app/index.html'),/const seats=Array.from\(\{length:15\}/);
+});
+
+test('profile and home share the five sections and original falcon asset, without replacing any screen',()=>{
+  const markup=read('app/index.html');
+  const refinement=read('app/toti-nav-banner-refine.js');
+  const css=read('app/toti-nav-banner-refine.css');
+  assert.match(markup,/toti-nav-banner-refine\.css/);
+  assert.match(markup,/toti-nav-banner-refine\.js/);
+  for(const label of ['الرئيسية','اكتشف','إنشاء غرفة','الرسائل','حسابي']){
+    assert.ok(refinement.includes(label),label);
+  }
+  assert.match(refinement,/toti_falcon_logo_1790422919580\.jpg/);
+  assert.match(refinement,/royal-create/);
+  assert.match(refinement,/const previousRender=render/);
+  assert.match(css,/\.me-links \.me-link/);
+  assert.match(css,/\.me-more button/);
+  assert.doesNotMatch(refinement,/\b(XMLHttpRequest|supabase\.from|socket\.emit)\s*\(/);
+});
+
+test('home banner slot rotates independently and only labels validated live banners as official',()=>{
+  const script=read('app/toti-nav-banner-refine.js');
+  const feed=read('app/home-banners.js');
+  assert.match(feed,/getItems:\(\)=>state\.items\.map/);
+  assert.match(script,/function localSlides/);
+  assert.match(script,/function slides/);
+  assert.match(script,/raw\.length/);
+  assert.match(script,/liveIndex/);
+  assert.match(script,/setInterval/);
+  assert.match(script,/document\.hidden/);
+  assert.match(script,/aria-label/);
+  assert.match(script,/data-royal/);
+  assert.match(read('index.html'),/const A=/);
+  assert.doesNotMatch(read('index.html'),/toti-nav-banner-refine/);
 });
