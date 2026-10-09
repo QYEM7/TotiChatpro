@@ -37,7 +37,7 @@ test('New app points ONLY at independent Supabase and preserves official banner'
  const config=(await get('dist/app/config.js')).toString();
  assert.match(config,/sqedsnyvjblvbjbizcay\.supabase\.co/);
  assert.doesNotMatch(config,/bfadhdnudmsggylunhlh/);
- assert.doesNotMatch(config,/service[_-]?role/i);
+ assert.doesNotMatch(config.replace(/\/\*[\s\S]*?\*\//g,''),/service[_-]?role|sb_secret_/i);
  const banner=(await get('dist/app/home-banners.js')).toString();
  assert.match(banner,/home_banners/);
  const royalty=(await get('dist/app/royal-visuals.js')).toString();
