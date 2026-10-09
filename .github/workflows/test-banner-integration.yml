@@ -25,4 +25,4 @@ jobs:
         with:
           node-version: '22'
       - name: Verify HTML, JS, SQL and original asset hashes
-        run: node --test tests/home-banners.test.cjs
+        run: node --test tests/home-banners.test.cjs tests/live-supabase.test.cjs
