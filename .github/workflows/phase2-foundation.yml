@@ -28,6 +28,6 @@ jobs:
       - name: Check isolated builder syntax
         run: node --check scripts/build-approved-web.mjs
       - name: Verify exact UI/asset Android payload and independent backend
-        run: node --test tests/phase2-foundation.test.mjs
+        run: node --test tests/phase2-foundation.test.mjs tests/phase2-auth.test.cjs
       - name: Run approved-banner + UI integrity regression contracts
         run: node --test tests/home-banners.test.cjs tests/live-supabase.test.cjs
