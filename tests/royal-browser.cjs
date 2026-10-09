@@ -119,6 +119,12 @@ async function shot(page,name){
    assert.equal(await page.$eval('#app',e=>e.dataset.route),route,'Wrong route '+route);
    if(['me','vip','cp','storePreview','agencyPreview','profilePreview','musicPreview'].includes(route))await shot(page,'route-'+route);
  }
+ await load(page,'?view=royal-level');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'level');
+ assert.equal(await page.$eval('.rp-level-card',xs=>xs.length),10);
+ await load(page,'?view=royal-achievements');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'honor');
+ assert.equal(await page.$eval('.rp-honor-card',xs=>xs.length),9);
  assert.equal(errors.length,0,'Browser JS errors: '+errors.join(' | '));
  console.log('Royal browser QA passed: 6 major flows, '+routes.length+' routes, 15 unchanged seats, 0 uncaught page errors');
 })().catch(e=>{console.error(e.stack||e);process.exitCode=1}).finally(async()=>{if(browser)await browser.close()});
