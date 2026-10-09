@@ -60,8 +60,12 @@ async function shot(page,name){
  assert.deepEqual(stats.map(({number,label})=>[number,label]),[
   ['240','متابعين'],['120','الأصدقاء'],['33','متابعة'],['0','زوار']
  ]);
- assert.equal(stats[0].numberColor,'rgb(69, 36, 94)','Profile numbers must not be pale on white');
- assert.equal(stats[0].labelColor,'rgb(114, 84, 130)','Profile labels must remain readable');
+ assert.equal(await page.$eval('.me-royal > .me-statcard',el=>el.classList.contains('tc-stats-luxe')),true,'Luxury statistics component must be mounted');
+ assert.equal(await page.$eval('.me-royal > .me-statcard > button .tc-stat-glyph',items=>items.length),4,'Each statistic has its own decorative icon');
+ const background=await page.$eval('.me-royal > .me-statcard',el=>getComputedStyle(el).backgroundImage);
+ assert.match(background,/rgb\(37, 17, 55\)|#251137|linear-gradient/i,'Stats panel must have the distinctive purple theme');
+ assert.equal(stats[0].numberColor,'rgb(255, 227, 170)','Visible gold numbers must be used');
+ assert.equal(stats[0].labelColor,'rgb(247, 234, 255)','Stat labels must have strong contrast');
  await shot(page,'01a-me-unified');
  await page.click('.me-royal > .me-statcard > button:first-child');
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'friendsPreview','Statistics navigation must continue to work');
