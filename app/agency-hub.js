@@ -48,6 +48,9 @@ function createOrder(agentId){
  const o={id,agentId,qty:state.pack,uid:'7273804',status:'waiting',created:now(),accepted:null,paidAt:null,assignee:staffAssigned(),messages:[{by:'system',text:'تم إنشاء طلب الشحن. انتظر قبول الوكيل قبل الدفع.',at:now()}],history:['إنشاء طلب تجريبي'],rating:0};
  state.orders.unshift(o);state.selectedOrder=id;state.section='order';closeSheet();go('agencyDesk');persist();notify('تم إنشاء طلب محلي للتجربة، بدون أي دفع حقيقي');
 }
+/* Consistent line icons for operations cards. */
+const agencyGlyphs={"orders":"<rect x=\"5\" y=\"4\" width=\"14\" height=\"17\" rx=\"3\"/><path d=\"M9 4h6M9 10h6M9 14h6M9 18h4\"/>","chats":"<path d=\"M20 11.5a8 8 0 0 1-8.5 8.1c-1.2 0-2.4-.3-3.4-.7L4 20l1.2-3.9A8 8 0 1 1 20 11.5Z\"/><path d=\"M8 11h8M8 14h5\"/>","direct":"<circle cx=\"10.5\" cy=\"12\" r=\"7.5\"/><path d=\"M8 10h5m-2.5-2.5v9M16.5 6.5l3 3-3 3m3-3H15\"/>","wallet":"<rect x=\"3\" y=\"6\" width=\"18\" height=\"14\" rx=\"3\"/><path d=\"M4 9V5.5A2.5 2.5 0 0 1 6.5 3H18M15 12h6v4h-6a2 2 0 0 1 0-4Z\"/>","staff":"<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 5v1\"/>","shifts":"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l4 2\"/>","payroll":"<rect x=\"3\" y=\"5\" width=\"18\" height=\"15\" rx=\"3\"/><path d=\"M3 10h18M7 15h4M16 15h2\"/>","ratings":"<path d=\"m12 2.5 3.1 6.2 6.9 1-5 4.9 1.2 6.9-6.2-3.3-6.2 3.3L7 14.6l-5-4.9 6.9-1Z\"/>","tickets":"<path d=\"M12 2 20 6v6c0 5.1-3.5 8.5-8 10-4.5-1.5-8-4.9-8-10V6Z\"/><path d=\"M12 7v6m0 4h.01\"/>","reports":"<rect x=\"4\" y=\"13\" width=\"3\" height=\"7\" rx=\"1\"/><rect x=\"10.5\" y=\"8\" width=\"3\" height=\"12\" rx=\"1\"/><rect x=\"17\" y=\"4\" width=\"3\" height=\"16\" rx=\"1\"/>","approvals":"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"m8 12 2.5 2.5 5.5-6\"/>","payments":"<path d=\"m3 9 9-6 9 6M4 20h16M6 10v8m5-8v8m6-8v8\"/>","transfers":"<path d=\"M4 7h15l-3-3m3 3-3 3M20 17H5l3 3m-3-3 3-3\"/>","appeals":"<path d=\"M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM15 3v5h4M9 12h6M9 16h5\"/>"};
+function agencyIcon(name){return '<svg class="tca-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(agencyGlyphs[name]||agencyGlyphs.orders)+'</svg>';}
 const homeMenu=[
  ['طلبات الشحن','orders','📋'],['محادثات الشحن','chats','💬'],
  ['الشحن عبر User ID','direct','🪙'],['محفظة الوكالة','wallet','👛'],
@@ -66,7 +69,7 @@ function overview(){
  if(state.role==='staff')return !['wallet','staff','payroll','approvals','payments','reports'].includes(x[1]);
  if(state.role==='supervisor')return !['wallet','payroll','approvals','payments'].includes(x[1]);
  return true;
- }).map(x=>'<button class="tca-tile" data-tca="section" data-id="'+x[1]+'"><span>'+x[2]+'</span><b>'+x[0]+'</b><small>فتح القسم ←</small></button>').join('')+'</div>';
+ }).map(x=>'<button class="tca-tile" data-tca="section" data-id="'+x[1]+'"><span class="tca-icon-wrap">'+agencyIcon(x[1])+'</span><b>'+x[0]+'</b><small>فتح القسم ←</small></button>').join('')+'</div>';
 }
 function orderList(){
  return title('طلبات الشحن','جميع الطلبات محفوظة محلياً')+
