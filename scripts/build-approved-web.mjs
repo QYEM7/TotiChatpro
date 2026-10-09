@@ -22,16 +22,16 @@ await rm(destination,{recursive:true,force:true});
 await mkdir(destination,{recursive:true});
 await cp(path.join(root,'app'),path.join(destination,'app'),{recursive:true});
 await cp(path.join(root,'assets'),path.join(destination,'assets'),{recursive:true});
-const entry=`<!doctype html>
-<html lang="ar" dir="rtl"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0; url=./app/">
-<title>TotiChat</title>
-</head><body>
-<p><a href="./app/">TotiChat</a></p>
-<script>window.location.replace('./app/');</script>
-</body></html>
-`;
+// CRITICAL ANDROID WEBVIEW FIX (2026-10-10):
+// Android's embedded Capacitor server opens dist/index.html at https://localhost/.
+// A redirect to './app/' can fail to resolve a folder-style URL on-device,
+// leaving users on a WHITE PAGE showing only the fallback "TotiChat" link.
+// Render the already-approved UI DIRECTLY at the root instead, while a base
+// element preserves its CSS/script/../assets/image URLs (originally /app/).
+// Keep app/index.html byte-for-byte identical for existing Pages/QA previews.
+const head='<html lang="ar" dir="rtl"><head>';
+if(html.split(head).length!==2)throw new Error('Unexpected source <head>: refusing unsafe Android packaging');
+if(/<base\b/i.test(html))throw new Error('Approved app already specifies a base tag; review packager');
+const entry=html.replace(head,head+'<base href="./app/">');
 await writeFile(path.join(destination,'index.html'),entry,'utf8');
-console.log('PASS: unmodified approved UI and assets packaged under dist/app and dist/assets');
+console.log('PASS: Android root directly hosts approved TotiChat UI, /app/ relative paths and ../assets preserved');
