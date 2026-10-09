@@ -1,0 +1,37 @@
+name: Royal frontend browser QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "assets/**"
+      - "tests/royal-browser.cjs"
+      - ".github/workflows/royal-preview-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install small browser control dependency
+        run: npm install --no-save --no-package-lock --ignore-scripts puppeteer-core@24
+      - name: Start local static preview server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/totichat-web.log 2>&1 &
+          sleep 3
+          curl --fail http://127.0.0.1:8765/app/ >/dev/null
+      - name: Inspect all TotiChat screens and take visual captures
+        run: node tests/royal-browser.cjs
+      - name: Save browser review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-royal-qa-captures
+          path: royal-preview-screenshots/
+          if-no-files-found: ignore
