@@ -56,6 +56,12 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
     ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
   ];
+  // Approved root is immutable. Additional reviewed feature layers on /app/ may
+  // be loaded externally without altering the original inline HTML master.
+  assert.match(app,/identity-return\.css\?v=/);
+  assert.match(app,/agency-hub\.js\?v=/);
+  app=app.replace(/<link rel="stylesheet" href="\.\/identity-return\.css\?v=[^"]+">\n/,'');
+  app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
   assert.match(app, /<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/);
   app=app.replace(/<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/,'');
@@ -84,7 +90,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js','app/royal-vip15.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js','app/royal-vip15.js','app/agency-hub.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
