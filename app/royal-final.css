@@ -212,3 +212,18 @@ html,body{background:#0b0616!important}
 #app.rf-app[data-route="wallet"] .visual-hero,#app.rf-app[data-route="rechargePreview"] .visual-hero{background:linear-gradient(105deg,#511976bd,#190b35e4),url('../assets/images/wealth_screen_bg_1790554652978.jpg') center/cover!important;color:#ffeac2!important}
 #app.rf-app[data-route="storage"] .inventory{background:linear-gradient(130deg,#2b113a99,#150b24)!important}
 #app.rf-app:not(.rf-room):not(.rf-royal-home) .previewflag{color:#ffdba1!important;background:linear-gradient(90deg,#371448,#150a2b)!important;border-color:#b884b2!important}
+
+/* Profile fine pass: remove green overlays and legacy emerald controls. */
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-scene::before{background:linear-gradient(to top,#170821 0%,#301035b0 31%,#26092221 76%),radial-gradient(circle at 15% 85%,#5016639c,transparent 65%)!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-scene::after{background:linear-gradient(transparent,#170923)!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-top-actions button{background:linear-gradient(130deg,#5d1b73,#210b35)!important;color:#ffdeb0;border-color:#e5b56a}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-avatar-border{background:#3b1055!important;box-shadow:0 0 0 2px #be58d6,0 0 22px #f8ce85!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-numbers small{color:#ecc0fc!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-major-tabs button{background:linear-gradient(105deg,#301145,#1b0b2d)!important;color:#e5bfe9!important;border-color:#a56d9c!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-major-tabs button.active{background:linear-gradient(110deg,#8437a5,#4f195f)!important;border-color:#f1cb80!important;color:#ffe1a4!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-small-tabs{background:#1c0b2f!important;border-color:#ad74a6!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-small-tabs button{color:#f5d7ee!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-small-tabs button.active{background:linear-gradient(115deg,#8e35b2,#541669)!important;border-color:#f3c37b!important;color:#ffe6b3!important}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-display-items button{background:linear-gradient(140deg,#511866,#1c0d32)!important;border-color:#f1be78!important;color:#ffeac4!important;box-shadow:0 0 10px #d25aea7c}
+#app.rf-app[data-route="profilePreview"] .pr-final .pr-display-items button span.caption{color:#ffdcaa}
+#app.rf-app[data-route="profileEdit"] .edit-royal::before{background:linear-gradient(transparent,#24102f),url('../assets/images/room_screen_bg_1790556227206.jpg') center/cover!important;opacity:.35}
