@@ -9,6 +9,8 @@ on:
       - 'scripts/build-approved-web.mjs'
       - 'tests/phase2-foundation.test.mjs'
       - 'tests/phase2-auth.test.cjs'
+      - 'tests/phase2-wallet-security.test.cjs'
+      - 'tests/phase2-native-gate-browser.cjs'
       - 'supabase/migrations/**'
       - 'package.json'
       - 'capacitor.config.ts'
@@ -39,7 +41,9 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Verify original approved HTML, assets, Auth and RLS contracts
         run: |
-          node --test tests/phase2-foundation.test.mjs tests/phase2-auth.test.cjs
+          node --check app/phase2-live-mode.js
+          node --check app/phase2-wallet.js
+          node --test tests/phase2-foundation.test.mjs tests/phase2-auth.test.cjs tests/phase2-wallet-security.test.cjs
           node --test tests/home-banners.test.cjs tests/live-supabase.test.cjs
       - name: Generate Android shell from exact approved UI
         run: |
