@@ -6,6 +6,7 @@ on:
       - "app/**"
       - "assets/**"
       - "tests/royal-browser.cjs"
+      - "tests/agency-flow-browser.cjs"
       - ".github/workflows/royal-preview-qa.yml"
   workflow_dispatch:
 permissions:
