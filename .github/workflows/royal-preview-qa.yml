@@ -35,3 +35,4 @@ jobs:
           name: totichat-royal-qa-captures
           path: royal-preview-screenshots/
           if-no-files-found: ignore
+          retention-days: 14
