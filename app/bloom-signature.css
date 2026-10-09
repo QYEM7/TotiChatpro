@@ -1,0 +1,599 @@
+/* TotiChat · Bloom Signature 2026
+   A lively SOCIAL VOICE identity: midnight grape + electric orchid + cherry blossom + champagne.
+   Flat, quiet page background, expressive surfaces. All seats, buttons, page routes and VIP vectors retained.
+   Pure presentation layer: no financial, network, persistence or backend changes. */
+:root{
+ --bloom-ink:#281c49;--bloom-muted:#867a9e;--bloom-orchid:#7655ec;--bloom-magenta:#dd4cb8;
+ --bloom-rose:#ff5f91;--bloom-peach:#ffb7a3;--bloom-gold:#f4c273;--bloom-paper:#fff9fc;
+ --bloom-line:#ebdff2;--bloom-drop:0 9px 26px #4d2c8b13,0 2px 5px #4829760d;
+}
+html,body,body.royal-home-body{background:#f1eaf5!important;color:var(--bloom-ink)!important}
+#app.phone,#app.rf-app,#app.rf-app:not(.rf-room):not(.rf-royal-home){background:#fff9fc!important;color:var(--bloom-ink)!important;box-shadow:0 12px 65px #37245425!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home)>.status,#app.rf-app:not(.rf-room):not(.rf-royal-home) .status{background:#fff8fc!important;color:#786788!important;border-bottom:1px solid #f2e6f0!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .main.pastel,#app.rf-app:not(.rf-room):not(.rf-royal-home)>.main{background:#fff9fc!important;background-image:none!important;color:var(--bloom-ink)!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .pagehead{
+ background:linear-gradient(115deg,#fff9fc,#f9edfc 72%,#fff5fa)!important;background-image:linear-gradient(115deg,#fff9fc,#f9edfc 72%,#fff5fa)!important;
+ border-bottom:1px solid #edddf2!important;min-height:76px!important;padding:12px 17px 16px!important;
+ box-shadow:0 8px 24px #4e33800a!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .pagehead:after{display:none!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .pagehead strong{color:#30204d!important;font-size:19px!important;letter-spacing:-.25px;text-shadow:none!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .pagehead button,
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .pagehead .iconbtn{
+ width:43px!important;height:43px!important;min-width:43px!important;border-radius:16px!important;
+ background:linear-gradient(145deg,#ffffff,#f2e5ff)!important;color:#6843cb!important;border:1px solid #ead7f8!important;
+ box-shadow:0 4px 11px #59419317,inset 0 1px #fff!important;
+}
+/* Tactile controls: depth, generous targets, selected states, focus rings. */
+#app.rf-app button,#overlay button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#app.rf-app button:focus-visible,#overlay button:focus-visible{
+ outline:3px solid #ff80b5!important;outline-offset:3px!important;
+}
+#app.rf-app :is(.primary,.ag-submit,.ag-small-btn,.save,.buy,.rf-primary),
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.primary,.ag-submit,.ag-small-btn,.save,.buy),
+#overlay .tca-btn:not(.outline):not(.muted){
+ position:relative;background:linear-gradient(115deg,#7353e9 0%,#b348df 51%,#fc6197 100%)!important;color:#fff!important;
+ border:1px solid #c587ed!important;border-radius:16px!important;font-weight:900!important;
+ box-shadow:0 7px 19px #aa50ce44,inset 0 1px 0 #ffffff9b,inset 0 -2px 0 #6939c42c!important;
+ text-shadow:0 1px 2px #57286b45!important;min-height:45px;letter-spacing:.05px;
+}
+#app.rf-app :is(.primary,.ag-submit,.ag-small-btn,.save,.buy,.rf-primary):active,
+#app.rf-app .tca-btn:active{transform:translateY(1px) scale(.988);box-shadow:0 2px 8px #8b46ad25!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.cardwhite,.panel,.taskcard){
+ background:linear-gradient(148deg,#fff 0%,#fffafd 75%,#fff4fa 100%)!important;color:#35284e!important;
+ border:1px solid #f0e2f1!important;border-radius:21px!important;
+ box-shadow:var(--bloom-drop)!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.cardwhite,.panel) :is(h2,h3,b){
+ color:#35214e!important;text-shadow:none!important
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.cardwhite,.panel) p,
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .visual-copy small{color:#827695!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.listrow,.visual-row){
+ background:linear-gradient(108deg,#fff,#fffbfe)!important;border:1px solid #f2e5f2!important;
+ border-radius:17px!important;box-shadow:0 3px 11px #563b6e0e!important;
+ color:#382852!important;min-height:60px!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .listrow .ico{
+ background:linear-gradient(140deg,#f3e8ff,#ffe7f1)!important;
+ color:#8053d9!important;border:1px solid #ebd6fc!important;border-radius:13px!important;
+ box-shadow:inset 0 1px #fff,0 2px 7px #7e53cb18!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.field,.search,input:not([type=checkbox]),textarea,select){
+ background:#fff!important;color:#36284c!important;border:1px solid #e2cfe9!important;border-radius:14px!important;
+ box-shadow:0 2px 7px #4f3a7011,inset 0 1px 2px #2511310a!important;min-height:43px;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.field,.search,input,textarea,select):focus{
+ outline:none!important;border-color:#b080ee!important;box-shadow:0 0 0 4px #a26dea23!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(input,textarea)::placeholder{color:#aa9ab8!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.segments,.visual-tab){gap:7px!important;scrollbar-width:none}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.segments,.visual-tab) button{
+ background:linear-gradient(140deg,#f7effd,#fff3f8)!important;border:1px solid #edd9f1!important;
+ color:#6f5c84!important;border-radius:24px!important;box-shadow:inset 0 1px #fff!important;
+ font-size:12px!important;padding:10px 14px!important;min-height:39px;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.segments,.visual-tab) button.active{
+ background:linear-gradient(105deg,#7756ea,#df52b2)!important;border-color:#b68bf2!important;color:#fff!important;
+ box-shadow:0 5px 12px #ac69d54b,inset 0 1px #fff7!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.tour-title,.sect,.rf-section-title){color:#3a2259!important;text-shadow:none!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) :is(.empty,.visual-dark){
+ background:#fff8fc!important;color:#877990!important;border:1px dashed #e6d5ea!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .empty span{filter:drop-shadow(0 3px 4px #955fb733)}
+/* App homepage: quiet canvas; all visual life is inside components and artwork. */
+.royal-home,.royal-home-haze{background:#fff9fc!important;background-image:none!important;color:#2e204b!important}
+.royal-home{isolation:isolate}
+.royal-home:before{
+ content:"";position:absolute;inset:0 0 auto 0;height:420px;pointer-events:none;z-index:-1;
+ background:radial-gradient(ellipse 75% 55% at 90% 10%,#fbd5e780,transparent 79%),radial-gradient(ellipse 50% 55% at 0% 30%,#dfd3ff7a,transparent 85%);
+}
+.royal-home-haze{backdrop-filter:none!important;opacity:0!important}
+.royal-home .royal-topbar{
+ background:linear-gradient(105deg,#fff9fc,#fff4fb 50%,#f8f1ff)!important;
+ border-bottom:1px solid #f0e0ef!important;min-height:74px;
+ box-shadow:0 4px 16px #60428210!important;
+}
+.royal-home .royal-brand,.royal-home .royal-brand strong{
+ color:#6d3ace!important;text-shadow:0 1px 0 #fff!important;font-weight:900!important;
+}
+.royal-home .royal-brand{font-size:23px!important;gap:6px}
+.royal-home .royal-top-actions{gap:8px!important}
+.royal-home .royal-top-actions button:not(.royal-vip-chip){
+ background:linear-gradient(143deg,#fff,#f3e5ff)!important;color:#7146d0!important;
+ width:35px!important;height:35px!important;border-radius:12px!important;border:1px solid #ebddf4!important;
+ box-shadow:0 4px 9px #50317f20!important;font-size:22px!important;
+}
+.royal-home .royal-top-actions .royal-vip-chip{
+ background:linear-gradient(110deg,#35214f,#6541a1)!important;color:#ffe4a5!important;
+ border:1px solid #ecbd70!important;border-radius:13px!important;
+ box-shadow:0 4px 12px #50317f40,inset 0 1px #fff3!important;height:35px!important;
+}
+.royal-home .royal-home-main{padding:9px 10px 10px}
+.royal-home .royal-hero{
+ height:172px!important;border-radius:25px!important;border:2px solid #fff8e8!important;
+ box-shadow:0 0 0 1px #cf93de,0 10px 25px #774c984b!important;
+ overflow:hidden;
+}
+.royal-home .royal-hero img{filter:saturate(1.17) contrast(1.04) brightness(.81)!important;transform:scale(1.01)}
+.royal-home .royal-hero-shine{
+ background:linear-gradient(92deg,#3c175fb9,#4d1a925e 56%,#42184b70),radial-gradient(circle at 72% 40%,#ed4b9426,transparent 70%)!important;
+}
+.royal-home .royal-hero-text{color:#fff5fc!important;gap:6px}
+.royal-home .royal-hero-text:before{
+ content:"✦ LIVE VOICE · TOTICHAT ✦";display:block;letter-spacing:1.5px;
+ background:#fff3;border:1px solid #ffffff65;border-radius:18px;padding:4px 13px;
+ color:#ffebc0;font-size:8px;font-weight:900;line-height:1.1;
+}
+.royal-home .royal-hero-text b{font-size:24px!important;color:#fff4fc!important;letter-spacing:-.3px}
+.royal-home .royal-hero-text small{color:#ffe9d8!important}
+.royal-home .royal-hero-pips i:first-child{background:linear-gradient(90deg,#ffd29d,#ff72ab)!important}
+.royal-home .royal-category-row{margin:16px 0 13px;gap:5px}
+.royal-home .royal-cat{
+ height:82px!important;border-radius:17px!important;border:1px solid #e8d6f4!important;
+ background:linear-gradient(160deg,#fff 0%,#f4eafd 100%)!important;
+ color:#49306a!important;box-shadow:0 5px 12px #65509b1a,inset 0 1px #fff!important;gap:4px!important;
+}
+.royal-home .royal-cat:nth-child(2n){background:linear-gradient(155deg,#fff,#ffeaf5)!important;border-color:#f6dbe8!important}
+.royal-home .royal-cat:nth-child(3n){background:linear-gradient(145deg,#fff,#edf4ff)!important;border-color:#dfe8fc!important}
+.royal-home .royal-cat.active{border:2px solid #aa78ed!important;box-shadow:0 5px 12px #a36ad245,0 0 0 2px #eedbff!important}
+.royal-home .royal-cat-icon{
+ display:grid;place-items:center;width:36px;height:36px;font-size:22px!important;line-height:1!important;
+ border-radius:13px;background:linear-gradient(135deg,#f6ddff,#ffe0ed);
+ box-shadow:inset 0 1px #fff,inset 0 -2px #a36edc15,0 3px 8px #a677c433;
+ filter:none!important;
+}
+.royal-home .royal-cat:nth-child(2n) .royal-cat-icon{background:linear-gradient(145deg,#ffe2ea,#ffe9be)}
+.royal-home .royal-cat:nth-child(3n) .royal-cat-icon{background:linear-gradient(145deg,#e6e5ff,#ddf5ff)}
+.royal-home .royal-cat small{color:#644c78!important;font-size:clamp(7.5px,2.35vw,10px)!important;font-weight:900}
+.royal-home .royal-vip-promo{
+ height:83px!important;border-radius:23px!important;
+ background:linear-gradient(105deg,#3b2159,#6730ad 45%,#bd45ba 78%,#ff799c)!important;
+ border:1px solid #e9b0e0!important;box-shadow:0 10px 23px #914d9a48,inset 0 1px #ffffff55!important;
+ color:#fff3d9!important;
+}
+.royal-home .royal-vip-emblem{
+ background:linear-gradient(140deg,#533070,#2b194a)!important;border:1px solid #f9cc83!important;
+ border-radius:19px!important;box-shadow:0 2px 10px #1b08385c,inset 0 1px #fff3!important;
+ color:#ffe3ac!important;transform:rotate(-4deg);font-size:26px!important;
+}
+.royal-home .royal-vip-promo-copy b{color:#fff3ff!important;font-size:clamp(13px,4vw,17px)!important}
+.royal-home .royal-vip-promo-copy small{color:#ffe0f1!important}
+.royal-home .royal-gold-cta{
+ border-radius:14px!important;padding:9px 11px!important;font-size:10px!important;
+ border:1px solid #ffe3aa!important;background:linear-gradient(150deg,#ffefc6,#ffc37e)!important;
+ color:#63315e!important;box-shadow:0 4px 12px #3612404a!important;
+}
+.royal-home .royal-section-label{padding:17px 3px 10px!important}
+.royal-home .royal-section-label h2{
+ color:#342154!important;font-size:16px!important;font-weight:900!important;
+ display:flex;align-items:center;gap:6px;text-shadow:none!important;
+}
+.royal-home .royal-section-label button{
+ background:#f6ecfc!important;color:#885ac2!important;border:1px solid #ead8f5!important;
+ padding:6px 10px!important;border-radius:12px!important;font-size:11px!important;
+}
+.royal-home .royal-room-gallery{gap:8px!important}
+.royal-home .royal-room-tile{
+ border:2px solid #ffebee!important;border-radius:19px!important;
+ box-shadow:0 5px 14px #3c245d2a,0 0 0 1px #dfb7e8!important;
+ background:#3c225a!important;
+}
+.royal-home .royal-room-tile:before{background:linear-gradient(180deg,#250d4758,transparent 37%,#231042ea 100%)!important}
+.royal-home .royal-room-tile:focus-visible{outline:3px solid #f07fb5!important}
+.royal-home .royal-tile-top b{
+ background:linear-gradient(110deg,#f3428a,#fa756b)!important;
+ box-shadow:0 2px 6px #0b0a2365!important;
+}
+.royal-home .royal-tile-top small{background:#21103db9!important}
+.royal-home .royal-tile-detail{background:linear-gradient(180deg,transparent,#241139ba)!important}
+.royal-home .royal-tags i{
+ background:#9252d97a!important;border:1px solid #ee9cd3!important;border-radius:8px!important;color:#fff9fd!important;
+}
+.royal-home .royal-near{gap:8px!important}
+.royal-home .royal-near-tile{border:2px solid #fff0ed!important;border-radius:17px!important;box-shadow:0 4px 12px #3f2a651c,0 0 0 1px #e6cae6!important}
+.royal-home .royal-near-tile span{background:#512a69c9!important;color:#fff8fe!important;padding:3px 7px!important}
+.royal-home .royal-official{
+ background:linear-gradient(125deg,#fff,#fff2fb)!important;border:1px solid #f0dfeb!important;
+ border-radius:19px!important;padding:12px!important;box-shadow:var(--bloom-drop)!important;
+}
+.royal-home .royal-official p{color:#633c85!important;font-weight:900!important}
+.royal-home .royal-nav{
+ background:#fffafe!important;background-image:none!important;border:1px solid #eadcf1!important;border-bottom:0!important;
+ border-radius:24px 24px 0 0!important;box-shadow:0 -9px 24px #553c8027!important;
+}
+.royal-home .royal-nav button,.royal-home .royal-nav button small{color:#9e91ac!important}
+.royal-home .royal-nav button.selected{
+ border:1px solid #f0dcf7!important;background:linear-gradient(130deg,#f6eaff,#ffeff5)!important;
+ border-radius:17px!important;box-shadow:inset 0 1px #fff!important;color:#8250d2!important;
+}
+.royal-home .royal-nav button.selected small,.royal-home .royal-nav button.selected span{color:#8250d2!important}
+.royal-home .royal-nav .royal-create{background:none!important}
+.royal-home .royal-create span{
+ width:57px!important;height:57px!important;border:3px solid #fff5fd!important;
+ border-radius:19px!important;background:linear-gradient(130deg,#8c5afa,#db4bb9,#ff709d)!important;
+ box-shadow:0 6px 15px #a557cf70,0 0 0 2px #e9c4f4!important;transform:rotate(-8deg);
+ color:white!important;text-shadow:0 1px 3px #55308a80!important;
+}
+.royal-home .royal-mini-room{
+ background:linear-gradient(110deg,#42245b,#8f42a2)!important;color:#fff!important;
+ border:1px solid #ffbfde!important;box-shadow:0 7px 18px #622c8b70!important;
+}
+/* Calm pages, expressive cards: each CTA still retains its original click handler. */
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .visual-hero{
+ background:linear-gradient(134deg,#482d7b 0%,#7e46b9 57%,#ec68aa 100%)!important;
+ background-image:linear-gradient(134deg,#482d7b 0%,#7e46b9 57%,#ec68aa 100%)!important;
+ color:#fff6fc!important;border:1px solid #f8c7e8!important;border-radius:24px!important;
+ box-shadow:0 9px 20px #61378f48!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .visual-hero :is(h1,h2,h3,p,small,b){color:#fff6fc!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .visual-product{
+ background:linear-gradient(155deg,#fff,#fff2fa)!important;border:1px solid #efc9ec!important;
+ border-radius:20px!important;color:#49325d!important;
+ box-shadow:0 6px 15px #6e447823,inset 0 1px #fff!important;
+ transition:transform .18s,box-shadow .18s;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .visual-product:active{transform:scale(.965)}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .visual-product:focus-visible{outline:3px solid #c871e9!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .visual-product b{color:#432759!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-hero{
+ background:#352158!important;border:2px solid #fff1e6!important;border-radius:25px!important;
+ box-shadow:0 9px 23px #64448b35,0 0 0 1px #d9acd8!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-hero:after{
+ background:linear-gradient(90deg,#351552cb,#39166a55),radial-gradient(circle at 77% 30%,#f3729a38,transparent 80%)!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-local-note{
+ background:#fff1fb!important;border:1px solid #eecded!important;
+ color:#885e94!important;border-radius:13px!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-tile{
+ background:linear-gradient(140deg,#fff,#fdf0fd)!important;border:1px solid #ebd5f4!important;
+ color:#3f285a!important;border-radius:19px!important;box-shadow:0 6px 12px #593a7b20!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-tile:nth-child(3n+2){background:linear-gradient(145deg,#fff,#fff0f5)!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-tile:nth-child(3n){background:linear-gradient(145deg,#fff,#f0f2ff)!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-tile b{color:#432b64!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .rf-tile-icon{
+ background:linear-gradient(145deg,#f5e0ff,#ffe3f4)!important;
+ border:1px solid #e6c6f0!important;border-radius:16px!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .tour-grid button{
+ background:linear-gradient(160deg,#fff,#fff0fc)!important;color:#4d3668!important;
+ border:1px solid #eddbf2!important;border-radius:20px!important;box-shadow:var(--bloom-drop)!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .bottom{
+ background:#fff9fe!important;border-top:1px solid #eee1f2!important;border-radius:23px 23px 0 0!important;
+ box-shadow:0 -7px 20px #51357021!important;
+}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .bottom button{color:#a497b1!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .bottom button.active{color:#824ed6!important;text-shadow:none!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .bottom .falconmark{
+ border:2px solid #eab8e5!important;border-radius:15px!important;
+ box-shadow:0 4px 9px #8d66b13c!important;
+}
+/* Profile / social: accent areas are not full-page wallpapers. */
+#app.rf-app[data-route="me"] .me-royal,#app.rf-app[data-route="profilePreview"] .profile-royal,
+#app.rf-app[data-route="profileEdit"] .edit-royal,#app.rf-app[data-route="vip"] .vip-royal,
+#app.rf-app .ag-screen,#app .rvip-root,
+#app .rp-level-page,#app .rp-honor-page{background:#fff9fc!important;background-image:none!important;color:#372449!important}
+#app.rf-app[data-route="me"] .me-hero,#app.rf-app[data-route="profilePreview"] .pr-scene,
+#app.rf-app[data-route="profileEdit"] .edit-royal header{
+ background:linear-gradient(115deg,#432a72,#7852be 50%,#ea6ba5)!important;background-image:linear-gradient(115deg,#432a72,#7852be 50%,#ea6ba5)!important;
+ color:#fff6ed!important;border-bottom:1px solid #f5c7e6!important;box-shadow:0 7px 17px #552e8336!important;
+}
+#app.rf-app[data-route="me"] .me-hero:before{
+ opacity:1!important;filter:none!important;pointer-events:none!important;
+ background:radial-gradient(circle at 87% 12%,#fff4c52b,transparent 46%),radial-gradient(circle at 12% 85%,#ffd1f44a,transparent 45%)!important;
+}
+#app.rf-app[data-route="me"] .me-view-profile .me-avatar{
+ border:3px solid #ffe2b2!important;box-shadow:0 3px 17px #2414397b!important;
+}
+#app.rf-app[data-route="me"] .me-summary b{color:#fff0d9!important}
+#app.rf-app[data-route="me"] .me-statcard,#app.rf-app[data-route="me"] .me-agency,
+#app.rf-app[data-route="me"] .me-link,#app.rf-app[data-route="me"] .me-more button,
+#app.rf-app[data-route="profilePreview"] :is(.pr-group,.pr-cosmetic-panel,.pr-gold-frame,.pr-agencywide),
+#app.rf-app[data-route="profileEdit"] .edit-panel{
+ background:linear-gradient(147deg,#fff,#fff4fc)!important;color:#3e2b59!important;
+ border:1px solid #efdaee!important;border-radius:19px!important;box-shadow:var(--bloom-drop)!important;
+}
+#app.rf-app[data-route="me"] .me-link .rich-icon{
+ width:49px;height:49px;display:grid;place-items:center;margin:auto auto 6px;
+ background:linear-gradient(143deg,#f0ddff,#ffe3ef);border-radius:16px;
+ border:1px solid #ebd0f2;box-shadow:0 4px 9px #9866ae25;font-size:27px;
+}
+#app.rf-app[data-route="me"] .me-link:nth-child(2) .rich-icon{background:linear-gradient(140deg,#ffe6ee,#ffe9ca)}
+#app.rf-app[data-route="me"] .me-link:nth-child(3) .rich-icon{background:linear-gradient(140deg,#e9ecff,#dee9ff)}
+#app.rf-app[data-route="me"] .me-vip-banner{
+ background:linear-gradient(105deg,#392552,#7444ae,#d64e9d)!important;color:#ffedc2!important;
+ border:1px solid #f5c891!important;border-radius:20px!important;
+ box-shadow:0 7px 16px #74379143!important;
+}
+#app.rf-app[data-route="profileEdit"] .edit-royal input,
+#app.rf-app[data-route="profileEdit"] .edit-royal textarea{background:#fff!important;color:#362149!important;border-color:#e5cbe9!important}
+#app.rf-app .ag-screen{color:#37284c!important}
+#app.rf-app .ag-top{
+ background:linear-gradient(115deg,#452874,#7947b7 55%,#dd65a8)!important;
+ background-image:linear-gradient(115deg,#452874,#7947b7 55%,#dd65a8)!important;
+ border:1px solid #f3c9ec!important;border-radius:23px!important;color:#fff0fc!important;
+ box-shadow:0 8px 17px #7e55ad40!important;
+}
+#app.rf-app .ag-top :is(h1,h2),#app.rf-app .ag-top p{color:#fff4f5!important}
+#app.rf-app .ag-panel,#app.rf-app .ag-company,#app.rf-app .ag-usercard,#app.rf-app .ag-status-info{
+ background:linear-gradient(140deg,#fff,#fff5fc)!important;border:1px solid #eddaf0!important;
+ color:#402953!important;border-radius:20px!important;box-shadow:var(--bloom-drop)!important;
+}
+#app.rf-app .ag-panel :is(h2,h3,b){color:#3e275b!important}
+#app.rf-app .ag-hero{border:2px solid #f6d2ec!important;border-radius:24px!important;box-shadow:0 6px 18px #60438a2a!important}
+#app.rf-app .ag-nav button{
+ border-radius:14px!important;background:linear-gradient(145deg,#f9efff,#fff2f8)!important;
+ color:#815f94!important;border:1px solid #ead7ee!important;
+ box-shadow:0 3px 7px #703c9015!important;min-height:39px;
+}
+#app.rf-app .ag-nav button.active{
+ background:linear-gradient(110deg,#8054ee,#e54dae)!important;
+ border-color:#d0a4ed!important;color:#fff!important;box-shadow:0 5px 14px #a351ce4b!important;
+}
+#app.rf-app .ag-field :is(input,select,textarea){background:#fff!important;border:1px solid #e0cce9!important;color:#3b2b50!important}
+#app.rf-app .ag-field :is(input,select,textarea):focus{border-color:#ba7cea!important;box-shadow:0 0 0 4px #b77bea26!important}
+/* Level badges & medals keep all SVG content and tier colors. */
+#app .rp-level-hero,#app .rp-honor-hero{
+ background:linear-gradient(130deg,#efdeff,#ffdfef 78%)!important;background-image:linear-gradient(130deg,#efdeff,#ffdfef 78%)!important;
+ color:#45265c!important;border:1px solid #dfbaed!important;border-radius:25px!important;
+ box-shadow:0 6px 16px #7c4bb62a!important;
+}
+#app .rp-level-card,#app .rp-honor-card{
+ background:linear-gradient(150deg,#fff,#fff2fb)!important;color:#422657!important;
+ border:1px solid #ebd6ee!important;border-radius:19px!important;
+ box-shadow:0 4px 11px #563b771c!important;
+}
+#app .rp-level-card.rp-current{border:2px solid #d48bde!important;box-shadow:0 3px 14px #c887da5c!important}
+#app .rp-level-groups button.active,#app .rp-level-switch button.active{
+ background:linear-gradient(110deg,#815bf2,#e459b3)!important;color:#fff!important;border-radius:14px!important;
+}
+/* VIP is an ornamental collection. Never filter/transform .rvip-crest (Android checkerboard fix). */
+#app .rvip-root{
+ --rvGold:#e4b365;--rvText:#3b2851;--rvPlum:#35204e;--rvPink:#db63a3;
+ background:#fff9fc!important;background-image:none!important;color:#382450!important;
+}
+#app .rvip-header{
+ background:linear-gradient(115deg,#fff9fd,#f1e8fc)!important;color:#392354!important;
+ border-bottom:1px solid #e9d3f0!important;
+}
+#app .rvip-header h1{color:#48285f!important;text-shadow:none!important}
+#app .rvip-header>div>span{color:#a57cad!important}
+#app .rvip-header>button{
+ background:linear-gradient(145deg,#fff,#edddfa)!important;color:#7a4ecb!important;
+ border:1px solid #e5c4eb!important;border-radius:14px!important;box-shadow:0 3px 9px #68499b22!important;
+}
+#app .rvip-hero{
+ background:linear-gradient(120deg,#372055,#6d33a0 59%,#a53b8c)!important;
+ background-image:linear-gradient(120deg,#372055,#6d33a0 59%,#a53b8c)!important;
+ border:2px solid #f2c384!important;border-radius:25px!important;box-shadow:0 8px 23px #6d367e5b!important;
+}
+#app .rvip-hero:before{
+ background:radial-gradient(circle at 20% 4%,#ffdaaa3b,transparent 39%),radial-gradient(circle at 80% 85%,#e35fd44c,transparent 52%)!important;
+}
+#app .rvip-hero-copy :is(h2,p,small,strong),#app .rvip-hero-header,#app .rvip-hero-footer{
+ color:#fff0d8!important;text-shadow:0 1px 3px #2a103765!important;
+}
+#app .rvip-tier{
+ background:linear-gradient(150deg,#fff,#fff1f9)!important;border:1px solid #edcbe7!important;
+ color:#482c5a!important;border-radius:18px!important;box-shadow:0 4px 11px #714a7b23!important;
+}
+#app .rvip-tier.selected{
+ background:linear-gradient(147deg,#f1e4ff,#ffe8f4)!important;border:2px solid #b674e6!important;
+ box-shadow:0 6px 14px #b26ec050!important;
+}
+#app .rvip-tier b{color:#4c2c61!important}
+#app .rvip-tier small{color:#936a96!important}
+#app .rvip-subheading h3{color:#45285b!important;text-shadow:none!important}
+#app .rvip-subheading span,#app .rvip-subheading button{color:#8a6595!important}
+#app .rvip-tabs{background:#f7edfb!important;border:1px solid #e9d4f3!important}
+#app .rvip-tabs button{
+ background:#fff!important;color:#8a6a99!important;border:1px solid #eee0f0!important;border-radius:14px!important;
+}
+#app .rvip-tabs button.active{
+ background:linear-gradient(110deg,#7852e6,#d64bbb)!important;color:#fff!important;
+ border:1px solid #bc8fec!important;box-shadow:0 5px 11px #9e4bb147!important;
+}
+#app .rvip-feature-focus,#app .rvip-benefit,#app .rvip-scenario{
+ background:linear-gradient(140deg,#fff,#fff3fa)!important;border:1px solid #ebd6eb!important;
+ border-radius:18px!important;color:#402955!important;box-shadow:0 4px 13px #5a36651b!important;
+}
+#app .rvip-feature-focus strong,#app .rvip-benefit b{color:#502a61!important}
+#app .rvip-feature-focus p,#app .rvip-benefit small{color:#876f92!important}
+#app .rvip-feature-focus>.rvip-crest,#app .rvip-crest{filter:none!important;-webkit-filter:none!important;transform:none!important}
+/* Voice room: immersive night stage, full detail, no photo wallpaper, no hidden components. */
+#app.rf-app.rf-room{background:#170d2e!important}
+#app.rf-room .roomview.room-v2,#app .roomview{
+ background:
+ radial-gradient(ellipse 84% 38% at 52% 8%,#8345b666 0%,transparent 80%),
+ radial-gradient(ellipse 64% 28% at 5% 45%,#e53f8536,transparent 80%),
+ linear-gradient(180deg,#210d42 0%,#21103a 42%,#110b27 100%)!important;
+ background-image:radial-gradient(ellipse 84% 38% at 52% 8%,#8345b666 0%,transparent 80%),
+ radial-gradient(ellipse 64% 28% at 5% 45%,#e53f8536,transparent 80%),
+ linear-gradient(180deg,#210d42 0%,#21103a 42%,#110b27 100%)!important;
+ color:#ffeff9!important;
+}
+#app.rf-room .roomview:before{background:linear-gradient(180deg,#34124b12,#17081a13 50%,#0e071a52)!important}
+#app.rf-room .roomtop{
+ background:linear-gradient(110deg,#2f1657bd,#51235ab0)!important;
+ border-bottom:1px solid #c383d252!important;
+}
+#app.rf-room .roomidentity{
+ background:linear-gradient(110deg,#361e58e8,#231438f2)!important;
+ border:1px solid #e7a5ce!important;box-shadow:0 5px 14px #07021959,inset 0 1px #fff3!important;
+ border-radius:25px!important;
+}
+#app.rf-room .roomidentity b{color:#ffdcf3!important;text-shadow:none!important}
+#app.rf-room .roomidentity img{border:2px solid #ffbfcc!important}
+#app.rf-room .roomtop .darkbtn{
+ background:linear-gradient(135deg,#50318d,#803fb5)!important;color:#fff3ff!important;
+ border:1px solid #cf93db!important;box-shadow:0 4px 11px #120b2166!important;
+}
+#app.rf-room .roomevents{background:linear-gradient(110deg,#341a54bd,#421c50ba)!important;color:#ffd7e9!important}
+#app.rf-room .giftTicker{
+ background:linear-gradient(110deg,#a82f8c,#6527a9,#b5359f)!important;
+ border:1px solid #f1b5e0!important;box-shadow:0 3px 17px #e656d05c,inset 0 1px #fff6!important;
+}
+#app.rf-room .giftTicker .orb{background:radial-gradient(circle at 30% 24%,#ffe5ef,#ed8bd5,#8735b8)!important}
+#app.rf-room .rf-room-royal-ribbon,.rf-room-royal-ribbon{
+ background:linear-gradient(105deg,#472456e8,#7c348dd6,#442154e9)!important;
+ background-image:linear-gradient(105deg,#472456e8,#7c348dd6,#442154e9)!important;
+ border:1px solid #ebb3dc!important;box-shadow:0 3px 12px #a442bc45,inset 0 1px #fff3!important;
+ color:#ffe4f4!important;border-radius:17px!important;
+}
+#app.rf-room .seats{
+ background:linear-gradient(145deg,#49225a60,#1c124558 70%)!important;
+ border:1px solid #d595ba57!important;
+}
+#app.rf-room .seatface{
+ background:radial-gradient(circle at 35% 23%,#8b50b657,#221536e9)!important;
+ border:2px solid #da99c5!important;box-shadow:0 0 11px #a568d953,inset 0 0 12px #c778e417!important;
+}
+#app.rf-room .seat.vip5 .seatface,#app.rf-room .seat.vip8 .seatface{
+ border-color:#ffe1ad!important;box-shadow:0 0 13px #ffa8df9b,0 0 9px #f1bf7757!important;
+}
+#app.rf-room .seat.vip1 .seatface{border-color:#ffadd9!important}
+#app.rf-room .seat.locked .seatface{border-color:#9076a798!important;background:#21172fba!important}
+#app.rf-room .seatbadge{background:linear-gradient(110deg,#ffa9be,#a66eee)!important;color:#331a4b!important}
+#app.rf-room .chatArea{background:linear-gradient(180deg,#2110384d,#100a2bb0)!important}
+#app.rf-room .chatTabs{
+ background:#3e235ebd!important;border:1px solid #b483d87f!important;
+ border-radius:13px!important;box-shadow:0 2px 9px #12061c3d!important;
+}
+#app.rf-room .chatTabs button.active{color:#ffbdde!important}
+#app.rf-room .chatMsg{background:#35204eca!important;border:1px solid #995ca79d!important}
+#app.rf-room .chatMsg.royal{background:linear-gradient(110deg,#6d3273,#412052)!important;border-color:#f3bf97!important}
+#app.rf-room .roomBottom{
+ background:linear-gradient(180deg,#2b184ceF,#170f33fa)!important;
+ border-top:1px solid #cb92d3!important;box-shadow:0 -5px 21px #0a081eab!important;
+}
+#app.rf-room .roomBottom button:not(.gift){
+ background:linear-gradient(140deg,#56307f,#382058)!important;color:#ffebfa!important;
+ border:1px solid #b687c6!important;border-radius:16px!important;
+ box-shadow:0 4px 10px #07041645,inset 0 1px #fff3!important;
+}
+#app.rf-room .roomBottom button.gift{
+ background:radial-gradient(circle at 30% 19%,#fff1c9,#ff8fc0 31%,#d84ca9 62%,#702fb0)!important;
+ border:2px solid #ffe7bf!important;box-shadow:0 0 17px #fc7cb0bf!important;
+}
+#app.rf-room .roomsidel button{background:#59307fc9!important;border-color:#e0a5d8!important}
+/* Agency hub: real hierarchy, colorful affordances, premium controls and labels. */
+#app.rf-app .tca-root{background:#fff9fc!important;color:#402d59!important;padding:15px 13px 95px}
+#app.rf-app .tca-card,#overlay .tca-card{
+ background:linear-gradient(143deg,#fff,#fff8fe)!important;color:#432e5b!important;
+ border:1px solid #eedcf1!important;border-radius:20px!important;box-shadow:var(--bloom-drop)!important;
+ padding:15px!important;
+}
+#app.rf-app .tca-banner{
+ border-radius:18px!important;background:linear-gradient(105deg,#3e265f,#8a49bb 60%,#eb6c9e)!important;
+ color:#fff6fc!important;padding:18px 16px!important;box-shadow:0 9px 20px #7a40994a!important;
+}
+#app.rf-app .tca-banner strong{font-size:20px!important;color:#fff!important}
+#app.rf-app .tca-banner small{color:#ffe3ee!important}
+#app.rf-app .tca-heading h3,#overlay .tca-heading h3{color:#43245b!important;font-size:17px!important}
+#app.rf-app .tca-heading span,#app.rf-app .tca-muted,#overlay .tca-muted{color:#867591!important}
+#app.rf-app .tca-role{
+ background:linear-gradient(110deg,#f9f0ff,#fff3fa)!important;border:1px solid #eed7f2!important;
+ box-shadow:0 3px 12px #653e8115!important;border-radius:15px!important;padding:11px 12px!important;
+}
+#app.rf-app .tca-role label{color:#654e7f!important;font-weight:800}
+#app.rf-app .tca-role select{background:#fff!important;border-color:#e0c8eb!important;color:#593881!important}
+#app.rf-app .tca-grid{gap:10px!important}
+#app.rf-app .tca-tile{
+ background:linear-gradient(145deg,#fff,#f6ebff)!important;
+ border:1px solid #e9d8f4!important;border-radius:20px!important;
+ color:#412b66!important;box-shadow:0 7px 16px #734d9220,inset 0 1px #fff!important;
+ padding:15px!important;min-height:127px!important;position:relative;overflow:hidden;
+}
+#app.rf-app .tca-tile:nth-child(4n+2){background:linear-gradient(145deg,#fff,#ffeaf3)!important;border-color:#f3d7e8!important}
+#app.rf-app .tca-tile:nth-child(4n+3){background:linear-gradient(145deg,#fff,#f0efff)!important}
+#app.rf-app .tca-tile:nth-child(4n){background:linear-gradient(145deg,#fff,#fff1ed)!important;border-color:#f3dcd6!important}
+#app.rf-app .tca-tile:after{
+ content:"";position:absolute;width:76px;height:76px;left:-36px;top:-31px;
+ border-radius:50%;background:#a671ee13;pointer-events:none;
+}
+#app.rf-app .tca-tile span{
+ width:45px;height:45px;display:grid;place-items:center;border:1px solid #e8cdf6;
+ background:linear-gradient(135deg,#efdaff,#ffe6f3);border-radius:15px;
+ font-size:26px!important;box-shadow:0 4px 11px #8b51a72b;
+}
+#app.rf-app .tca-tile:nth-child(4n+2) span{background:linear-gradient(135deg,#ffdde9,#fff0ca)}
+#app.rf-app .tca-tile:nth-child(4n+3) span{background:linear-gradient(135deg,#e6e1ff,#e1ecff)}
+#app.rf-app .tca-tile b{color:#402457!important;font-size:13px!important;line-height:1.55}
+#app.rf-app .tca-tile small{color:#a16fba!important;font-weight:800}
+#app.rf-app .tca-btn,#overlay .tca-btn{
+ border-radius:14px!important;min-height:43px!important;
+ box-shadow:inset 0 1px #ffffff79,0 5px 13px #8054a42b!important;
+}
+#app.rf-app .tca-btn:not(.outline):not(.muted){
+ background:linear-gradient(110deg,#7f57f0,#dd4fb5)!important;color:white!important;
+ border:1px solid #ce90f2!important;
+}
+#app.rf-app .tca-btn.outline,#overlay .tca-btn.outline{
+ background:linear-gradient(125deg,#f7eefd,#fff0f8)!important;color:#7845af!important;
+ border:1px solid #e8cbee!important;
+}
+#app.rf-app .tca-btn.muted,#overlay .tca-btn.muted{
+ background:#f4edf8!important;color:#785f87!important;border:1px solid #e8d9ee!important;
+}
+#app.rf-app .tca-line{border-bottom:1px solid #f2e8f2!important}
+#app.rf-app .tca-line>span{color:#8c7999!important}
+#app.rf-app .tca-line>strong{color:#3e2857!important}
+#app.rf-app .tca-badge{background:#f3e9ff!important;color:#7a44bc!important;border:1px solid #ddc8f8!important;font-weight:900!important}
+#app.rf-app .tca-demo,#overlay .tca-demo{
+ background:#fff0fb!important;color:#8d5e91!important;border:1px solid #efcfee!important;
+ border-radius:13px!important;
+}
+#app.rf-app .tca-label input,#app.rf-app .tca-label select,#app.rf-app .tca-label textarea,
+#app.rf-app .tca-compose input{
+ border:1px solid #e1c9ed!important;background:#fff!important;color:#443057!important;border-radius:13px!important;
+}
+#app.rf-app .tca-chat{background:#faf3ff!important;border:1px solid #ebd9f3!important;border-radius:15px!important}
+#app.rf-app .tca-msg{background:#fff!important;border:1px solid #ebd9f3!important}
+#app.rf-app .tca-msg.mine{background:#eee1ff!important}
+#overlay .sheet:has(.tca-sheet){
+ background:#fffafd!important;color:#3b2957!important;
+ border:1px solid #efd9f0!important;border-radius:27px 27px 0 0!important;
+ box-shadow:0 -9px 34px #22112c47!important;
+}
+#overlay .tca-agrow{gap:12px}
+#overlay .tca-avatar{
+ width:47px;height:47px;background:linear-gradient(145deg,#f2dcff,#ffe5f4);
+ color:#7149c3;border:2px solid #eabbeb;box-shadow:0 4px 10px #8654ad2a;
+}
+#app.rf-app .tca-hub-entry{
+ background:linear-gradient(110deg,#f8edff,#ffedf8)!important;border:1px solid #ead3ef!important;
+ border-radius:17px!important;box-shadow:0 5px 13px #634b781e!important;
+}
+/* Auth/account and room tools share exact same action affordances. */
+#overlay .sheet:not(.room-glass){background:#fffafd!important;color:#402e57!important;border:1px solid #e8d5ef!important;border-radius:25px 25px 0 0!important}
+#overlay .sheet .sheethead h3{color:#402652!important}
+#overlay .sheet button.rp-unified-close{background:linear-gradient(145deg,#fff,#f1e2ff)!important;color:#754fc5!important;border:1px solid #e2c6ef!important}
+.overlay.tc-feature-overlay .sheet:has(.royal-feature){background:linear-gradient(140deg,#2b1744,#45215a)!important;color:#fff4fc!important}
+.royal-feature .tc-feature-head h2,.royal-feature-title h2{color:#ffe9bb!important}
+.royal-feature .tc-input{background:#fff8fd!important;color:#402a5a!important;border-color:#e1c5ea!important}
+.royal-feature .tc-friend,.royal-feature .tc-mod-row{border-radius:15px!important}
+#overlay .sheet .tc-feature-head button.rp-unified-close{color:#fff!important;background:#69387f!important;border-color:#ac69ca!important}
+/* Non-blocking shimmer and press feedback; disable motion where requested. */
+@keyframes bloom-rise{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:no-preference){
+ .royal-home .royal-hero,.royal-home .royal-vip-promo,#app.rf-app .tca-banner{animation:bloom-rise .42s ease-out both}
+ .royal-home :is(.royal-cat,.royal-room-tile,.royal-vip-promo),#app.rf-app .tca-tile{transition:transform .18s ease,box-shadow .18s ease}
+ .royal-home :is(.royal-cat,.royal-room-tile,.royal-vip-promo):active,#app.rf-app .tca-tile:active{transform:scale(.972)}
+}
+@media(max-width:350px){
+ .royal-home .royal-category-row{gap:3px!important}
+ .royal-home .royal-cat{height:74px!important;padding:2px 0}
+ .royal-home .royal-cat-icon{width:31px;height:31px;font-size:19px!important}
+ .royal-home .royal-gold-cta{padding:7px 6px!important;font-size:9px!important}
+ .royal-home .royal-vip-emblem{min-width:59px!important;width:63px!important}
+ .royal-home .royal-vip-promo-copy small{font-size:8px!important}
+ #app.rf-app .tca-tile{min-height:112px!important;padding:12px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .royal-home *,#app.rf-app .tca-tile{animation:none!important;transition:none!important}
+}
