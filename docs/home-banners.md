@@ -8,20 +8,24 @@
 - The old 3 hard-coded promo slides are replaced **only in the integration preview** with dynamic public data.
 - The announcement button uses the same published banner list. No fake announcements in that specific drawer.
 - Other modules/screens in this integration preview still contain prototype content. **Do not present it as a complete production app.**
-- No production database has been migrated; no previous Supabase account, wallet or room state has been modified.
-- No example rows are inserted. Missing connection/no published ads produce an honest empty state.
+- A NEW isolated Supabase project **TotiChatpro** has been created (region eu-central-1, project ref `sqedsnyvjblvbjbizcay`). The home_banners schema has been applied to the new project ONLY; legacy accounts, balances and rooms are untouched.
+- Three genuinely published **project-status notices** now live in the new database, using exact approved artwork: official preview, UI development status, and agency UI preview. They do not advertise imaginary gifts or events. Missing connection/no published ads display an honest empty state.
 
-## Next: choose the production Supabase target (owner decision)
+## Connected, live backend
 
-The existing Supabase project `TotiChat` contains sensitive legacy balances, agencies, rooms, and permissions, so this new repository's backend configuration remains empty until the owner explicitly selects a destination. A *new isolated Supabase project* is preferable for clean rebuild; if chosen, project creation and any plan/cost must be confirmed first.
+- **New and isolated Supabase project:** `TotiChatpro` (`sqedsnyvjblvbjbizcay`, `eu-central-1`).
+- **Live migration:** [home_banners](../supabase/migrations/20261009150000_home_banners.sql) is applied; RLS enabled; public read only for current published records; public writes are revoked.
+- **Browser configuration:** `app/config.js` contains ONLY the new project's public URL and publishable key (no secrets).
+- **Live data:** Three truthful official announcements, with their original approved image files, status `published`.
+- **Proven:** [GitHub Actions 10/10 tests](https://github.com/QYEM7/TotiChatpro/actions/runs/37927116944), including a real HTTP request to the Supabase REST API with only the public key. All 27 original image hashes match.
 
-1. Create/select the target Supabase project.
-2. Apply [the reviewed home banner schema](../supabase/migrations/20261009150000_home_banners.sql) to **that** project only.
-3. Put the Supabase **public API base URL** and **publishable API key** in `app/config.js`. They are not secrets but **never** add `service_role`, database password, JWT secret or other private keys.
-4. Publish a real ad using an authorized server-side admin operation. Until the owner dashboard is built and permission-audited, use the secure Supabase Dashboard as the only admin interface.
-5. Confirm that an anonymous public client sees only rows with `status='published'` in the active date window, and that anonymous writes are denied. Test expired/future/draft ads too.
-6. Open `https://qyem7.github.io/TotiChatpro/app/` and verify the banner updates after refresh or within 90s, and rotates every 6.5s. Compare appearance against root preview.
-7. Build owner/staff dashboard operations via a trusted backend with authorization checks and audit logging. Keep service-role credentials server-side **only**.
+### Next
+
+1. Have the owner compare `https://qyem7.github.io/TotiChatpro/app/` with the approved root visual master, especially banner structure and transitions.
+2. Administer/replace current announcements from the secure [Supabase Table Editor](https://supabase.com/dashboard/project/sqedsnyvjblvbjbizcay/editor) until the owner dashboard is implemented.
+3. Implement a separate authenticated owner/staff dashboard on a trusted backend; enforce roles and audit logs before giving any staff advertisement-writing permission.
+4. Continue converting other approved screens to real app flows one subsystem at a time, with visual parity tests.
+5. Never migrate legacy wallets/users without a separate approved plan.
 
 ### Banner data contract
 
