@@ -84,22 +84,22 @@ async function shot(page,name){
  assert.equal(await page.$eval('#overlay',el=>el.classList.contains('show')),false);
  // Every level has its own generated vector emblem, with 100 selectable levels.
  await page.evaluate(()=>go('level'));
- assert.equal(await page.$eval('.rp-level-groups button',xs=>xs.length),10);
- assert.equal(await page.$eval('.rp-level-card',xs=>xs.length),10);
- assert.equal(await page.$eval('.rp-level-card svg',xs=>xs.length),10);
+ assert.equal(await page.$$eval('.rp-level-groups button',xs=>xs.length),10);
+ assert.equal(await page.$$eval('.rp-level-card',xs=>xs.length),10);
+ assert.equal(await page.$$eval('.rp-level-card svg',xs=>xs.length),10);
  assert.ok(await page.$('.rp-level-card[data-level="45"]'));
  await shot(page,'08-royal-level-badges-41-to-50');
  await page.click('.rp-level-groups button[data-group="9"]');
  assert.ok(await page.$('.rp-level-card[data-level="100"]'));
- assert.equal(await page.$eval('.rp-level-card[data-level] svg',els=>new Set(els.map(e=>e.getAttribute('aria-label'))).size),10);
+ assert.equal(await page.$$eval('.rp-level-card[data-level] svg',els=>new Set(els.map(e=>e.getAttribute('aria-label'))).size),10);
  await shot(page,'09-royal-level-badges-91-to-100');
  await page.click('.rp-level-card[data-level="100"]');
  assert.ok(await page.$('.rp-badge-detail .rp-unified-close'));
  await page.click('.rp-badge-detail .rp-unified-close');
  assert.equal(await page.$eval('#overlay',el=>el.classList.contains('show')),false);
  await page.evaluate(()=>go('honor'));
- assert.equal(await page.$eval('.rp-honor-card',xs=>xs.length),9);
- assert.equal(await page.$eval('.rp-honor-icon svg',xs=>xs.length),9);
+ assert.equal(await page.$$eval('.rp-honor-card',xs=>xs.length),9);
+ assert.equal(await page.$$eval('.rp-honor-icon svg',xs=>xs.length),9);
  await shot(page,'10-royal-achievement-badges');
  await page.click('.rp-honor-card');
  assert.ok(await page.$('#overlay .rp-unified-close'));
