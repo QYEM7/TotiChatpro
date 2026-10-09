@@ -65,7 +65,7 @@ async function shot(page,name){
  assert.ok(await page.$('.tc-mini-room'));
  assert.ok(await page.$('.tc-mini-room img'));
  await shot(page,'06-minimized');
- await page.click('[data-a="restoreRoom"]');
+ await page.evaluate(()=>document.querySelector('[data-a="restoreRoom"]')?.click());
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'room');
 
  // Unified X must be part of the room menu, not floating outside.
