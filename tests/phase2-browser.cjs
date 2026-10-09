@@ -29,6 +29,7 @@ async function waitUntil(page,fn){
     console.error('UI timeout diagnostics:',JSON.stringify({route,formStatus:text}));
     console.error('Recent backend endpoints:',JSON.stringify(calls.slice(-15)));
     console.error('Last UI toast:',await page.$eval('#toast',x=>x.textContent).catch(()=>''));
+    console.error('Current room UI:',JSON.stringify(await page.evaluate(()=>({title:document.querySelector('.roomidentity b')?.textContent,route:window.screen,room:window.TotiPhase2Rooms?.getStatus?.(),container:document.querySelector('.roomview')?.outerHTML?.slice(0,500)}))));
     throw error;
   }
 }
