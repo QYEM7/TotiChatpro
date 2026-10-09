@@ -32,7 +32,7 @@ function modulePage(id){
  const m=premiumModules[id];
  return page(m.title,decoratedHero(m.title,m.caption,m.icon,m.art)+pureNote+
  '<div class="rf-section-title">✧ الأقسام والخدمات</div>'+tileGrid(m.cards)+
- '<div class="rf-promo">'+img('room1')+'<span><b>غرف TotiChat الملكية</b><small>استمتع بالتواصل والتفاعل مع الأصدقاء</small></span><button data-a="go" data-v="room">دخول ❮</button></div>');
+ '<div class="rf-promo">'+img('room1')+'<span><b>غرف TotiChat الصوتية</b><small>استمتع بالتواصل والتفاعل مع الأصدقاء</small></span><button data-a="go" data-v="room">دخول ❮</button></div>');
 }
 function roomAdmin(){
  const ops=[['⚙️','إعدادات الغرفة','rf-room-settings'],['👑','المشرفون','rf-room-settings'],['🎤','المقاعد والمايكات','rf-room-seats'],
@@ -148,7 +148,7 @@ function decorateRoom(){
  if(events)events.insertAdjacentHTML('beforeend','<span class="rf-room-live">● LIVE</span>');
  const ticker=$('.ticker-rail',room);
  if(ticker)ticker.insertAdjacentHTML('afterend',
- '<div class="rf-room-royal-ribbon" aria-label="هوية الغرفة الملكية"><span>✧</span><div><b>هنا يجتمع الصوت الجميل</b><small>✦ TotiChat Royal Voice ✦</small></div><span>♛</span></div>');
+ '<div class="rf-room-royal-ribbon" aria-label="هوية الغرفة الملكية"><span>✧</span><div><b>هنا يجتمع الصوت الجميل</b><small>✦ TotiChat · Live Voice ✦</small></div><span>♛</span></div>');
  const bottom=$('.roomBottom',room);
  if(bottom)bottom.setAttribute('aria-label','أدوات الغرفة: الدردشة، الهدايا، الرسائل، الألعاب والمزيد');
 }
