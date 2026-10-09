@@ -142,7 +142,7 @@ function json(data,status=200){
  await page.click('.me-pencil');
  await page.waitForSelector('[data-edit-field="name"]');
  await page.$eval('[data-edit-field="name"]',input=>{input.value='New Test Name';input.dispatchEvent(new Event('input',{bubbles:true}));});
- await page.click('[data-a="saveProfilePreview"]');
+ await page.$eval('[data-a="saveProfilePreview"]',el=>el.click());
  await waitUntil(page,()=>window.TotiPhase2Auth?.state()?.profile?.display_name==='New Test Name');
  assert.equal(await page.$eval('#app',x=>x.dataset.route),'profilePreview');
  await page.evaluate(()=>go('room'));
