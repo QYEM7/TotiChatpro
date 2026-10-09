@@ -50,7 +50,22 @@ async function shot(page,name){
  assert.equal(await page.$$eval('.me-royal .me-links .me-link',x=>x.length),4);
  assert.equal(await page.$$eval('.me-royal .me-more button',x=>x.length),5);
  assert.ok(await page.$('.tc-unified-nav [data-v="me"] .tc-falcon-nav'));
+ // Premium profile statistics should remain readable and fully clickable.
+ const stats=await page.$eval('.me-royal > .me-statcard > button',items=>items.map(el=>({
+   number:el.querySelector('b')?.textContent?.trim(),
+   label:el.querySelector('small')?.textContent?.trim(),
+   numberColor:getComputedStyle(el.querySelector('b')).color,
+   labelColor:getComputedStyle(el.querySelector('small')).color
+ })));
+ assert.deepEqual(stats.map(({number,label})=>[number,label]),[
+  ['240','متابعين'],['120','الأصدقاء'],['33','متابعة'],['0','زوار']
+ ]);
+ assert.equal(stats[0].numberColor,'rgb(69, 36, 94)','Profile numbers must not be pale on white');
+ assert.equal(stats[0].labelColor,'rgb(114, 84, 130)','Profile labels must remain readable');
  await shot(page,'01a-me-unified');
+ await page.click('.me-royal > .me-statcard > button:first-child');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'friendsPreview','Statistics navigation must continue to work');
+ await page.evaluate(()=>go('me'));
  await page.click('.tc-unified-nav [data-v="home"]');
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'home');
  await shot(page,'01-home');
