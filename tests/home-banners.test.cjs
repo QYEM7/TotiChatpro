@@ -63,6 +63,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   app=app.replace(/<link rel="stylesheet" href="\.\/identity-return\.css\?v=[^"]+">\n/,'');
   assert.match(app,/bloom-signature\.css\?v=/);
   app=app.replace(/<link rel="stylesheet" href="\.\/bloom-signature\.css\?v=[^"]+">\n/,'');
+  assert.match(app,/frontend-finish\.css\?v=/);
+  assert.match(app,/frontend-finish\.js\?v=/);
+  app=app.replace(/<link rel="stylesheet" href="\.\/frontend-finish\.css\?v=[^"]+">\n/,'');
+  app=app.replace(/<script src="\.\/frontend-finish\.js\?v=[^"]+"><\/script>/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
   assert.match(app, /<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/);
@@ -92,7 +96,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js','app/royal-vip15.js','app/agency-hub.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js','app/royal-badges-close.js','app/royal-vip15.js','app/agency-hub.js','app/frontend-finish.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
