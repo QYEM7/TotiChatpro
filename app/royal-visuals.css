@@ -117,3 +117,7 @@ body.royal-home-body{background:#0a0615!important;color:#fff}
 @media(max-width:360px){.royal-topbar{gap:3px;padding:8px 9px}.royal-brand{font-size:20px}.royal-top-actions{gap:4px}.royal-top-actions button{font-size:19px}.royal-top-actions .royal-vip-chip{min-width:61px;font-size:11px}.royal-category-row{gap:2px}.royal-cat{border-radius:10px}.royal-vip-emblem{width:55px;min-width:55px}.royal-gold-cta{padding:7px;font-size:9px}.royal-vip-promo-copy b{font-size:13px}.royal-vip-promo-copy small{font-size:8px}.royal-feature .tc-room-card{gap:6px}.royal-feature .royal-profile-card img{width:60px;height:60px}}
 @media(min-width:440px){.royal-home{width:440px;margin:auto;box-shadow:0 0 40px #0008}}
 @media(prefers-reduced-motion:reduce){.royal-home *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Match approved reference ordering: Home is leftmost, popular category on left. */
+.royal-home .royal-nav,.royal-home .royal-category-row,.royal-home .royal-room-gallery,.royal-home .royal-near{direction:ltr}
+.royal-home .royal-room-gallery button,.royal-home .royal-category-row button{direction:rtl}
