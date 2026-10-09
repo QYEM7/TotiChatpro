@@ -11,7 +11,7 @@ test('private invitation rows are unreadable and no anonymous RPC calls are poss
   assert.match(sql,/alter table public\.phase2_room_invites enable row level security/i);
   assert.match(sql,/revoke all on public\.phase2_room_invites from public, anon, authenticated/i);
   assert.match(sql,/revoke all on function[\s\S]*?phase2_room_invite_join\(uuid,text\)[\s\S]*?from public,anon/i);
-  assert.match(sql,/p_room_id=p_room_id and r\.owner_id=caller and r\.is_private/i);
+  assert.match(sql,/r\.id=p_room_id and r\.owner_id=caller and r\.is_private/i);
 });
 test('invitation codes are random and stored only as hashes, short lived and one-use',()=>{
   assert.match(sql,/extensions\.gen_random_bytes\(24\)/);
