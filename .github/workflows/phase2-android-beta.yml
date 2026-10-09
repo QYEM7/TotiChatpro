@@ -28,7 +28,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest already includes Android SDK. Avoid setup-android's
+      # legacy sdkmanager 'tools' package lookup that fails on modern images.
+      - name: Check preinstalled Android SDK
+        run: |
+          test -n "${ANDROID_HOME:-}" && test -d "$ANDROID_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms" || true
       - name: Install pinned Capacitor dependencies
         run: npm install --no-audit --no-fund
       - name: Verify original approved HTML, assets, Auth and RLS contracts
