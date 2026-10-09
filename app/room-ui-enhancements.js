@@ -109,7 +109,11 @@ function moveDrag(e){
 }
 function endDrag(){if(!drag)return;blockClick=drag.moved;drag=null;if(blockClick)setTimeout(()=>{blockClick=false},280);}
 function applyRoom(){
- if(screen==='room'){
+ // Keep the approved guest room settings preview intact. Once a member
+ // enters a REAL server-backed room, the server's title/art must win:
+ // the old preview MutationObserver must not overwrite live metadata.
+ const phase2Live=!!window.TotiPhase2Rooms?.getStatus?.().activeRoomId;
+ if(screen==='room'&&!phase2Live){
    const title=q('.roomidentity b');if(title&&title.textContent!==settings.name)title.textContent=settings.name;
    const pic=q('.roomidentity img');if(pic&&pic.getAttribute('src')!==roomPhoto())pic.src=roomPhoto();
  }
