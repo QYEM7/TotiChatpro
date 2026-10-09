@@ -212,6 +212,7 @@ document.addEventListener('click',event=>{
   card('تحدد الإدارة الأهلية وقيمة المكافأة وتاريخ انتهاء الصلاحية، ويمنع منح رصيد تجريبي باعتباره حقيقياً.')+
   btn('إغلاق','close','','wide')+'</div>',true);return}
  if(a==='validate-auth'){
+  if(window.TotiPhase2UI?.handleAuthClick?.(v,el))return;
   const email=(document.getElementById('fc-email')?.value||'').trim();
   const password=document.getElementById('fc-pass')?.value||'';
   const signup=v==='signupPreview',reset=v==='passwordResetPreview',verify=v==='verifyAccountPreview';
