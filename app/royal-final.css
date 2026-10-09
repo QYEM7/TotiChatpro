@@ -181,3 +181,12 @@ html,body{background:#0b0616!important}
 #overlay .sheet:not(.room-glass) .roominfo button{color:#ffe4b2}
 #overlay .sheet:not(.room-glass) .tool>span{filter:drop-shadow(0 0 10px #db6eff)}
 #overlay .sheet:not(.room-glass) .recipient button.selected{border-color:#ffd88d!important;box-shadow:0 0 9px #f2bb7d}
+
+/* Only visible with explicit ?review=1 link; the user-facing app never shows this button. */
+.rf-review-fab{position:fixed;top:48px;right:max(8px,calc((100vw - 440px)/2 + 8px));z-index:99;border:1px solid #ffd590;border-radius:18px;background:linear-gradient(105deg,#3f1659,#a02acc);box-shadow:0 0 13px #d756f3;color:#ffe2b0;font-size:10px;padding:7px 11px;font-weight:900;font-family:Cairo,sans-serif}
+#overlay .rf-review-dialog{padding:16px 12px;color:#ffeac7;background:linear-gradient(120deg,#2a1035e9,#150b26ed);border-radius:21px}
+#overlay .rf-review-dialog .tc-feature-head{border-bottom:1px solid #dda574;display:flex;justify-content:space-between;align-items:center}
+#overlay .rf-review-dialog h3{font-size:16px;color:#ffe0a0;margin:0}
+#overlay .rf-review-dialog p{font-size:11px;color:#e8cde5}
+#overlay .rf-review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:65dvh;overflow-y:auto}
+#overlay .rf-review-grid button{background:linear-gradient(120deg,#4c155f,#220d34);border:1px solid #dcae81;border-radius:12px;min-height:41px;color:#fff0cc;font-weight:700;font-size:11px}
