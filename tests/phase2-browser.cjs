@@ -20,7 +20,15 @@ let profile={id:owner,display_name:'Room Test User',bio:'مرحبا',
  avatar_url:null,created_at:today,updated_at:today};
 let room=null,joined=false,seat=null,messages=[];
 let browser;
-async function waitUntil(page,fn){await page.waitForFunction(fn,{timeout:13000,polling:150});}
+async function waitUntil(page,fn){
+  try{await page.waitForFunction(fn,{timeout:13000,polling:150});}
+  catch(error){
+    const text=await page.$eval('#fc-form-status',x=>x.textContent).catch(()=>null);
+    const route=await page.$eval('#app',x=>x.dataset.route).catch(()=>null);
+    console.error('UI timeout diagnostics:',JSON.stringify({route,formStatus:text}));
+    throw error;
+  }
+}
 function json(data,status=200){
  return {status,contentType:'application/json',headers:{
   'access-control-allow-origin':'*',
