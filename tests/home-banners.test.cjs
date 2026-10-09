@@ -72,6 +72,8 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   app=app.replace(/<link rel="stylesheet" href="\.\/toti-nav-banner-refine\.css\?v=[^"]+">/,'');
   assert.match(app,/profile-stats-luxe\.css\?v=/);
   app=app.replace(/<link rel="stylesheet" href="\.\/profile-stats-luxe\.css\?v=[^"]+">/,'');
+  assert.match(app,/room-seats-finish\.css\?v=/);
+  app=app.replace(/\n<link rel="stylesheet" href="\.\/room-seats-finish\.css\?v=[^"]+">/,'');
 
   app=app.replace(/<script src="\.\/toti-nav-banner-refine\.js\?v=[^"]+"><\/script>/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
@@ -156,7 +158,7 @@ test('royal-wide UI makeover covers existing screens, preserves voice seats and 
  const original=read('reference/approved-original.html');
  assert.match(royalty,/const priorRender=render/);
  assert.match(royalty,/vMore=function/);
- for(const token of ['decorateRoom','rf-room-royal-ribbon','openMusicDb','musicPreview','roomAdminPreview','gamesPreview','notificationsPreview','missionsPreview','treasurePreview'])assert.match(royalty,new RegExp(token));
+ for(const token of ['decorateRoom','openMusicDb','musicPreview','roomAdminPreview','gamesPreview','notificationsPreview','missionsPreview','treasurePreview'])assert.match(royalty,new RegExp(token));
  for(const token of ['.rf-room .seat','.rf-room .roomBottom','.me-royal','.vip-royal','.ag-screen','.visual-inventory','.royal-profile-card'])assert.ok((css+read('app/royal-visuals.css')).includes(token),token);
  assert.match(app,/const seats=Array\.from\(\{length:15\}/);
  assert.match(app,/act\('seat',i\)/);
@@ -235,4 +237,29 @@ test('profile stats makeover is isolated, truly distinctive and retains the four
  assert.match(html,/const stats='<div class="me-statcard">/);
  assert.match(html,/act\('go','friendsPreview'\)/);
  assert.doesNotMatch(read('index.html'),/profile-stats-luxe/);
+});
+
+test('the home room listings end without a duplicate official-ads footer, but retain top banner',()=>{
+  const js=read('app/royal-visuals.js');
+  assert.match(js,/class="royal-hero"/,'top hero banner remains');
+  assert.match(js,/class="royal-near"/,'nearby voice rooms remain');
+  assert.match(js,/class="royal-room-gallery"/,'featured rooms remain');
+  assert.doesNotMatch(js,/class="royal-official"/,'the bottom duplicate ad must be removed');
+  assert.match(read('app/home-banners.js'),/function renderBanner/,'live banners remain implemented');
+  assert.match(read('app/toti-nav-banner-refine.js'),/function enhanceBanner/,'animated primary banner remains enabled');
+});
+
+test('voice room removes the slogan ribbon and the seats panel, keeping all mic data and clicks',()=>{
+  const royal=read('app/royal-final.js');
+  const finish=read('app/room-seats-finish.css');
+  const markup=read('app/index.html');
+  assert.doesNotMatch(royal,/rf-room-royal-ribbon/);
+  assert.doesNotMatch(royal,/هنا يجتمع الصوت الجميل/);
+  assert.match(markup,/room-seats-finish\.css\?v=/);
+  for(const key of ['background:transparent!important','border:0!important','row-gap:3px!important','seat\.vip8','seat\.locked','seatname','seatlv']){
+    assert.ok(finish.includes(key),key);
+  }
+  assert.match(markup,/const seats=Array\.from\(\{length:15\}/);
+  assert.match(markup,/act\('seat',i\)/);
+  assert.doesNotMatch(read('index.html'),/room-seats-finish/,'the immutable root remains unchanged');
 });
