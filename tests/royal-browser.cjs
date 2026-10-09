@@ -123,9 +123,9 @@ async function shot(page,name){
  // 15 distinct interactive VIP levels, previews, benefits, tabs and no backend writes.
  await load(page,'?view=royal-vip&vip=1');
  assert.equal(await page.$eval('#app',el=>el.dataset.route),'vip');
- assert.equal(await page.$eval('.rvip-tier',els=>els.length),15);
- assert.equal(await page.$eval('.rvip-tier .rvip-crest',els=>els.length),15);
- assert.equal(await page.$eval('.rvip-tier .rvip-crest',els=>new Set(els.map(el=>el.getAttribute('aria-label'))).size),15);
+ assert.equal(await page.$$eval('.rvip-tier',els=>els.length),15);
+ assert.equal(await page.$$eval('.rvip-tier .rvip-crest',els=>els.length),15);
+ assert.equal(await page.$$eval('.rvip-tier .rvip-crest',els=>new Set(els.map(el=>el.getAttribute('aria-label'))).size),15);
  assert.ok(await page.$('.rvip-hero-crest .rvip-crest[aria-label^="شارة VIP 1 "]'));
  await shot(page,'11-vip-01-royal');
  await page.click('[data-vip15="select"][data-level="15"]');
@@ -133,10 +133,10 @@ async function shot(page,name){
  assert.equal(await page.$eval('[data-vip15="select"][data-level="15"]',el=>el.getAttribute('aria-pressed')),'true');
  await shot(page,'12-vip-15-supreme');
  await page.click('[data-vip15="tab"][data-tab="المميزات"]');
- assert.equal(await page.$eval('.rvip-benefit:not(.locked)',els=>els.length),15);
+ assert.equal(await page.$$eval('.rvip-benefit:not(.locked)',els=>els.length),15);
  await shot(page,'13-vip-15-perks');
  await page.click('[data-vip15="select"][data-level="4"]');
- assert.equal(await page.$eval('.rvip-benefit:not(.locked)',els=>els.length),4);
+ assert.equal(await page.$$eval('.rvip-benefit:not(.locked)',els=>els.length),4);
  await page.click('[data-vip15="tab"][data-tab="المعاينة"]');
  assert.ok(await page.$('.rvip-scenario-avatar .rvip-crest'));
  assert.ok(await page.$('.rvip-enter-line .rvip-crest'));
