@@ -1,0 +1,92 @@
+// No dependencies. Run with: node --test tests/home-banners.test.cjs
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const crypto=require('node:crypto');
+const root=path.join(__dirname,'..');
+const read=(p)=>fs.readFileSync(path.join(root,p),'utf8');
+const core=require('../app/banner-core.js');
+const now=Date.parse('2026-10-09T10:00:00Z');
+function row(patch={}){return {id:'banner-1',title:'إعلان حقيقي',image_url:'https://example.org/banner.png',link_kind:'none',link_target:null,status:'published',starts_at:null,ends_at:null,sort_order:0,...patch};}
+
+test('published and current ads are eligible, drafts and expired ads are not',()=>{
+  assert.equal(core.normalize([row()],now).length,1);
+  for(const patch of [{status:'draft'},{status:'archived'},{starts_at:'2026-10-10T00:00:00Z'},{ends_at:'2026-10-09T09:59:59Z'},{title:''}]){
+    assert.equal(core.normalize([row(patch)],now).length,0,JSON.stringify(patch));
+  }
+});
+test('external and image links accept HTTPS only, no credentials or script URLs',()=>{
+  for(const url of ['javascript:alert(1)','data:image/png;base64,AA','http://example.org/img.jpg','https://user:pass@example.org','/relative.png']){
+    assert.equal(core.normalize([row({image_url:url})],now).length,0,url);
+    assert.equal(core.normalize([row({link_kind:'external',link_target:url})],now).length,0,url);
+  }
+  assert.equal(core.normalize([row({link_kind:'external',link_target:'https://totichat.example/event'})],now).length,1);
+});
+test('in-app navigation accepts only the known screen routes',()=>{
+  assert.equal(core.normalize([row({link_kind:'screen',link_target:'agencyPreview'})],now).length,1);
+  assert.equal(core.normalize([row({link_kind:'screen',link_target:'javascript:alert(1)'})],now).length,0);
+  assert.equal(core.normalize([row({link_kind:'none',link_target:'https://example.org'})],now).length,0);
+});
+test('ads sort, dedupe and cap, never invent fallback banners',()=>{
+  const input=Array.from({length:15},(_,i)=>row({id:'id-'+i,title:'Banner '+i,sort_order:14-i}));
+  const result=core.normalize(input.concat(input[0]),now);
+  assert.equal(result.length,12);
+  assert.equal(result[0].id,'id-14');
+  assert.equal(new Set(result.map(x=>x.id)).size,12);
+  assert.deepEqual(core.normalize([],now),[]);
+});
+test('escape untrusted titles before inserting into UI',()=>{
+  assert.equal(core.escape('<img src=x onerror="go()">'), '&lt;img src=x onerror=&quot;go()&quot;&gt;');
+});
+test('approved root preview stays byte-identical to signed visual master except local image URLs',()=>{
+  const original=read('reference/approved-original.html');
+  const rootPreview=read('index.html');
+  const old='https://raw.githubusercontent.com/jsjsnsnsnsn0-pixel/TotiChat/main/public/assets/images/';
+  assert.equal(rootPreview,original.replaceAll(old,'assets/images/'));
+});
+test('app preserves approved HTML and changes only the five reviewed banner-integration snippets and asset base',()=>{
+  const rootPreview=read('index.html');
+  let app=read('app/index.html');
+  const substitutions=[
+    [`<script>\nconst A=`,`<script src="./banner-core.js"></script>\n<script src="./config.js"></script>\n<script src="./home-banners.js"></script>\n<script>\nconst A=`],
+    [`content='<div class="hero" '+act('sheet','promo')+'>'+im(['hero','hero2','hero3'][banner])+'<b>فعاليات ومكافآت TotiChat</b><div class="dots"><i class="'+(banner===0?'on':'')+'"></i><i class="'+(banner===1?'on':'')+'"></i><i class="'+(banner===2?'on':'')+'"></i></div></div><div class="featurecards">`,`content=window.TotiBannerData.renderBanner()+'<div class="featurecards">`],
+    [`if(type==='announcement'){showSheet(head('الإعلانات الرسمية')+im('hero','class="eventbanner"')+'<p>تنشر إدارة TotiChat الإعلانات والفعاليات من لوحة التحكم. هذه بنرات عرض تجريبية.</p>');return}`,`if(type==='announcement'){showSheet(head('الإعلانات الرسمية')+window.TotiBannerData.renderAnnouncements());return}`],
+    [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
+    ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
+  ];
+  app=app.replaceAll('../assets/images/','assets/images/');
+  for(const [oldCode,newCode] of substitutions){
+    assert.equal(app.split(newCode).length,2,'replacement missing or duplicated');
+    app=app.replace(newCode,oldCode);
+  }
+  assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
+});
+test('all frontend scripts compile and original 27 images match source hashes',()=>{
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js']){
+    new vm.Script(read(p),{filename:p});
+  }
+  const app=read('app/index.html');
+  const match=app.match(/<script>\s*([\s\S]*?)<\/script>/);
+  assert.ok(match,'Missing app inline script');
+  new vm.Script(match[1],{filename:'app/index.html:inline'});
+  const manifest=read('reference/approved-assets.gitsha').split('\n').filter(x=>/^[a-f0-9]{40} /.test(x));
+  assert.equal(manifest.length,27);
+  for(const line of manifest){
+    const [expected,name]=line.split(' ');
+    const bytes=fs.readFileSync(path.join(root,'assets/images',name));
+    const hash=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+    assert.equal(hash,expected,'Changed approved image '+name);
+  }
+});
+test('database schema exposes only active published ads, never enables public writes or fake seeds',()=>{
+  const sql=read('supabase/migrations/20261009150000_home_banners.sql');
+  assert.match(sql,/enable row level security/i);
+  assert.match(sql,/status = 'published'/);
+  assert.match(sql,/starts_at is null or starts_at <= now\(\)/);
+  assert.match(sql,/ends_at is null or ends_at > now\(\)/);
+  assert.match(sql,/grant select on table public.home_banners to anon, authenticated/i);
+  assert.doesNotMatch(sql,/grant\s+(insert|update|delete|all)\s+on\s+table\s+public.home_banners\s+to\s+anon/i);
+  assert.doesNotMatch(sql,/insert\s+into\s+public.home_banners\s*\(/i);
+});
