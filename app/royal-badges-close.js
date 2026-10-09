@@ -193,4 +193,7 @@ function onBadgeAction(e){
 }
 document.addEventListener('click',onBadgeAction,true);
 closePolish();
+const badgePreview=new URLSearchParams(location.search).get('view');
+if(badgePreview==='royal-level')go('level');
+if(badgePreview==='royal-achievements')go('honor');
 })();
