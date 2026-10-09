@@ -164,7 +164,7 @@ function json(data,status=200){
  await page.waitForSelector('.tc-phase2-account-sheet [data-phase2="logout"]');
  await page.$eval('.tc-phase2-account-sheet [data-phase2="logout"]',el=>el.click());
  await waitUntil(page,()=>window.TotiPhase2Auth?.state()?.signedIn===false);
- assert.equal(await page.$eval('#app',e=>e.dataset.route),'loginPreview');
+ await waitUntil(page,()=>document.querySelector('#app')?.dataset.route==='loginPreview');
  // The second journey checks that private-room codes are created only on
  // explicit owner action and presented as one-use, short-lived secrets.
  await page.type('#fc-email','voice@test.invalid');
