@@ -139,12 +139,24 @@ async function submitAuth(route,button){
   go('me');
   if(typeof showToast==='function')showToast('تم تسجيل الدخول وربط الملف الشخصي بنجاح');
 }
+const phase2Demo=new URLSearchParams(location.search).get('phase2Demo')==='1';
+function handleAuthClick(route,button){
+  if(phase2Demo)return false;
+  if(busy)return true;
+  busy=true;button.disabled=true;
+  notify('جارٍ التواصل مع الخادم…');
+  void submitAuth(route,button).catch(err=>notify(errorMessage(err),true))
+    .finally(()=>{busy=false;button.disabled=false;});
+  return true;
+}
+window.TotiPhase2UI=Object.freeze({handleAuthClick});
 document.addEventListener('click',event=>{
   const el=event.target.closest('[data-fc="validate-auth"],[data-a="saveProfilePreview"],[data-phase2]');
   if(!el)return;
   const action=el.dataset.phase2||el.dataset.fc||el.dataset.a;
   const state=auth.state();
   if(action==='saveProfilePreview'&&!state.signedIn)return; // Preserve guest demo edits.
+  if(action==='validate-auth'&&phase2Demo)return; // Visual-only regression mode.
   if(!['validate-auth','saveProfilePreview','account','logout'].includes(action))return;
   event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
   if(action==='account'){
@@ -171,14 +183,12 @@ document.addEventListener('click',event=>{
       .finally(()=>{busy=false;el.disabled=false;});
     return;
   }
+  if(action==='validate-auth'){
+    handleAuthClick(el.dataset.v||screen,el);return;
+  }
   if(busy)return;
   busy=true;el.disabled=true;
-  if(action==='validate-auth'){
-    const route=el.dataset.v||screen;
-    notify('جارٍ التواصل مع الخادم…');
-    void submitAuth(route,el).catch(err=>notify(errorMessage(err),true))
-      .finally(()=>{busy=false;el.disabled=false;});
-  }else if(action==='saveProfilePreview'){
+  if(action==='saveProfilePreview'){
     const name=(editForm.name||'').trim(),bio=(editForm.bio||'').slice(0,150);
     notify('جارٍ حفظ الملف على الخادم…');
     void auth.updateProfile({display_name:name,bio}).then(()=>{
