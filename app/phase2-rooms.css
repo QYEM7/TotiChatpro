@@ -32,3 +32,26 @@
 #app.rf-room .seats .seat.occupied .seatface{
   box-shadow:0 0 12px #efbcf3bb,0 0 6px #ffe1a1b1!important;
 }
+
+/* Server-backed private-room entry and owner-only invite control. */
+#app .tc-phase2-invite-entry{
+  margin:8px 12px 14px;text-align:center;
+}
+#app .tc-phase2-invite-entry button,
+#app .tc-phase2-room-share{
+  border:1px solid #e3ba83;border-radius:17px;
+  color:#ffe6aa;background:linear-gradient(135deg,#56306d,#351e4d);
+  font-weight:900;padding:8px 13px;min-height:36px;
+  box-shadow:0 2px 8px #1c0c3240;
+}
+#app .tc-phase2-room-share{
+  flex:0 0 auto;font-size:10px;min-height:34px;
+  padding:6px 10px;margin:0 4px;
+}
+.tc-phase2-invite textarea{
+  display:block;width:100%;min-height:82px;resize:vertical;
+  background:#fff7ff;color:#3c2249;border:1px solid #d7afe0;
+  padding:12px;border-radius:12px;font-size:12px;
+  overflow-wrap:anywhere;direction:ltr;
+}
+.tc-phase2-invite textarea:focus-visible{outline:2px solid #d8aa6b;outline-offset:2px}
