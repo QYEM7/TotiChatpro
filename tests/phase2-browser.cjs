@@ -18,6 +18,8 @@ const token={access_token:'test-access-token',refresh_token:'test-refresh-token'
  expires_in:3600,user:{id:owner,email:'voice@test.invalid'}};
 let profile={id:owner,display_name:'Room Test User',bio:'مرحبا',
  avatar_url:null,created_at:today,updated_at:today};
+const guest='cfde7092-3bb2-4a8a-93b8-7efbb9688991';
+let actor=owner,guestJoined=false;
 let room=null,joined=false,seat=null,messages=[];
 const calls=[];
 let browser;
@@ -68,17 +70,19 @@ function json(data,status=200){
   let result;
   if(route==='/rest/v1/home_banners'){result=json([]);}
   else if(route==='/auth/v1/token'&&u.searchParams.get('grant_type')==='password'){
-   assert.equal(body.email,'voice@test.invalid');result=json(token);
+   assert.ok(['voice@test.invalid','invited@test.invalid'].includes(body.email));
+   actor=body.email==='invited@test.invalid'?guest:owner;
+   result=json({...token,user:{id:actor,email:body.email}});
   }
-  else if(route==='/auth/v1/user')result=json(token.user);
+  else if(route==='/auth/v1/user')result=json({id:actor,email:actor===guest?'invited@test.invalid':'voice@test.invalid'});
   else if(route==='/auth/v1/logout')result=json(null,204);
-  else if(route==='/rest/v1/profiles'&&method==='GET')result=json([profile]);
+  else if(route==='/rest/v1/profiles'&&method==='GET')result=json([actor===guest?{...profile,id:guest,display_name:'Guest Invited'}:profile]);
   else if(route==='/rest/v1/profiles'&&method==='PATCH'){
    assert.deepEqual(Object.keys(body).sort(),['bio','display_name']);
    profile={...profile,...body};result=json([profile]);
   }
-  else if(route==='/rest/v1/rooms'&&method==='GET')result=json(room?[room]:[]);
-  else if(route==='/rest/v1/room_members'&&method==='GET')result=json(joined?[{room_id:roomId}]:[]);
+  else if(route==='/rest/v1/rooms'&&method==='GET')result=json(room&&(!room.is_private||actor===owner||guestJoined)?[room]:[]);
+  else if(route==='/rest/v1/room_members'&&method==='GET')result=json(actor===guest?(guestJoined?[{room_id:roomId}]:[]):(joined?[{room_id:roomId}]:[]));
   else if(route==='/rest/v1/room_messages'&&method==='GET')result=json([...messages].reverse());
   else if(route==='/rest/v1/rpc/phase2_room_create'){
    room={id:roomId,title:body.p_title,owner_id:owner,is_private:!!body.p_is_private,created_at:today};
@@ -93,10 +97,11 @@ function json(data,status=200){
   else if(route==='/rest/v1/rpc/phase2_room_invite_join'){
    assert.equal(body.p_token,'ab'.repeat(24));
    assert.equal(body.p_room_id,roomId);
-   joined=true;result=json(true);
+   assert.equal(actor,guest,'Invite should only be redeemed by guest');
+   guestJoined=true;result=json(true);
   }
   else if(route==='/rest/v1/rpc/phase2_room_members'){
-   result=json(joined?[{user_id:owner,display_name:profile.display_name,seat_no:seat,is_muted:true}]:[]);
+   result=json([...(joined?[{user_id:owner,display_name:profile.display_name,seat_no:seat,is_muted:true}]:[]),...(guestJoined?[{user_id:guest,display_name:'Guest Invited',seat_no:null,is_muted:true}]:[])]);
   }
   else if(route==='/rest/v1/rpc/phase2_room_take_seat'){
    seat=body.p_seat;result=json(seat);
@@ -184,6 +189,23 @@ function json(data,status=200){
  const invitation=await page.$eval('#tc-phase2-invite-code',el=>el.value);
  assert.match(invitation,new RegExp('^'+roomId+':[0-9a-f]{48}$'));
  assert.equal(invitation.includes('strong-password'),false,'Do not leak account password');
+ // The private room is invisible to outsiders until a valid invitation is redeemed.
+ await page.evaluate(async()=>{await window.TotiPhase2Auth.signOut();go('loginPreview');});
+ await page.waitForSelector('#fc-email');
+ await page.type('#fc-email','invited@test.invalid');
+ await page.type('#fc-pass','strong-password');
+ await page.$eval('[data-fc="validate-auth"]',el=>el.click());
+ await waitUntil(page,()=>document.querySelector('#app')?.dataset.route==='me');
+ await page.$eval('.tc-unified-nav [data-v="home"]',el=>el.click());
+ await waitUntil(page,()=>window.TotiPhase2Rooms?.getStatus?.().roomCount===0);
+ assert.equal(await page.$$eval('.royal-room-gallery .royal-room-tile',items=>items.length),0,'Private rooms stay hidden from outsiders');
+ await page.$eval('[data-phase2="invite-enter"]',el=>el.click());
+ await page.waitForSelector('#tc-phase2-redeem-code');
+ await page.$eval('#tc-phase2-redeem-code',(el,code)=>{el.value=code;el.dispatchEvent(new Event('input',{bubbles:true}));},invitation);
+ await page.$eval('[data-phase2="invite-redeem"]',el=>el.click());
+ await waitUntil(page,()=>document.querySelector('.roomidentity b')?.textContent==='غرفتي الخاصة');
+ assert.equal(await page.$('#tc-phase2-room-share'),null,'Only the room owner can generate invitations');
+ assert.equal(guestJoined,true,'Private-room join must be confirmed by server');
  console.log('PASS: real Auth, private invites, profile editing, 15 seats, chat and logout (mock backend)');
  await browser.close();
 })().catch(async e=>{console.error(e.stack||e);if(browser)await browser.close().catch(()=>{});process.exitCode=1;});
