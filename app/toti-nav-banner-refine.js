@@ -139,9 +139,26 @@ function enhanceBanner(){
   stage.appendChild(dots);
   applySlide(hero,list,state.index);
 }
+function enhanceProfileStats(){
+  // Only decorate the existing profile counters; preserve values, data-a routes and click events.
+  const card=app.querySelector('.me-royal > .me-statcard');
+  if(!card)return;
+  card.classList.add('tc-stats-luxe');
+  card.setAttribute('aria-label','متابعة الحساب والأصدقاء والزوار');
+  const glyphs=['♟','♥','✦','◉'];
+  Array.from(card.querySelectorAll(':scope > button')).forEach(function(button,index){
+    if(button.querySelector('.tc-stat-glyph'))return;
+    const glyph=document.createElement('span');
+    glyph.className='tc-stat-glyph';
+    glyph.setAttribute('aria-hidden','true');
+    glyph.textContent=glyphs[index]||'✦';
+    button.insertBefore(glyph,button.firstChild);
+  });
+}
 function refine(){
   enhanceNavigation();
   enhanceBanner();
+  enhanceProfileStats();
 }
 const previousRender=render;
 render=function(){
@@ -158,5 +175,5 @@ setInterval(function(){
   const total=slides().length;
   if(total>1)setSlide((state.index+1)%total,true);
 },5300);
-window.TotiChatBannerRefinement=Object.freeze({version:'1.0',getSlideIndex:function(){return state.index;}});
+window.TotiChatBannerRefinement=Object.freeze({version:'1.1',getSlideIndex:function(){return state.index;}});
 })();
