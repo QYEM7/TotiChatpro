@@ -99,6 +99,10 @@ function json(data,status=200){
  });
  await page.goto(web+'?screen=me',{waitUntil:'domcontentloaded'});
  await page.waitForSelector('#app.rf-app');
+ console.log('Stage 2 runtime modules',JSON.stringify(await page.evaluate(()=>({
+    auth:!!window.TotiPhase2Auth,rooms:!!window.TotiPhase2Rooms,
+    render:typeof window.render,base:!!window.TOTICHAT_PUBLIC_BACKEND
+ }))));
  assert.ok(await page.$('[data-phase2="account"]'),'Account button must exist inside approved Me screen');
  await page.click('[data-phase2="account"]');
  assert.equal(await page.$eval('#app',x=>x.dataset.route),'loginPreview');
