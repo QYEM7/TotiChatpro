@@ -62,8 +62,13 @@ try{
  assert.ok(await page.$('#overlay.show .fc-sheet'));
  await go('settings');
  assert.ok(await page.$('[data-fc-entry]'));
+ await go('roomAdminPreview');
+ assert.ok(await page.$('[data-rf="rf-room-settings"]'));
+ await click('[data-rf="rf-room-settings"]');
+ assert.ok(await page.$('#overlay.show #tc-name'),'owner dashboard must open the full room-settings form');
+ await page.evaluate(()=>closeSheet());
  await go('room');
- assert.equal(await page.$$eval('.seats .seat',e=>e.length),15);
+ assert.equal(await page.$eval('.seats .seat',e=>e.length),15);
  await go('vip');
  assert.equal(await page.$$eval('.rvip-tier',e=>e.length),15);
  assert.deepEqual(errors,[],'no page errors');
