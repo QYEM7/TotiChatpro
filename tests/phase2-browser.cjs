@@ -144,7 +144,7 @@ function json(data,status=200){
  await page.click('.roomBottom [data-a="sheet"][data-v="chatInput"]');
  await page.waitForSelector('#composerInput');
  await page.type('#composerInput','مرحبا من الدردشة الحقيقية');
- await page.click('[data-a="sendPreview"]');
+ await page.keyboard.press('Enter');
  await waitUntil(page,()=>[...document.querySelectorAll('.chatArea .chatMsg')].some(x=>x.textContent.includes('مرحبا من الدردشة الحقيقية')));
  assert.equal(messages.length,1,'One server-side send is recorded, no local fake send');
  assert.ok(!errors.length,'No browser errors: '+errors.join('; '));
@@ -182,11 +182,8 @@ function json(data,status=200){
  await page.$eval('#tc-phase2-room-share',el=>el.click());
  await page.waitForSelector('#tc-phase2-invite-code');
  const invitation=await page.$eval('#tc-phase2-invite-code',el=>el.value);
- assert.match(invitation,new RegExp('^'+roomId+':[0-9a-f]{48} -> profile -> rooms -> seat -> chat -> profile edit -> logout, all mocked/isolated');
- await browser.close();
-})().catch(async e=>{console.error(e.stack||e);if(browser)await browser.close().catch(()=>{});process.exitCode=1;});
-));
- assert.equal(invitation.includes('strong-password'),false,'No password or token leak in invitations');
- console.log('PASS: real UI Auth -> profile -> rooms -> seat -> chat -> profile edit -> logout, all mocked/isolated');
+ assert.match(invitation,new RegExp('^'+roomId+':[0-9a-f]{48}$'));
+ assert.equal(invitation.includes('strong-password'),false,'Do not leak account password');
+ console.log('PASS: real Auth, private invites, profile editing, 15 seats, chat and logout (mock backend)');
  await browser.close();
 })().catch(async e=>{console.error(e.stack||e);if(browser)await browser.close().catch(()=>{});process.exitCode=1;});
