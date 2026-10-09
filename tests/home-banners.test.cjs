@@ -56,6 +56,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
     ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
   ];
+  assert.match(app, /<link rel="stylesheet" href="\.\/royal-visuals\.css">/);
+  assert.match(app, /<script src="\.\/royal-visuals\.js"><\/script>/);
+  app=app.replace('<link rel="stylesheet" href="./royal-visuals.css">','');
+  app=app.replace('<script src="./royal-visuals.js"></script>','');
   assert.match(app, /<link rel="stylesheet" href="\.\/room-ui-enhancements\.css">/);
   assert.match(app, /<script src="\.\/room-ui-enhancements\.js"><\/script>/);
   app=app.replace('<link rel="stylesheet" href="./room-ui-enhancements.css">','');
@@ -68,7 +72,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
@@ -101,4 +105,15 @@ test('room preview completion leaves server and approved root untouched',()=>{
  assert.doesNotMatch(source,/\b(fetch|XMLHttpRequest|supabase\.from|navigator\.share)\s*\(/);
  assert.match(read('app/index.html'),/room-ui-enhancements\.js/);
  assert.doesNotMatch(read('index.html'),/room-ui-enhancements\.js/);
+});
+
+test('royal reference changes are frontend-only and preserve approved original artwork',()=>{
+ const html=read('app/index.html');
+ const royal=read('app/royal-visuals.js');
+ const css=read('app/royal-visuals.css');
+ assert.match(html,/royal-visuals\.css/);
+ for(const key of ['royalHome','royal-feature-settings','royal-feature-share','royal-feature-games','royal-mini-room'])assert.ok(royal.includes(key)||css.includes(key),key);
+ for(const key of ['Room Settings','Share Room','Games Center','TotiChat Lounge'])assert.match(royal,new RegExp(key));
+ assert.doesNotMatch(royal,/\b(fetch|XMLHttpRequest|supabase\.from)\s*\(/);
+ assert.doesNotMatch(read('index.html'),/royal-visuals\.(css|js)/);
 });
