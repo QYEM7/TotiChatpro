@@ -29,12 +29,12 @@ try{
  await go('passwordResetPreview');
  assert.equal(await page.$eval('#app',el=>el.dataset.route),'passwordResetPreview');
  await go('friendsPreview');
- assert.equal(await page.$eval('.fc-person',e=>e.length),2);
+ assert.equal(await page.$$eval('.fc-person',e=>e.length),2);
  await page.screenshot({path:'royal-preview-screenshots/frontend-friends.png',fullPage:true});
  await click('[data-fc="social-tab"][data-v="followers"]');
  assert.equal(await page.$$eval('.fc-person',e=>e.length),1);
  await go('storePreview');
- assert.equal(await page.$eval('.fc-product',e=>e.length),7);
+ assert.equal(await page.$$eval('.fc-product',e=>e.length),7);
  await page.screenshot({path:'royal-preview-screenshots/frontend-store.png',fullPage:true});
  await click('[data-fc="store-tab"][data-v="frames"]');
  assert.equal(await page.$$eval('.fc-product',e=>e.length),2);
@@ -81,7 +81,7 @@ try{
  assert.ok(await page.$('#overlay.show #tc-name'),'owner dashboard must open the full room-settings form');
  await page.evaluate(()=>closeSheet());
  await go('room');
- assert.equal(await page.$eval('.seats .seat',e=>e.length),15);
+ assert.equal(await page.$$eval('.seats .seat',e=>e.length),15);
  await go('vip');
  assert.equal(await page.$$eval('.rvip-tier',e=>e.length),15);
  assert.deepEqual(errors,[],'no page errors');
