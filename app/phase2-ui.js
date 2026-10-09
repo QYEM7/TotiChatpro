@@ -1,0 +1,199 @@
+/* Stage-2 opt-in UI bridge. Preserve all approved markup, navigation and
+ * guest visual QA while wiring only real Auth/profile flows to new Supabase.
+ * Finance, gifts, agencies and audio remain explicitly demo until backed.
+ */
+(function(){
+'use strict';
+const auth=window.TotiPhase2Auth;
+if(!auth||typeof window.render!=='function')return;
+const $=(selector,root=document)=>root.querySelector(selector);
+let currentUser='',busy=false;
+function notify(text,error=false){
+  const target=$('#fc-form-status');
+  if(target){target.textContent=text;target.classList.toggle('error',error);
+    target.style.color=error?'#b22656':'#2f7959';target.setAttribute('role',error?'alert':'status');}
+  else if(typeof showToast==='function')showToast(text);
+}
+function errorMessage(e){
+  const str=String(e?.message||'تعذر الاتصال بالخادم');
+  if(/invalid login credentials/i.test(str))return 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+  if(/email not confirmed/i.test(str))return 'يلزم تأكيد البريد الإلكتروني قبل الدخول';
+  if(/rate limit|too many requests/i.test(str))return 'محاولات كثيرة؛ انتظر قليلاً وأعد المحاولة';
+  if(/failed to fetch|networkerror/i.test(str))return 'تعذر الاتصال بالخادم؛ افحص الإنترنت';
+  if(/already registered/i.test(str))return 'هذا البريد مرتبط بحساب مسبق';
+  return str.length>150?'حدث خطأ غير متوقع':str;
+}
+function changePreviewIdentity(){
+  const state=auth.state(),p=state.profile;
+  if(p?.display_name){
+    previewProfileName=p.display_name;
+    previewProfileBio=p.bio||'';
+    editForm.name=p.display_name;editForm.bio=p.bio||'';
+    currentUser=state.user?.id||'';
+  }else if(!state.signedIn&&currentUser){
+    // Never show the previous account identity after sign-out.
+    previewProfileName='مستخدم تجريبي';
+    previewProfileBio='هذه معاينة بصرية قبل تسجيل الدخول';
+    editForm.name=previewProfileName;editForm.bio=previewProfileBio;
+    previewProfilePic='';currentUser='';
+  }
+}
+function hydrate(){
+  const s=auth.state();
+  if(screen==='me'){
+    const container=$('.me-hero-top');
+    if(container&&!container.querySelector('[data-phase2="account"]')){
+      const b=document.createElement('button');
+      b.type='button';b.className='tc-phase2-account';
+      b.dataset.phase2='account';
+      b.textContent=s.signedIn?'✓ الحساب مفعل':'تسجيل الدخول';
+      b.setAttribute('aria-label',s.signedIn?'إدارة حسابك الحقيقي':'تسجيل الدخول إلى حساب TotiChat');
+      const edit=container.querySelector('button');
+      if(edit)container.insertBefore(b,edit);else container.appendChild(b);
+    }
+    if(s.signedIn){
+      const summary=$('.me-summary .muted-id');
+      if(summary)summary.textContent='🇮🇶 IQ | حساب '+s.user.id.slice(0,8).toUpperCase();
+      const badges=$('.me-summary .vip-labels');
+      if(badges)badges.innerHTML='<span>الحساب موثّق الدخول</span><span>VIP قيد الربط</span>';
+      const vip=$('.me-vip-banner strong');
+      if(vip)vip.textContent='👑 VIP · قيد الربط';
+      // Counts have not been integrated with a social graph yet. Never show sample numbers as real.
+      $$('.me-statcard > button b').forEach(x=>{x.textContent='—';});
+    }
+  }
+  if(screen==='profilePreview'&&s.signedIn){
+    const info=$('.pr-final');
+    if(info)info.dataset.phase2='linked-profile';
+  }
+  if(['loginPreview','signupPreview','passwordResetPreview','verifyAccountPreview'].includes(screen)){
+    const notes=$$('.fc-page .fc-note');
+    notes.forEach(node=>{node.textContent='تسجيل الدخول والملف الشخصي مربوطان بقاعدة TotiChatpro الجديدة. بقية الوظائف لا تزال تجريبية.';});
+    const cards=$$('.fc-page .fc-card');
+    const note=cards[cards.length-1]?.querySelector('p');
+    if(note)note.textContent='المصادقة تتم عبر Supabase Auth الحقيقي. لا نحتفظ بكلمة مرورك داخل التطبيق. قد يطلب الخادم تأكيد البريد.';
+    const button=$('[data-fc="validate-auth"]');
+    if(button){
+      const caption={
+        loginPreview:'تسجيل الدخول',
+        signupPreview:'إنشاء الحساب',
+        passwordResetPreview:'إرسال تعليمات الاستعادة',
+        verifyAccountPreview:'تأكيد البريد الإلكتروني'
+      };
+      button.textContent=caption[screen]||'متابعة';
+    }
+    if(screen==='signupPreview'){
+      const label=$('.fc-consent');
+      if(label&&label.lastChild?.nodeType===3)
+        label.lastChild.textContent=' أوافق على إنشاء الحساب وحفظ البريد واسم العرض والبيانات الأساسية اللازمة للخدمة';
+    }
+    if(s.signedIn){
+      const c=$('.fc-heading');
+      if(c)c.insertAdjacentHTML('beforeend','<small class="tc-phase2-connected">✓ أنت مسجل الدخول حالياً</small>');
+    }
+  }
+  if(screen==='profileEdit'&&s.signedIn){
+    const help=$('.edit-help');
+    if(help)help.textContent='حفظ الاسم والنبذة يتم على خادم TotiChat. رفع الصورة وباقي الحقول قيد الربط.';
+  }
+  if(screen==='settings'){
+    const logout=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.trim()==='تسجيل الخروج');
+    if(logout){
+      logout.dataset.phase2='logout';
+      logout.textContent=s.signedIn?'تسجيل الخروج من الحساب':'تسجيل الدخول';
+    }
+  }
+}
+function $$(selector,root=document){return Array.from(root.querySelectorAll(selector));}
+const renderBefore=render;
+render=function(){
+  const result=renderBefore.apply(this,arguments);
+  hydrate();return result;
+};
+hydrate();
+async function submitAuth(route,button){
+  const email=($('#fc-email')?.value||'').trim();
+  const password=$('#fc-pass')?.value||'';
+  const signup=route==='signupPreview',verify=route==='verifyAccountPreview';
+  const reset=route==='passwordResetPreview';
+  if(!verify&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new Error('أدخل بريداً إلكترونياً صحيحاً');
+  if(!reset&&!verify&&password.length<8)throw new Error('كلمة المرور يجب أن تحتوي ثمانية أحرف على الأقل');
+  if(signup){
+    const displayName=($('#fc-name')?.value||'').trim();
+    if(displayName.length<2||displayName.length>35)throw new Error('الاسم يجب أن يكون 2–35 حرفاً');
+    if(password!==($('#fc-confirm')?.value||''))throw new Error('كلمتا المرور غير متطابقتين');
+    if(!$('#fc-terms')?.checked)throw new Error('يجب الموافقة على إنشاء الحساب');
+    const result=await auth.signUp({email,password,displayName});
+    if(!result.signedIn){notify('تحقق من بريدك الإلكتروني لتأكيد الحساب، ثم أدخل رمز التحقق أو ارجع لتسجيل الدخول.');return;}
+  }else if(reset){
+    await auth.recover(email);
+    notify('إذا كان البريد مرتبطاً بحساب فستصلك رسالة استعادة.');return;
+  }else if(verify){
+    const ok=await auth.verifySignup($('#fc-code')?.value||'');
+    if(!ok){notify('افتح رسالة التأكيد التي أرسلها الخادم ثم ارجع لتسجيل الدخول.');return;}
+  }else{
+    await auth.signIn({email,password});
+  }
+  changePreviewIdentity();
+  if(typeof closeSheet==='function')closeSheet();
+  go('me');
+  if(typeof showToast==='function')showToast('تم تسجيل الدخول وربط الملف الشخصي بنجاح');
+}
+document.addEventListener('click',event=>{
+  const el=event.target.closest('[data-fc="validate-auth"],[data-a="saveProfilePreview"],[data-phase2]');
+  if(!el)return;
+  const action=el.dataset.phase2||el.dataset.fc||el.dataset.a;
+  const state=auth.state();
+  if(action==='saveProfilePreview'&&!state.signedIn)return; // Preserve guest demo edits.
+  if(!['validate-auth','saveProfilePreview','account','logout'].includes(action))return;
+  event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+  if(action==='account'){
+    if(state.signedIn){
+      if(typeof showSheet==='function'){
+        const div=document.createElement('div');
+        const email=document.createElement('p');email.textContent=state.user.email||'';
+        const name=document.createElement('b');name.textContent=state.profile?.display_name||'حساب متصل';
+        div.append(name,email);
+        showSheet('<div class="tc-phase2-account-sheet" dir="rtl"><h3>حساب TotiChat</h3><p class="tc-phase2-account-info"></p><button class="primary" data-phase2="logout">تسجيل الخروج</button><button class="primary" data-a="close">إغلاق</button></div>',true);
+        const info=$('.tc-phase2-account-info');
+        if(info)info.textContent=(state.profile?.display_name||'حساب متصل')+' · '+state.user.email;
+      }
+    }else go('loginPreview');
+    return;
+  }
+  if(action==='logout'){
+    if(busy)return;
+    busy=true;el.disabled=true;
+    void auth.signOut().then(()=>{
+      changePreviewIdentity();go('loginPreview');
+      if(typeof showToast==='function')showToast('تم تسجيل الخروج');
+    }).catch(err=>notify(errorMessage(err),true))
+      .finally(()=>{busy=false;el.disabled=false;});
+    return;
+  }
+  if(busy)return;
+  busy=true;el.disabled=true;
+  if(action==='validate-auth'){
+    const route=el.dataset.v||screen;
+    notify('جارٍ التواصل مع الخادم…');
+    void submitAuth(route,el).catch(err=>notify(errorMessage(err),true))
+      .finally(()=>{busy=false;el.disabled=false;});
+  }else if(action==='saveProfilePreview'){
+    const name=(editForm.name||'').trim(),bio=(editForm.bio||'').slice(0,150);
+    notify('جارٍ حفظ الملف على الخادم…');
+    void auth.updateProfile({display_name:name,bio}).then(()=>{
+      changePreviewIdentity();
+      editDraftPhoto='';editError='';
+      go('profilePreview');
+      if(typeof showToast==='function')showToast('تم حفظ الاسم والنبذة في حسابك الحقيقي');
+    }).catch(err=>notify(errorMessage(err),true))
+      .finally(()=>{busy=false;el.disabled=false;});
+  }
+},true);
+window.addEventListener('totichat-phase2-auth',()=>{
+  changePreviewIdentity();
+  if(!['loginPreview','signupPreview','passwordResetPreview','verifyAccountPreview'].includes(screen))
+    render();
+  else hydrate();
+});
+})();
