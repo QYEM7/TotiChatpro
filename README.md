@@ -12,19 +12,19 @@ The 27 original images and brand assets have been copied to this repository and 
 
 ### First live-data integration: home advertising banner
 
-- **[Open the live-banner integration preview](https://qyem7.github.io/TotiChatpro/app/)** — same approved design; home banner reads real published announcements once the new Supabase backend is configured. Without a configured backend, it displays an explicit empty/connection state, never pretend promotional content.
-- **[Technical setup and status](docs/home-banners.md)** — secure SQL migration is prepared but NOT applied. The old Supabase database remains untouched.
-- **[9 passing Node.js tests](https://github.com/QYEM7/TotiChatpro/actions/workflows/test-banner-integration.yml)** — validates HTML fidelity, 27 image checksums and ad safety.
+- **[Open the live-banner integration preview](https://qyem7.github.io/TotiChatpro/app/)** — same approved design; home banner now reads 3 genuine official project notices from the **NEW independent Supabase** backend. If the backend becomes unavailable, no fake ad replaces them.
+- **[Technical setup and status](docs/home-banners.md)** — secure SQL migration is APPLIED to new project `sqedsnyvjblvbjbizcay` ONLY. The old Supabase database remains untouched.
+- **[10 passing Node.js tests](https://github.com/QYEM7/TotiChatpro/actions/workflows/test-banner-integration.yml)** — validates HTML fidelity, 27 image checksums and ad safety.
 
 ### Project status
 
 - ✅ Approved original visual design preserved.
 - ✅ Original assets imported and verified.
 - ✅ Independent preview deployed using GitHub Pages.
-- ⏳ Owner's visual confirmation of this independent preview.
+- ⏳ Owner's visual review of the first connected-feature preview (`/app/`).
 - ⏳ Production frontend, backend/database, voice chat, transactions, agency systems, Android app.
 
-**This is an interactive visual demo, not a connected production application.** Screens and some buttons use demonstration data. No live balance, chat, or account operation should be inferred from the demo.
+**The approved root page remains a visual demo.** The `/app/` page now has a real, read-only Supabase-powered promotional carousel, but other features still use prototype data. Never infer that money, chat, voice or accounts are fully operational.
 
 ### Non-negotiable rules
 
