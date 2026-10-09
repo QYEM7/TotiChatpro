@@ -217,8 +217,13 @@
     }
     scheduleRefresh();return publicState();
   }
+  async function requestData(path,{method='GET',body,prefer}={}){
+    if(typeof path!=='string'||!path.startsWith('/rest/v1/'))throw new Error('Forbidden service path');
+    const accessToken=await validToken();
+    return request(path,{method,body,accessToken,prefer});
+  }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
-    verifySignup,readProfile,updateProfile,resume,refresh});
+    verifySignup,readProfile,updateProfile,resume,refresh,requestData});
   window.TotiPhase2Auth=api;
   if(session){void resume();}
   else queueMicrotask(notify);
