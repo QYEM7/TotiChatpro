@@ -29,7 +29,15 @@ test('Android web payload uses exact approved HTML, CSS, JS and asset bytes',asy
      digest(await get('dist/assets/images/'+entry)), 'asset modified: '+entry);
  }
  const entry=(await get('dist/index.html')).toString();
- assert.match(entry,/window.location.replace\('\.\/app\/'\)/);
+ const source=(await get('app/index.html')).toString();
+ assert.match(entry,/<html lang="ar" dir="rtl"><head><base href="\.\/app\/">/);
+ assert.equal(entry,source.replace('<html lang="ar" dir="rtl"><head>',
+   '<html lang="ar" dir="rtl"><head><base href="./app/">'),
+   'APK WebView root MUST contain the exact original approved app with only a base tag');
+ assert.match(entry,/id="app"/);
+ assert.match(entry,/royal-visuals\.js/);
+ assert.doesNotMatch(entry,/http-equiv="refresh"|window\.location\.replace\('\.\/app\/'\)/i,
+   'Never redirect Capacitor WebView to an unsupported /app/ directory');
  assert.doesNotMatch(entry,/jsjsnsnsnsn0-pixel\/TotiChat/);
 });
 
