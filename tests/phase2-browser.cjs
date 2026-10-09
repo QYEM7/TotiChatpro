@@ -85,6 +85,16 @@ function json(data,status=200){
    joined=true;result=json(roomId);
   }
   else if(route==='/rest/v1/rpc/phase2_room_join'){assert.equal(body.p_room_id,roomId);joined=true;result=json(true);}
+  else if(route==='/rest/v1/rpc/phase2_room_invite_create'){
+   assert.equal(body.p_room_id,roomId);
+   assert.equal(room.is_private,true,'Only private-room owners generate invitations');
+   result=json(roomId+':'+('ab'.repeat(24)));
+  }
+  else if(route==='/rest/v1/rpc/phase2_room_invite_join'){
+   assert.equal(body.p_token,'ab'.repeat(24));
+   assert.equal(body.p_room_id,roomId);
+   joined=true;result=json(true);
+  }
   else if(route==='/rest/v1/rpc/phase2_room_members'){
    result=json(joined?[{user_id:owner,display_name:profile.display_name,seat_no:seat,is_muted:true}]:[]);
   }
@@ -155,6 +165,28 @@ function json(data,status=200){
  await page.$eval('.tc-phase2-account-sheet [data-phase2="logout"]',el=>el.click());
  await waitUntil(page,()=>window.TotiPhase2Auth?.state()?.signedIn===false);
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'loginPreview');
+ // The second journey checks that private-room codes are created only on
+ // explicit owner action and presented as one-use, short-lived secrets.
+ await page.type('#fc-email','voice@test.invalid');
+ await page.type('#fc-pass','strong-password');
+ await page.$eval('[data-fc="validate-auth"]',el=>el.click());
+ await waitUntil(page,()=>document.querySelector('#app')?.dataset.route==='me');
+ await page.$eval('.tc-unified-nav [data-v="home"]',el=>el.click());
+ await waitUntil(page,()=>document.querySelector('[data-phase2="create-room"]')!==null);
+ await page.$eval('[data-phase2="create-room"]',el=>el.click());
+ await page.type('#tc-phase2-room-title','غرفتي الخاصة');
+ await page.click('#tc-phase2-room-private');
+ await page.$eval('[data-phase2="create-room-submit"]',el=>el.click());
+ await waitUntil(page,()=>document.querySelector('.roomidentity b')?.textContent==='غرفتي الخاصة');
+ assert.ok(await page.$('#tc-phase2-room-share'),'Private owner invite control visible');
+ await page.$eval('#tc-phase2-room-share',el=>el.click());
+ await page.waitForSelector('#tc-phase2-invite-code');
+ const invitation=await page.$eval('#tc-phase2-invite-code',el=>el.value);
+ assert.match(invitation,new RegExp('^'+roomId+':[0-9a-f]{48} -> profile -> rooms -> seat -> chat -> profile edit -> logout, all mocked/isolated');
+ await browser.close();
+})().catch(async e=>{console.error(e.stack||e);if(browser)await browser.close().catch(()=>{});process.exitCode=1;});
+));
+ assert.equal(invitation.includes('strong-password'),false,'No password or token leak in invitations');
  console.log('PASS: real UI Auth -> profile -> rooms -> seat -> chat -> profile edit -> logout, all mocked/isolated');
  await browser.close();
 })().catch(async e=>{console.error(e.stack||e);if(browser)await browser.close().catch(()=>{});process.exitCode=1;});
