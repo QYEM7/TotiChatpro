@@ -1,0 +1,76 @@
+/* TotiChat royal polish: close buttons + 100 individual level emblems + luxury medals.
+ * Scope restricted to these elements. All approved purple/gold backgrounds remain intact.
+ */
+#app .rp-level-page,#app .rp-honor-page{--rp-gold:#f6cb81;--rp-ink:#fbe7bf;--rp-violet:#a640de;--rp-line:#d9a77695;color:#f5dff3;background:transparent;padding:8px 10px 100px;direction:rtl;font-family:Cairo,system-ui,sans-serif}
+#app .rp-level-hero{position:relative;min-height:177px;display:flex;flex-direction:row;align-items:center;gap:13px;overflow:hidden;margin:2px 0 14px;padding:30px 12px 13px;border:1.5px solid #e8bb7f;border-radius:21px;background:linear-gradient(110deg,#491469b8,#200c30ec),url('../assets/images/room_cover_majlis_1790226059300.jpg') center 45%/cover;box-shadow:0 0 14px #b23be77b,inset 0 0 18px #f5b96d27}
+#app .rp-level-shine{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:2px;color:#ffe4ae;text-shadow:0 0 9px #fbc077b3}
+#app .rp-active-badge{height:139px;width:119px;min-width:105px;flex:0 0 119px;filter:drop-shadow(0 0 10px #dd88ff75)}
+#app .rp-badge-svg{display:block;width:100%;height:100%;max-width:100%;overflow:visible;filter:drop-shadow(0 3px 5px #07020c8e)}
+#app .rp-level-user{flex:1;min-width:0}
+#app .rp-level-user>small{color:#f0c8ec;font-size:11px;font-weight:800}
+#app .rp-level-user h2{margin:0;font-size:23px;color:#ffe0a2;text-shadow:0 2px 9px #f7ad798c;white-space:nowrap}
+#app .rp-level-user p{font-size:10px;margin:4px 0 11px;color:#ead6e7;line-height:1.7}
+#app .rp-progress-label{display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:9px;color:#e8c2ec}
+#app .rp-progress-label b{color:#ffe1a7}
+#app .rp-progress{margin-top:5px;overflow:hidden;background:#281339;border:1px solid #b28e9b;height:10px;border-radius:8px}
+#app .rp-progress>span{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#9d3ad5,#efb5ee,#f1c578);box-shadow:0 0 9px #cb69f6}
+#app .rp-level-switch{display:flex;gap:8px;padding:0 3px 13px}
+#app .rp-level-switch button{flex:1;min-height:42px;border-radius:15px;border:1px solid #b981b3;background:linear-gradient(120deg,#3a174c,#1b0d31);color:#e7bde9;font-size:14px;font-weight:900}
+#app .rp-level-switch button.active{background:linear-gradient(105deg,#74269f,#b92de4);color:#ffe6af;border-color:#f6cb8b;box-shadow:0 0 11px #d150e37f}
+#app .rp-heading{font-size:17px;font-weight:900;margin:10px 4px 4px;color:#ffe0a1;text-shadow:0 0 8px #ffc77461}
+#app .rp-subcopy{margin:0 4px 12px;color:#ebcfe6;font-size:11px;line-height:1.8}
+#app .rp-level-groups{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:4px 2px 12px;overscroll-behavior-x:contain}
+#app .rp-level-groups button{flex:0 0 auto;min-width:55px;border:1px solid #b989b49c;border-radius:12px;background:#2c123fea;padding:8px 7px;color:#e0c7e9;font-size:10px;font-weight:800;box-shadow:inset 0 1px #f8e1ff18}
+#app .rp-level-groups button.active{background:linear-gradient(130deg,#8f32cd,#491672);border-color:#f3c77c;color:#ffecbf;box-shadow:0 0 9px #be48e68c}
+#app .rp-level-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:2px}
+#app .rp-level-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:202px;padding:8px 4px 12px;border:1.5px solid #bc8baf;background:linear-gradient(155deg,#381349e9,#1a0d2bda 68%,#2d1047e3),url('../assets/images/room_wallpaper_crown_queen_1790560306491.jpg') center/cover;border-radius:18px;color:#ffe3ba;box-shadow:0 5px 16px #0008,inset 0 0 20px #ba41eb27}
+#app .rp-level-card.rp-current{border-color:#ffe6a1;box-shadow:0 0 15px #e4a951a3,inset 0 0 13px #ffe3ad28}
+#app .rp-level-card.rp-locked .rp-level-art{opacity:.79;filter:saturate(.74)}
+#app .rp-level-card:focus-visible,#app .rp-honor-card:focus-visible{outline:3px solid #f1d3a0;outline-offset:2px}
+#app .rp-level-card .rp-level-art{height:134px;width:122px;max-width:100%;display:grid;place-items:center}
+#app .rp-level-card strong{font-size:13px;font-weight:900;color:#ffe3b0}
+#app .rp-level-card>span:last-child{font-size:9px;color:#d6b9e4}
+#app .rp-level-card.rp-current>span:last-child{color:#ffe4a3}
+#app .rp-level-note{margin:15px 2px 10px;padding:10px 11px;background:linear-gradient(110deg,#361244ca,#210e35d8);border:1px solid #be8bb773;border-radius:13px;font-size:10px;line-height:1.9;color:#e8cde7}
+#app .rp-honor-page{padding-top:9px}
+#app .rp-honor-hero{position:relative;min-height:177px;margin:2px 1px 16px;padding:13px 8px;text-align:center;overflow:hidden;border:1.6px solid #efd18d;border-radius:21px;background:linear-gradient(115deg,#3b104eab,#170923c5),url('../assets/images/room_cover_majlis_1790226059300.jpg') center/cover;box-shadow:0 0 16px #be3bda8e,inset 0 0 15px #eab87d35}
+#app .rp-honor-crown{font-size:43px;display:block;line-height:1.3;color:#ffe0a5;text-shadow:0 0 12px #ffba6e,0 0 24px #bd45e3}
+#app .rp-honor-hero h2{font-size:19px;margin:3px 0 1px;color:#ffe5a6;text-shadow:0 2px 8px #02000a}
+#app .rp-honor-hero p{margin:2px 0 9px;color:#e6c8ec;font-size:10px}
+#app .rp-honor-stats{display:flex;align-items:center;justify-content:center;gap:8px;color:#ffe7bd}
+#app .rp-honor-stats>b{font-size:19px;color:#ffe4ae}
+#app .rp-honor-stats small{font-size:10px}
+#app .rp-honor-stats span{font-size:9px;border:1px solid #b77db86e;border-radius:12px;padding:2px 8px;color:#e6c5e8;background:#280e34cc}
+#app .rp-honor-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:4px 0 10px}
+#app .rp-honor-card{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-height:185px;padding:8px 4px 12px;background:linear-gradient(145deg,#3b164bc9,#190b31ee 70%);border:1px solid #e1ae76b4;border-radius:17px;color:#ffe1bc;box-shadow:0 3px 12px #0008,0 0 8px #bb55de36,inset 0 1px #ffffff15}
+#app .rp-honor-card .rp-honor-icon{height:114px;width:100px;max-width:98%;display:grid;place-items:center;filter:drop-shadow(0 0 7px #ba68e266)}
+#app .rp-honor-card strong{font-size:12px;min-height:19px;line-height:1.4;font-weight:900;color:#ffe1ab}
+#app .rp-honor-card small{font-size:8px;line-height:1.5;color:#dcc1e8;display:block;text-align:center;min-height:12px}
+#app .rp-honor-status{font-size:9px;line-height:1.5;color:#e6c0ed;border:1px solid #ad7db662;border-radius:11px;padding:2px 6px;background:#27113c7a}
+#overlay .rp-badge-detail{text-align:center;color:#ffedc8;min-height:290px;background:transparent}
+#overlay .rp-badge-detail .sheethead{text-align:right}
+#overlay .rp-badge-detail .rp-detail-gem{height:210px;width:200px;max-width:80%;margin:7px auto;filter:drop-shadow(0 0 14px #ad4bdc8a)}
+#overlay .rp-badge-detail h3{color:#ffe0a1;font-size:17px}
+#overlay .rp-badge-detail p{color:#e8cce8;font-size:12px}
+#overlay .rp-badge-detail .rp-level-note{margin:8px 4px;border:1px solid #b785b78a;background:#2d113de8;color:#ffdebd}
+#app .rp-level-page svg,#app .rp-honor-page svg,#overlay .rp-badge-detail svg{max-height:100%;max-width:100%}
+/* One exact 42x42 button standard for all modal close controls. */
+#overlay .sheet{position:relative}
+#overlay .sheet .sheethead{position:relative;min-height:48px;padding-right:54px;display:flex;align-items:center}
+#overlay .sheet .sheethead h3{color:#ffe3a9;margin:0;font-size:17px}
+#overlay .sheet button.rp-unified-close{display:grid!important;place-items:center!important;flex-shrink:0!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;max-width:42px!important;max-height:42px!important;padding:0!important;margin:0!important;border-radius:50%!important;border:1.5px solid #f4cb8a!important;background:linear-gradient(140deg,#692188,#230b3c)!important;color:#ffe3bd!important;box-shadow:inset 0 0 10px #b857e982,0 0 10px #cc48dd64!important;text-shadow:none!important;font-size:0!important;line-height:1!important;cursor:pointer;touch-action:manipulation}
+#overlay .sheet button.rp-unified-close svg{width:20px!important;height:20px!important;display:block!important;stroke:currentColor!important;fill:none!important;pointer-events:none}
+#overlay .sheet button.rp-unified-close:focus-visible{outline:2px solid #fff2c0!important;outline-offset:3px}
+#overlay .sheet .sheethead button.rp-unified-close{position:absolute!important;top:2px!important;right:0!important;left:auto!important;z-index:7}
+#overlay .sheet .tc-feature-head{min-height:46px}
+#overlay .sheet .tc-feature-head button.rp-unified-close{position:absolute!important;top:8px!important;right:9px!important;left:auto!important;z-index:9}
+#overlay .sheet:has(.royal-feature) .royal-feature-title{padding-right:53px}
+#overlay .sheet .rf-review-dialog .tc-feature-head{position:relative;min-height:47px;padding-right:52px}
+#overlay .sheet .rf-review-dialog .tc-feature-head button.rp-unified-close{top:0!important;right:0!important}
+#overlay.room-glass-show .sheet.room-glass{position:relative!important;display:flex!important;flex-direction:column!important;gap:10px!important;width:min(400px,calc(100vw - 22px))!important;max-width:400px!important;max-height:90dvh!important;overflow-y:auto!important;align-items:stretch!important;padding:13px 15px 17px!important;border:1.5px solid #efc285!important;border-radius:23px!important;background:linear-gradient(140deg,#2c0d45ef,#130a27f5),url('../assets/images/room_screen_bg_1790556227206.jpg') center/cover!important;box-shadow:0 0 19px #b149dc8f,0 10px 38px #000c!important}
+#overlay.room-glass-show .sheet.room-glass .rp-room-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:48px;padding:0 3px 8px;border-bottom:1px solid #dfaa8176;color:#ffdfaf;direction:rtl;flex:0 0 auto}
+#overlay.room-glass-show .sheet.room-glass .rp-room-menu-head b{font-size:15px}
+#overlay.room-glass-show .sheet.room-glass .rp-room-menu-head button.rp-unified-close{position:static!important;align-self:center!important}
+#overlay.room-glass-show .sheet.room-glass .room-action{width:100%!important;max-width:none!important;margin:0!important}
+@media(max-width:370px){#app .rp-level-card{min-height:190px}#app .rp-level-card .rp-level-art{width:108px;height:120px}#app .rp-level-hero{gap:5px;padding:29px 7px 12px}#app .rp-active-badge{flex-basis:102px;min-width:102px;height:117px}#app .rp-level-user h2{font-size:19px}#app .rp-honor-grid{gap:5px}#app .rp-honor-card{min-height:174px;padding:6px 2px}#app .rp-honor-card strong{font-size:10px}#app .rp-honor-card .rp-honor-icon{height:104px}}
+@media(prefers-reduced-motion:reduce){#app .rp-level-card,#app .rp-honor-card{transition:none!important}}
