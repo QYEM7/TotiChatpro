@@ -125,12 +125,12 @@ async function shot(page,name){
  assert.equal(await page.$eval('#app',el=>el.dataset.route),'vip');
  assert.equal(await page.$$eval('.rvip-tier',els=>els.length),15);
  assert.equal(await page.$$eval('.rvip-tier .rvip-crest',els=>els.length),15);
- assert.equal(await page.$eval('.rvip-tier .rvip-crest',els=>new Set(els.map(el=>el.getAttribute('aria-label'))).size),15);
+ assert.equal(await page.$$eval('.rvip-tier .rvip-crest',els=>new Set(els.map(el=>el.getAttribute('aria-label'))).size),15);
 
  // SVG elements are deliberately isolated as cached image surfaces, not
  // duplicated inline defs. This targets Android checkerboard artifacts.
  const imagesStable=async()=>{
-  return page.$eval('.rvip-root img.rvip-crest',els=>({
+  return page.$$eval('.rvip-root img.rvip-crest',els=>({
    count:els.length,allDecoded:els.every(el=>el.complete&&el.naturalWidth>0&&el.naturalHeight>0),
    selfContained:els.every(el=>el.src.startsWith('data:image/svg+xml;charset=utf-8,')),
    dimensions:els.map(el=>({w:el.naturalWidth,h:el.naturalHeight})),
