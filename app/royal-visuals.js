@@ -127,4 +127,5 @@ window.addEventListener('click',handle,true);
 const startUrl=new URLSearchParams(location.search);
 if(startUrl.get('view')==='royal-home'){minimizedRoom=false;screen='home';}
 render();
+decorate();
 })();
