@@ -1,7 +1,7 @@
 name: Royal frontend browser QA
 on:
   push:
-    branches: [main]
+    branches: [main, develop/phase-2]
     paths:
       - "app/**"
       - "assets/**"
