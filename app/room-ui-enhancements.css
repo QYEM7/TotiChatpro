@@ -1,0 +1,44 @@
+/* TotiChat existing mint/teal/gold identity preserved; enhancements affect new UI only. */
+.overlay.tc-feature-overlay{align-items:center!important;justify-content:center!important;padding:12px;background:#041a21ba!important;backdrop-filter:blur(7px);z-index:60}
+.overlay.tc-feature-overlay .sheet{width:min(100%,440px);max-width:440px;height:auto;max-height:min(92dvh,900px);overflow-y:auto;overscroll-behavior:contain;padding:0;border:1px solid #dbb87aaa;border-radius:24px;background:linear-gradient(168deg,#092f3b 0%,#142946 46%,#241735 100%);color:#f6fffb;box-shadow:0 18px 65px #0009,0 0 17px #edcd7f44}
+.tc-feature{font-family:Cairo,system-ui,sans-serif;text-align:right;line-height:1.7;padding:16px}
+.tc-feature-head{display:flex;align-items:center;gap:8px;justify-content:space-between;border-bottom:1px solid #ffd6904c;padding-bottom:10px;margin-bottom:12px}
+.tc-feature-head h2{font-size:19px;margin:0;color:#ffdf99}
+.tc-crest{font-size:11px;color:#eec781;direction:ltr}.tc-x{background:#ffffff19;color:#fff;border:1px solid #ffffff35;border-radius:50%;width:35px;height:35px;font-size:17px}
+.tc-room-card{display:flex;gap:12px;align-items:center;border-radius:18px;border:1px solid #efc98466;background:linear-gradient(110deg,#0b545d88,#55305773);padding:10px;margin:8px 0 12px;min-height:84px}
+.tc-room-card img,.tc-room-strip img{width:66px;height:66px;flex:none;object-fit:cover;border-radius:16px;border:2px solid #dcb66a}
+.tc-room-card div{min-width:0}.tc-room-card b,.tc-room-strip b{display:block;color:#fff4d4;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tc-room-card small,.tc-room-strip small{display:block;font-size:10px;color:#99ffdb}.tc-room-card p{font-size:11px;margin:2px 0;color:#dce9e7}
+.tc-preview-note{background:#c7a04f1b;color:#e4dcb9;border:1px solid #c7a04f60;border-radius:12px;padding:7px 10px;font-size:10px;margin:9px 0}
+.tc-label,.tc-form label{display:block;color:#e8f9f3;font-size:13px;font-weight:800;margin:13px 0 7px}
+.tc-input{display:block;width:100%;background:#ffffff13!important;color:#fff!important;border:1px solid #a9d9cc70!important;border-radius:13px!important;padding:12px!important;outline:none;min-height:45px;font-size:13px}
+.tc-input::placeholder{color:#d3e4e1a0}.tc-input:focus{border-color:#46e1b2!important;box-shadow:0 0 0 2px #26d8ac29}
+.tc-form textarea{resize:vertical}.tc-form select{color:#f1e9ff}.tc-form option{color:#162e2c;background:#f1f9f5}
+.tc-subtitle{font-size:13px;color:#f5db9c;margin:14px 0 9px}.tc-friends{max-height:45dvh;overflow-y:auto;display:grid;gap:7px}
+.tc-friend,.tc-mod-row{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #ffffff29;background:#ffffff0c;border-radius:14px;color:#fff;text-align:right;min-height:60px}
+.tc-friend.selected{border-color:#29dbb3;background:#10b39e29}
+.tc-friend img,.tc-mod-row img{height:43px;width:43px;border-radius:50%;border:2px solid #eac680;object-fit:cover}
+.tc-friend span,.tc-mod-row span{flex:1;min-width:0}.tc-friend b{font-size:12px}.tc-friend small{font-size:10px;color:#bedbd9;display:block}.tc-friend em{font-size:10px;color:#f7d884;font-style:normal}
+.tc-friend i{color:#ffe3a6;font-size:23px;margin-inline:6px;font-style:normal}
+.tc-sticky{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid #fff3}
+.tc-sticky span{font-size:11px}.tc-sticky button,.tc-primary,.tc-add-mod button{border-radius:14px;padding:12px 15px;color:#0b3029;background:linear-gradient(120deg,#8cecc6,#d7f3ab,#e8c678);font-weight:900;box-shadow:0 3px 14px #00c39a44;font-size:12px}
+.tc-sticky button:disabled{opacity:.45}
+.tc-photo-row{display:flex;align-items:center;gap:15px}.tc-photo-row img{width:76px;height:76px;border-radius:15px;border:2px solid #efc475;object-fit:cover}
+.tc-upload{background:#ffffff24;border:1px solid #cbdcce7f;border-radius:12px;padding:10px;position:relative;overflow:hidden;font-size:12px}
+.tc-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.tc-hint{font-size:11px;color:#c7dddc;margin:7px 0}
+.tc-mod-row{margin:7px 0;min-height:54px}.tc-mod-row small{font-size:10px;color:#cfbee4}
+.tc-mod-row button{color:#ffc8c8;background:#7b273a6b;border-radius:9px;padding:7px;font-size:11px}
+.tc-add-mod{display:flex;gap:8px;align-items:center;margin:10px 0 18px}.tc-add-mod select{flex:1;min-width:0}.tc-add-mod button{flex-shrink:0}.tc-form>.tc-primary{display:block;width:100%;margin:16px 0 4px}
+.tc-empty{text-align:center;padding:18px;color:#d9eae5}
+.sheet.room-glass{max-height:88dvh;overflow-y:auto;gap:12px}
+.tc-room-strip{display:flex;gap:12px;align-items:center;padding:9px;border:1px solid #ffd28c66;border-radius:15px;background:#024e5270}
+.tc-room-strip img{width:50px;height:50px}
+.tc-tabs{display:flex;gap:7px;margin:12px 0}.tc-tabs button{flex:1;border:1px solid #a2d0c858;border-radius:12px;background:#ffffff11;color:#e3f5f0;padding:10px 2px;font-weight:800;font-size:12px}.tc-tabs button.active{background:#1ec4a4;color:#003c31}
+.tc-game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tc-game-card{min-height:130px;border:1px solid #d8bb7a72;background:linear-gradient(125deg,#16736855,#662e8370);color:#fff;border-radius:17px;padding:11px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px}.tc-game-icon{font-size:38px}.tc-game-card b{font-size:13px}.tc-game-card small{color:#a9f0dd}
+.tc-game-nav{display:flex;align-items:center;justify-content:space-between;margin:12px 0}.tc-game-nav button{background:#ffffff25;color:white;padding:9px 13px;border-radius:12px}.tc-xo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:320px;margin:14px auto}.tc-xo button{aspect-ratio:1;border:1px solid #ddc788;background:#ffffff16;border-radius:16px;color:#ffe5a7;font-size:35px;font-weight:900}
+.tc-xo-info,.tc-question{color:#f3db9d;text-align:center}.tc-answers{display:grid;gap:8px}.tc-answers button{padding:12px;background:#ffffff16;border:1px solid #d8b77c69;color:#fff;border-radius:13px}
+.mini-room-pill.tc-mini-room{touch-action:none;cursor:grab;padding:6px 10px;gap:8px;max-width:235px;min-height:56px;border:1px solid #f4ca7a;direction:rtl;background:linear-gradient(135deg,#12565c,#203c66,#5e3775);border-radius:24px;z-index:35;text-align:right}
+.tc-mini-room img{height:40px;width:40px;object-fit:cover;border-radius:50%;border:2px solid #e9c77c}
+.tc-mini-room span{min-width:0;display:grid;line-height:1.4}.tc-mini-room b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:#fff}.tc-mini-room small{font-size:9px;color:#d3ffe8;white-space:nowrap}.tc-mini-room .tc-restore{color:#ffdfa2;font-size:17px}
+.room-action-label small{display:block;font-size:10px;color:#ffe5ab}
+@media(max-width:360px){.tc-feature{padding:10px}.tc-room-card img{width:50px;height:50px}.tc-feature-head h2{font-size:16px}.tc-add-mod{flex-wrap:wrap}.tc-sticky button{padding:10px}}
