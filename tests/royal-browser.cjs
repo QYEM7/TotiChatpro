@@ -40,9 +40,17 @@ async function shot(page,name){
  assert.ok(await page.$('.royal-nav [data-v="me"] .tc-falcon-nav'));
  assert.equal(await page.$$eval('.tc-banner-controls .tc-banner-dot',x=>x.length)>=3,true);
  const firstHero=await page.$eval('.royal-hero img',img=>img.src);
- await page.click('.tc-banner-controls .tc-banner-dot:nth-child(2)');
- await page.waitForFunction((src)=>document.querySelector('.royal-hero img')?.src!==src,{timeout:3000},firstHero);
- assert.equal(await page.$eval('.tc-banner-dot:nth-child(2)',x=>x.getAttribute('aria-pressed')),'true');
+ // The carousel advances automatically; target an INACTIVE dot to avoid
+ // asserting a nonexistent image change when slide two is already active.
+ const dotState=await page.$eval('.tc-banner-dot',els=>els.map((el,i)=>({index:i,active:el.getAttribute('aria-pressed')==='true'})));
+ const active=dotState.find(x=>x.active)?.index??0;
+ const chosen=(active+1)%dotState.length;
+ await page.click('.tc-banner-controls .tc-banner-dot:nth-child('+(chosen+1)+')');
+ await page.waitForFunction(({src,index})=>{
+   const dots=document.querySelectorAll('.tc-banner-dot');
+   return document.querySelector('.royal-hero img')?.src!==src && dots[index]?.getAttribute('aria-pressed')==='true';
+ },{timeout:4500},{src:firstHero,index:chosen});
+ assert.equal(await page.$eval('.tc-banner-dot:nth-child('+(chosen+1)+')',x=>x.getAttribute('aria-pressed')),'true');
  await shot(page,'01-home-banner-second-slide');
  await page.click('.royal-nav [data-v="me"]');
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'me');
