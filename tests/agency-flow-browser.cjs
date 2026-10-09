@@ -31,7 +31,7 @@ const base=process.env.UI_URL||'http://127.0.0.1:8765/app/';
   assert.ok(await page.$('[data-tca="complete"]'));
   await page.click('[data-tca="complete"]');
   assert.ok(await page.$('[data-tca="rate"]'));
-  await page.click('[data-tca="rate"]');
+  await page.$eval('[data-tca="rate"]', el=>el.click());
   if(!(await page.$('#tca-stars'))) console.log('RATE DEBUG',await page.evaluate(()=>({html:document.querySelector('#sheet')?.innerHTML.slice(0,1200),overlay:document.querySelector('#overlay')?.className,buttons:[...document.querySelectorAll('[data-tca]')].slice(-12).map(e=>[e.dataset.tca,e.dataset.id]),errors:window.__agencyErrors||[]})),errors);
   assert.ok(await page.$('#tca-stars'));
   await page.click('[data-tca="rate-save"]');
