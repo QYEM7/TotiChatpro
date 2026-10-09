@@ -1,7 +1,7 @@
 name: Royal frontend browser QA
 on:
   push:
-    branches: [main]
+    branches: [main, "design/royal-purple-pink-reference-1"]
     paths:
       - "app/**"
       - "assets/**"
@@ -29,6 +29,8 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/totichat-web.log 2>&1 &
           sleep 3
           curl --fail http://127.0.0.1:8765/app/ >/dev/null
+      - name: Validate approved source and theme integration
+        run: node --test tests/home-banners.test.cjs
       - name: Inspect all TotiChat screens and take visual captures
         run: node tests/royal-browser.cjs
       - name: Verify agency recharge and staffing UX
