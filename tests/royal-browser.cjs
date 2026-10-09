@@ -69,7 +69,7 @@ async function shot(page,name){
   ['240','متابعين'],['120','الأصدقاء'],['33','متابعة'],['0','زوار']
  ]);
  assert.equal(await page.$eval('.me-royal > .me-statcard',el=>el.classList.contains('tc-stats-luxe')),true,'Luxury statistics component must be mounted');
- assert.equal(await page.$eval('.me-royal > .me-statcard > button .tc-stat-glyph',items=>items.length),4,'Each statistic has its own decorative icon');
+ assert.equal(await page.$$eval('.me-royal > .me-statcard > button .tc-stat-glyph',items=>items.length),4,'Each statistic has its own decorative icon');
  const background=await page.$eval('.me-royal > .me-statcard',el=>getComputedStyle(el).backgroundImage);
  assert.match(background,/rgb\(37, 17, 55\)|#251137|linear-gradient/i,'Stats panel must have the distinctive purple theme');
  assert.equal(stats[0].numberColor,'rgb(255, 227, 170)','Visible gold numbers must be used');
