@@ -74,8 +74,14 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   app=app.replace(/<link rel="stylesheet" href="\.\/profile-stats-luxe\.css\?v=[^"]+">/,'');
   assert.match(app,/room-seats-finish\.css\?v=/);
   app=app.replace(/\n<link rel="stylesheet" href="\.\/room-seats-finish\.css\?v=[^"]+">/,'');
+  assert.match(app,/phase2-ui\.css\?v=/);
+  app=app.replace(/\n<link rel="stylesheet" href="\.\/phase2-ui\.css\?v=[^"]+">/,'');
 
   app=app.replace(/<script src="\.\/toti-nav-banner-refine\.js\?v=[^"]+"><\/script>/,'');
+  assert.match(app,/phase2-auth\.js\?v=/);
+  assert.match(app,/phase2-ui\.js\?v=/);
+  app=app.replace(/<script src="\.\/phase2-auth\.js\?v=[^"]+"><\/script>/,'');
+  app=app.replace(/<script src="\.\/phase2-ui\.js\?v=[^"]+"><\/script>/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
   assert.match(app, /<script src="\.\/royal-vip15\.js(?:\?v=[^"]+)?"><\/script>/);
