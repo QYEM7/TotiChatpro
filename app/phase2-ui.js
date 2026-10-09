@@ -136,7 +136,7 @@ async function submitAuth(route,button){
   }
   changePreviewIdentity();
   if(typeof closeSheet==='function')closeSheet();
-  go('me');
+  go(window.TotiLiveMode?.enabled?'home':'me');
   if(typeof showToast==='function')showToast('تم تسجيل الدخول وربط الملف الشخصي بنجاح');
 }
 const phase2Demo=new URLSearchParams(location.search).get('phase2Demo')==='1';
