@@ -51,7 +51,7 @@ async function shot(page,name){
  assert.equal(await page.$$eval('.me-royal .me-more button',x=>x.length),5);
  assert.ok(await page.$('.tc-unified-nav [data-v="me"] .tc-falcon-nav'));
  // Premium profile statistics should remain readable and fully clickable.
- const stats=await page.$eval('.me-royal > .me-statcard > button',items=>items.map(el=>({
+ const stats=await page.$$eval('.me-royal > .me-statcard > button',items=>items.map(el=>({
    number:el.querySelector('b')?.textContent?.trim(),
    label:el.querySelector('small')?.textContent?.trim(),
    numberColor:getComputedStyle(el.querySelector('b')).color,
