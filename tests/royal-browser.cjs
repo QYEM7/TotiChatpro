@@ -1,0 +1,76 @@
+// Browser-level UI regression coverage. Headless Chromium, no backend modifications.
+const puppeteer=require('puppeteer-core');
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const dir=path.join(process.cwd(),'royal-preview-screenshots');
+fs.mkdirSync(dir,{recursive:true});
+const exe=process.env.CHROME_BIN||
+ ['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'].find(x=>fs.existsSync(x));
+if(!exe)throw new Error('No system Chromium available on CI runner');
+const base=process.env.UI_URL||'http://127.0.0.1:8765/app/';
+const errors=[];
+let browser;
+async function load(page,query){
+ await page.goto(base+query,{waitUntil:'domcontentloaded',timeout:30000});
+ await page.waitForSelector('#app.rf-app',{timeout:20000});
+ await new Promise(res=>setTimeout(res,120));
+}
+async function shot(page,name){
+ await page.screenshot({path:path.join(dir,name+'.png'),fullPage:true});
+}
+(async()=>{
+ browser=await puppeteer.launch({headless:true,executablePath:exe,args:['--no-sandbox','--disable-setuid-sandbox']});
+ const page=await browser.newPage();
+ await page.setViewport({width:390,height:844,deviceScaleFactor:1});
+ page.on('pageerror',e=>errors.push(e.message));
+ await load(page,'?view=royal-home');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'home');
+ assert.ok(await page.$('.royal-home'));
+ assert.equal(await page.$$eval('.royal-room-tile',x=>x.length),6);
+ await shot(page,'01-home');
+ await page.evaluate(()=>go('room'));
+ await page.waitForSelector('.roomview.room-v2');
+ assert.equal(await page.$$eval('.seats .seat',x=>x.length),15,'original seats must survive');
+ assert.ok(await page.$('.rf-room-royal-ribbon'));
+ assert.ok(await page.$('[data-a="sheet"][data-v="games"]'));
+ await shot(page,'02-room');
+ await load(page,'?screen=room&view=share&owner=1');
+ assert.ok(await page.$('.royal-feature-share'));
+ await page.click('[data-tc="friend"]');
+ assert.equal(await page.$eval('#tc-share-count',e=>e.textContent),'1');
+ await shot(page,'03-share');
+ await load(page,'?screen=room&view=settings&owner=1');
+ assert.ok(await page.$('.royal-feature-settings'));
+ await page.click('[data-royal="seat-select"][data-count="8"]');
+ assert.equal(await page.$eval('#tc-seat-count',e=>e.value),'8');
+ await shot(page,'04-settings');
+ await load(page,'?screen=room&view=games&owner=1');
+ assert.ok(await page.$('.royal-feature-games'));
+ await shot(page,'05-games');
+ await page.click('[data-tc="start-game"][data-game="xo"]');
+ assert.equal(await page.$$eval('.tc-xo button',x=>x.length),9);
+ await page.click('.tc-xo button:first-child');
+ assert.ok(await page.$eval('.tc-xo button:first-child',e=>e.textContent.trim()));
+ await load(page,'?screen=room&view=minimized&owner=1');
+ assert.ok(await page.$('.tc-mini-room'));
+ assert.ok(await page.$('.tc-mini-room img'));
+ await shot(page,'06-minimized');
+ await page.click('[data-a="restoreRoom"]');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'room');
+ const routes=[
+ 'me','profilePreview','profileEdit','messages','chatPreview','settings','storage','honor','level','ranks','agency','agencyPreview',
+ 'agencyApply','agencyStatusPreview','agencyJoinPreview','vip','wallet','rechargePreview','storePreview','bagPreview','friendsPreview',
+ 'discoverPreview','notificationsPreview','missionsPreview','treasurePreview','musicPreview','roomAdminPreview','gamesPreview',
+ 'giftsPreview','loginPreview','signupPreview','welcomePreview','tour','languages','block','report'
+ ];
+ for(const route of routes){
+   await page.evaluate(x=>go(x),route);
+   const hasContent=await page.$eval('#app',e=>e.textContent.trim().length>20);
+   assert.ok(hasContent,'Blank UI '+route);
+   assert.equal(await page.$eval('#app',e=>e.dataset.route),route,'Wrong route '+route);
+   if(['me','vip','cp','storePreview','agencyPreview','profilePreview','musicPreview'].includes(route))await shot(page,'route-'+route);
+ }
+ assert.equal(errors.length,0,'Browser JS errors: '+errors.join(' | '));
+ console.log('Royal browser QA passed: 6 major flows, '+routes.length+' routes, 15 unchanged seats, 0 uncaught page errors');
+})().catch(e=>{console.error(e.stack||e);process.exitCode=1}).finally(async()=>{if(browser)await browser.close()});
