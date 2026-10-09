@@ -42,7 +42,7 @@ async function shot(page,name){
  const firstHero=await page.$eval('.royal-hero img',img=>img.src);
  // The carousel advances automatically; target an INACTIVE dot to avoid
  // asserting a nonexistent image change when slide two is already active.
- const dotState=await page.$eval('.tc-banner-dot',els=>els.map((el,i)=>({index:i,active:el.getAttribute('aria-pressed')==='true'})));
+ const dotState=await page.$$eval('.tc-banner-dot',els=>els.map((el,i)=>({index:i,active:el.getAttribute('aria-pressed')==='true'})));
  const active=dotState.find(x=>x.active)?.index??0;
  const chosen=(active+1)%dotState.length;
  await page.click('.tc-banner-controls .tc-banner-dot:nth-child('+(chosen+1)+')');
