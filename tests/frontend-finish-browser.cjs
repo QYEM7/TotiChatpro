@@ -62,6 +62,16 @@ try{
  assert.ok(await page.$('#overlay.show .fc-sheet'));
  await go('settings');
  assert.ok(await page.$('[data-fc-entry]'));
+ const toggle='[data-a="option"][data-v="switch"]';
+ const oldSwitch=await page.$eval(toggle,el=>el.querySelector('.switch').classList.contains('on'));
+ await click(toggle);
+ const changed=await page.$eval(toggle,el=>el.querySelector('.switch').classList.contains('on'));
+ assert.notEqual(oldSwitch,changed,'switch should react to tap');
+ await go('me');await go('settings');
+ assert.equal(await page.$eval(toggle,el=>el.querySelector('.switch').classList.contains('on')),changed,'local preference survives route changes');
+ await click('[data-a="option"][data-v="security"]');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'accountSafetyPreview');
+
  await go('roomAdminPreview');
  assert.ok(await page.$('[data-rf="rf-room-settings"]'));
  await click('[data-rf="rf-room-settings"]');
