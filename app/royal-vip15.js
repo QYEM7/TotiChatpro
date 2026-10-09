@@ -46,8 +46,13 @@ function ring(n){
  'M60 6 82 18 103 21 107 46 115 65 105 87 95 110 74 108 60 127 46 108 25 110 15 87 5 65 13 46 17 21 38 18Z'];
  return shape[n];
 }
+const crestImageCache=new Map();
 function crest(n,small=false){
  n=p(n);
+ const cacheKey=n+':'+(small?'small':'large');
+ const ariaLabel='شارة VIP '+n+' '+tiers[n-1][0];
+ const cached=crestImageCache.get(cacheKey);
+ if(cached)return '<img class="rvip-crest" src="'+cached+'" alt="'+e(ariaLabel)+'" aria-label="'+e(ariaLabel)+'" width="120" height="142" draggable="false" decoding="async" loading="eager">';
  const [name,, , ,kind,accent]=tiers[n-1],id='rvip'+n+(small?'s':'b');
  const arches=Array.from({length:n<5?5:n<10?7:9},(_,i)=>{
   const x=15+i*(90/(n<5?4:n<10?6:8));
@@ -67,7 +72,7 @@ function crest(n,small=false){
  else if(['imperial','supreme','crown'].includes(kind))motif=crown+gem+(n>=14?wing:'');
  else motif=gem;
  const spread=n>=11?wing:'';
- return '<svg class="rvip-crest" viewBox="0 0 120 142" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="شارة VIP '+n+' '+e(name)+'">'+
+ const svg='<svg viewBox="0 0 120 142" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="شارة VIP '+n+' '+e(name)+'">'+
  '<defs><linearGradient id="'+id+'gold" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#fff6d4"/><stop offset=".28" stop-color="#fac875"/><stop offset=".6" stop-color="#8d532f"/><stop offset=".81" stop-color="#ffdc91"/><stop offset="1" stop-color="#b56d32"/></linearGradient>'+
  '<radialGradient id="'+id+'gem"><stop stop-color="#fff7ff"/><stop offset=".3" stop-color="'+accent+'"/><stop offset=".82" stop-color="#7824b0"/><stop offset="1" stop-color="#281035"/></radialGradient>'+
  '<linearGradient id="'+id+'bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#4c135d"/><stop offset=".6" stop-color="#180922"/><stop offset="1" stop-color="#68267a"/></linearGradient></defs>'+
@@ -80,6 +85,13 @@ function crest(n,small=false){
  '<rect x="35" y="114" width="50" height="20" rx="10" fill="#2c0d37" stroke="url(#'+id+'gold)" stroke-width="2"/>'+
  '<text x="60" y="128.7" font-family="Arial,sans-serif" font-weight="900" font-size="'+(n>=10?13:14)+'" text-anchor="middle" fill="#ffebbb">VIP '+n+'</text>'+
  '</svg>';
+ // Render the same vector as a self-contained SVG image. Its gradients no longer
+ // share DOM IDs with the 15 other VIP crests or the hero/card previews.
+ // Memoizing the src lets Android WebView reuse decoded image surfaces instead
+ // of rebuilding many gradient SVG subtrees during route transitions.
+ const src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+ crestImageCache.set(cacheKey,src);
+ return '<img class="rvip-crest" src="'+src+'" alt="'+e(ariaLabel)+'" aria-label="'+e(ariaLabel)+'" width="120" height="142" draggable="false" decoding="async" loading="eager">';
 }
 function uniqueAdvantages(n){
  const benefitRows=[
