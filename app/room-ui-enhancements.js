@@ -57,7 +57,7 @@ function settingsRoom(){
  '<div class="tc-form"><label>اسم الغرفة<input id="tc-name" class="tc-input" maxlength="50" value="'+E(settings.name)+'"></label>'+
  '<label>صورة الغرفة<div class="tc-photo-row"><img id="tc-photo" src="'+E(roomPhoto())+'" alt="معاينة صورة الغرفة"><span class="tc-upload">📷 تغيير الصورة<input id="tc-photo-file" type="file" accept="image/*"></span></div></label>'+
  '<label>ملاحظة / وصف الغرفة<textarea id="tc-note" class="tc-input" maxlength="200" rows="3">'+E(settings.note)+'</textarea></label>'+
- '<label>عدد المقاعد<select id="tc-seat-count" class="tc-input">'+[8,10,12,15,20].map(n=>'<option value="'+n+'" '+(settings.seats===n?'selected':'')+'>'+n+' مقعد</option>').join('')+'</select></label>'+
+ '<label>عدد المقاعد<select id="tc-seat-count" class="tc-input">'+[6,8,10,12,15,20].map(n=>'<option value="'+n+'" '+(settings.seats===n?'selected':'')+'>'+n+' مقعد</option>').join('')+'</select></label>'+
  '<div class="tc-hint">مقاعد الغرفة الحالية تبقى محفوظة في المعاينة. تطبيق تغيير العدد الفعلي على الجلسات يحتاج ربطاً لاحقاً.</div>'+
  '<label>👑 إدارة المشرفين</label><div class="tc-mod-list" id="tc-mod-list"></div>'+
  '<div class="tc-add-mod"><select id="tc-mod-picker" class="tc-input" aria-label="اختيار مشرف"></select><button data-tc="add-mod">+ إضافة مشرف</button></div>'+
@@ -68,7 +68,7 @@ function saveSettings(){
  const name=(q('#tc-name')?.value||'').trim(),note=(q('#tc-note')?.value||'').trim();
  const seats=Number(q('#tc-seat-count')?.value||15);
  if(name.length<2){showToast('اسم الغرفة يجب أن يحتوي على حرفين على الأقل');return;}
- if(![8,10,12,15,20].includes(seats)){showToast('عدد المقاعد غير صالح');return;}
+ if(![6,8,10,12,15,20].includes(seats)){showToast('عدد المقاعد غير صالح');return;}
  settings={...settings,name,note,seats,photo:photoDraft||settings.photo};
  try{localStorage.setItem(savedKey,JSON.stringify(settings));}catch(_){showToast('تعذّر حفظ الصورة محلياً، حاول بصورة أصغر');}
  closeFeature();
@@ -125,8 +125,8 @@ function renderGames(){
  let body=strip+notice;
  if(gameView==='library'){
  const list=gameTab==='solo'?
- [['xo','❎','XO ضد الكمبيوتر','العب الآن'],['quiz','❓','تحدي الأسئلة','العب الآن'],['puzzle','🧩','الألغاز','قريباً'],['dice','🎲','النرد','قريباً']]:
- [['xo','⭕','XO بين لاعبين','العب الآن'],['quiz','🏆','تحدي الأسئلة الجماعي','العب الآن'],['ludo','🎯','لودو','قريباً'],['billiards','🎱','بلياردو','قريباً']];
+ [['xo','⭕','XO ضد الكمبيوتر','العب الآن'],['quiz','❓','Trivia الفردية','العب الآن'],['puzzle','🧩','Puzzle','قريباً'],['dice','🎲','Dice','قريباً'],['draw','🎨','Draw & Guess','قريباً'],['spy','🎭','Who’s the Spy','قريباً']]:
+ [['ludo','🎲','Ludo','قريباً'],['xo','⭕','XO','العب الآن'],['billiards','🎱','Billiards','قريباً'],['quiz','❓','Trivia','العب الآن'],['draw','🎨','Draw & Guess','قريباً'],['spy','🎭','Who’s the Spy','قريباً']];
  body+='<div class="tc-tabs"><button data-tc="game-tab" data-mode="solo" class="'+(gameTab==='solo'?'active':'')+'">👤 ألعاب فردية</button><button data-tc="game-tab" data-mode="multi" class="'+(gameTab==='multi'?'active':'')+'">👥 ألعاب جماعية</button></div>'+
  '<div class="tc-game-grid">'+list.map(g=>'<button data-tc="'+(g[3]==='قريباً'?'game-soon':'start-game')+'" data-game="'+g[0]+'" class="tc-game-card"><span class="tc-game-icon">'+g[1]+'</span><b>'+g[2]+'</b><small>'+g[3]+'</small></button>').join('')+'</div>'+
  (gameTab==='multi'?'<div class="tc-hint">الألعاب الجماعية تعمل محلياً لشخصين على نفس الجهاز في هذه المعاينة. دعوات ومزامنة الأجهزة لاحقاً.</div>':'');
