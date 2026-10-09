@@ -17,7 +17,7 @@ if(!auth||typeof window.render!=='function'){
 }
 let explicitPreview=false;
 const authScreens=new Set(['loginPreview','signupPreview','verifyAccountPreview','passwordResetPreview']);
-const allowed=new Set(['home','me','room','profilePreview','profileEdit',...authScreens]);
+const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit',...authScreens]);
 const $=(q,root=document)=>root.querySelector(q);
 const $$=(q,root=document)=>Array.from(root.querySelectorAll(q));
 let lastNotice='';
@@ -138,6 +138,12 @@ window.addEventListener('click',e=>{
   const route=item.dataset.v||'';
   const op=item.dataset.a||'';
   const royal=item.dataset.royal||'';
+  if(op==='go'&&route==='rechargePreview'){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    go('wallet');
+    warn('شحن العملات عبر الوكلاء قيد التنفيذ. هنا تعرض محفظتك الحقيقية فقط.');
+    return;
+  }
   if((op==='go'&&!allowed.has(route))||
      (op==='go'&&route==='room'&&!window.TotiPhase2Rooms?.getStatus?.().activeRoomId)||
      (op==='sheet'&&/^(gift|music|game|store|vip|recharge|lucky)/i.test(route))||
