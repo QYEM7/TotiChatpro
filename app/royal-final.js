@@ -146,9 +146,7 @@ function decorateRoom(){
  top?.appendChild(owner);
  const events=$('.roomevents',room);
  if(events)events.insertAdjacentHTML('beforeend','<span class="rf-room-live">● LIVE</span>');
- const ticker=$('.ticker-rail',room);
- if(ticker)ticker.insertAdjacentHTML('afterend',
- '<div class="rf-room-royal-ribbon" aria-label="هوية الغرفة الملكية"><span>✧</span><div><b>هنا يجتمع الصوت الجميل</b><small>✦ TotiChat · Live Voice ✦</small></div><span>♛</span></div>');
+ // The in-room promotional ribbon was removed by design; keep ticker and mic seats in place.
  const bottom=$('.roomBottom',room);
  if(bottom)bottom.setAttribute('aria-label','أدوات الغرفة: الدردشة، الهدايا، الرسائل، الألعاب والمزيد');
 }
