@@ -1,0 +1,20 @@
+{
+  "name": "totichat-approved-phase2",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Approved TotiChat UI packaged unchanged for a clean Android backend integration",
+  "scripts": {
+    "build": "node scripts/build-approved-web.mjs",
+    "test:foundation": "node --test tests/phase2-foundation.test.mjs",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:init": "npm run build && npx cap add android"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.2",
+    "@capacitor/android": "8.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2"
+  }
+}
