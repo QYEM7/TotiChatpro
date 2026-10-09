@@ -1,0 +1,33 @@
+name: Phase 2 isolated foundation QA
+on:
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'app/**'
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'supabase/migrations/**'
+      - 'capacitor.config.ts'
+      - 'package.json'
+      - '.github/workflows/phase2-foundation.yml'
+  pull_request:
+    branches: [develop/phase-2]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check isolated builder syntax
+        run: node --check scripts/build-approved-web.mjs
+      - name: Verify exact UI/asset Android payload and independent backend
+        run: node --test tests/phase2-foundation.test.mjs
+      - name: Run approved-banner + UI integrity regression contracts
+        run: node --test tests/home-banners.test.cjs tests/live-supabase.test.cjs
