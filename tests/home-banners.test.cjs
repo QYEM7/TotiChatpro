@@ -56,6 +56,10 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     [`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){banner=(banner+1)%3;const h=document.querySelector('.hero img');if(h)h.src=A+assets[['hero','hero2','hero3'][banner]];document.querySelectorAll('.dots i').forEach((e,i)=>e.className=i===banner?'on':'')}},6500);`,`setInterval(()=>{if(screen==='home'&&homeTab==='حفلة'&&!document.getElementById('overlay').classList.contains('show')){window.TotiBannerData.advance()}},6500);`],
     ['TotiChat • معاينة UI/UX فقط','TotiChat • نسخة ربط تجريبية (الإعلانات حقيقية عند الاتصال)']
   ];
+  assert.match(app, /<link rel="stylesheet" href="\.\/royal-final\.css">/);
+  assert.match(app, /<script src="\.\/royal-final\.js"><\/script>/);
+  app=app.replace('<link rel="stylesheet" href="./royal-final.css">','');
+  app=app.replace('<script src="./royal-final.js"></script>','');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-visuals\.css">/);
   assert.match(app, /<script src="\.\/royal-visuals\.js"><\/script>/);
   app=app.replace('<link rel="stylesheet" href="./royal-visuals.css">','');
@@ -72,7 +76,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.equal(app,rootPreview,'Unexpected visual changes outside authorized banner integration');
 });
 test('all frontend scripts compile and original 27 images match source hashes',()=>{
-  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js']){
+  for(const p of ['app/banner-core.js','app/config.js','app/home-banners.js','app/room-ui-enhancements.js','app/royal-visuals.js','app/royal-final.js']){
     new vm.Script(read(p),{filename:p});
   }
   const app=read('app/index.html');
@@ -116,4 +120,21 @@ test('royal reference changes are frontend-only and preserve approved original a
  for(const key of ['Room Settings','Share Room','Games Center','TotiChat Lounge'])assert.match(royal,new RegExp(key));
  assert.doesNotMatch(royal,/\b(fetch|XMLHttpRequest|supabase\.from)\s*\(/);
  assert.doesNotMatch(read('index.html'),/royal-visuals\.(css|js)/);
+});
+
+test('royal-wide UI makeover covers existing screens, preserves voice seats and backend',()=>{
+ const app=read('app/index.html');
+ const royalty=read('app/royal-final.js');
+ const css=read('app/royal-final.css');
+ const original=read('reference/approved-original.html');
+ assert.match(royalty,/const priorRender=render/);
+ assert.match(royalty,/vMore=function/);
+ for(const token of ['decorateRoom','rf-room-royal-ribbon','openMusicDb','musicPreview','roomAdminPreview','gamesPreview','notificationsPreview','missionsPreview','treasurePreview'])assert.match(royalty,new RegExp(token));
+ for(const token of ['.rf-room .seat','.rf-room .roomBottom','.me-royal','.vip-royal','.ag-screen','.visual-inventory','.royal-profile-card'])assert.ok((css+read('app/royal-visuals.css')).includes(token),token);
+ assert.match(app,/const seats=Array\.from\(\{length:15\}/);
+ assert.match(app,/act\('seat',i\)/);
+ assert.match(app,/act\('sheet','gift'\)/);
+ assert.doesNotMatch(royalty,/\b(fetch|XMLHttpRequest|supabase\.from|socket\.emit)\s*\(/);
+ assert.doesNotMatch(original,/royal-final/);
+ assert.doesNotMatch(read('index.html'),/royal-final/);
 });
