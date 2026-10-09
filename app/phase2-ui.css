@@ -1,0 +1,13 @@
+/* Phase 2 authentication adapter: respects approved purple/gold layout. */
+#app .tc-phase2-account{
+  border:1px solid #f1d3a2;border-radius:20px;background:#512363;
+  color:#ffedc7;padding:4px 12px;font-size:10px;font-weight:900;
+  box-shadow:0 2px 8px #1a0a2845;line-height:1.8;
+}
+#app .tc-phase2-account:focus-visible{outline:2px solid #fce6bc;outline-offset:3px}
+#app .tc-phase2-connected{display:inline-block;color:#2f986e;font-weight:800}
+#app .fc-form-error.error{color:#b22656!important}
+.tc-phase2-account-sheet{padding:18px;display:grid;gap:12px;text-align:center}
+.tc-phase2-account-sheet h3{color:#71478a}
+.tc-phase2-account-info{overflow-wrap:anywhere}
+.tc-phase2-account-sheet .primary{min-height:44px}
