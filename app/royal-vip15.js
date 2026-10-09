@@ -161,6 +161,11 @@ vVIP=function(){
  '<p class="rvip-privacy">معاينة تصميم فقط — لا تعديل على رصيد أو صلاحيات أو بيانات الحساب أو الـBackend.</p>'+
  '<div class="rvip-navback"><button data-vip15="back">العودة إلى التطبيق</button></div></div>';
 };
+function centerSelectedVIP(){
+ const selected=q('.rvip-tier.selected');
+ if(!selected)return;
+ requestAnimationFrame(()=>selected.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'}));
+}
 function details(n) {
  const row=tiers[n-1],b=uniqueAdvantages(n)[n-1];
  showSheet('<div class="rvip-detail" dir="rtl">'+head('تفاصيل VIP '+n)+
@@ -173,8 +178,8 @@ document.addEventListener('click',function(event){
  const btn=event.target.closest('[data-vip15]');if(!btn)return;
  event.preventDefault();event.stopImmediatePropagation();
  const action=btn.dataset.vip15,n=p(btn.dataset.level);
- if(action==='select'){vt.vip=n;render();}
- else if(action==='tab'){activeView=btn.dataset.tab;render();}
+ if(action==='select'){vt.vip=n;render();centerSelectedVIP();}
+ else if(action==='tab'){activeView=btn.dataset.tab;render();centerSelectedVIP();}
  else if(action==='back'){back();}
  else if(action==='effect'){
   if(effectPlaying)return;
@@ -193,6 +198,7 @@ const preview=new URLSearchParams(location.search);
 if(preview.get('view')==='royal-vip'){
  vt.vip=p(preview.get('vip')||5);
  go('vip');
+ centerSelectedVIP();
 }
 window.TotiChatVIPPreview=Object.freeze({
  total:15,
