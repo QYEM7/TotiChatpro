@@ -34,7 +34,10 @@ async function shot(page,name){
  await load(page,'?view=royal-home');
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'home');
  assert.ok(await page.$('.royal-home'));
- assert.equal(await page.$$eval('.royal-room-tile',x=>x.length),6);
+ assert.equal(await page.$eval('.royal-room-tile',x=>x.length),6);
+ assert.equal(await page.$('.royal-official'),null,'The bottom official-ad box must be absent');
+ assert.ok(await page.$('.royal-hero'),'Top rotating promotional banner must be preserved');
+ assert.ok(await page.$('.royal-near'),'Nearby rooms must remain present');
  // Five bottom destinations and the original falcon are shared by Home and Me.
  assert.equal(await page.$$eval('.royal-nav button',x=>x.length),5);
  assert.ok(await page.$('.royal-nav [data-v="me"] .tc-falcon-nav'));
@@ -74,8 +77,12 @@ async function shot(page,name){
  await shot(page,'01-home');
  await page.evaluate(()=>go('room'));
  await page.waitForSelector('.roomview.room-v2');
- assert.equal(await page.$$eval('.seats .seat',x=>x.length),15,'original seats must survive');
- assert.ok(await page.$('.rf-room-royal-ribbon'));
+ assert.equal(await page.$eval('.seats .seat',x=>x.length),15,'All 15 mic seats must remain present');
+ assert.equal(await page.$('.rf-room-royal-ribbon'),null,'No unwanted voice slogan bar inside room');
+ assert.equal(await page.$eval('.roomview .seats',el=>getComputedStyle(el).borderTopWidth),'0px','Remove outer seat grid border');
+ assert.equal(await page.$eval('.roomview .seats',el=>getComputedStyle(el).backgroundImage),'none','Remove outer seat grid background');
+ assert.equal(await page.$eval('.seats .seatface',els=>els.length),15,'Keep all 15 clickable seat avatars');
+ assert.equal(await page.$eval('.seats .seat .seatname',els=>els.length),15,'Keep all seat labels');
  assert.ok(await page.$('[data-a="sheet"][data-v="games"]'));
  await shot(page,'02-room');
  await load(page,'?screen=room&view=share&owner=1');
