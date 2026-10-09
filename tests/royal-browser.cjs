@@ -24,6 +24,13 @@ async function shot(page,name){
  const page=await browser.newPage();
  await page.setViewport({width:390,height:844,deviceScaleFactor:1});
  page.on('pageerror',e=>errors.push(e.message));
+ await load(page,'?view=royal-home&review=1');
+ assert.ok(await page.$('.rf-review-fab'));
+ await page.click('[data-rf="review-list"]');
+ assert.equal(await page.$eval('.rf-review-grid button',x=>x.length),36);
+ await page.click('[data-rf="review-route"][data-target="cp"]');
+ assert.equal(await page.$eval('#app',e=>e.dataset.route),'cp');
+ await shot(page,'00-review-navigator');
  await load(page,'?view=royal-home');
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'home');
  assert.ok(await page.$('.royal-home'));
