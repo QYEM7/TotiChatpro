@@ -1,0 +1,134 @@
+/* TotiChat | DISTINCT luxury statistics panel, profile screen ONLY.
+   Real cards, count values and handlers are not recreated or replaced. */
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe {
+  position:relative!important;
+  isolation:isolate!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:6px!important;
+  min-height:166px!important;
+  margin:5px 13px 18px!important;
+  padding:36px 10px 12px!important;
+  background:
+    radial-gradient(ellipse 150px 110px at 89% 100%,rgba(255,184,205,.25),transparent 97%),
+    radial-gradient(ellipse 230px 140px at 0% 0%,rgba(206,146,244,.26),transparent 100%),
+    linear-gradient(121deg,#251137 0%,#40245e 47%,#713d88 100%)!important;
+  border:2px solid #e7be80!important;
+  border-radius:25px!important;
+  outline:0!important;
+  box-shadow:0 9px 23px rgba(54,24,78,.30),inset 0 0 0 1px rgba(255,245,210,.19),inset 0 8px 25px rgba(255,255,255,.065)!important;
+  color:#fff!important;
+  overflow:hidden!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe::before{
+  content:"✦  مجتمع الحساب  ✦"!important;
+  position:absolute!important;
+  top:7px!important;
+  left:0!important;right:0!important;
+  transform:none!important;
+  width:auto!important;
+  height:24px!important;
+  line-height:24px!important;
+  text-align:center!important;
+  font-size:13px!important;
+  font-family:Cairo,system-ui,sans-serif!important;
+  font-weight:900!important;
+  letter-spacing:.1px;
+  color:#ffe3aa!important;
+  text-shadow:0 1px 4px rgba(18,4,34,.42)!important;
+  z-index:1;pointer-events:none;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe::after{
+  content:"";position:absolute;
+  top:33px;left:14%;right:14%;height:1px;
+  background:linear-gradient(90deg,transparent,#e9bc8d66 25%,#ffe4bca5 50%,#e9bc8d66 75%,transparent);
+  pointer-events:none;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:1!important;
+  gap:1px!important;
+  min-width:0!important;
+  min-height:110px!important;
+  padding:8px 1px 9px!important;
+  border:1px solid rgba(255,226,249,.26)!important;
+  border-radius:16px!important;
+  background:linear-gradient(155deg,rgba(255,255,255,.16),rgba(255,255,255,.045))!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.18),0 2px 7px rgba(12,3,26,.11)!important;
+  text-align:center!important;
+  transition:transform .16s ease,border-color .16s ease!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button:nth-child(2) {
+  background:linear-gradient(160deg,rgba(243,174,240,.25),rgba(255,255,255,.04))!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button:nth-child(3) {
+  background:linear-gradient(160deg,rgba(173,163,255,.24),rgba(255,255,255,.04))!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button:nth-child(4) {
+  background:linear-gradient(160deg,rgba(255,216,167,.23),rgba(255,255,255,.04))!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button .tc-stat-glyph{
+  width:29px!important;height:29px!important;
+  display:grid!important;place-items:center!important;
+  flex:none!important;
+  border-radius:50%!important;
+  background:linear-gradient(140deg,rgba(255,240,216,.28),rgba(251,188,255,.14))!important;
+  border:1px solid rgba(255,221,165,.50)!important;
+  color:#ffe6b7!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.15),inset 0 1px rgba(255,255,255,.28)!important;
+  font-size:17px!important;line-height:1!important;
+  font-family:Arial,system-ui,sans-serif!important;
+  margin:0 0 4px!important;
+  text-shadow:0 1px 3px rgba(18,6,31,.25)!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button > b,
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button:nth-child(n) > b{
+  display:block!important;
+  margin:0!important;
+  font-family:Cairo,system-ui,sans-serif!important;
+  font-size:clamp(20px,5.6vw,26px)!important;
+  line-height:1.3!important;
+  letter-spacing:0!important;
+  font-weight:900!important;
+  color:#ffe3aa!important;
+  text-shadow:0 2px 5px rgba(10,0,27,.35)!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button > small{
+  display:block!important;
+  width:100%!important;
+  margin-top:3px!important;
+  font-size:clamp(9px,2.65vw,11px)!important;
+  font-family:Cairo,system-ui,sans-serif!important;
+  font-weight:900!important;
+  line-height:1.5!important;
+  white-space:nowrap!important;
+  color:#f7eaff!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.18)!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button:focus-visible{
+  outline:3px solid #ffe2a1!important;outline-offset:2px!important;
+}
+#app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button:active{transform:scale(.965)!important;}
+@media(hover:hover){
+ #app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button:hover{
+   transform:translateY(-2px);
+   border-color:#ffe3aa!important;
+ }
+}
+@media(max-width:350px){
+ #app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe{
+   margin-inline:9px!important;gap:4px!important;padding-inline:7px!important;
+ }
+ #app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button{
+   border-radius:12px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #app.rf-app[data-route="me"] .me-royal > .me-statcard.tc-stats-luxe > button{
+   transition:none!important;
+ }
+}
