@@ -190,3 +190,25 @@ html,body{background:#0b0616!important}
 #overlay .rf-review-dialog p{font-size:11px;color:#e8cde5}
 #overlay .rf-review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:65dvh;overflow-y:auto}
 #overlay .rf-review-grid button{background:linear-gradient(120deg,#4c155f,#220d34);border:1px solid #dcae81;border-radius:12px;min-height:41px;color:#fff0cc;font-weight:700;font-size:11px}
+
+/* Fix inline legacy pastel and emerald remnants spotted in mobile screenshot review. */
+#app.rf-app[data-route="me"] .me-hero:before{background:linear-gradient(90deg,#220b33b8,#58225a55),url('../assets/images/avatar_male_ghutra_1790628422202.jpg') center 27%/cover!important;opacity:.75!important;filter:saturate(.9) hue-rotate(18deg)!important}
+#app.rf-app[data-route="me"] .me-hero:after{background:radial-gradient(circle at 100% 20%,transparent 0%,#24102eaa 67%),linear-gradient(0deg,#1a0b2d,transparent 72%)!important}
+#app.rf-app[data-route="me"] .me-pencil{background:linear-gradient(130deg,#3e1459,#1b0b2b)!important;border-color:#eab879;color:#ffe2ba;box-shadow:0 0 10px #d366d9}
+#app.rf-app[data-route="me"] .me-statcard small{color:#f8c3fb!important}
+#app.rf-app[data-route="me"] .me-summary .muted-id{color:#eed2e7!important}
+#app.rf-app[data-route="me"] .me-summary .vip-labels{background:linear-gradient(100deg,#4d155c,#270b32)!important}
+#app.rf-app[data-route="me"] .me-agency .ag-details :is(small,.agency-minor){color:#e4bfec!important}
+#app.rf-app[data-route="me"] .me-vip-banner strong{color:#ffe0a1!important}
+#app.rf-app[data-route="me"] .me-more{background:#1d0d30e8!important;border-color:#d5a879}
+#app.rf-app[data-route="me"] .me-more .more-icon{background:linear-gradient(130deg,#70268b,#2b0c3c)!important}
+#app.rf-app[data-route="me"] .me-royal-bottom{background:linear-gradient(110deg,#1b0b2b,#12071c)!important;border-top-color:#d4a57d!important}
+#app.rf-app[data-route="me"] .me-royal-bottom button{color:#ecd5f1!important}
+#app.rf-app[data-route="me"] .me-royal-bottom button.active{color:#ffe1a9!important}
+#app.rf-app[data-route="cp"] .main>div[style*="background"],#app.rf-app[data-route="wallet"] .main>div[style*="background"],#app.rf-app[data-route="rechargePreview"] .main>div[style*="background"],#app.rf-app[data-route="storage"] .main>div[style*="background"]{background:linear-gradient(180deg,#210f39d5,#0d071bec 78%),url('../assets/images/room_screen_bg_1790556227206.jpg') center/cover!important;color:#ffe4c3!important}
+#app.rf-app[data-route="cp"] .topgraphic{background:linear-gradient(140deg,#711885ba,#1b0a31e9),url('../assets/images/soulmates_hd_banner_1790725251977.jpg') center/cover!important;border:1.5px solid #e8b77c;border-radius:20px;box-shadow:0 0 16px #d149fa88;color:#ffe1ac!important}
+#app.rf-app[data-route="cp"] .topgraphic :is(h1,h2,h3,p){color:#ffe0ab!important;text-shadow:0 1px 8px #000}
+#app.rf-app[data-route="cp"] .cardwhite{background:linear-gradient(120deg,#4c174ec8,#1c0b2bea)!important}
+#app.rf-app[data-route="wallet"] .visual-hero,#app.rf-app[data-route="rechargePreview"] .visual-hero{background:linear-gradient(105deg,#511976bd,#190b35e4),url('../assets/images/wealth_screen_bg_1790554652978.jpg') center/cover!important;color:#ffeac2!important}
+#app.rf-app[data-route="storage"] .inventory{background:linear-gradient(130deg,#2b113a99,#150b24)!important}
+#app.rf-app:not(.rf-room):not(.rf-royal-home) .previewflag{color:#ffdba1!important;background:linear-gradient(90deg,#371448,#150a2b)!important;border-color:#b884b2!important}
