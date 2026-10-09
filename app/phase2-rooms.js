@@ -14,7 +14,7 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
 }[c]));
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let currentUser='',rooms=null,active=null,members=[],messages=[],loadingRooms=null,refreshing=null,entering=false;
-let sequence=0;
+let sequence=0,sending=false;
 function session(){return auth.state();}
 async function query(path,options){return auth.requestData(path,options);}
 async function rpc(name,args){
@@ -327,9 +327,11 @@ async function setSeat(number){
   }catch(err){toast(failure(err));}
 }
 async function sendMessage(){
+  if(sending)return;
   const input=$('#composerInput');
   const body=String(input?.value||'').trim();
   if(!active||!body)return;
+  sending=true;
   try{
     await rpc('phase2_room_send_message',{p_room_id:active.id,p_body:body});
     input.value='';
@@ -337,7 +339,16 @@ async function sendMessage(){
     chatTab='الكل';await refreshRoom();render();
     const area=$('.chatArea');if(area)area.scrollTop=area.scrollHeight;
   }catch(err){toast(failure(err));}
+  finally{sending=false;}
 }
+// The approved guest composer sends demo messages on Enter. For signed-in
+// room members, intercept Enter before that legacy handler and use the
+// authenticated RPC instead; never display an unsent local fake message.
+document.addEventListener('keydown',event=>{
+  if(!session().signedIn||!active||event.key!=='Enter'||event.shiftKey||event.target?.id!=='composerInput')return;
+  event.preventDefault();event.stopImmediatePropagation();
+  void sendMessage();
+},true);
 document.addEventListener('click',event=>{
   if(!session().signedIn)return;
   const b=event.target.closest('[data-phase2],[data-royal="create-room"],[data-royal="hero"],[data-a="leaveRoom"],[data-a="seat"],[data-a="sendPreview"]');
