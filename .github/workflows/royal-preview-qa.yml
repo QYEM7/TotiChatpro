@@ -6,6 +6,7 @@ on:
       - "app/**"
       - "assets/**"
       - "tests/royal-browser.cjs"
+      - "tests/phase2-browser.cjs"
       - "tests/agency-flow-browser.cjs"
       - "tests/bloom-design-browser.cjs"
       - "tests/frontend-finish-browser.cjs"
