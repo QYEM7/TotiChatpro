@@ -66,6 +66,9 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.match(app,/frontend-finish\.css\?v=/);
   assert.match(app,/frontend-finish\.js\?v=/);
   app=app.replace(/<link rel="stylesheet" href="\.\/frontend-finish\.css\?v=[^"]+">\n/,'');
+  assert.match(app,/royal-purple-pink\.css\?v=/);
+  app=app.replace(/<link rel="stylesheet" href="\.\/royal-purple-pink\.css\?v=[^"]+">\n/,'');
+  app=app.replace('name="theme-color" content="#7656D9"','name="theme-color" content="#e8fbef"');
   app=app.replace(/<script src="\.\/frontend-finish\.js\?v=[^"]+"><\/script>/,'');
   app=app.replace(/<script src="\.\/agency-hub\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app, /<link rel="stylesheet" href="\.\/royal-vip15\.css(?:\?v=[^"]+)?">/);
