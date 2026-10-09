@@ -93,8 +93,11 @@ const observer=new MutationObserver(()=>decorate());
 if(overlay)observer.observe(overlay,{childList:true,subtree:true});
 function handle(e){
  const el=e.target.closest('[data-royal]');if(!el)return;
- e.preventDefault();e.stopImmediatePropagation();
  const a=el.dataset.royal;
+ // The approved top buttons route to the REAL phase-2 room flow after sign-in.
+ // Guest users continue to see the original non-mutating visual preview.
+ if(window.TotiPhase2Auth?.state()?.signedIn && (a==='create-room'||a==='hero'))return;
+ e.preventDefault();e.stopImmediatePropagation();
  if(a==='category'){
   const cat=el.dataset.cat;
   if(cat==='games'){go('room');queueMicrotask(()=>sheet('games'));return;}
