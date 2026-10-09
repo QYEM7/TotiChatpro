@@ -1,0 +1,53 @@
+name: Publish approved TotiChat visual review
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'assets/images/**'
+      - 'reference/approved-assets.gitsha'
+      - '.github/workflows/deploy-approved-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: approved-totichat-preview
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original visual master and each image before publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          found=0
+          while read -r expected filename; do
+            [[ -z "${expected:-}" || "${expected:0:1}" == "#" ]] && continue
+            test -s "assets/images/$filename"
+            actual="$(git hash-object "assets/images/$filename")"
+            [[ "$actual" == "$expected" ]] || { echo "::error::Image mismatch: $filename"; exit 1; }
+            found=$((found+1))
+          done < reference/approved-assets.gitsha
+          [[ "$found" -eq 27 ]] || { echo "::error::Found $found images, expected 27"; exit 1; }
+          test -s index.html
+          if grep -Fq 'raw.githubusercontent.com/jsjsnsnsnsn0-pixel/TotiChat/main/public/assets/images/' index.html; then
+            echo "::error::Preview must not reference old repo assets"
+            exit 1
+          fi
+          echo "Approved prototype and 27 exact image assets verified."
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload standalone preview
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: '.'
+      - name: Deploy standalone preview
+        id: deployment
+        uses: actions/deploy-pages@v4
