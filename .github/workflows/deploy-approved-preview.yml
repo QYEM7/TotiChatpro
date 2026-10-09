@@ -1,4 +1,4 @@
-name: Publish approved TotiChat visual review
+name: Verify approved TotiChat visual master
 on:
   push:
     branches: [main]
@@ -6,24 +6,17 @@ on:
       - 'index.html'
       - 'assets/images/**'
       - 'reference/approved-assets.gitsha'
+      - 'reference/approved-original.html'
       - '.github/workflows/deploy-approved-preview.yml'
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: approved-totichat-preview
-  cancel-in-progress: false
 jobs:
-  publish:
+  verify-approved-preview:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Verify original visual master and each image before publishing
+      - name: Verify exact approved visual master and 27 image assets
         shell: bash
         run: |
           set -euo pipefail
@@ -35,19 +28,19 @@ jobs:
             [[ "$actual" == "$expected" ]] || { echo "::error::Image mismatch: $filename"; exit 1; }
             found=$((found+1))
           done < reference/approved-assets.gitsha
-          [[ "$found" -eq 27 ]] || { echo "::error::Found $found images, expected 27"; exit 1; }
+          [[ "$found" -eq 27 ]] || { echo "::error::Expected 27 images, found $found"; exit 1; }
           test -s index.html
+          test -s reference/approved-original.html
           if grep -Fq 'raw.githubusercontent.com/jsjsnsnsnsn0-pixel/TotiChat/main/public/assets/images/' index.html; then
-            echo "::error::Preview must not reference old repo assets"
+            echo "::error::Preview still refers to the old repository"
             exit 1
           fi
-          echo "Approved prototype and 27 exact image assets verified."
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Upload standalone preview
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: '.'
-      - name: Deploy standalone preview
-        id: deployment
-        uses: actions/deploy-pages@v4
+          python3 - <<'PY'
+          from pathlib import Path
+          original=Path("reference/approved-original.html").read_text()
+          independent=Path("index.html").read_text()
+          old="https://raw.githubusercontent.com/jsjsnsnsnsn0-pixel/TotiChat/main/public/assets/images/"
+          assert original.replace(old,"assets/images/")==independent, "Approved UI HTML changed beyond local asset URLs"
+          print("PASS: UI master matches approved original; only 9 image URL references localized.")
+          PY
+          echo "PASS: All 27 approved images exactly match their source Git hashes."
