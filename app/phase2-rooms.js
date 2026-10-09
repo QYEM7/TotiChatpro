@@ -18,7 +18,7 @@ let sequence=0;
 function session(){return auth.state();}
 async function query(path,options){return auth.requestData(path,options);}
 async function rpc(name,args){
-  if(!/^phase2_room_(create|join|leave|take_seat|members|send_message)$/.test(name))
+  if(!/^phase2_room_(create|join|leave|take_seat|members|send_message|invite_create|invite_join)$/.test(name))
     throw new Error('Invalid room operation');
   return query('/rest/v1/rpc/'+name,{method:'POST',body:args});
 }
@@ -30,6 +30,8 @@ function failure(e){
   if(/room is private/i.test(s))return 'هذه الغرفة خاصة ولا تسمح بالدخول دون دعوة';
   if(/room does not exist/i.test(s))return 'الغرفة غير موجودة أو تم إغلاقها';
   if(/slow down/i.test(s))return 'انتظر ثانية قبل إرسال رسالة أخرى';
+  if(/invalid invite|invite expired or used/i.test(s))return 'رمز الدعوة غير صحيح، منتهي الصلاحية أو مستخدم مسبقاً';
+  if(/not owner of a private room/i.test(s))return 'الدعوات متاحة لمالك الغرفة الخاصة فقط';
   return s.slice(0,160);
 }
 function roomImage(index){return A+assets[['room1','room2','room3','room4'][index%4]];}
@@ -51,6 +53,17 @@ function homeContent(){
       }).join('');
     }
   }
+  // A separate server-backed entry point for private rooms, which are deliberately
+  // hidden from other members in the public directory by the RLS policy.
+  const listing=$('.royal-home .royal-room-gallery');
+  if(listing&&!$('#tc-phase2-invite-entry')){
+    const container=document.createElement('div');
+    container.className='tc-phase2-invite-entry';container.id='tc-phase2-invite-entry';
+    const button=document.createElement('button');button.type='button';
+    button.dataset.phase2='invite-enter';button.textContent='🔒 دخول غرفة خاصة برمز دعوة';
+    container.appendChild(button);
+    listing.insertAdjacentElement('afterend',container);
+  }
   // Do not represent the old hardcoded 'nearby' people or counts as live room data.
   const near=$('.royal-home .royal-near');
   if(near){
@@ -69,6 +82,17 @@ function roomContent(){
     const name=$('.roomidentity span b',view);
     if(name)name.textContent='اختر غرفة حقيقية من الرئيسية';
   }else{
+    if(active.is_private&&active.owner_id===session().user?.id){
+      const header=$('.roomtop',view);
+      if(header&&!$('#tc-phase2-room-share',header)){
+        const button=document.createElement('button');
+        button.id='tc-phase2-room-share';button.type='button';
+        button.dataset.phase2='invite-generate';button.className='tc-phase2-room-share';
+        button.textContent='🔒 دعوة';
+        button.setAttribute('aria-label','إنشاء رمز دعوة آمن لغرفتك الخاصة');
+        header.appendChild(button);
+      }
+    }
     const title=$('.roomidentity span b',view);
     if(title)title.textContent=active.title;
     const id=$('.roomidentity span small',view);
@@ -196,6 +220,61 @@ async function enterRoom(id){
   }catch(err){toast(failure(err));}
   finally{entering=false;}
 }
+const INVITE=/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}):([0-9a-f]{48})$/i;
+async function generateInvite(){
+  if(!active||!active.is_private||active.owner_id!==session().user?.id)return;
+  try{
+    const raw=await rpc('phase2_room_invite_create',{p_room_id:active.id});
+    if(!INVITE.test(String(raw)))throw new Error('لم يُنشئ الخادم رمز دعوة صالحاً');
+    if(typeof showSheet==='function'){
+      showSheet('<div class="tc-phase2-create tc-phase2-invite" dir="rtl">'+
+        '<h3>🔒 رمز الدعوة لمرة واحدة</h3>'+
+        '<p>صالح لمدة 30 دقيقة ولمستخدم واحد فقط. إنشاء رمز جديد يلغي الرمز السابق.</p>'+
+        '<label>انسخ رمز الدعوة وأرسله للشخص الذي تريد دعوته.'+
+        '<textarea id="tc-phase2-invite-code" rows="4" readonly dir="ltr"></textarea></label>'+
+        '<button class="primary" data-phase2="invite-copy">نسخ رمز الدعوة</button>'+
+        '<button class="primary" data-a="close">إغلاق</button></div>',true);
+      const target=$('#tc-phase2-invite-code');if(target)target.value=raw;
+    }
+  }catch(err){toast(failure(err));}
+}
+function inviteForm(){
+  if(!session().signedIn){go('loginPreview');return;}
+  if(active){toast('اخرج من الغرفة الحالية قبل قبول دعوة جديدة');return;}
+  if(typeof showSheet!=='function')return;
+  showSheet('<div class="tc-phase2-create tc-phase2-invite" dir="rtl">'+
+    '<h3>🔒 الدخول إلى غرفة خاصة</h3>'+
+    '<p>استخدم الرمز الذي أرسله مالك الغرفة. الرمز يُستعمل لمرة واحدة فقط.</p>'+
+    '<label>رمز الدعوة<textarea id="tc-phase2-redeem-code" rows="4" dir="ltr" maxlength="100" placeholder="RoomID:InviteCode"></textarea></label>'+
+    '<button class="primary" data-phase2="invite-redeem">دخول الغرفة</button>'+
+    '<button class="primary" data-a="close">إلغاء</button></div>',true);
+}
+async function redeemInvite(){
+  if(entering||active)return;
+  const raw=String($('#tc-phase2-redeem-code')?.value||'').trim().toLowerCase();
+  const match=INVITE.exec(raw);
+  if(!match){toast('تنسيق رمز الدعوة غير صحيح');return;}
+  entering=true;
+  try{
+    await rpc('phase2_room_invite_join',{p_room_id:match[1],p_token:match[2]});
+    const rows=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(match[1])+
+      '&select=id,title,owner_id,is_private,created_at&limit=1');
+    if(!rows?.length)throw new Error('الغرفة ليست متاحة');
+    active=rows[0];members=[];messages=[];
+    if(typeof closeSheet==='function')closeSheet();
+    go('room');await refreshRoom();
+  }catch(err){toast(failure(err));}
+  finally{entering=false;}
+}
+async function copyInvite(){
+  const field=$('#tc-phase2-invite-code');
+  if(!field?.value)return;
+  if(navigator.clipboard?.writeText){
+    try{await navigator.clipboard.writeText(field.value);toast('تم نسخ رمز الدعوة');return;}catch(_){}
+  }
+  field.focus();field.select();
+  toast('حدد رمز الدعوة وانسخه يدوياً');
+}
 async function createRoom(){
   if(entering)return;
   const title=String($('#tc-phase2-room-title')?.value||'').trim();
@@ -264,7 +343,7 @@ document.addEventListener('click',event=>{
   const b=event.target.closest('[data-phase2],[data-royal="create-room"],[data-royal="hero"],[data-a="leaveRoom"],[data-a="seat"],[data-a="sendPreview"]');
   if(!b)return;
   const kind=b.dataset.phase2||b.dataset.royal||b.dataset.a;
-  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview'].includes(kind))return;
+  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy'].includes(kind))return;
   if((kind==='seat'||kind==='seat-action'||kind==='leaveRoom'||kind==='sendPreview')&&!active)return;
   event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
   if(kind==='create-room')showCreate();
@@ -274,6 +353,10 @@ document.addEventListener('click',event=>{
   else if(kind==='seat'||kind==='seat-action')void setSeat(Number(b.dataset.seat||Number(b.dataset.v)+1));
   else if(kind==='leaveRoom')void leaveRoom();
   else if(kind==='sendPreview')void sendMessage();
+  else if(kind==='invite-enter')inviteForm();
+  else if(kind==='invite-redeem')void redeemInvite();
+  else if(kind==='invite-generate')void generateInvite();
+  else if(kind==='invite-copy')void copyInvite();
 },true);
 window.addEventListener('totichat-phase2-auth',()=>{
   const id=session().user?.id||'';
