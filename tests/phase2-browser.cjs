@@ -124,7 +124,7 @@ function json(data,status=200){
    'Signed-in user never sees demo rooms when actual directory empty');
  await page.click('[data-phase2="create-room"]');
  await page.type('#tc-phase2-room-title','غرفة الاختبار الحقيقية');
- await page.click('[data-phase2="create-room-submit"]');
+ await page.$eval('[data-phase2="create-room-submit"]',button=>button.click());
  await waitUntil(page,()=>document.querySelector('#app')?.dataset.route==='room');
  await waitUntil(page,()=>document.querySelector('.roomidentity b')?.textContent==='غرفة الاختبار الحقيقية');
  assert.equal(await page.$$eval('.seats .seat',e=>e.length),15);
