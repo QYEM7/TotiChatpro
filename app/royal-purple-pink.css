@@ -506,3 +506,69 @@ html,body,body.royal-home-body{background:#F7F5FF!important;color:#292344!import
  #app.rf-app *,#overlay *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
 }
 /* 15-seat order is unchanged; never use display:none on .seats, gifts or VIP badges. */
+
+
+/* Legacy route shells have inline pale green/pink wallpapers: harmonize those
+   containers without rewriting their markup, actions or image assets. */
+#app.rf-app[data-route="wallet"] .main>div[style],
+#app.rf-app[data-route="rechargePreview"] .main>div[style],
+#app.rf-app[data-route="cp"] .main>div[style]{
+ background:#F7F5FF!important;background-image:none!important;color:#292344!important;
+}
+#app.rf-app[data-route="cp"] .topgraphic{
+ background:linear-gradient(125deg,#56288E,#7656D9 53%,#FF79AC)!important;
+ background-image:linear-gradient(125deg,#56288E,#7656D9 53%,#FF79AC)!important;
+ color:#FFFFFF!important;box-shadow:var(--tc-shadow-float)!important;
+}
+#app.rf-app[data-route="cp"] .topgraphic :is(h1,h2,h3,p){
+ color:#FFFFFF!important;text-shadow:0 2px 3px #32135455!important;
+}
+#app.rf-app[data-route="cp"] .medal{filter:drop-shadow(0 5px 10px #F6C66A59)}
+#app.rf-app[data-route="ranks"] .rankrow{
+ background:var(--tc-surface)!important;border:1px solid #DCCBF3!important;
+ color:#292344!important;box-shadow:var(--tc-shadow-card)!important;
+}
+#app.rf-app[data-route="ranks"] .rankrow :is(b,small,em){color:#3C295F!important}
+#app.rf-app[data-route="ranks"] .topgraphic{
+ background:linear-gradient(110deg,#28104A9A,#5B277E78),var(--tc-gradient-primary)!important;
+ border-color:#F6C66A!important;
+}
+#app.rf-app[data-route="level"] table th{background:#7656D9!important;color:#FFFFFF!important;border-color:#D9C7F8!important}
+#app.rf-app[data-route="level"] table td{color:#382956!important;border-bottom-color:#DCCDF0!important}
+#app.rf-app[data-route="storage"] .inventory,
+#app.rf-app[data-route="honor"] .inventory{
+ background:#F7F5FF!important;border-color:#E8DFF7!important;
+}
+#app.rf-app[data-route="storage"] .itemcard,
+#app.rf-app[data-route="honor"] .itemcard{background:var(--tc-surface)!important;border-color:#E5D4F4!important;color:#292344!important}
+#app.rf-app[data-route="wallet"] .visual-hero,
+#app.rf-app[data-route="rechargePreview"] .visual-hero{
+ background:linear-gradient(118deg,#4B2286,#7656D9 58%,#F175B0)!important;
+ border-color:#F6C66A!important;box-shadow:var(--tc-shadow-float)!important;
+}
+#app.rf-app[data-route="wallet"] :is(.visual-hero h2,.visual-hero p,.visual-hero small),
+#app.rf-app[data-route="rechargePreview"] :is(.visual-hero h2,.visual-hero p,.visual-hero small){
+ color:#FFFFFF!important;
+}
+#app.rf-room .roomidentity span:last-child{color:#55D6CF!important}
+#app.rf-room .giftTicker img,#app.rf-room .roomevents .crowd img{
+ border-color:#F6C66A!important;
+}
+/* Native sheet tool affordances (room member/info, gift quantity, emoji and chats). */
+#overlay .sheet:not(.room-glass) :is(.toolgrid button,.giftTabs button,.recipient button){
+ border-color:#E2D1F3!important;color:#5C3A93!important;
+}
+#overlay .sheet:not(.room-glass) .giftTabs button.active,
+#overlay .sheet:not(.room-glass) .recipient button.active{
+ background:linear-gradient(115deg,#7656D9,#FF79AC)!important;color:#FFFFFF!important;
+}
+#overlay .sheet:not(.room-glass) :is(.giftitem,.giftgrid button):active{
+ box-shadow:0 4px 16px #7656D952!important;
+}
+#app.rf-app .rf-music-player h3{color:#41245F!important}
+#app.rf-app .rf-track.rf-current{
+ background:linear-gradient(125deg,#EEE7FF,#FFF2F9)!important;
+}
+#app.rf-app .fc-entry .fc-row{color:#352251!important}
+#app.rf-app .tca-line>span,#app.rf-app .fc-row small{color:#786991!important}
+#app.rf-app .tca-line>strong,#app.rf-app .fc-row b{color:#342650!important}
