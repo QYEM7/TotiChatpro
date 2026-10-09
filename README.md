@@ -10,6 +10,12 @@ This clean repository preserves the exact approved preview previously reviewed i
 
 The 27 original images and brand assets have been copied to this repository and verified by Git blob hash against `reference/approved-assets.gitsha`.
 
+### First live-data integration: home advertising banner
+
+- **[Open the live-banner integration preview](https://qyem7.github.io/TotiChatpro/app/)** — same approved design; home banner reads real published announcements once the new Supabase backend is configured. Without a configured backend, it displays an explicit empty/connection state, never pretend promotional content.
+- **[Technical setup and status](docs/home-banners.md)** — secure SQL migration is prepared but NOT applied. The old Supabase database remains untouched.
+- **[9 passing Node.js tests](https://github.com/QYEM7/TotiChatpro/actions/workflows/test-banner-integration.yml)** — validates HTML fidelity, 27 image checksums and ad safety.
+
 ### Project status
 
 - ✅ Approved original visual design preserved.
