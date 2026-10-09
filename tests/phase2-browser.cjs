@@ -35,7 +35,9 @@ function json(data,status=200){
  const page=await browser.newPage();
  await page.setViewport({width:390,height:844,deviceScaleFactor:1});
  const errors=[];
- page.on('pageerror',e=>errors.push(e.message));
+ page.on('pageerror',e=>{errors.push(e.message);console.error('Browser JS error:',e.message)});
+ page.on('requestfailed',r=>{if(r.url().includes('supabase.co'))console.error('API failed:',r.url(),r.failure()?.errorText)});
+ page.on('console',m=>{if(m.type()==='error')console.error('Console error:',m.text())});
  page.on('dialog',d=>d.accept());
  await page.setRequestInterception(true);
  page.on('request',async req=>{
