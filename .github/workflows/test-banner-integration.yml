@@ -1,0 +1,28 @@
+name: Validate live-banner integration
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'tests/**'
+      - 'supabase/migrations/**'
+      - 'reference/**'
+      - 'assets/images/**'
+      - 'index.html'
+      - '.github/workflows/test-banner-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-live-banners:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out approved visual source and integration
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify HTML, JS, SQL and original asset hashes
+        run: node --test tests/home-banners.test.cjs
