@@ -29,11 +29,13 @@ try{
  await go('passwordResetPreview');
  assert.equal(await page.$eval('#app',el=>el.dataset.route),'passwordResetPreview');
  await go('friendsPreview');
- assert.equal(await page.$$eval('.fc-person',e=>e.length),2);
+ assert.equal(await page.$eval('.fc-person',e=>e.length),2);
+ await page.screenshot({path:'royal-preview-screenshots/frontend-friends.png',fullPage:true});
  await click('[data-fc="social-tab"][data-v="followers"]');
  assert.equal(await page.$$eval('.fc-person',e=>e.length),1);
  await go('storePreview');
- assert.equal(await page.$$eval('.fc-product',e=>e.length),7);
+ assert.equal(await page.$eval('.fc-product',e=>e.length),7);
+ await page.screenshot({path:'royal-preview-screenshots/frontend-store.png',fullPage:true});
  await click('[data-fc="store-tab"][data-v="frames"]');
  assert.equal(await page.$$eval('.fc-product',e=>e.length),2);
  await click('[data-fc="product"][data-v="f1"]');
@@ -55,6 +57,7 @@ try{
  assert.ok(await page.$('.fc-row[data-v="block"]'));
  await go('report');
  assert.ok(await page.$('#fc-report-text'));
+ await page.screenshot({path:'royal-preview-screenshots/frontend-report.png',fullPage:true});
  await click('[data-fc="report-review"]');
  assert.match(await page.$eval('#fc-report-status',e=>e.textContent),/15 حرفاً/);
  await page.type('#fc-report-text','هذا بلاغ معاينة لفحص اكتمال نموذج الدعم.');
