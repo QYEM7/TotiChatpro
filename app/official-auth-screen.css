@@ -53,3 +53,11 @@ body.tc-auth-body{background:#fcf9ff!important;overflow-x:hidden}
 @media(prefers-reduced-motion:reduce){#app.tc-auth-root .tc-login-panel-inner{animation:none}#app.tc-auth-root .tc-login-submit{transition:none}#app.tc-auth-root .tc-login-spinner{animation:none}}
 @keyframes tcAuthIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes tcSpin{to{transform:rotate(360deg)}}
+
+/* Desktop Split Screen must escape the 438px mobile-only app shell. */
+#app.rf-app.tc-auth-root{width:100%!important;max-width:none!important;
+ min-width:100%!important;margin:0!important;border:0!important;
+ border-radius:0!important;box-shadow:none!important}
+#app.tc-auth-root .tc-login-layout{width:100%;max-width:none!important}
+#app.tc-auth-root .tc-login-layout>.tc-login-panel,
+#app.tc-auth-root .tc-login-layout>.tc-login-art{min-width:0}
