@@ -1,0 +1,160 @@
+{
+  "project": "TotiChatpro",
+  "date": "2026-10-10",
+  "budget_usd_now": 0,
+  "paid_activation_authorized": false,
+  "phase": "beta30_prelaunch",
+  "principles": [
+    "Keep source of truth for money and identity in Supabase only.",
+    "No billing-account creation, Blaze, cloud storage upgrade, or paid resource without separate Owner authorization.",
+    "Third-party free quotas are ceilings, not availability guarantees; confirm terms and live limits before activating.",
+    "Do not claim account, service, or project was created when only integration source or workflow exists.",
+    "Do not change protected production database without verified offsite snapshot, Storage object restoration and isolated staging.",
+    "Do not publish APK or bind a live download link until T48 80/80 and 40/50 verified live with nine evidence flags and Owner review."
+  ],
+  "services": [
+    {
+      "id": "supabase",
+      "provider": "Supabase Free",
+      "purpose": "Auth identity, rooms and financial ledger",
+      "stage": "existing_active",
+      "billing": "no_card_for_free_plan",
+      "enable_now": true,
+      "account_required": true,
+      "doc": "https://supabase.com/pricing",
+      "caveat": "Production migrations pending; avoid writes and backups must be proven."
+    },
+    {
+      "id": "google_oauth",
+      "provider": "Google OAuth via Supabase",
+      "purpose": "Only beta login",
+      "stage": "provider_setup_unverified",
+      "billing": "no_card_for_oauth_setup",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://supabase.com/docs/guides/auth/social-login/auth-google",
+      "caveat": "Needs Google Cloud OAuth credentials, allowed callbacks, identity mapping and live Android device tests; do not disable existing login prematurely."
+    },
+    {
+      "id": "livekit",
+      "provider": "LiveKit Cloud Build",
+      "purpose": "Room SFU/TURN and audio",
+      "stage": "credentials_and_live_audio_unverified",
+      "billing": "verify_current_build_tier",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://livekit.io/pricing",
+      "caveat": "Free monthly participant-minute limits; cannot claim real working rooms without real two-phone test."
+    },
+    {
+      "id": "firebase_fcm",
+      "provider": "Firebase FCM / Crashlytics / Performance",
+      "purpose": "Mobile notifications and health",
+      "stage": "project_not_verified",
+      "billing": "spark_no_card_if_supported",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://firebase.google.com/pricing",
+      "caveat": "Needs Firebase project, Android package registration, Google-services config and valid privacy notice."
+    },
+    {
+      "id": "cloudflare_pages",
+      "provider": "Cloudflare Pages",
+      "purpose": "Static landing and safe APK link after release",
+      "stage": "landing_code_ready_not_deployed",
+      "billing": "free_static_pages",
+      "enable_now": true,
+      "account_required": true,
+      "doc": "https://developers.cloudflare.com/pages/platform/limits/",
+      "caveat": "Free Pages project not created; use dist-free-site build and official public URL only after deploying."
+    },
+    {
+      "id": "cloudflare_turnstile",
+      "provider": "Cloudflare Turnstile",
+      "purpose": "Protect future website forms",
+      "stage": "deferred_no_forms",
+      "billing": "free_tier",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://developers.cloudflare.com/turnstile/",
+      "caveat": "No current form; enabling is unnecessary now."
+    },
+    {
+      "id": "github_actions",
+      "provider": "GitHub Actions",
+      "purpose": "Offline CI/test evidence and static site bundle",
+      "stage": "existing_active",
+      "billing": "public_repo_free_action_quotas",
+      "enable_now": true,
+      "account_required": false,
+      "doc": "https://docs.github.com/en/billing/concepts/product-billing/github-actions",
+      "caveat": "No APK builders may run until T48 gate."
+    },
+    {
+      "id": "github_releases",
+      "provider": "GitHub Releases",
+      "purpose": "Distribute final Owner-approved signed APK",
+      "stage": "blocked_by_T48",
+      "billing": "free_with_repo_usage_rules",
+      "enable_now": false,
+      "account_required": false,
+      "doc": "https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases",
+      "caveat": "No release/APK until evidence and Owner approval."
+    },
+    {
+      "id": "encrypted_backups",
+      "provider": "restic / pg_dump + protected offsite object storage",
+      "purpose": "Independent DB and Storage backup, proven restore",
+      "stage": "not_implemented_on_production",
+      "billing": "tools_free_storage_destination_required",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://restic.readthedocs.io/en/stable/",
+      "caveat": "Encryption keys, backups and physical Storage object bytes need independent recovery proof."
+    },
+    {
+      "id": "neon",
+      "provider": "Neon",
+      "purpose": "Disposable isolated PostgreSQL tests only",
+      "stage": "deferred",
+      "billing": "free_tier",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://neon.tech/pricing",
+      "caveat": "Does not replace Supabase Auth+Storage+Realtime staging."
+    },
+    {
+      "id": "cloudflare_r2",
+      "provider": "Cloudflare R2",
+      "purpose": "Optional media storage",
+      "stage": "deferred_billing_risk",
+      "billing": "billing_required_even_with_free_allocation",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://developers.cloudflare.com/r2/pricing/",
+      "caveat": "Requires subscription/billing; do not activate on $0 budget."
+    },
+    {
+      "id": "firebase_storage",
+      "provider": "Firebase Cloud Storage",
+      "purpose": "Media storage",
+      "stage": "deferred_billing_risk",
+      "billing": "blaze_required",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://firebase.google.com/docs/storage",
+      "caveat": "Blaze billing is required; excluded from zero-budget beta."
+    },
+    {
+      "id": "workers",
+      "provider": "Cloudflare Workers / D1 / KV",
+      "purpose": "General APIs and cache only",
+      "stage": "deferred_until_profiling",
+      "billing": "free_quota_service_specific",
+      "enable_now": false,
+      "account_required": true,
+      "doc": "https://developers.cloudflare.com/workers/platform/pricing/",
+      "caveat": "Do not duplicate financial ledger or room state without proof of necessity."
+    }
+  ]
+}
