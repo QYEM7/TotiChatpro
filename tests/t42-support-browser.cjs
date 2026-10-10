@@ -63,8 +63,20 @@ const CUSTOMER='5c4f8202-4400-4b2e-8000-333333333333';
   await page.waitForSelector('[data-t42-form="staff"]');
   await page.type('[data-t42-form="staff"] [name="user_id"]',AGENT);
   await page.select('[data-t42-form="staff"] [name="decision"]','staff_grant');
+  const formState=await page.$eval('[data-t42-form="staff"]',form=>({
+   valid:form.checkValidity(),
+   id:form.querySelector('[name="user_id"]')?.value,
+   decision:form.querySelector('[name="decision"]')?.value
+  }));
+  assert.equal(formState.valid,true,'Staff form client validation: '+JSON.stringify(formState));
   await page.click('[data-t42-form="staff"] button[type="submit"]');
-  await page.waitForFunction(()=>window.__mock.calls.some(c=>c.body?.p_action==='staff_grant'));
+  await page.waitForFunction(()=>window.__mock.calls.some(c=>c.body?.p_action==='staff_grant'),{timeout:5000})
+    .catch(async error=>{console.error('T42 staff form diagnostic',await page.evaluate(()=>({
+       calls:window.__mock.calls.slice(-8),
+       status:document.querySelector('[data-t42-status]')?.textContent,
+       fields:[...document.querySelectorAll('[data-t42-form="staff"] input, [data-t42-form="staff"] select')].map(x=>({name:x.name,value:x.value,valid:x.validity.valid})),
+       buttons:[...document.querySelectorAll('[data-t42-form="staff"] button')].map(x=>({disabled:x.disabled,type:x.type}))
+      })));throw error;});
   const staffCall=await page.evaluate(()=>window.__mock.calls.find(c=>c.body?.p_action==='staff_grant'));
   assert.equal(staffCall.body.p_data.user_id,AGENT);
   assert.match(staffCall.body.p_request_id,/^[0-9a-f-]{36}$/i);
