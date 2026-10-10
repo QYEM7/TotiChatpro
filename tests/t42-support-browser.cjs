@@ -66,7 +66,12 @@ const CUSTOMER='5c4f8202-4400-4b2e-8000-333333333333';
   const formState=await page.$eval('[data-t42-form="staff"]',form=>({
    valid:form.checkValidity(),
    id:form.querySelector('[name="user_id"]')?.value,
-   decision:form.querySelector('[name="decision"]')?.value
+   decision:form.querySelector('[name="decision"]')?.value,
+   controls:[...form.elements].map(x=>({
+      tag:x.tagName,name:x.name,value:x.value,valid:x.validity?.valid,
+      reason:x.validationMessage,pattern:x.pattern,required:x.required
+   })),
+   markup:form.outerHTML.slice(0,2000)
   }));
   assert.equal(formState.valid,true,'Staff form client validation: '+JSON.stringify(formState));
   await page.click('[data-t42-form="staff"] button[type="submit"]');
