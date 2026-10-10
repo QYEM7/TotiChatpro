@@ -5,7 +5,7 @@ const load=fs.readFileSync('app/phase4-voice-messages-ui.js','utf8');
 test('T42 real support entry only appears on signed-in profile',()=>{
  assert(s.includes("screen!=='me'"));
  assert(s.includes("auth.state().signedIn"));
- assert(s.includes("data-t42='open'"));
+ assert(s.includes("b.dataset.t42='open'"));
  assert(load.includes('phase5-support-ui.js'));
 });
 test('T42 ticket request is authenticated and agency opening is never faked',()=>{
