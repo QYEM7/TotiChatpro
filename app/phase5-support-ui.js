@@ -21,13 +21,13 @@ function markup(){
 }
 async function open(){
  if(!auth.state().signedIn)return;
- reset();owner=auth.state().user?.id;const uid=owner;showSheet(markup(),true);
+ reset();owner=auth.state().user?.id;const uid=owner,openGeneration=generation;showSheet(markup(),true);
  // Presentation-only Owner check; phase5_support_action independently verifies Owner on the server.
  try{const a=await auth.requestData('/rest/v1/rpc/phase3_admin_session',{method:'POST',body:{}});
-  if(owner!==uid||!auth.state().signedIn)return;
+  if(owner!==uid||generation!==openGeneration||!auth.state().signedIn)return;
   isOwner=a?.isOwner===true;
- }catch{if(owner!==uid)return;isOwner=false;}
- if(owner===uid)await load();
+ }catch{if(owner!==uid||generation!==openGeneration)return;isOwner=false;}
+ if(owner===uid&&generation===openGeneration)await load();
 }
 function ticketView(t){
  return '<article><button type="button" data-t42="thread" data-id="'+esc(t.id)+'" class="primary">'+esc(t.subject)+'</button>'+
