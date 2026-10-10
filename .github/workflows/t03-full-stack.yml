@@ -6,6 +6,8 @@ on:
       - 'scripts/t03-local-auth-smoke.mjs'
       - 'scripts/t06-parallel-support-e2e.mjs'
       - 'scripts/t06-parallel-finance-e2e.mjs'
+      - 'scripts/t30-reseller-flow-e2e.mjs'
+      - 'tests/t30-reseller-flow-contract.test.cjs'
       - 'tests/t06-parallel-finance-contract.test.cjs'
       - 'tests/t06-parallel-support-contract.test.cjs'
       - 'scripts/t16-rooms-e2e.mjs'
@@ -27,6 +29,8 @@ on:
       - 'scripts/t03-local-auth-smoke.mjs'
       - 'scripts/t06-parallel-support-e2e.mjs'
       - 'scripts/t06-parallel-finance-e2e.mjs'
+      - 'scripts/t30-reseller-flow-e2e.mjs'
+      - 'tests/t30-reseller-flow-contract.test.cjs'
       - 'tests/t06-parallel-finance-contract.test.cjs'
       - 'tests/t06-parallel-support-contract.test.cjs'
       - 'scripts/t03-secret-audit.mjs'
@@ -55,7 +59,8 @@ jobs:
           node --test tests/t03-secret-audit.test.mjs
           node --check scripts/t06-parallel-support-e2e.mjs
           node --check scripts/t06-parallel-finance-e2e.mjs
-          node --test tests/t06-parallel-support-contract.test.cjs tests/t06-parallel-finance-contract.test.cjs
+          node --check scripts/t30-reseller-flow-e2e.mjs
+          node --test tests/t06-parallel-support-contract.test.cjs tests/t06-parallel-finance-contract.test.cjs tests/t30-reseller-flow-contract.test.cjs
       - name: Validate 32 migration fingerprint baseline
         run: node --test tests/t01-migration-history.test.cjs
       - name: T49 refuse production recovery pretence or linked DB access
@@ -108,6 +113,10 @@ jobs:
           T06_DISPOSABLE_ONLY=YES \
             SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
             node scripts/t06-parallel-finance-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
+          # Simulated cash reseller: Owner -> Recharge Agent -> real local wallet.
+          T06_DISPOSABLE_ONLY=YES \
+            SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
+            node scripts/t30-reseller-flow-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           # Separate local DB restored from test-only custom pg_dump. No production access.
           T49_DISPOSABLE_ONLY=YES \
             SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
