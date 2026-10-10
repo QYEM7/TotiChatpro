@@ -134,8 +134,8 @@
   {
     "id": "T23",
     "title": "Synchronized music playlists",
-    "status": "blocked",
-    "evidence": "Real shared music synchronization and persistent playlist not verified"
+    "status": "partial",
+    "evidence": "Real account music bookmarks and owner-managed room queue metadata implemented; approved UI preserved; two-device synchronized licensed audio playback not available; migration pending production."
   },
   {
     "id": "T24",
@@ -212,8 +212,8 @@
   {
     "id": "T36",
     "title": "Monthly payroll and safe zeroing",
-    "status": "blocked",
-    "evidence": "Month-close durable entitlements and authorized zeroing not verified"
+    "status": "partial",
+    "evidence": "Owner/main-partner-only immutable-source historical diamonds preflight implemented, non-mutating; salaries, durable month-close snapshot, cash settlement and balance zeroing NOT implemented; migration pending production."
   },
   {
     "id": "T37",
@@ -248,8 +248,8 @@
   {
     "id": "T42",
     "title": "Customer support and tickets",
-    "status": "blocked",
-    "evidence": "Complete CRM/support ticket backend and moderation SLA not verified"
+    "status": "partial",
+    "evidence": "Private support tickets, authenticated user threads, audited idempotent actions, isolated staff permissions, account support UI and five-account rollback-only SQL acceptance source committed. Foundation CI green; Docker/Postgres acceptance and hosted deployment not yet proven."
   },
   {
     "id": "T43",
