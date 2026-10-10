@@ -253,7 +253,7 @@
   function base64Url(array){
     const arr=Array.from(array);
     return btoa(arr.map(byte=>String.fromCharCode(byte)).join(''))
-      .replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
+      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
   const OAUTH_PENDING='totichat.phase2.oauth.pending';
   async function signInWithProvider(provider){
