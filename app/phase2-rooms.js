@@ -311,6 +311,7 @@ async function leaveRoom(){
   if(room.owner_id===session().user?.id&&
       !window.confirm('مغادرة غرفتك ستغلقها وتحذف محادثتها الحالية. هل تريد المتابعة؟'))return;
   try{
+    await window.TotiRealVoice?.disconnect?.();
     await rpc('phase2_room_leave',{p_room_id:room.id});
     active=null;members=[];messages=[];sequence++;
     if(typeof closeSheet==='function')closeSheet();
@@ -321,6 +322,8 @@ async function leaveRoom(){
 async function setSeat(number){
   if(!active)return;
   try{
+    // Releasing or switching a seat must close the existing media publication.
+    await window.TotiRealVoice?.disconnect?.();
     const current=members.find(x=>x.user_id===session().user?.id)?.seat_no;
     await rpc('phase2_room_take_seat',{
       p_room_id:active.id,p_seat:current===number?null:number
