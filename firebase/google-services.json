@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "628216218105",
+    "project_id": "totichatpro",
+    "storage_bucket": "totichatpro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:628216218105:android:0ff533294459815d7b3d28",
+        "android_client_info": {
+          "package_name": "com.totichat.beta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "628216218105-c94pklt12ljphb02jvmk36sdnm1nhsfs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlyAM3x9Y4kEzdCuNPXAZcMLLKC1YMzDY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "628216218105-c94pklt12ljphb02jvmk36sdnm1nhsfs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
