@@ -94,10 +94,6 @@ jobs:
           T06_DISPOSABLE_ONLY=YES \
             SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
             node scripts/t06-parallel-support-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
-          # Synthetic Owner account exists ONLY in isolated local PostgreSQL.
-          T06_DISPOSABLE_ONLY=YES \
-            SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
-            node scripts/t06-parallel-finance-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           T49_DISPOSABLE_ONLY=YES \
             SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
             node scripts/t49-storage-object-restore.mjs "$RUNNER_TEMP/t03-local-status.json"
@@ -108,6 +104,10 @@ jobs:
             echo "T04/T05 local security test: $test_sql"
             docker exec -i "${db_containers[0]}" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres < "$GITHUB_WORKSPACE/supabase/tests/$test_sql" | grep -E "^PASS|^DO$|^ROLLBACK$"
           done
+          # Synthetic Owner account exists ONLY in isolated local PostgreSQL.
+          T06_DISPOSABLE_ONLY=YES \
+            SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
+            node scripts/t06-parallel-finance-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           # Separate local DB restored from test-only custom pg_dump. No production access.
           T49_DISPOSABLE_ONLY=YES \
             SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
