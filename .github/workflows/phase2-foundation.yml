@@ -25,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install pinned Android voice bundling dependencies
+        run: npm install --no-audit --no-fund
       - name: Check isolated builder syntax
         run: |
           node --check scripts/build-approved-web.mjs
