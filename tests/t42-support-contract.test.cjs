@@ -40,6 +40,25 @@ test('T42 staff controls are visible to Owner only and enforce the real RPC',()=
  assert(ui.includes("generation!==openGeneration"));
  assert(sql.includes("if not is_owner then raise exception 'Owner alone grants support access'"));
 });
+test('T42 extended staff roster and bounded message paging keep SQL authorization on server',()=>{
+ const paging=fs.readFileSync('supabase/migrations/20261010183000_t42_support_roster_thread_paging.sql','utf8');
+ const sqlTest=fs.readFileSync('supabase/tests/t42_support_roster_paging.sql','utf8');
+ assert(paging.includes('phase5_support_staff_list('));
+ assert(paging.includes('phase5_support_thread_page('));
+ assert(paging.includes('if not phase3.is_owner()'));
+ assert(paging.includes('t.creator_id<>u and not staff'));
+ assert(paging.includes('phase3.actor()'));
+ assert(paging.includes('p_limit>50'));
+ assert(paging.includes('revoke all on function public.phase5_support_staff_list'));
+ assert(ui.includes("rpc('staff_list'"));
+ assert(ui.includes("rpc('thread_page'"));
+ assert(ui.includes('data-t42-staff-roster'));
+ assert(ui.includes('data-offset='));
+ assert(/(?:^|\\n)begin;/i.test(sqlTest));
+ assert(sqlTest.includes('rollback;'));
+ assert(sqlTest.includes('T42 outsider can page a private ticket'));
+ assert(sqlTest.includes('T42 revoked staff retained ticket history access'));
+});
 test('T42 full PostgreSQL 5-account evidence is rollback-only',()=>{
  assert(/(?:^|\n)begin;/i.test(local));
  assert(local.includes('rollback;'));
