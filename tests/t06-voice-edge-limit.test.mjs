@@ -42,3 +42,11 @@ test('T06 source explicitly fails closed before issuing LiveKit tokens',async()=
  assert(src.indexOf('const budget=await rateVoiceRequest')<src.indexOf('const token=new AccessToken'));
  assert(src.includes("if(!budget.allowed)return json(budget.status,{error:budget.code});"));
 });
+
+test('T06 runtime secret template requires Redis/HMAC salt as Edge-only config',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const template=readFileSync(new URL('../.env.example',import.meta.url),'utf8');
+ const readiness=readFileSync(new URL('../scripts/check-service-readiness.mjs',import.meta.url),'utf8');
+ assert(template.includes('VOICE_RATE_LIMIT_SALT='));
+ assert(readiness.includes("['VOICE_RATE_LIMIT_SALT']"));
+});
