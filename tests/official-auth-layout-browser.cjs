@@ -46,6 +46,8 @@ if(!executablePath)throw Error('Chrome/Chromium needed');
   assert.ok(desktop.falcon>0,'Official logo file must load');
   assert.ok(desktop.usernameField&&desktop.footer);
   assert.equal(desktop.nav,0,'Auth page must not show app tabs');
+  await fs.promises.mkdir('royal-preview-screenshots',{recursive:true});
+  await page.screenshot({path:'royal-preview-screenshots/official-login-desktop.png',fullPage:true});
   await page.setViewport({width:390,height:844});
   await page.waitForFunction(()=>getComputedStyle(document.querySelector('.tc-login-art')).display==='none');
   const mobile=await page.evaluate(()=>({
@@ -61,6 +63,7 @@ if(!executablePath)throw Error('Chrome/Chromium needed');
   assert.equal(mobile.socials,3);
   assert.equal(mobile.enabledSocial,0,'Disabled providers cannot pretend to work');
   assert.equal(mobile.secret,'password');
+  await page.screenshot({path:'royal-preview-screenshots/official-login-mobile.png',fullPage:true});
   await page.$eval('[data-auth-action="toggle-password"]',x=>x.click());
   assert.equal(await page.$eval('#fc-pass',x=>x.type),'text');
   await page.$eval('[data-auth-action="toggle-password"]',x=>x.click());
