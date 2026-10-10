@@ -186,6 +186,7 @@ async function refreshRoom(){
       members=Array.isArray(roster)?roster:[];
       messages=Array.isArray(history)?history.reverse():[];
       if(screen==='room')roomContent();
+      window.dispatchEvent(new CustomEvent('totichat-real-room-state',{detail:{roomId:current}}));
     }catch(err){
       if(before===sequence)console.warn('TotiChat real room refresh:',failure(err));
     }finally{refreshing=null;}
@@ -325,7 +326,7 @@ async function setSeat(number){
       p_room_id:active.id,p_seat:current===number?null:number
     });
     await refreshRoom();
-    toast('تم تحديث المقعد على الخادم. نقل الصوت ما زال قيد التطوير.');
+    toast('تم تحديث مقعد المايك الحقيقي. لتشغيل الصوت اضغط تفعيل الصوت.');
   }catch(err){toast(failure(err));}
 }
 async function sendMessage(){
@@ -387,6 +388,8 @@ setInterval(()=>{
 window.TotiPhase2Rooms=Object.freeze({
   // Deliberately do not expose raw tokens, owner-level mutations or balance writes.
   getStatus:()=>({signedIn:session().signedIn,activeRoomId:active?.id||null,roomCount:rooms?.length??null}),
-  getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id}):null
+  getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id}):null,
+  getMyMicState:()=>{const m=members.find(x=>x.user_id===session().user?.id);return Object.freeze({seatNo:m?.seat_no??null,isMuted:m?.is_muted??true});},
+  refreshRoom
 });
 })();
