@@ -51,6 +51,8 @@ jobs:
           node --check app/phase2-voice-ui.js
           node --check app/phase2-livekit-sdk.mjs
           node --check tests/phase2-browser.cjs
+      - name: T03 isolated staging and public-config safety tests
+        run: node --test tests/t03-staging-safety.test.mjs
       - name: T02 check commit and changed-path audit snapshots (no network writes)
         run: node --test tests/t02-commit-manifest.test.cjs
       - name: T01 check applied Supabase migration snapshot (no database writes)

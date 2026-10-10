@@ -13,10 +13,9 @@ android/local.properties
 android/**/build/
 *.apk
 *.aab
-# Keep credentials out of the repository
-.env
-.env.local
-.env.*.local
+# Never commit dotenv variants; permit only documented empty template.
+.env*
+!.env.example
 *.keystore
 *.jks
 
