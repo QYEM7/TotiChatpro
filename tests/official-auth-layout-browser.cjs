@@ -46,6 +46,7 @@ if(!executablePath)throw Error('Chrome/Chromium needed');
   assert.ok(desktop.falcon>0,'Official logo file must load');
   assert.ok(desktop.usernameField&&desktop.footer);
   assert.equal(desktop.nav,0,'Auth page must not show app tabs');
+  await new Promise(resolve=>setTimeout(resolve,800));
   await fs.promises.mkdir('royal-preview-screenshots',{recursive:true});
   await page.screenshot({path:'royal-preview-screenshots/official-login-desktop.png',fullPage:true});
   await page.setViewport({width:390,height:844});
