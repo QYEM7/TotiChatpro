@@ -43,6 +43,8 @@ jobs:
         run: |
           node --check app/phase2-live-mode.js
           node --check app/phase2-wallet.js
+          node --check app/official-auth-screen.js
+          node --check scripts/configure-android-auth.mjs
           node --test tests/phase2-foundation.test.mjs tests/phase2-auth.test.cjs tests/phase2-wallet-security.test.cjs
           node --test tests/home-banners.test.cjs tests/live-supabase.test.cjs
       - name: Generate Android shell from exact approved UI
@@ -50,6 +52,7 @@ jobs:
           npm run build
           npx cap add android
           npx cap sync android
+          node scripts/configure-android-auth.mjs
       - name: Build independently-installable debug APK
         run: |
           chmod +x android/gradlew
@@ -75,6 +78,8 @@ jobs:
                 'Android root must NEVER redirect to the folder URL'
               )
               assert 'assets/public/app/phase2-auth.js' in files, 'Auth adapter missing'
+              assert 'assets/public/app/official-auth-screen.js' in files, 'Official login UI missing'
+              assert 'assets/public/app/official-auth-screen.css' in files, 'Official login CSS missing'
               assert 'assets/public/app/phase2-rooms.js' in files, 'Room adapter missing'
               assert any(n.startswith('assets/public/assets/images/toti_falcon_logo_') for n in files), (
                 'Branding assets missing'
