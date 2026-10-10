@@ -156,13 +156,40 @@
     const data=await request('/rest/v1/profiles?id=eq.'+encodeURIComponent(id)+
       '&select=id,display_name,bio,avatar_url,created_at,updated_at',{
       method:'PATCH',accessToken:token,
-      body:{display_name:displayName,bio},
+      body:input.avatar_url===undefined?{display_name:displayName,bio}:
+        {display_name:displayName,bio,avatar_url:input.avatar_url},
       prefer:'return=representation'
     });
     if(generation!==requestGeneration)throw new Error('الجلسة تغيرت أثناء حفظ البيانات');
     if(!Array.isArray(data)||data.length!==1||data[0].id!==id)
       throw new Error('لم يؤكد الخادم حفظ الملف الشخصي');
     profile=data[0];notify();return {...profile};
+  }
+  function avatarHref(path,userId=session?.user?.id){
+    if(typeof path!=='string'||!userId)return '';
+    const parts=path.match(/^storage:profile-avatars\/([0-9a-f-]{36})\/([0-9a-f-]{36}\.(?:jpg|png|webp))$/);
+    return parts?.[1]===userId?origin+'/storage/v1/object/public/profile-avatars/'+parts[1]+'/'+parts[2]:'';
+  }
+  async function uploadAvatar(file,data){
+    const owner=session?.user?.id,generation=requestGeneration;
+    if(!owner)throw Error('يجب تسجيل الدخول أولاً');
+    const ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file?.type];
+    if(!ext||!Number.isFinite(file.size)||file.size<1||file.size>5242880)
+      throw Error('اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 5MB');
+    const id=crypto.randomUUID(),name=owner+'/'+id+'.'+ext;
+    const token=await validToken();
+    if(generation!==requestGeneration||session?.user?.id!==owner)throw Error('تغيّر حسابك أثناء رفع الصورة');
+    const response=await fetch(origin+'/storage/v1/object/profile-avatars/'+name,{
+      method:'POST',headers:{apikey:apiKey,Authorization:'Bearer '+token,
+      'Content-Type':file.type,'x-upsert':'false'},body:file,
+      cache:'no-store',credentials:'omit'
+    });
+    if(!response.ok)throw Error('تعذّر رفع الصورة إلى الخادم ('+response.status+')');
+    if(generation!==requestGeneration||session?.user?.id!==owner)throw Error('تغيّر الحساب بعد رفع الصورة');
+    const path='storage:profile-avatars/'+name;
+    const profile=await updateProfile({...data,avatar_url:path});
+    if(profile.id!==owner||profile.avatar_url!==path)throw Error('لم يؤكد الخادم صورة الحساب');
+    return profile;
   }
   function emailValid(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)&&s.length<=254;}
   async function signUp({email,password,displayName}){
@@ -422,7 +449,7 @@
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
     verifySignup,readProfile,updateProfile,resume,refresh,requestData,voiceStorage,
     providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,
-    securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider});
+    securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider,avatarHref,uploadAvatar});
   window.TotiPhase2Auth=api;
   if(typeof location!=='undefined'&&location.hostname==='localhost'){
     const app=window.Capacitor?.Plugins?.App;

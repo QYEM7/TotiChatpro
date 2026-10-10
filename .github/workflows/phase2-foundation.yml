@@ -53,6 +53,8 @@ jobs:
           node --check tests/phase2-browser.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
         run: node --test tests/t06-voice-edge-limit.test.mjs
+      - name: T14 avatar user-scoped upload tests
+        run: node --test tests/t14-avatar.test.cjs
       - name: T09/T11 verify real login and honest live room actions
         run: node --test tests/t09-t11-integrity.test.cjs
       - name: T10 verify live Android never silently becomes sample-preview

@@ -8,6 +8,12 @@ const auth=window.TotiPhase2Auth;
 if(!auth||typeof window.render!=='function')return;
 const $=(selector,root=document)=>root.querySelector(selector);
 let currentUser='',busy=false;
+let selectedAvatar=null,avatarPreview='';
+function clearAvatarDraft(){
+ selectedAvatar=null;if(avatarPreview)URL.revokeObjectURL(avatarPreview);
+ avatarPreview='';editDraftPhoto='';
+}
+
 function notify(text,error=false){
   const target=$('#fc-form-status');
   if(target){target.textContent=text;target.classList.toggle('error',error);
@@ -29,7 +35,10 @@ function changePreviewIdentity(){
     previewProfileName=p.display_name;
     previewProfileBio=p.bio||'';
     editForm.name=p.display_name;editForm.bio=p.bio||'';
-    currentUser=state.user?.id||'';
+    const nextUser=state.user?.id||'';
+    if(currentUser!==nextUser)previewProfilePic='';
+    previewProfilePic=auth.avatarHref?.(p.avatar_url,nextUser)||'';
+    currentUser=nextUser;
   }else if(!state.signedIn&&currentUser){
     // Never show the previous account identity after sign-out.
     previewProfileName='مستخدم تجريبي';
@@ -94,7 +103,7 @@ function hydrate(){
   }
   if(screen==='profileEdit'&&s.signedIn){
     const help=$('.edit-help');
-    if(help)help.textContent='حفظ الاسم والنبذة يتم على خادم TotiChat. رفع الصورة وباقي الحقول قيد الربط.';
+    if(help)help.textContent='الاسم والنبذة والصورة تحفظ على حسابك الحقيقي. صورة الحساب علنية، وبقية الحقول للمعاينة فقط.';
   }
   if(screen==='settings'){
     const logout=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.trim()==='تسجيل الخروج');
@@ -157,6 +166,18 @@ function handleAuthClick(route,button){
   return true;
 }
 window.TotiPhase2UI=Object.freeze({handleAuthClick});
+document.addEventListener('change',event=>{
+ if(event.target?.id!=='editAvatarUpload'||!auth.state().signedIn)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const file=event.target.files?.[0];if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<1||file.size>5242880){
+  notify('يجب اختيار JPG أو PNG أو WebP أقل من 5MB',true);return;
+ }
+ if(avatarPreview)URL.revokeObjectURL(avatarPreview);
+ selectedAvatar=file;avatarPreview=URL.createObjectURL(file);editDraftPhoto=avatarPreview;
+ const img=$('.edit-profile-person .portrait img');if(img)img.src=avatarPreview;
+ notify('اختيرت الصورة؛ اضغط حفظ لإرسالها إلى حسابك الحقيقي');
+},true);
 document.addEventListener('click',event=>{
   const el=event.target.closest('[data-fc="validate-auth"],[data-a="saveProfilePreview"],[data-phase2]');
   if(!el)return;
@@ -184,7 +205,7 @@ document.addEventListener('click',event=>{
     if(busy)return;
     busy=true;el.disabled=true;
     void auth.signOut().then(()=>{
-      changePreviewIdentity();go('loginPreview');
+      clearAvatarDraft();changePreviewIdentity();go('loginPreview');
       if(typeof showToast==='function')showToast('تم تسجيل الخروج');
     }).catch(err=>notify(errorMessage(err),true))
       .finally(()=>{busy=false;el.disabled=false;});
@@ -198,16 +219,18 @@ document.addEventListener('click',event=>{
   if(action==='saveProfilePreview'){
     const name=(editForm.name||'').trim(),bio=(editForm.bio||'').slice(0,150);
     notify('جارٍ حفظ الملف على الخادم…');
-    void auth.updateProfile({display_name:name,bio}).then(()=>{
-      changePreviewIdentity();
-      editDraftPhoto='';editError='';
+    void (selectedAvatar?auth.uploadAvatar(selectedAvatar,{display_name:name,bio}):
+      auth.updateProfile({display_name:name,bio})).then(()=>{
+      clearAvatarDraft();changePreviewIdentity();
+      editError='';
       go('profilePreview');
-      if(typeof showToast==='function')showToast('تم حفظ الاسم والنبذة في حسابك الحقيقي');
+      if(typeof showToast==='function')showToast('تم حفظ البروفايل وصورته إن اختيرت على حسابك الحقيقي');
     }).catch(err=>notify(errorMessage(err),true))
       .finally(()=>{busy=false;el.disabled=false;});
   }
 },true);
 window.addEventListener('totichat-phase2-auth',()=>{
+  if(!auth.state().signedIn||auth.state().user?.id!==currentUser)clearAvatarDraft();
   changePreviewIdentity();
   if(!['loginPreview','signupPreview','passwordResetPreview','verifyAccountPreview'].includes(screen))
     render();
