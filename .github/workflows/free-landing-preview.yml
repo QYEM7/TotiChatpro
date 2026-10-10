@@ -1,0 +1,33 @@
+name: Free TotiChat landing preview (no APK)
+on:
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'site/**'
+      - 'scripts/build-free-landing.mjs'
+      - 'docs/free-tier-service-policy.json'
+      - 'tests/free-landing.test.cjs'
+      - '.github/workflows/free-landing-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-static-landing-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build static landing without npm, Gradle, Android SDK or network credentials
+        run: node scripts/build-free-landing.mjs
+      - name: Verify zero billing activation and APK freeze
+        run: node --test tests/free-landing.test.cjs tests/beta30-scope-freeze.test.cjs
+      - name: Publish only STATIC PREVIEW artifact, never an APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-cloudflare-pages-static-preview
+          path: dist-free-site/
+          retention-days: 7
+          if-no-files-found: error
