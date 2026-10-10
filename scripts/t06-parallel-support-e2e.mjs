@@ -96,6 +96,23 @@ if(over.status>=200&&over.status<300||!msg(over).includes('Support rate limit ex
  stop('post-limit new support mutation escaped rate budget');
 thread=ok(await ticketPage(user),'final read-only message query');
 if(thread.total!==20)stop('replay or denied actions mutated support messages');
+// Ensure a completely separate verified actor has their OWN budget; one saturated
+// customer must never block creation for another account.
+const otherKey=randomUUID();
+const otherPayload={category:'technical',subject:'Independent actor budget check',
+ message:'Second account verifies separate user rate budget'};
+const otherCreated=ok(await act(other,'create',otherPayload,otherKey),'unrelated actor action after quota');
+if(!otherCreated?.id||otherCreated.id===ticket)
+ stop('second account ticket creation was not independent');
+const otherThread=ok(await request('/rest/v1/rpc/phase5_support_thread_page',{
+ jwt:other.jwt,body:{p_ticket_id:otherCreated.id,p_offset:0,p_limit:20}
+}),'other actor independently owned thread');
+if(otherThread.total!==1||otherThread.ticket?.creator_id!==other.id)
+ stop('second actor thread owner mismatch');
+const firstByOther=await ticketPage(other);
+if(firstByOther.status>=200&&firstByOther.status<300)
+ stop('independent rate limit did not preserve first actor private ticket');
+console.log('PASS T06: a second GoTrue user retained a separate quota after first user hit the 20/min ceiling; ticket privacy preserved.');
 console.log('PASS T06: genuine disposable GoTrue users + PostgREST; six parallel identical create requests committed ONE ticket, ONE first message.');
 console.log('PASS T06: 28 concurrent replies => 19 accepted and 9 bounded denials; total 20 messages; replay after limit retained same ticket.');
 console.log('PASS T06: outsider thread/reply denied, staff privilege escalation denied, conflicting idempotency key denied.');
