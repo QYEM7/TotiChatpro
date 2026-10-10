@@ -13,6 +13,7 @@ on:
       - "tests/phase2-voice-browser.cjs"
       - "tests/phase4-browser.cjs"
       - "tests/phase4-voice-messages-browser.cjs"
+      - "tests/t42-support-browser.cjs"
       - "scripts/build-approved-web.mjs"
       - "tests/agency-flow-browser.cjs"
       - "tests/bloom-design-browser.cjs"
@@ -59,6 +60,9 @@ jobs:
       - name: Verify CP, redemption, receipts and XLSX UI contracts
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase4-browser.cjs
+      - name: T42 verify support UX, Owner staff assignment, and logout cleanup (isolated API fixture)
+        if: github.ref == 'refs/heads/develop/phase-2'
+        run: node tests/t42-support-browser.cjs
       - name: Verify private audio UI with Chromium test microphone
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase4-voice-messages-browser.cjs
