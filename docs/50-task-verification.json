@@ -33,7 +33,7 @@
     "id": "T06",
     "title": "Rate limits and audit logs",
     "status": "partial",
-    "evidence": "Local hardening: support_action uses per-actor transaction advisory lock before 20/min counting and idempotency; SHA-256 replaces duplicate message plaintext in request retry ledger. Recharge gateway phase4_recharge_action uses verified-actor transaction lock before 30/min counting and Owner cash-reference issuance, without changing finance formulas. Disposable PostgreSQL SQL rollback CI 38062181018 and static foundation CI 38062197702 passed. MULTI-CONNECTION adversarial stress, global throttling and hosted validation still incomplete."
+    "evidence": "Local transactional actor advisory locks for T42 20/min and recharge 30/min, SHA-256 support retry privacy, and finance duplicate reference guard. New REAL concurrent PostgREST HTTP GoTrue tests (unlinked Supabase CI 38064686350): six identical concurrent creations persisted exactly one ticket; 28 concurrent replies -> 19 accepted, 9 quota-denied, 20 total messages; same-key replay after quota, changed-key content conflict, different user with fresh independent budget. Cross-user ticket access and self-staff escalation denied. Prior SQL 38062181018 also green. Still PARTIAL: real hosted production traffic, concurrent financial API stress, distributed quotas across actors, and independent security validation remain outstanding."
   },
   {
     "id": "T07",
@@ -249,7 +249,7 @@
     "id": "T42",
     "title": "Customer support and tickets",
     "status": "partial",
-    "evidence": "Real authenticated private support tickets, Owner-only staff grant/revoke plus paged Owner staff roster and 30-message history paging; per-user auth and IDOR restricted by database. 6+ actor tests in disposable PostgreSQL rollback passed 38061109118; isolated Chromium Owner/agent/customer + message paging passed 38061220445, foundation 38061220423. STILL PARTIAL: 6 repo migrations unapplied to production; hosted/two-device real users, CS SLA, push/email notifications and staff ops pending."
+    "evidence": "Real authenticated support ticket RPC and UI with Owner-only staff roster/grant/revoke and 30-message paging. T42 20/min genuine concurrent HTTP test against disposable GoTrue/PostgREST CI 38064686350 proves duplicate request idempotency, quota, second-user isolation and outsider IDOR denial; previous isolated Chromium 38061220445 + SQL rollback CI passed. STILL PARTIAL: migrations pending hosted deployment, staff notifications, SLA and real two-phone user flow missing."
   },
   {
     "id": "T43",
@@ -273,7 +273,7 @@
     "id": "T46",
     "title": "Authorization pentest IDOR replay",
     "status": "partial",
-    "evidence": "Local RLS/role tests pass; adversarial independent review missing"
+    "evidence": "Isolated PostgreSQL role/IDOR negative tests plus new genuine parallel HTTP with two real disposable GoTrue users: outsider cannot view/reply to another customer's support ticket or self-appoint as staff, conflicting idempotency denied (CI 38064686350). Not a substitute for independent pentest/hosted production authorization audits; remains PARTIAL."
   },
   {
     "id": "T47",
