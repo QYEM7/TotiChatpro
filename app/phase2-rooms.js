@@ -97,10 +97,12 @@ function roomContent(){
     if(title)title.textContent=active.title;
     const id=$('.roomidentity span small',view);
     if(id)id.textContent='Room: '+active.id.slice(0,8).toUpperCase();
+    const activity=$('.roomevents > b',view);
+    if(activity)activity.textContent='● غرفة حقيقية';
     const crowd=$('.roomevents .crowd',view);
     if(crowd)crowd.textContent='👥 '+members.length;
     const ticker=$('.giftTicker .tickerBody',view);
-    if(ticker)ticker.textContent='✨ الهدايا الحقيقية قيد الربط';
+    if(ticker)ticker.textContent='🎁 إرسال الهدايا غير مفعّل بعد';
     const count=$('.giftTicker .orb b',view);
     if(count)count.textContent='0';
     const all=$$('.seats .seat',view);
@@ -384,6 +386,7 @@ setInterval(()=>{
 },7500);
 window.TotiPhase2Rooms=Object.freeze({
   // Deliberately do not expose raw tokens, owner-level mutations or balance writes.
-  getStatus:()=>({signedIn:session().signedIn,activeRoomId:active?.id||null,roomCount:rooms?.length??null})
+  getStatus:()=>({signedIn:session().signedIn,activeRoomId:active?.id||null,roomCount:rooms?.length??null}),
+  getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id}):null
 });
 })();
