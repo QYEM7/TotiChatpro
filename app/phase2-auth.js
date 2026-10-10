@@ -164,6 +164,39 @@
       throw new Error('لم يؤكد الخادم حفظ الملف الشخصي');
     profile=data[0];notify();return {...profile};
   }
+  async function uploadAvatar(blob){
+    if(!(blob instanceof Blob)||blob.size<1||blob.size>2097152||blob.type!=='image/webp')
+      throw new Error('صورة الحساب يجب أن تكون WebP وبحجم لا يتجاوز 2 ميغابايت');
+    const id=session?.user?.id,generation=requestGeneration;
+    const token=await validToken();
+    if(!id||generation!==requestGeneration||id!==session?.user?.id)
+      throw new Error('انتهت الجلسة قبل رفع الصورة');
+    const imageId=crypto.randomUUID(),objectPath=id+'/'+imageId+'.webp';
+    const encoded=objectPath.split('/').map(encodeURIComponent).join('/');
+    const response=await fetch(origin+'/storage/v1/object/profile-avatars/'+encoded,{
+      method:'POST',headers:{
+        apikey:apiKey,Authorization:'Bearer '+token,
+        'Content-Type':'image/webp','x-upsert':'false'
+      },body:blob,credentials:'omit',cache:'no-store'
+    });
+    if(generation!==requestGeneration||id!==session?.user?.id)
+      throw new Error('تغير الحساب أثناء رفع الصورة');
+    if(!response.ok){
+      const payload=await response.json().catch(()=>({message:'تعذّر رفع الصورة'}));
+      throw apiError(payload,response.status);
+    }
+    const avatarUrl=origin+'/storage/v1/object/public/profile-avatars/'+encoded;
+    const result=await request('/rest/v1/profiles?id=eq.'+encodeURIComponent(id)+
+      '&select=id,display_name,bio,avatar_url,created_at,updated_at',{
+      method:'PATCH',accessToken:await validToken(),
+      body:{avatar_url:avatarUrl},prefer:'return=representation'
+    });
+    if(generation!==requestGeneration||id!==session?.user?.id)
+      throw new Error('تغير الحساب أثناء حفظ الصورة');
+    if(!Array.isArray(result)||result.length!==1||result[0].id!==id||
+      result[0].avatar_url!==avatarUrl)throw new Error('لم يؤكد الخادم حفظ صورة الحساب');
+    profile=result[0];notify();return {...profile};
+  }
   function emailValid(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)&&s.length<=254;}
   async function signUp({email,password,displayName}){
     email=String(email||'').trim().toLowerCase();
@@ -421,7 +454,7 @@
   }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
     verifySignup,readProfile,updateProfile,resume,refresh,requestData,voiceStorage,
-    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,
+    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,uploadAvatar,
     securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider});
   window.TotiPhase2Auth=api;
   if(typeof location!=='undefined'&&location.hostname==='localhost'){
