@@ -57,7 +57,7 @@ async function load(){
   '<button class="primary" type="submit">إرسال التذكرة</button></form>':'')+
   (isOwner?'<form data-t42-form="staff"><h4>صلاحيات موظفي الدعم · Owner فقط</h4>'+ 
    '<p>هذه الصلاحية للدعم والتذاكر فقط؛ لا تسمح بفتح وكالات أو شحن محافظ.</p>'+ 
-   '<label>معرّف حساب الموظف (UUID)<input type="text" name="user_id" required pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" maxlength="36"></label>'+ 
+   '<label>معرّف حساب الموظف (UUID)<input type="text" name="user_id" required pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" maxlength="36"></label>'+ 
    '<label>الإجراء<select name="decision"><option value="staff_grant">منح صلاحية الدعم</option><option value="staff_revoke">سحب صلاحية الدعم</option></select></label>'+ 
    '<button type="submit" class="primary">حفظ صلاحية الموظف</button></form>':'')+
   '<div data-t42-thread></div>';
