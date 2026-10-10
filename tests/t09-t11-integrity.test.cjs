@@ -33,6 +33,9 @@ test('T09 approved visual layers and 15-seat SQL range are preserved',()=>{
  for(const f of ['room-seats-finish.css','profile-stats-luxe.css','toti-nav-banner-refine.js'])assert(html.includes(f));
  assert(rooms.includes("const all=$$('.seats .seat',view);"));
  assert(rooms.includes('button.dataset.seat=String(slot)'));
+ assert(rooms.includes("button.classList.toggle('occupied',!!p)"),'Real refresh preserves approved decorative seat classes');
+ assert(rooms.includes("glyph.dataset.realSeatGlyph='';face.appendChild(glyph);"));
+ assert(!rooms.includes("button.className='seat'+(p?' occupied':'')"));
  const sql=fs.readFileSync(path.join(root,'supabase/migrations/20261009223845_phase2_rooms_chat_seats.sql'),'utf8');
  assert(sql.includes('seat_no between 1 and 15'));
 });
