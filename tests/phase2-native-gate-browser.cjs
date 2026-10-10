@@ -40,7 +40,7 @@ if(!executablePath)throw Error('System chromium unavailable');
   await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='loginPreview');
   assert.equal(await page.$('.royal-room-tile'),null,'No demo rooms displayed before login');
   assert.ok(await page.$('.tc-login-layout'),'Official responsive clean login must be mounted');
-  assert.equal(await page.$eval('.royal-nav,.bottom',items=>items.length),0,
+  assert.equal(await page.evaluate(()=>document.querySelectorAll('.royal-nav,.bottom').length),0,
     'No distracting bottom navigation on Login');
   assert.ok(await page.$('.tc-login-brand img'),'Approved official falcon must display');
   assert.match(await page.$eval('.tc-login-intro h1',x=>x.textContent),/مرحباً بعودتك/);
