@@ -9,6 +9,8 @@ on:
       - 'tests/free-landing.test.cjs'
       - 'scripts/inspect-google-auth-readiness.mjs'
       - 'tests/google-auth-readiness.test.cjs'
+      - 'scripts/inspect-google-authorize-preflight.mjs'
+      - 'tests/google-authorize-preflight.test.mjs'
       - '.github/workflows/free-landing-preview.yml'
   workflow_dispatch:
 permissions:
@@ -28,6 +30,10 @@ jobs:
         run: node --test tests/free-landing.test.cjs tests/google-auth-readiness.test.cjs tests/beta30-scope-freeze.test.cjs
       - name: Check public Google OAuth provider settings READ-ONLY (report only)
         run: node scripts/inspect-google-auth-readiness.mjs
+      - name: Test Google OAuth public redirect without login or Android build
+        run: |
+          node --test tests/google-authorize-preflight.test.mjs
+          node scripts/inspect-google-authorize-preflight.mjs
       - name: Publish only STATIC PREVIEW artifact, never an APK
         uses: actions/upload-artifact@v4
         with:

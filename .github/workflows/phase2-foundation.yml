@@ -62,6 +62,8 @@ jobs:
         run: |
           node scripts/check-beta-integrations.mjs --strict-source
           node --test tests/beta-integrations.test.cjs
+      - name: Offline Google PKCE authorization initiation safety tests
+        run: node --test tests/google-authorize-preflight.test.mjs
       - name: T48 block all APK builds before independently verified 80% readiness
         run: node --test tests/t48-no-apk-before-80.test.cjs tests/t48-release-threshold-matrix.test.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
