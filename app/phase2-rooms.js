@@ -300,8 +300,8 @@ function showCreate(){
   if(typeof showSheet!=='function')return;
   showSheet('<div class="tc-phase2-create" dir="rtl"><h3>🎙️ إنشاء غرفة حقيقية</h3>'+
     '<label>اسم الغرفة<input id="tc-phase2-room-title" maxlength="60" placeholder="اسم غرفتك"></label>'+
-    '<label class="tc-phase2-private"><input type="checkbox" id="tc-phase2-room-private"> غرفة خاصة بالمالك (الدعوات قيد التطوير)</label>'+
-    '<p>المقاعد والرسائل ستكون حقيقية. بث الصوت لم يُفعّل بعد.</p>'+
+    '<label class="tc-phase2-private"><input type="checkbox" id="tc-phase2-room-private"> غرفة خاصة بالدعوات</label>'+
+    '<p>الغرف والمقاعد والرسائل تُحفظ على الخادم. يتطلب الصوت إعداد الخدمة وإذن الميكروفون.</p>'+
     '<button class="primary" data-phase2="create-room-submit">إنشاء الغرفة</button>'+
     '<button class="primary" data-a="close">إلغاء</button></div>',true);
 }

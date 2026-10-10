@@ -19,6 +19,7 @@ const reply=data=>({status:200,contentType:'application/json',headers:{'access-c
   if(url.pathname==='/auth/v1/settings')return req.respond(reply({external:{}}));
   if(url.pathname==='/auth/v1/token')return req.respond(reply({access_token:'test-token',refresh_token:'test-refresh',expires_in:3600,user}));
   if(url.pathname==='/auth/v1/user')return req.respond(reply(user));
+  if(url.pathname==='/rest/v1/rpc/phase4_cp_state')return req.respond(reply({types:seed.cp_types,relations:[]}));
   const table=url.pathname.split('/').pop();
   if(table==='profiles')return req.respond(reply([{id:user.id,display_name:'Catalog Tester',bio:'',avatar_url:null}]));
   if(table==='wallets')return req.respond(reply([{user_id:user.id,coins:0,diamonds:0}]));
@@ -58,7 +59,7 @@ const reply=data=>({status:200,contentType:'application/json',headers:{'access-c
  await p.click('[data-catalog-action="gift-item"]');
  await p.waitForFunction(()=>document.querySelector('.sendrow')?.textContent.includes('تم تحديد'));
  assert.equal(await p.$eval('.sendrow button',e=>e.disabled),false);
- assert.equal(calls.some(c=>c.method!=='GET'&&c.method!=='OPTIONS'&&c.path.startsWith('/rest/v1/')),false,'Catalog selection cannot mutate backend');
+ assert.equal(calls.some(c=>c.method!=='GET'&&c.method!=='OPTIONS'&&c.path.startsWith('/rest/v1/')&&c.path!=='/rest/v1/rpc/phase4_cp_state'&&c.path!=='/rest/v1/rpc/phase4_verified_session'),false,'Catalog selection cannot mutate backend');
  assert.deepEqual(errors,[]);
  console.log('PASS: live catalog pages, 40 store items, search focus, 6 packs, 10 tiers, CP, recipient/gift selection and XSS protection.');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();});

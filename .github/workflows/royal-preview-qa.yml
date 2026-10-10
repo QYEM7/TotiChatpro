@@ -52,6 +52,9 @@ jobs:
       - name: Verify protected catalog administration contract
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase3-admin-browser.cjs
+      - name: Verify CP, redemption, receipts and XLSX UI contracts
+        if: github.ref == 'refs/heads/develop/phase-2'
+        run: node tests/phase4-browser.cjs
       - name: Verify Capacitor Android startup renders the actual Home page
         if: github.ref == 'refs/heads/develop/phase-2'
         run: |

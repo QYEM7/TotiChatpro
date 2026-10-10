@@ -102,7 +102,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   app=app.replace(/<script src="\.\/official-auth-screen\.js\?v=[^"]+"><\/script>/,'');
   assert.match(app,/phase2-voice-ui\.js\?v=/);
   app=app.replace(/<script src="\.\/phase2-voice-ui\.js\?v=[^"]+"><\/script>/,'');
-  for(const name of ['phase2-catalog-data','phase2-catalog-ui','phase2-security-ui','phase3-transfer-ui','phase3-admin-ui']){
+  for(const name of ['phase2-catalog-data','phase2-catalog-ui','phase2-security-ui','phase3-transfer-ui','phase3-admin-ui','phase4-cp-ui','phase4-redemption-ui','phase4-reports-ui','phase4-gift-receipts']){
     assert.ok(app.includes('<script src="./'+name+'.js?v='));
     app=app.replace(new RegExp('<script src="\\.\\/'+name+'\\.js\\?v=[^"]+"><\\/script>'),'');
   }

@@ -1,0 +1,2 @@
+PASS: live catalog pages, 40 store items, search focus, 6 packs, 10 tiers, CP, recipient/gift selection and XSS protection.
+PASS: server-authorized admin entry, schema-driven catalog edit, one idempotent RPC, mobile overflow and logout cleanup (browser contract).

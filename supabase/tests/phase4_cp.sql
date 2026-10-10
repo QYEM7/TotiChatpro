@@ -1,0 +1,34 @@
+begin;
+do $$
+declare a uuid:=gen_random_uuid();b uuid:=gen_random_uuid();c uuid:=gen_random_uuid();sa uuid:=gen_random_uuid();sb uuid:=gen_random_uuid();room uuid:=gen_random_uuid();key uuid:=gen_random_uuid();first jsonb;repeat_result jsonb;accepted jsonb;rejected boolean;
+begin
+ insert into auth.users(id,email,email_confirmed_at,is_anonymous) values(a,a::text||'@test.invalid',now(),false),(b,b::text||'@test.invalid',now(),false),(c,c::text||'@test.invalid',now(),false);
+ insert into auth.sessions(id,user_id) values(sa,a),(sb,b);
+ insert into public.gift_catalog(id,name,price,category_id,relationship_type_id,diamond_source_type) values('qa_cp_gift','Transactional CP test',20,'cp','love','FIXED_GIFT');
+ insert into public.rooms(id,owner_id,title) values(room,a,'CP SQL test');
+ insert into public.room_members(room_id,user_id) values(room,a),(room,b),(room,c);
+ update public.wallets set coins=1000 where user_id=a;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'session_id',sa,'aal','aal1')::text,true);
+ rejected:=false;begin perform public.phase3_send_gift(room,b,'qa_cp_gift',1,gen_random_uuid(),20);exception when others then rejected:=true;end;
+ if not rejected then raise exception 'CP gift without relationship accepted';end if;
+ first:=public.phase4_cp_action(b,'love','request',key);repeat_result:=public.phase4_cp_action(b,'love','request',key);
+ if first<>repeat_result then raise exception 'CP request idempotency';end if;
+ perform public.phase4_cp_action(c,'love','request',gen_random_uuid());
+ rejected:=false;begin perform public.phase4_cp_action(b,'love','accept',gen_random_uuid());exception when others then rejected:=true;end;if not rejected then raise exception 'Requester self-accepted';end if;
+ rejected:=false;begin perform public.phase3_send_gift(room,b,'qa_cp_gift',1,gen_random_uuid(),20);exception when others then rejected:=true;end;if not rejected then raise exception 'CP gift before acceptance';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',b,'session_id',sb,'aal','aal1')::text,true);
+ accepted:=public.phase4_cp_action(a,'love','accept',gen_random_uuid());
+ if accepted->>'accepted_at' is null or (select count(*) from phase3.cp_slots where relationship_id=(accepted->>'id')::uuid)<>2 then raise exception 'Bilateral CP slots missing';end if;
+ if exists(select 1 from public.cp_relationships where c in(user_a,user_b) and ended_at is null) then raise exception 'Incompatible pending request not closed';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'session_id',sa,'aal','aal1')::text,true);
+ rejected:=false;begin perform public.phase4_cp_action(c,'love','request',gen_random_uuid());exception when others then rejected:=true;end;if not rejected then raise exception 'Second partner accepted';end if;
+ rejected:=false;begin perform public.phase3_send_gift(room,c,'qa_cp_gift',1,gen_random_uuid(),20);exception when others then rejected:=true;end;if not rejected then raise exception 'Wrong CP recipient accepted';end if;
+ perform public.phase3_send_gift(room,b,'qa_cp_gift',1,gen_random_uuid(),20);
+ if (select gift_gold from public.cp_relationships where id=(accepted->>'id')::uuid)<>20 or (select coins from public.wallets where user_id=a)<>980 then raise exception 'CP gift transaction/progress';end if;
+ perform public.phase4_cp_action(b,'love','end',gen_random_uuid());
+ if exists(select 1 from phase3.cp_slots where relationship_id=(accepted->>'id')::uuid) then raise exception 'Ended CP retained slots';end if;
+ rejected:=false;begin perform public.phase3_send_gift(room,b,'qa_cp_gift',1,gen_random_uuid(),20);exception when others then rejected:=true;end;if not rejected then raise exception 'Ended CP gift accepted';end if;
+ if (select coins from public.wallets where user_id=a)<>980 then raise exception 'Failed CP gifts changed wallet';end if;
+end $$;
+rollback;
+select 'PASS: bilateral consent, idempotency, no self-acceptance, one partner/type, actual CP gift gating/progress, termination and rollback; fixtures rolled back' as result;

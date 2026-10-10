@@ -7,18 +7,21 @@
     "build": "node scripts/build-approved-web.mjs",
     "test:foundation": "node --test tests/phase2-foundation.test.mjs",
     "android:sync": "npm run build && npx cap sync android",
-    "android:init": "npm run build && npx cap add android"
+    "android:init": "npm run build && npx cap add android",
+    "test:real-e2e": "playwright test",
+    "check:services": "node scripts/check-service-readiness.mjs"
   },
   "dependencies": {
-    "@capacitor/core": "8.5.2",
     "@capacitor/android": "8.5.2",
     "@capacitor/app": "8.0.0",
     "@capacitor/browser": "8.0.0",
+    "@capacitor/core": "8.5.2",
     "livekit-client": "2.22.3"
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.2",
-    "typescript": "5.9.3",
-    "esbuild": "0.28.2"
+    "@playwright/test": "1.64.0",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
   }
 }

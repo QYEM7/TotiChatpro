@@ -36,6 +36,11 @@ jobs:
           node --check app/phase2-security-ui.js
           node --check app/phase3-transfer-ui.js
           node --check app/phase3-admin-ui.js
+          node --check app/phase4-cp-ui.js
+          node --check app/phase4-redemption-ui.js
+          node --check app/phase4-reports-ui.js
+          node --check app/phase4-gift-receipts.js
+          node --check e2e/critical-flow.spec.mjs
           node --check app/phase2-ui.js
           node --check app/phase2-live-mode.js
           node --check app/phase2-wallet.js

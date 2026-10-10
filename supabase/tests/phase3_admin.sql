@@ -22,7 +22,7 @@ begin
  perform set_config('request.jwt.claims',jsonb_build_object('sub',qa_owner,'session_id',so,'aal','aal1')::text,true);
  perform public.phase3_manage_access(regular,'super_admin','{}',true);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',regular,'session_id',sr,'aal','aal1')::text,true);
- a:=public.phase3_admin_session();if not (a->>'canManageHostAgencies')::boolean or (a->>'canManageRechargeAgencies')::boolean then raise exception 'Main partner permission boundary';end if;
+ a:=public.phase3_admin_session();if not (a->>'canManageHostAgencies')::boolean or not (a->>'canManageRechargeAgencies')::boolean then raise exception 'Main partner permission boundary';end if;
  perform public.phase3_catalog_list('gift_categories');
  perform public.phase3_catalog_write('gift_categories','delete',record_id,null,gen_random_uuid());
  if exists(select 1 from public.gift_categories where id=record_id) then raise exception 'Catalog delete';end if;

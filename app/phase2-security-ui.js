@@ -18,7 +18,9 @@ async function open(){
    '<button class="primary" data-security-action="enroll">إضافة تطبيق مصادقة</button><div data-security-enrollment></div>'+
    '<h4>الحسابات المرتبطة</h4><p>'+state.identities.map(i=>esc(i.provider)).join('، ')+'</p>'+['google','apple','facebook'].filter(p=>providers[p]&&!state.identities.some(i=>i.provider===p)).map(p=>'<button class="primary" data-security-action="link" data-provider="'+p+'">ربط '+p+'</button>').join('');
   void auth.requestData('/rest/v1/rpc/phase3_admin_session',{method:'POST',body:{}}).then(authority=>{
-   if(id!==generation||!node.isConnected||!authority?.canManageCatalogs)return;
+   if(id!==generation||!node.isConnected||!authority)return;
+   if(authority.canReadReports){const report=document.createElement('button');report.type='button';report.className='primary';report.dataset.reportsOpen='';report.textContent='التقارير والمعاملات';node.appendChild(report);}
+   if(!authority.canManageCatalogs)return;
    const button=document.createElement('button');button.type='button';button.className='primary';button.dataset.adminOpen='';button.textContent='إدارة الإعدادات';node.appendChild(button);
   }).catch(()=>{});
   status(auth.state().recoveryRequired?'أدخل كلمة مرور جديدة لإكمال الاستعادة':'تم تحميل إعدادات حسابك');
@@ -55,8 +57,11 @@ window.addEventListener('submit',event=>{
  });
 },true);
 window.addEventListener('totichat-auth-error',e=>{if(typeof showToast==='function')showToast(e.detail);});
-let recoveryShown=false;
+let recoveryShown=false,verifiedUser=null,verificationPending=null;
 window.addEventListener('totichat-phase2-auth',e=>{
+ const user=e.detail.user?.id;
+ if(!e.detail.signedIn){verifiedUser=null;verificationPending=null;}
+ if(user&&e.detail.profile&&verifiedUser!==user&&verificationPending!==user){verificationPending=user;void auth.requestData('/rest/v1/rpc/phase4_verified_session',{method:'POST',body:{}}).then(id=>{if(id===user&&auth.state().user?.id===user)verifiedUser=user;}).catch(()=>{}).finally(()=>{if(verificationPending===user)verificationPending=null;});}
  if(!e.detail.signedIn){generation++;factor=null;recoveryShown=false;document.querySelector('[data-security-sheet]')?.remove();}
  if(e.detail.recoveryRequired&&!recoveryShown){recoveryShown=true;setTimeout(()=>void open(),0);}
 });

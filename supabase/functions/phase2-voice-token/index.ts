@@ -44,6 +44,8 @@ Deno.serve(async(request:Request)=>{
     const {data:who,error:userError}=await db.auth.getUser();
     if(userError||!who.user)return json(401,{error:'INVALID_SESSION'});
     const userId=who.user.id;
+    const {data:verified,error:verificationError}=await db.rpc('phase4_verified_session');
+    if(verificationError||verified!==userId)return json(403,{error:'VERIFIED_SESSION_REQUIRED'});
     const [roomResult,memberResult]=await Promise.all([
       db.from('rooms').select('id,is_private').eq('id',roomId).maybeSingle(),
       db.from('room_members').select('room_id,user_id,seat_no,is_muted')

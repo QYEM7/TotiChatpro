@@ -12,3 +12,5 @@
 [data-wallet-transfer] .primary{min-height:44px}
 
 .tc-wallet-transfer{background:var(--card,#fff);color:var(--text,#302447);padding:16px;border-radius:18px;margin:12px 0}
+[data-redemption-panel] label,[data-live-catalog=cp] label{display:block;text-align:start;margin:10px 0}
+[data-redemption-panel] input,[data-live-catalog=cp] input,[data-live-catalog=cp] select{display:block;box-sizing:border-box;width:100%;max-width:100%;min-height:44px;margin-top:6px}
