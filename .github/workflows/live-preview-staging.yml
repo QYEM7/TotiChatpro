@@ -28,6 +28,15 @@ jobs:
         run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs
       - name: Assemble approved browser UI only (NEVER Gradle or APK)
         run: npm run build
+      - name: Smoke-build full approved website with SYNTHETIC isolated public config (never deploy)
+        env:
+          STAGING_SUPABASE_URL: https://abcdefghijklmnopqrst.supabase.co
+          STAGING_SUPABASE_PUBLISHABLE_KEY: sb_publishable_OFFLINE_FIXTURE_ONLY
+        run: |
+          node scripts/build-live-preview.mjs
+          node --check dist-live-preview/app/config.js
+          node --check dist-live-preview/app/phase2-live-mode.js
+          node -e "const s=require('./dist-live-preview/preview-status.json');if(!s.backend_isolated||s.release_allowed||s.apk_built!==false)process.exit(1)"
   publish-preview:
     needs: source-check
     if: ${{ vars.STAGING_SUPABASE_URL != '' && vars.STAGING_SUPABASE_PUBLISHABLE_KEY != '' }}

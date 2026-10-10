@@ -30,7 +30,7 @@ test('browser entry selects live mode without clearing OAuth code',()=>{
 test('staging build copy denies optional sample mode',()=>{
  const js="if(screen==='loginPreview'){ } if(action.dataset.liveEntry==='preview'){explicitPreview=true;}";
  const out=restrictDemoChoice(js);
- assert(out.includes("&& !window.TotiLivePreviewOnly"));
+ assert(out.includes("&&!window.TotiLivePreviewOnly"));
  assert(out.includes("if(window.TotiLivePreviewOnly)"));
  assert.throws(()=>restrictDemoChoice('unknown'));
 });
