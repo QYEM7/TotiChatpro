@@ -17,28 +17,36 @@ const CUSTOMER='5c4f8202-4400-4b2e-8000-333333333333';
   await page.goto('http://127.0.0.1:8765/t42-isolated-contract-fixture',{waitUntil:'domcontentloaded'});
   await page.setContent('<!doctype html><html lang="ar"><head><meta charset="UTF-8"></head><body><button data-support-open>Open support</button><div id="test-sheet"></div></body></html>');
   await page.evaluate(({OWNER,AGENT,CUSTOMER})=>{
-   window.__mock={uid:OWNER,owner:true,canHandle:true,calls:[],tickets:[],messages:new Map(),next:0};
+   window.__mock={uid:OWNER,owner:true,canHandle:true,calls:[],tickets:[],messages:new Map(),staff:[],next:0};
    window.TotiPhase2Auth={
     state:()=>({signedIn:!!window.__mock.uid,user:window.__mock.uid?{id:window.__mock.uid}:null}),
     requestData:async(path,{body})=>{
      const m=window.__mock;
      m.calls.push({path,body,uid:m.uid});
      if(path.endsWith('/phase3_admin_session'))return {isOwner:m.owner};
+     if(path.endsWith('/phase5_support_staff_list')){
+      if(!m.owner)throw Error('Owner only');
+      return {rows:m.staff.slice(body.p_offset||0,(body.p_offset||0)+(body.p_limit||50)),total:m.staff.length};
+     }
      if(path.endsWith('/phase5_support_list')){
       if(body.p_scope==='all'&&!m.canHandle)throw Error('Support scope denied');
       const rows=m.tickets.filter(t=>body.p_scope==='all'||t.creator_id===m.uid);
       return {rows,total:rows.length,canHandle:m.canHandle};
      }
-     if(path.endsWith('/phase5_support_thread')){
+     if(path.endsWith('/phase5_support_thread_page')){
       const ticket=m.tickets.find(t=>t.id===body.p_ticket_id);
       if(!ticket||(!m.canHandle&&ticket.creator_id!==m.uid))throw Error('Ticket not found');
-      return {ticket,messages:m.messages.get(ticket.id)||[],canHandle:m.canHandle};
+      const messages=m.messages.get(ticket.id)||[],offset=body.p_offset||0,limit=body.p_limit||30;
+      return {ticket,messages:[...messages].reverse().slice(offset,offset+limit).reverse(),total:messages.length,canHandle:m.canHandle};
      }
      if(path.endsWith('/phase5_support_action')){
       const act=body.p_action;
       if(['staff_grant','staff_revoke'].includes(act)){
        if(!m.owner)throw Error('Owner only');
-       return {id:body.p_data.user_id,enabled:act==='staff_grant'};
+       let rec=m.staff.find(s=>s.user_id===body.p_data.user_id);
+       if(!rec){rec={user_id:body.p_data.user_id,enabled:false,updated_at:new Date().toISOString()};m.staff.push(rec);}
+       rec.enabled=act==='staff_grant';
+       return {id:body.p_data.user_id,enabled:rec.enabled};
       }
       if(act==='create'){
        const id=crypto.randomUUID(),t={id,creator_id:m.uid,subject:body.p_data.subject,category:body.p_data.category,
@@ -85,6 +93,10 @@ const CUSTOMER='5c4f8202-4400-4b2e-8000-333333333333';
   const staffCall=await page.evaluate(()=>window.__mock.calls.find(c=>c.body?.p_action==='staff_grant'));
   assert.equal(staffCall.body.p_data.user_id,AGENT);
   assert.match(staffCall.body.p_request_id,/^[0-9a-f-]{36}$/i);
+  await page.waitForSelector('[data-t42="staff-revoke"]');
+  await page.click('[data-t42="staff-revoke"]');
+  await page.waitForFunction(()=>window.__mock.calls.some(c=>c.body?.p_action==='staff_revoke'));
+  await page.waitForFunction(()=>document.querySelector('[data-t42-staff-roster]')?.textContent.includes('مسحوب'));
 
   await page.evaluate(({uid})=>{window.__mock.uid=uid;window.__mock.owner=false;window.__mock.canHandle=true;window.dispatchEvent(new Event('totichat-phase2-auth'));},{uid:AGENT});
   await page.click('[data-support-open]');
@@ -105,6 +117,16 @@ const CUSTOMER='5c4f8202-4400-4b2e-8000-333333333333';
   await page.click('[data-t42-form="reply"] button[type="submit"]');
   await page.waitForFunction(()=>window.__mock.calls.some(c=>c.body?.p_action==='reply'));
   await page.waitForFunction(()=>document.querySelector('[data-t42-thread]')?.textContent.includes('Follow-up message'));
+  await page.evaluate(()=>{const t=window.__mock.tickets[0], messages=window.__mock.messages.get(t.id);
+    for(let i=0;i<45;i++)messages.push({author_id:t.creator_id,body:'Historical message '+i,created_at:new Date(Date.now()+i*1000).toISOString()});
+  });
+  await page.click('[data-t42="reload"]');
+  await page.waitForSelector('[data-t42="thread"]');
+  await page.click('[data-t42="thread"]');
+  await page.waitForSelector('[data-t42="thread"][data-offset="30"]');
+  await page.click('[data-t42="thread"][data-offset="30"]');
+  await page.waitForFunction(()=>document.querySelector('[data-t42-thread]')?.textContent.includes('Historical message 0'));
+  assert.equal(await page.$('[data-t42="thread"][data-offset="0"]')!==null,true);
   const create=await page.evaluate(()=>window.__mock.calls.find(c=>c.body?.p_action==='create'));
   assert.equal(create.body.p_data.category,'general');
   assert.equal(create.uid,CUSTOMER);
