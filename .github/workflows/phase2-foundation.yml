@@ -34,6 +34,7 @@ jobs:
           node --check app/phase2-rooms.js
           node --check app/phase2-auth.js
           node --check app/phase2-security-ui.js
+          node --check app/phase5-support-ui.js
           node --check app/phase3-transfer-ui.js
           node --check app/phase3-admin-ui.js
           node --check app/phase4-cp-ui.js
@@ -53,6 +54,8 @@ jobs:
           node --check tests/phase2-browser.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
         run: node --test tests/t06-voice-edge-limit.test.mjs
+      - name: T42 verify ticket privacy, real API UI wiring and role boundaries
+        run: node --test tests/t42-support-contract.test.cjs
       - name: T23 verify actual music bookmark and queue UI safety
         run: node --test tests/t23-music-ui.test.cjs
       - name: T17 verify foreground and reconnect room-state recovery
