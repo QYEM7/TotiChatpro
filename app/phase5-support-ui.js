@@ -59,16 +59,30 @@ async function load(){
    '<p>هذه الصلاحية للدعم والتذاكر فقط؛ لا تسمح بفتح وكالات أو شحن محافظ.</p>'+ 
    '<label>معرّف حساب الموظف (UUID)<input type="text" name="user_id" required pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" maxlength="36"></label>'+ 
    '<label>الإجراء<select name="decision"><option value="staff_grant">منح صلاحية الدعم</option><option value="staff_revoke">سحب صلاحية الدعم</option></select></label>'+ 
-   '<button type="submit" class="primary">حفظ صلاحية الموظف</button></form>':'')+
+   '<button type="submit" class="primary">حفظ صلاحية الموظف</button></form><div data-t42-staff-roster role="status">جارٍ تحميل قائمة الموظفين…</div>':'')+
   '<div data-t42-thread></div>';
   notify('تم تحميل البيانات الحقيقية من الخادم');
+  if(isOwner)void staffRoster(g,u);
  }catch(e){if(alive(g,u))notify('تعذّر تحميل خدمة الدعم: '+e.message);}
 }
-async function thread(id){
+async function staffRoster(g,u){
+ try{
+  const r=await rpc('staff_list',{p_offset:0,p_limit:50});
+  if(!alive(g,u)||!isOwner)return;
+  if(!Array.isArray(r.rows)||!Number.isInteger(r.total))throw Error('استجابة الموظفين غير صالحة');
+  const n=$('[data-t42-staff-roster]');if(!n)return;
+  n.innerHTML='<h4>حسابات الدعم ('+esc(r.total)+')</h4>'+
+    (r.rows.length?r.rows.map(s=>'<article><code>'+esc(s.user_id)+'</code> · '+(s.enabled?'مفعّل':'مسحوب')+
+    (s.enabled?'<button type="button" class="primary" data-t42="staff-revoke" data-id="'+esc(s.user_id)+'">سحب الصلاحية</button>':'')+
+    '</article>').join(''):'<p>ماكو حسابات دعم مضافة بعد.</p>')+
+    (r.total>50?'<p>تظهر أول 50 نتيجة فقط؛ يمكن إدارة حساب محدد من الحقل أعلاه.</p>':'');
+ }catch(e){if(alive(g,u)){const n=$('[data-t42-staff-roster]');if(n)n.textContent='تعذّر تحميل قائمة الموظفين: '+e.message;}}
+}
+async function thread(id,offset=0){
  const g=++generation,u=owner;
  notify('جارٍ فتح تفاصيل التذكرة…');
  try{
-  const data=await rpc('thread',{p_ticket_id:id});
+  const data=await rpc('thread_page',{p_ticket_id:id,p_offset:offset,p_limit:30});
   if(!alive(g,u)||!data.ticket||!Array.isArray(data.messages))return;
   selected=data.ticket;
   const n=$('[data-t42-thread]');if(!n)return;
@@ -76,6 +90,9 @@ async function thread(id){
   data.messages.map(m=>'<article><strong>'+(m.author_id===data.ticket.creator_id?'صاحب التذكرة':'الدعم الفني')+'</strong>'+
      '<p style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(m.body)+'</p>'+
      '<small>'+esc(new Date(m.created_at).toLocaleString('ar-IQ'))+'</small></article>').join('')+
+  '<p>رسائل '+esc(offset+1)+'–'+esc(offset+data.messages.length)+' من '+esc(data.total)+'</p>'+ 
+  (offset>0?'<button type="button" data-t42="thread" data-id="'+esc(id)+'" data-offset="0">أحدث الرسائل</button>':'')+
+  (offset+data.messages.length<data.total?'<button type="button" data-t42="thread" data-id="'+esc(id)+'" data-offset="'+esc(offset+30)+'">رسائل أقدم</button>':'')+
   (data.ticket.status!=='closed'?'<form data-t42-form="reply"><label>الرد<textarea name="message" minlength="2" maxlength="2500" required></textarea></label>'+
   '<button type="submit" class="primary">إرسال الرد</button></form>':'<p>هذه التذكرة مغلقة.</p>')+
   (data.canHandle?'<form data-t42-form="status"><label>حالة التذكرة<select name="status">'+
@@ -108,7 +125,12 @@ window.addEventListener('click',event=>{
  if(op==='scope'){scope=b.dataset.scope==='all'&&canHandle?'all':'mine';page=0;void load();return;}
  if(op==='previous'||op==='next'){page=Math.max(0,page+(op==='next'?1:-1));void load();return;}
  if(op==='reload'){void load();return;}
- if(op==='thread'&&b.dataset.id){void thread(b.dataset.id);}
+ if(op==='thread'&&b.dataset.id){void thread(b.dataset.id,Math.max(0,Number(b.dataset.offset)||0));return;}
+ if(op==='staff-revoke'&&isOwner&&b.dataset.id){
+   if(!confirm('تأكيد سحب صلاحية موظف الدعم المحدد؟'))return;
+   busy=true;void action('staff_revoke',{user_id:b.dataset.id})
+      .catch(e=>notify('تعذّر سحب الصلاحية: '+e.message)).finally(()=>{busy=false;});
+ }
 },true);
 window.addEventListener('submit',event=>{
  const form=event.target;if(!form.matches('[data-t42-form]'))return;
