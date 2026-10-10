@@ -249,7 +249,7 @@
     "id": "T42",
     "title": "Customer support and tickets",
     "status": "partial",
-    "evidence": "Private support tickets, authenticated user threads, audited idempotent actions, isolated staff permissions, account support UI and five-account rollback-only SQL acceptance source committed. Foundation CI green; Docker/Postgres acceptance and hosted deployment not yet proven."
+    "evidence": "Four private support tables; authenticated ticket list/thread/action RPC; Owner-only independent staff grants; real account support UI and CS roles without agency/financial permissions. Foundation CI 38058853187 green, disposable local Supabase full-stack SQL/5-user rollback CI 38058790264 green. Not applied to production; mobile two-user and SLA/notifications pending."
   },
   {
     "id": "T43",
