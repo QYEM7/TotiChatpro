@@ -19,7 +19,7 @@ if(!auth||typeof window.render!=='function'){
 }
 let explicitPreview=false;
 const authScreens=new Set(['loginPreview','signupPreview','verifyAccountPreview','passwordResetPreview']);
-const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview',...authScreens]);
+const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview','musicPreview',...authScreens]);
 const $=(q,root=document)=>root.querySelector(q);
 const $$=(q,root=document)=>Array.from(root.querySelectorAll(q));
 let lastNotice='';
