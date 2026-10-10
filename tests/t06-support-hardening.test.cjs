@@ -23,3 +23,14 @@ test('T06 rollback fixture exercises 20th and 21st action, retry and redaction',
  for(const phrase of ['T06 21st support mutation bypassed limit','T06 raw private user content duplicated','T06 replay past rate limit failed'])
   assert(fixture.includes(phrase));
 });
+
+test('T06 financial recharge API serialises verified actor before existing ledger logic',()=>{
+ const file=fs.readFileSync('supabase/migrations/20261010194500_t06_recharge_serial_actor.sql','utf8');
+ assert(file.includes('create or replace function public.phase4_recharge_action'));
+ assert(file.includes('u uuid:=phase3.actor()'));
+ assert(file.indexOf('pg_advisory_xact_lock')<file.indexOf('return phase3.recharge_action'));
+ assert(!file.includes('update public.wallets')&&!file.includes('update phase3.coin_issuance'));
+ const testFixture=fs.readFileSync('supabase/tests/t06_recharge_serial_actor.sql','utf8');
+ assert(testFixture.includes('Cash issuance reference already used'));
+ assert(testFixture.includes('rollback;'));
+});
