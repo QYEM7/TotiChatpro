@@ -14,6 +14,7 @@ test('T48 no push auto-build; release review is mandatory before JDK/Gradle',()=
 test('T48 both app engineering and real beta readiness >=80, with recovery & two phones',()=>{
  assert(gate.includes('report.engineering_percent<80'));
  assert(gate.includes('report.beta_readiness_percent<80'));
+ assert(gate.includes("verified.length<40"), '40 of 50 live verified tasks mandatory');
  for(const key of ['production_backup_restore','two_physical_android_phones','financial_conservation_and_month_close'])
   assert(gate.includes(key));
 });
