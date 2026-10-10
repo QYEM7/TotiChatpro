@@ -3,300 +3,400 @@
     "id": "T01",
     "title": "DB migration parity",
     "status": "tested_local",
-    "evidence": "32 applied versions matched and replayed; full database snapshot not proved"
+    "evidence": "32 applied versions matched and replayed; full database snapshot not proved",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T02",
     "title": "143-commit Git audit and rollback",
     "status": "tested_local",
-    "evidence": "143 commits and 137 files inventoried; code branches checkpointed"
+    "evidence": "143 commits and 137 files inventoried; code branches checkpointed",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "لا نكرر جرد Git؛ فقط الحفاظ على نقاط الاسترجاع والسلامة."
   },
   {
     "id": "T03",
     "title": "Isolated staging and credentials",
     "status": "partial",
-    "evidence": "Disposable full-stack Auth/REST/Realtime/Storage DB integration and isolated PostgreSQL backup/recovery CI 38062789341; real Storage avatar+private voice byte-restore CI 38063377960. Persistent independent HOSTED Staging not created (Supabase Free/0 branches); remains partial."
+    "evidence": "Disposable full-stack Auth/REST/Realtime/Storage DB integration and isolated PostgreSQL backup/recovery CI 38062789341; real Storage avatar+private voice byte-restore CI 38063377960. Persistent independent HOSTED Staging not created (Supabase Free/0 branches); remains partial.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T04",
     "title": "RLS and privileged RPC audit",
     "status": "tested_local",
-    "evidence": "Found 5 unindexed FKs with read-only live Supabase performance advisor, confirmed their column names, added pending forward-only indexes and verified all are usable without privilege widening in isolated CI 38062181018; 32 historical production migrations remain immutable and all public RLS audits locally tested. Production load and hosted migration acceptance incomplete."
+    "evidence": "Found 5 unindexed FKs with read-only live Supabase performance advisor, confirmed their column names, added pending forward-only indexes and verified all are usable without privilege widening in isolated CI 38062181018; 32 historical production migrations remain immutable and all public RLS audits locally tested. Production load and hosted migration acceptance incomplete.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T05",
     "title": "Owner lock and AAL2",
     "status": "partial",
-    "evidence": "Local role/session tests passed; no real Owner account enrolled"
+    "evidence": "Local role/session tests passed; no real Owner account enrolled",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T06",
     "title": "Rate limits and audit logs",
     "status": "partial",
-    "evidence": "T06 agency-action 30/min critical section now transaction-serialized INSIDE direct-callable phase3.agency_action. Real local GoTrue + concurrent PostgREST acceptance CI 38066242936: Owner 2 reviews + 28 parallel edits created precisely 30 audit requests; 31st new request refused. Support 20/min and Owner treasury/recharge 30/min concurrency tests also passed CI 38064686350/38065706706. Still PARTIAL: distributed/hosted abuse controls and independent security audit pending."
+    "evidence": "T06 agency-action 30/min critical section now transaction-serialized INSIDE direct-callable phase3.agency_action. Real local GoTrue + concurrent PostgREST acceptance CI 38066242936: Owner 2 reviews + 28 parallel edits created precisely 30 audit requests; 31st new request refused. Support 20/min and Owner treasury/recharge 30/min concurrency tests also passed CI 38064686350/38065706706. Still PARTIAL: distributed/hosted abuse controls and independent security audit pending.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "نكتفي بحماية المعاملات والتدقيق الأساسي؛ نؤجل تحليلات مكافحة الغش المتقدمة."
   },
   {
     "id": "T07",
     "title": "Git branch CI protection",
     "status": "blocked",
-    "evidence": "Both main/develop unprotected; Rulesets 0; repository admin permissions needed"
+    "evidence": "Both main/develop unprotected; Rulesets 0; repository admin permissions needed",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T08",
     "title": "Live phone preview",
     "status": "blocked",
-    "evidence": "Vercel scope 403; GitHub debug APK exists but no authorized hosted preview"
+    "evidence": "Vercel scope 403; GitHub debug APK exists but no authorized hosted preview",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "معاينة أو صفحة اختبار أساسية فقط؛ لا منصة جديدة معقدة."
   },
   {
     "id": "T09",
     "title": "UI UX screen and responsive QA",
     "status": "partial",
-    "evidence": "Chromium browser checks succeeded at 320/360/390/430/768/1280px; screenshots and preserved approved VIP seat CSS/classes verified. Physical Android accessibility/IME remains unverified."
+    "evidence": "Chromium browser checks succeeded at 320/360/390/430/768/1280px; screenshots and preserved approved VIP seat CSS/classes verified. Physical Android accessibility/IME remains unverified.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "نصلح عيوب الواجهة التي تمنع الاستخدام ونحافظ على هوية الغرف؛ لا إعادة تصميم."
   },
   {
     "id": "T10",
     "title": "Remove production mocks",
     "status": "partial",
-    "evidence": "Closed demo URL override in both phase2-live-mode.js and phase2-ui.js; native sign-in regression passes even with phase2Demo=1. Other preview-only frontend content still requires audit."
+    "evidence": "Closed demo URL override in both phase2-live-mode.js and phase2-ui.js; native sign-in regression passes even with phase2Demo=1. Other preview-only frontend content still requires audit.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T11",
     "title": "All controls functional states",
     "status": "partial",
-    "evidence": "Signed-in Royal categories no longer navigate to fake users/games or hide real rooms; a room directory 503 now shows Retry and recovers; stale loading on account switch/exit guarded. Full button inventory not complete."
+    "evidence": "Signed-in Royal categories no longer navigate to fake users/games or hide real rooms; a room directory 503 now shows Retry and recovers; stale loading on account switch/exit guarded. Full button inventory not complete.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "نجرد الأزرار في نطاق البيتا ونثبتها؛ لا توسيع ميزات خارج النطاق."
   },
   {
     "id": "T12",
     "title": "Email registration SMTP recovery",
     "status": "partial",
-    "evidence": "Auth REST integration coded and local GoTrue tested; SMTP unconfigured"
+    "evidence": "Auth REST integration coded and local GoTrue tested; SMTP unconfigured",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T13",
     "title": "Google Apple Facebook OAuth",
     "status": "blocked",
-    "evidence": "Callback code exists, provider secrets and device callbacks unverified"
+    "evidence": "Callback code exists, provider secrets and device callbacks unverified",
+    "beta_30d_scope": "paused_after_beta",
+    "beta_30d_scope_note": "تسجيل البريد الآمن يكفي للبيتا؛ OAuth متعدد المزودين لا يفتح حتى تُعتمد أسراره واختبارات العودة."
   },
   {
     "id": "T14",
     "title": "Real profile identity",
     "status": "partial",
-    "evidence": "Authenticated 512x512 WebP avatar upload in PUBLIC bucket, RLS owner path, real disposable GoTrue user tests; local destructive Storage byte-restore/owner-vs-outsider checks additionally passed CI 38063377960. Unapplied production migration, real devices not tested; remains partial."
+    "evidence": "Authenticated 512x512 WebP avatar upload in PUBLIC bucket, RLS owner path, real disposable GoTrue user tests; local destructive Storage byte-restore/owner-vs-outsider checks additionally passed CI 38063377960. Unapplied production migration, real devices not tested; remains partial.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T15",
     "title": "Session MFA logout security",
     "status": "partial",
-    "evidence": "Revocation/AAL gates tested local; real user MFA/device still missing"
+    "evidence": "Revocation/AAL gates tested local; real user MFA/device still missing",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T16",
     "title": "Create join private rooms",
     "status": "partial",
-    "evidence": "DB RPC rollback tests exist; hosted two-user test pending"
+    "evidence": "DB RPC rollback tests exist; hosted two-user test pending",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T17",
     "title": "Realtime room list presence",
     "status": "partial",
-    "evidence": "Authenticated Supabase Realtime Postgres Changes WebSocket implementation verified with two real disposable GoTrue JWT users, public room INSERT emitted and received under existing RLS. Foreground/online recovery, token updates and 7.5s polling fallback. Pending publication migration not applied to production; two physical Android tests still missing."
+    "evidence": "Authenticated Supabase Realtime Postgres Changes WebSocket implementation verified with two real disposable GoTrue JWT users, public room INSERT emitted and received under existing RLS. Foreground/online recovery, token updates and 7.5s polling fallback. Pending publication migration not applied to production; two physical Android tests still missing.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T18",
     "title": "15 mic seats and moderation",
     "status": "partial",
-    "evidence": "15-seat SQL RPC tested; device microphone policies unproven"
+    "evidence": "15-seat SQL RPC tested; device microphone policies unproven",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T19",
     "title": "In-room chat and moderation",
     "status": "partial",
-    "evidence": "Chat SQL tested local; multi-user abuse and moderation pending"
+    "evidence": "Chat SQL tested local; multi-user abuse and moderation pending",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T20",
     "title": "LiveKit SFU TURN tokens",
     "status": "blocked",
-    "evidence": "Voice token Edge code deployed, but LIVEKIT/TURN service settings not verified"
+    "evidence": "Voice token Edge code deployed, but LIVEKIT/TURN service settings not verified",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T21",
     "title": "Two-phone live voice",
     "status": "blocked",
-    "evidence": "No two physical Android devices tested"
+    "evidence": "No two physical Android devices tested",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T22",
     "title": "Voice messages stored securely",
     "status": "partial",
-    "evidence": "Private voice bucket actual local binary upload, room member authenticated read, outsider/public denial, delete and SHA256-restored audio bytes passed CI 38063377960 using non-playable WebM test fixture and genuine local GoTrue room membership. This is not recorded/playable audio acceptance, hosted staging/physical devices still pending; remains partial."
+    "evidence": "Private voice bucket actual local binary upload, room member authenticated read, outsider/public denial, delete and SHA256-restored audio bytes passed CI 38063377960 using non-playable WebM test fixture and genuine local GoTrue room membership. This is not recorded/playable audio acceptance, hosted staging/physical devices still pending; remains partial.",
+    "beta_30d_scope": "paused_after_beta",
+    "beta_30d_scope_note": "الرسائل الصوتية المسجلة إضافة غير لازمة للمكالمات المباشرة؛ لا تُحذف ملفاتها أو واجهتها."
   },
   {
     "id": "T23",
     "title": "Synchronized music playlists",
     "status": "partial",
-    "evidence": "Real account music bookmarks and owner-managed room queue metadata implemented; approved UI preserved; two-device synchronized licensed audio playback not available; migration pending production."
+    "evidence": "Real account music bookmarks and owner-managed room queue metadata implemented; approved UI preserved; two-device synchronized licensed audio playback not available; migration pending production.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "تشغيل موسيقى محفوظة ومتزامنة بمحتوى مرخّص فقط إن أمكن مجاناً؛ لا مكتبة موسيقى تجارية."
   },
   {
     "id": "T24",
     "title": "Atomic wallet ledger",
     "status": "partial",
-    "evidence": "SQL rollback tests for transfers/gifts exist; adversarial hosted load missing"
+    "evidence": "SQL rollback tests for transfers/gifts exist; adversarial hosted load missing",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T25",
     "title": "Gift selection recipient send",
     "status": "partial",
-    "evidence": "Gifts and ledger code exists; complete physical UI run unverified"
+    "evidence": "Gifts and ledger code exists; complete physical UI run unverified",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T26",
     "title": "Luck gifts probability and audit",
     "status": "blocked",
-    "evidence": "Certified probability/payout system not verified"
+    "evidence": "Certified probability/payout system not verified",
+    "beta_30d_scope": "paused_after_beta",
+    "beta_30d_scope_note": "مضاعفات هدايا الحظ والمخاطر الاحتمالية تُجمّد حتى التوثيق والتدقيق؛ الهدايا الأساسية مطلوبة."
   },
   {
     "id": "T27",
     "title": "Store and inventory",
     "status": "partial",
-    "evidence": "Catalog/ownership SQL and tests exist; complete mobile acceptance pending"
+    "evidence": "Catalog/ownership SQL and tests exist; complete mobile acceptance pending",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "المتجر والحقيبة لعناصر الهدايا وVIP المدعومة في البيتا فقط؛ لا توسع كتالوج."
   },
   {
     "id": "T28",
     "title": "P2P coins",
     "status": "partial",
-    "evidence": "Local conservation/idempotency tests passed; real-account E2E pending"
+    "evidence": "Local conservation/idempotency tests passed; real-account E2E pending",
+    "beta_30d_scope": "paused_after_beta",
+    "beta_30d_scope_note": "تحويل العملات بين المستخدمين P2P غير لازم للشحن اليدوي عبر وكيل؛ يبقى الكود دون توسيع."
   },
   {
     "id": "T29",
     "title": "Owner treasury issuance",
     "status": "partial",
-    "evidence": "Local REAL concurrent Owner cash issuance test with disposable GoTrue/PostgREST/Postgres CI 38065706706 confirms 6 same-key simultaneous requests create one ledger issue; 4 different keys sharing cash reference mint once; 28 parallel distinct refs produce 30 successful issues, 46 synthetic coins balanced in Owner treasury and issuance ledgers; 31st refused. Subsequent synthetic 500-coin Owner issuance and allocation to Recharge Agent through real RPC also passed. No real receipt, hosted deployment or real cash bank reconciliation; PARTIAL."
+    "evidence": "Local REAL concurrent Owner cash issuance test with disposable GoTrue/PostgREST/Postgres CI 38065706706 confirms 6 same-key simultaneous requests create one ledger issue; 4 different keys sharing cash reference mint once; 28 parallel distinct refs produce 30 successful issues, 46 synthetic coins balanced in Owner treasury and issuance ledgers; 31st refused. Subsequent synthetic 500-coin Owner issuance and allocation to Recharge Agent through real RPC also passed. No real receipt, hosted deployment or real cash bank reconciliation; PARTIAL.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T30",
     "title": "Agency reseller recharge cash",
     "status": "partial",
-    "evidence": "Local end-to-end RESSELLER flow via genuine disposable GoTrue Owner, recharge agent and customer, plus real agency request/Owner approval, synthetic 500 Owner coins allocated to agent, simulated 7-coin customer topup. Six concurrent same-key approvals credited once; customer self-approval and agent mint denied; different-key double approval refused. SQL state: Owner 0 / agent 493 / customer 7 with exact 500 conservation and wallet ledger/receipt link, CI 38065706706. NOT real cash receipt, production users, regulated IAP or hosted acceptance. PARTIAL."
+    "evidence": "Local end-to-end RESSELLER flow via genuine disposable GoTrue Owner, recharge agent and customer, plus real agency request/Owner approval, synthetic 500 Owner coins allocated to agent, simulated 7-coin customer topup. Six concurrent same-key approvals credited once; customer self-approval and agent mint denied; different-key double approval refused. SQL state: Owner 0 / agent 493 / customer 7 with exact 500 conservation and wallet ledger/receipt link, CI 38065706706. NOT real cash receipt, production users, regulated IAP or hosted acceptance. PARTIAL.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T31",
     "title": "Recharge packages bonuses",
     "status": "partial",
-    "evidence": "Catalog/reward SQL exists; business acceptance and load testing pending"
+    "evidence": "Catalog/reward SQL exists; business acceptance and load testing pending",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "باقات شحن محدودة بأسعار معتمدة، بدون محرك مكافآت متقدم."
   },
   {
     "id": "T32",
     "title": "CP relationships levels",
     "status": "partial",
-    "evidence": "CP DB tests/UI exist; all status rules not accepted on devices"
+    "evidence": "CP DB tests/UI exist; all status rules not accepted on devices",
+    "beta_30d_scope": "paused_after_beta",
+    "beta_30d_scope_note": "الخصائص المتقدمة لعلاقات CP تُجمّد؛ الحفاظ على الرسوم والواجهة وعدم إعلان ميزة غير فعّالة."
   },
   {
     "id": "T33",
     "title": "Diamonds 30 percent redemption",
     "status": "partial",
-    "evidence": "Redemption SQL and UI contracts exist; real user test pending"
+    "evidence": "Redemption SQL and UI contracts exist; real user test pending",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T34",
     "title": "Host agency application via support",
     "status": "partial",
-    "evidence": "Host agency registration/Owner review via real disposable GoTrue + PostgREST verified in CI 38066242936 including six same-key parallel registration requests yielding one application and separate Owner approvals; older support ticket path locally exercised. Formal request-to-customer-service-to-owner operational approval, tickets/notification/SLA and hosted validation are NOT fully integrated. PARTIAL."
+    "evidence": "Host agency registration/Owner review via real disposable GoTrue + PostgREST verified in CI 38066242936 including six same-key parallel registration requests yielding one application and separate Owner approvals; older support ticket path locally exercised. Formal request-to-customer-service-to-owner operational approval, tickets/notification/SLA and hosted validation are NOT fully integrated. PARTIAL.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "طلب وكالة المضيفين من خدمة العملاء ثم مراجعة واعتماد بشرية؛ بدون أتمتة توزيع متقدمة."
   },
   {
     "id": "T35",
     "title": "Host transfers and exception",
     "status": "partial",
-    "evidence": "REAL disposable GoTrue/PostgREST 5-actor acceptance CI 38066242936: six duplicate concurrent register requests persisted one host-agency registration, Owner opened two separate host agencies, initial join accepted, host transfer created pending_old; premature new-agent acceptance and outsider/host approval refused. Six parallel old-agent same-key approvals advanced pending_new once; six new-agent same-key acceptances moved the host once, with verified old_approved_by/accepted_by and single membership, new-key duplicate accept denied. Existing investigated exception/immutable historical gift SQL rollback tests also green. Pending migration 20261010202000, NOT deployed to production, real hosted CS/legal review and device tests remain; status PARTIAL."
+    "evidence": "REAL disposable GoTrue/PostgREST 5-actor acceptance CI 38066242936: six duplicate concurrent register requests persisted one host-agency registration, Owner opened two separate host agencies, initial join accepted, host transfer created pending_old; premature new-agent acceptance and outsider/host approval refused. Six parallel old-agent same-key approvals advanced pending_new once; six new-agent same-key acceptances moved the host once, with verified old_approved_by/accepted_by and single membership, new-key duplicate accept denied. Existing investigated exception/immutable historical gift SQL rollback tests also green. Pending migration 20261010202000, NOT deployed to production, real hosted CS/legal review and device tests remain; status PARTIAL.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "اعتماد الانتقال القديم والجديد ومسار تظلم استثنائي بشري موثق؛ لا ذكاء آلي."
   },
   {
     "id": "T36",
     "title": "Monthly payroll and safe zeroing",
     "status": "partial",
-    "evidence": "Approved historical monthly diamond preflight remains NON-MUTATING: SQL phase5_host_month_preflight restricted to Owner/designated main partner and closed UTC months; now has a live-mode agency UI with 50-record paging, server-derived amounts and explicit no payroll/rates/clearing, rejects current/future month and stale sessions. Isolated Chromium browser QA PASS 38063822554; isolated PostgreSQL Owner vs extra Super Admin rollback previously passed. Migration still unapplied in production, true monthly salary/agent entitlements and safe clearing NOT implemented. Remains partial."
+    "evidence": "Approved historical monthly diamond preflight remains NON-MUTATING: SQL phase5_host_month_preflight restricted to Owner/designated main partner and closed UTC months; now has a live-mode agency UI with 50-record paging, server-derived amounts and explicit no payroll/rates/clearing, rejects current/future month and stale sessions. Isolated Chromium browser QA PASS 38063822554; isolated PostgreSQL Owner vs extra Super Admin rollback previously passed. Migration still unapplied in production, true monthly salary/agent entitlements and safe clearing NOT implemented. Remains partial.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "الكشف الشهري ومراجعة الرواتب يدوياً ثم حفظ الالتزامات نهائياً وتصفيـر آمن فقط بعد ذلك."
   },
   {
     "id": "T37",
     "title": "VIP1 through VIP10",
     "status": "partial",
-    "evidence": "VIP visuals/catalog present; fully enforced tiers not verified"
+    "evidence": "VIP visuals/catalog present; fully enforced tiers not verified",
+    "beta_30d_scope": "paused_after_beta",
+    "beta_30d_scope_note": "توسيع منافع VIP وشرائحها غير لازم الآن؛ الإطارات والتصميم المعتمدان يبقيان كما هما دون منح مزايا وهمية."
   },
   {
     "id": "T38",
     "title": "Owner main partner and admin roles",
     "status": "partial",
-    "evidence": "SQL owner/partner negative tests pass locally; live Owner absent"
+    "evidence": "SQL owner/partner negative tests pass locally; live Owner absent",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T39",
     "title": "Restricted host-agency management",
     "status": "partial",
-    "evidence": "The SQL host-agency permission path and existing approval flow kept unchanged; disposable 5-actor concurrency test CI 38066242936 confirms the Owner can approve host agency applications and ordinary outsiders/hosts cannot authorize old-agent consent, with original old/new approval distinction. No extra Super Admin or DB employee given rights; explicit main-partner-only hosted test still pending; PARTIAL."
+    "evidence": "The SQL host-agency permission path and existing approval flow kept unchanged; disposable 5-actor concurrency test CI 38066242936 confirms the Owner can approve host agency applications and ordinary outsiders/hosts cannot authorize old-agent consent, with original old/new approval distinction. No extra Super Admin or DB employee given rights; explicit main-partner-only hosted test still pending; PARTIAL.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T40",
     "title": "Users rooms VIP moderation dashboard",
     "status": "partial",
-    "evidence": "Admin catalog features exist; full management not proven"
+    "evidence": "Admin catalog features exist; full management not proven",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "لوحة Owner ومشرف أساسية للتحكم بالمستخدمين والغرف والدعم؛ لا إدارة موارد بشرية موسعة."
   },
   {
     "id": "T41",
     "title": "Finance/admin pricing and audit",
     "status": "partial",
-    "evidence": "RPC and catalog control exists; cash/price acceptance pending"
+    "evidence": "RPC and catalog control exists; cash/price acceptance pending",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "نكتفي بعمليات خزينة وشحن متحكم بها وسجل غير قابل للتغيير الصامت؛ لا نظام بنكي كامل."
   },
   {
     "id": "T42",
     "title": "Customer support and tickets",
     "status": "partial",
-    "evidence": "Real authenticated support ticket RPC and UI with Owner-only staff roster/grant/revoke and 30-message paging. T42 20/min genuine concurrent HTTP test against disposable GoTrue/PostgREST CI 38064686350 proves duplicate request idempotency, quota, second-user isolation and outsider IDOR denial; previous isolated Chromium 38061220445 + SQL rollback CI passed. STILL PARTIAL: migrations pending hosted deployment, staff notifications, SLA and real two-phone user flow missing."
+    "evidence": "Real authenticated support ticket RPC and UI with Owner-only staff roster/grant/revoke and 30-message paging. T42 20/min genuine concurrent HTTP test against disposable GoTrue/PostgREST CI 38064686350 proves duplicate request idempotency, quota, second-user isolation and outsider IDOR denial; previous isolated Chromium 38061220445 + SQL rollback CI passed. STILL PARTIAL: migrations pending hosted deployment, staff notifications, SLA and real two-phone user flow missing.",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "تذاكر وردود وتخصيص موظفين؛ لا SLA/تنبيهات متعددة الطبقات."
   },
   {
     "id": "T43",
     "title": "Admin reports exports stats",
     "status": "partial",
-    "evidence": "Reports SQL and CSV UI exist; management dataset acceptance pending"
+    "evidence": "Reports SQL and CSV UI exist; management dataset acceptance pending",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "كشوف مالية وشهرية أساسية وتصدير محمي؛ تأجيل التحليلات المتقدمة."
   },
   {
     "id": "T44",
     "title": "Solo and multiplayer in-room games",
     "status": "blocked",
-    "evidence": "Server game service not integrated while preserving audio/seat"
+    "evidence": "Server game service not integrated while preserving audio/seat",
+    "beta_30d_scope": "paused_after_beta",
+    "beta_30d_scope_note": "الألعاب الفردية والجماعية تؤجل هذه الجولة؛ لا حذف أو إخفاء صامت للزر والتصميم، ولا واجهة تدّعي التشغيل."
   },
   {
     "id": "T45",
     "title": "Battery RAM performance",
     "status": "blocked",
-    "evidence": "Physical Android RAM/battery benchmarks not recorded; 5 missing FK covering indexes identified from live advisor and verified only on disposable PostgreSQL, not production. Performance and load testing on actual devices still blocked."
+    "evidence": "Physical Android RAM/battery benchmarks not recorded; 5 missing FK covering indexes identified from live advisor and verified only on disposable PostgreSQL, not production. Performance and load testing on actual devices still blocked.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T46",
     "title": "Authorization pentest IDOR replay",
     "status": "partial",
-    "evidence": "Isolated PostgreSQL role/IDOR negative tests plus new genuine parallel HTTP with two real disposable GoTrue users: outsider cannot view/reply to another customer's support ticket or self-appoint as staff, conflicting idempotency denied (CI 38064686350). Not a substitute for independent pentest/hosted production authorization audits; remains PARTIAL."
+    "evidence": "Isolated PostgreSQL role/IDOR negative tests plus new genuine parallel HTTP with two real disposable GoTrue users: outsider cannot view/reply to another customer's support ticket or self-appoint as staff, conflicting idempotency denied (CI 38064686350). Not a substitute for independent pentest/hosted production authorization audits; remains PARTIAL.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T47",
     "title": "Full two-device E2E and regressions",
     "status": "blocked",
-    "evidence": "Credentials/hosted staging and real physical device tests missing"
+    "evidence": "Credentials/hosted staging and real physical device tests missing",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T48",
     "title": "Signed APK AAB install",
     "status": "partial",
-    "evidence": "APK builds are frozen on develop: no push build, manual release gate requires explicit Owner approval, release_allowed, both engineering+beta >=80, 40/50 live-verified tasks and independently reviewable DB AND Storage recovery evidence, plus two-phone voice/finance/security/mobile. T49 Storage gate proof in foundation CI 38062861141. Historical debug APK predates freeze; no new APK built. Real signed AAB/install remains unproven."
+    "evidence": "APK builds are frozen on develop: no push build, manual release gate requires explicit Owner approval, release_allowed, both engineering+beta >=80, 40/50 live-verified tasks and independently reviewable DB AND Storage recovery evidence, plus two-phone voice/finance/security/mobile. T49 Storage gate proof in foundation CI 38062861141. Historical debug APK predates freeze; no new APK built. Real signed AAB/install remains unproven.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T49",
     "title": "Observability backup and recovery",
     "status": "blocked",
-    "evidence": "Disposable unlinked Supabase pg_dump/restore to separate local DB preserves fake ledgers, 1,200 fake coins, 155 fake unpaid diamond entitlements and RLS (CI 38062789341). New REAL local Supabase Storage API drill uploaded/deleted/restored byte-for-byte both PUBLIC avatar WebP and PRIVATE room audio WebM fixtures with SHA256 matching, genuine disposable GoTrue room member read and outsider/public denial (CI 38063377960). These prove local backup+restore mechanism, NOT a production/offsite DB or Storage restore or RPO/RTO. Production stage/backup remain blocked."
+    "evidence": "Disposable unlinked Supabase pg_dump/restore to separate local DB preserves fake ledgers, 1,200 fake coins, 155 fake unpaid diamond entitlements and RLS (CI 38062789341). New REAL local Supabase Storage API drill uploaded/deleted/restored byte-for-byte both PUBLIC avatar WebP and PRIVATE room audio WebM fixtures with SHA256 matching, genuine disposable GoTrue room member read and outsider/public denial (CI 38063377960). These prove local backup+restore mechanism, NOT a production/offsite DB or Storage restore or RPO/RTO. Production stage/backup remain blocked.",
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
   },
   {
     "id": "T50",
     "title": "True 30-day beta",
     "status": "blocked",
-    "evidence": "Cannot begin before signing, providers, two-device E2E, recovery and Owner acceptance"
+    "evidence": "Cannot begin before signing, providers, two-device E2E, recovery and Owner acceptance",
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "تجربة 30 يوماً صغيرة مع مراقبة الأعطال، بدون برنامج نمو وتسويق واسع."
   }
 ]
