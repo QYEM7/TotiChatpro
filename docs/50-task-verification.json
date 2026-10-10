@@ -249,7 +249,7 @@
     "id": "T42",
     "title": "Customer support and tickets",
     "status": "partial",
-    "evidence": "Four private support tables; authenticated ticket list/thread/action RPC; Owner-only independent staff grants; real account support UI and CS roles without agency/financial permissions. Foundation CI 38058853187 green, disposable local Supabase full-stack SQL/5-user rollback CI 38058790264 green. Not applied to production; mobile two-user and SLA/notifications pending."
+    "evidence": "Authenticated audited private ticket backend and account support UI; Owner-only real support staff grant/revoke interface; stale account authorization guarded. Five-identity PostgreSQL rollback CI 38058790264, frontend foundation CI 38059820406 and isolated Chromium customer/staff/Owner workflow CI 38059820436 passed after UUID format fix. STILL PARTIAL: five migrations pending production; two-phone hosted verification, notifications, SLA and staff list pending."
   },
   {
     "id": "T43",
