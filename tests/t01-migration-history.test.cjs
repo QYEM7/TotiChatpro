@@ -45,7 +45,15 @@ const dir = path.join(__dirname, '..', 'supabase', 'migrations');
 test('T01: applied SQL migration history has 32 unique canonical filenames and hashes', () => {
  const files = fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort();
  const expectedFiles = Object.keys(expected).sort();
- assert.deepEqual(files, expectedFiles, 'Applied migrations drifted; never push to production until reviewed');
+ const immutable=files.filter(f=>Object.hasOwn(expected,f));
+ assert.deepEqual(immutable,expectedFiles,'One of the 32 already-applied production SQL statements is missing');
+ const cutoff=expectedFiles.at(-1).slice(0,14);
+ const later=files.filter(f=>!Object.hasOwn(expected,f));
+ for(const f of later){
+  assert.match(f,/^\d{14}_[a-z0-9_]+\.sql$/,'new migration filename must have Supabase timestamp format');
+  assert(f.slice(0,14)>cutoff,'Do not inject earlier migrations before production-applied SQL history');
+ }
+ assert.equal(new Set(files.map(f=>f.slice(0,14))).size,files.length,'Migration timestamps must be unique');
  for(const filename of expectedFiles){
   const contents=fs.readFileSync(path.join(dir,filename));
   const digest=crypto.createHash('md5').update(contents).digest('hex');

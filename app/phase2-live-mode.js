@@ -8,7 +8,9 @@ const params=new URLSearchParams(location.search);
 const isNative=(location.protocol==='https:'&&location.hostname==='localhost')||
   !!window.Capacitor?.isNativePlatform?.();
 const enabled=params.get('mode')==='live'||isNative;
-if(!enabled||params.get('phase2Demo')==='1')return;
+// URL query parameters must never bypass the live account flow in a native build.
+// Deliberate design-preview entry remains available through the labelled login UI.
+if(!enabled)return;
 const auth=window.TotiPhase2Auth;
 if(!auth||typeof window.render!=='function'){
   // Do not silently treat backend failures as demo success.
