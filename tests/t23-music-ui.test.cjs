@@ -17,7 +17,7 @@ test('T23 no fake playing, audio transport or blind HTML interpolation',()=>{
  assert(ui.includes('label.textContent=item.title'));
  assert(ui.includes("element.closest('.t23-music-form')"));
  assert(ui.includes('textContent'));
- assert(html.includes('phase5-music-ui.js'));
+ assert(fs.readFileSync(root+'phase4-voice-messages-ui.js','utf8').includes('phase5-music-ui.js'));
 });
 test('T23 signed-in app keeps room screen and mic; Owner queues songs',()=>{
  assert(live.includes("'musicPreview',...authScreens"));

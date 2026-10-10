@@ -175,4 +175,5 @@ setInterval(()=>{
  if(visible&&!loading)void load(false);
 },8000);
 window.TotiPhase5Music=Object.freeze({isInstalled:()=>true,refresh:()=>load(true)});
+queueMicrotask(mount);
 })();
