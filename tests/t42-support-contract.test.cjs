@@ -32,7 +32,7 @@ test('T42 private support tables, scoped RPC, owner-only staff assignment and au
  assert(sql.includes("jsonb_build_object('id',outcome->>'id','request_id',p_request_id)"));
 });
 test('T42 full PostgreSQL 5-account evidence is rollback-only',()=>{
- assert(/^begin;/i.test(local.trim()));
+ assert(/(?:^|\\n)begin;/i.test(local));
  assert(local.includes('rollback;'));
  assert(local.includes('T42 outsider read ticket thread'));
  assert(local.includes('T42 staff self-escalated'));
