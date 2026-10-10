@@ -1,0 +1,24 @@
+{
+  "name": "TotiChatpro — Phone Live Preview",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "forwardPorts": [
+    3000
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "TotiChatpro — live UI",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": "npm install --global live-server@1.2.2",
+  "postStartCommand": "bash -lc 'nohup live-server --host=0.0.0.0 --port=3000 --no-browser > /tmp/totichatpro-preview.log 2>&1 < /dev/null &'",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.wordWrap": "on",
+        "editor.minimap.enabled": false,
+        "workbench.startupEditor": "none"
+      }
+    }
+  }
+}
