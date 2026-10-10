@@ -14,6 +14,11 @@
       "url": null,
       "notes": "No verified external snapshot and restore."
     },
+    "storage_object_backup_restore": {
+      "passed": false,
+      "url": null,
+      "notes": "Supabase DB backups do not contain actual Storage object bytes; no verified offsite object backup, restore and private-bucket access checks."
+    },
     "independent_staging": {
       "passed": false,
       "url": null,
