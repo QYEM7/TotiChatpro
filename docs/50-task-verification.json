@@ -15,7 +15,7 @@
     "id": "T03",
     "title": "Isolated staging and credentials",
     "status": "partial",
-    "evidence": "Disposable isolated full-stack Supabase migrations/Auth/REST/Storage plus local PostgreSQL pg_dump/pg_restore drill passes CI 38062789341; separate production-grade hosted staging is NOT deployed. Supabase org confirmed Free and project has zero branches; paid setup not authorized. Stays partial."
+    "evidence": "Disposable full-stack Auth/REST/Realtime/Storage DB integration and isolated PostgreSQL backup/recovery CI 38062789341; real Storage avatar+private voice byte-restore CI 38063377960. Persistent independent HOSTED Staging not created (Supabase Free/0 branches); remains partial."
   },
   {
     "id": "T04",
@@ -81,7 +81,7 @@
     "id": "T14",
     "title": "Real profile identity",
     "status": "partial",
-    "evidence": "Real authenticated profile avatar save exists: WebP 512x512 conversion and up to 2 MB upload in private user-owned Storage object path of intentionally PUBLIC avatar bucket. Two real disposable GoTrue users, RLS upload denial and read-back passed. Pending migration unapplied in production; real mobile acceptance incomplete."
+    "evidence": "Authenticated 512x512 WebP avatar upload in PUBLIC bucket, RLS owner path, real disposable GoTrue user tests; local destructive Storage byte-restore/owner-vs-outsider checks additionally passed CI 38063377960. Unapplied production migration, real devices not tested; remains partial."
   },
   {
     "id": "T15",
@@ -129,7 +129,7 @@
     "id": "T22",
     "title": "Voice messages stored securely",
     "status": "partial",
-    "evidence": "Database/storage flow and browser contracts exist; two device acceptance pending"
+    "evidence": "Private voice bucket actual local binary upload, room member authenticated read, outsider/public denial, delete and SHA256-restored audio bytes passed CI 38063377960 using non-playable WebM test fixture and genuine local GoTrue room membership. This is not recorded/playable audio acceptance, hosted staging/physical devices still pending; remains partial."
   },
   {
     "id": "T23",
@@ -213,7 +213,7 @@
     "id": "T36",
     "title": "Monthly payroll and safe zeroing",
     "status": "partial",
-    "evidence": "Owner/main-partner-only immutable-source historical diamonds preflight implemented, non-mutating; salaries, durable month-close snapshot, cash settlement and balance zeroing NOT implemented; migration pending production."
+    "evidence": "Approved historical monthly diamond preflight remains NON-MUTATING: SQL phase5_host_month_preflight restricted to Owner/designated main partner and closed UTC months; now has a live-mode agency UI with 50-record paging, server-derived amounts and explicit no payroll/rates/clearing, rejects current/future month and stale sessions. Isolated Chromium browser QA PASS 38063822554; isolated PostgreSQL Owner vs extra Super Admin rollback previously passed. Migration still unapplied in production, true monthly salary/agent entitlements and safe clearing NOT implemented. Remains partial."
   },
   {
     "id": "T37",
@@ -291,7 +291,7 @@
     "id": "T49",
     "title": "Observability backup and recovery",
     "status": "blocked",
-    "evidence": "Reusable T49 pg_dump -Fc / pg_restore mechanism with temporary scratch-source corruption and restore to a distinct disposable LOCAL database passed CI 38062789341; SQL checked 1,200 fake coins, ledger equality, 155 fake unpaid diamonds, foreign keys, RLS and no table grant widening. No production access, dump not uploaded and trap cleans scratch. Local mechanism verified; production-derived export, independent offsite restore, actual Storage object backup and byte restore, PITR and hosted RPO/RTO STILL NOT VERIFIED. Supabase project org Free with no branching; remains BLOCKED."
+    "evidence": "Disposable unlinked Supabase pg_dump/restore to separate local DB preserves fake ledgers, 1,200 fake coins, 155 fake unpaid diamond entitlements and RLS (CI 38062789341). New REAL local Supabase Storage API drill uploaded/deleted/restored byte-for-byte both PUBLIC avatar WebP and PRIVATE room audio WebM fixtures with SHA256 matching, genuine disposable GoTrue room member read and outsider/public denial (CI 38063377960). These prove local backup+restore mechanism, NOT a production/offsite DB or Storage restore or RPO/RTO. Production stage/backup remain blocked."
   },
   {
     "id": "T50",
