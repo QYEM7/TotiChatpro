@@ -53,6 +53,8 @@ jobs:
           node --check tests/phase2-browser.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
         run: node --test tests/t06-voice-edge-limit.test.mjs
+      - name: T23 verify actual music bookmark and queue UI safety
+        run: node --test tests/t23-music-ui.test.cjs
       - name: T17 verify foreground and reconnect room-state recovery
         run: node --test tests/t17-room-foreground.test.cjs
       - name: T09/T11 verify real login and honest live room actions

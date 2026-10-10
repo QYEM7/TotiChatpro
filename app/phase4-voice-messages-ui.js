@@ -58,3 +58,14 @@ window.addEventListener('totichat-phase2-auth',()=>{if(sheetOwner&&sheetOwner!==
 window.addEventListener('totichat-real-room-state',()=>{if(sheetRoom&&sheetRoom!==state().room)cleanup();});
 window.addEventListener('click',e=>{if(e.target.closest('[data-a="close"]')&&document.querySelector('[data-voice-message-sheet]'))cleanup();},true);
 })();
+
+/* T23 independent module: injected from the last approved script in the
+ * original HTML, so original approved HTML stays byte-for-byte unchanged. */
+(function(){
+ const base=document.currentScript?.src;
+ if(!base)return;
+ const node=document.createElement('script');
+ node.src=new URL('./phase5-music-ui.js?v=t23-real-music-20261010-1',base).href;
+ node.onerror=()=>console.warn('T23 music module unavailable; no demo playback used');
+ document.head.appendChild(node);
+})();
