@@ -2,12 +2,12 @@
   "project": "TotiChatpro",
   "branch": "develop/phase-2",
   "updated": "2026-10-10",
-  "engineering_percent": 53,
+  "engineering_percent": 54,
   "beta_readiness_percent": 15,
   "release_allowed": false,
   "reviewer": null,
   "verified_date": null,
-  "notes": "Evidence-based estimate only; explicit Owner review + independent signed live user and restore evidence required. Do not increase percentages without evidence.",
+  "notes": "Directional 54% engineering after tested support staff roster/history pagination and >=80% APK release gate; Beta stays 15% because hosted staging, backup restore, two-device voice and financial month close remain unverified. Evidence links are recorded in the fifth report.",
   "evidence": {
     "production_backup_restore": {
       "passed": false,
