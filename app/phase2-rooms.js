@@ -324,7 +324,7 @@ async function leaveRoom(){
   try{
     await window.TotiRealVoice?.disconnect?.();
     await rpc('phase2_room_leave',{p_room_id:room.id});
-    active=null;members=[];messages=[];sequence++;
+    active=null;members=[];messages=[];sequence++;loadingRooms=null;roomListError='';
     if(typeof closeSheet==='function')closeSheet();
     minimizedRoom=false;rooms=null;
     go('home');void listRooms();
