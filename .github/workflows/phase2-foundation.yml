@@ -35,6 +35,7 @@ jobs:
           node --check app/phase2-auth.js
           node --check app/phase2-security-ui.js
           node --check app/phase5-support-ui.js
+          node --check tests/t42-support-browser.cjs
           node --check app/phase3-transfer-ui.js
           node --check app/phase3-admin-ui.js
           node --check app/phase4-cp-ui.js
