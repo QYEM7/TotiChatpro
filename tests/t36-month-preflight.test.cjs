@@ -1,0 +1,28 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const ui=fs.readFileSync('app/phase4-agencies-ui.js','utf8');
+const sql=fs.readFileSync('supabase/migrations/20261010160500_t36_host_month_preflight.sql','utf8');
+test('T36 Owner/main partner preview is read-only and not a payout form',()=>{
+ assert(ui.includes("if(!mayManage('host')"));
+ assert(ui.includes("'/rest/v1/rpc/phase5_host_month_preflight'"));
+ assert(ui.includes("p_month:monthPeriod+'-01'"));
+ assert(ui.includes('data-agency-month-section'));
+ assert(ui.includes('data-agency-month-results'));
+ assert(ui.includes('data-agency-action="month-next"'));
+ assert(ui.includes('data-agency-action="month-prev"'));
+ assert(ui.includes("data?.canZeroDiamonds!==false"));
+ assert(ui.includes("data?.paysSalaries!==false"));
+ assert(ui.includes("data?.hasPayrollRates!==false"));
+ assert(ui.includes("monthGeneration++"));
+ assert(!ui.includes('phase5_host_month_close'));
+ assert(!ui.includes('zero_month'));
+});
+test('T36 database only permits approved principals and closed UTC months',()=>{
+ assert(sql.includes("phase3.admin_session()"));
+ assert(sql.includes("canManageHostAgencies"));
+ assert(sql.includes("p_month>=date_trunc('month',now() at time zone 'UTC')::date"));
+ assert(sql.includes("'isDraftPreflight',true"));
+ assert(sql.includes("'canZeroDiamonds',false"));
+ assert(sql.includes("'paysSalaries',false"));
+ assert(sql.includes("'hasPayrollRates',false"));
+});
