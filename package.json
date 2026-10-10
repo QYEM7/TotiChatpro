@@ -9,7 +9,9 @@
     "android:sync": "npm run build && npx cap sync android",
     "android:init": "npm run build && npx cap add android",
     "test:real-e2e": "playwright test",
-    "check:services": "node scripts/check-service-readiness.mjs"
+    "check:services": "node scripts/check-service-readiness.mjs",
+    "build:staging": "npm run build && node scripts/prepare-staging-preview.mjs",
+    "test:real-e2e:staging": "npm run build:staging && playwright test"
   },
   "dependencies": {
     "@capacitor/android": "8.5.2",

@@ -1,3 +1,8 @@
 import './scripts/load-local-env.mjs';
 import {defineConfig} from '@playwright/test';
-export default defineConfig({testDir:'./e2e',fullyParallel:false,workers:1,retries:0,timeout:90000,globalSetup:'./e2e/readiness.mjs',reporter:[['list'],['json',{outputFile:'playwright-report/real-results.json'}]],use:{baseURL:process.env.E2E_BASE_URL||'http://127.0.0.1:8765',headless:true,trace:'off',screenshot:'only-on-failure',video:'off',launchOptions:{executablePath:process.env.CHROME_BIN||undefined,args:['--no-sandbox']}},webServer:process.env.E2E_BASE_URL?undefined:{command:'python3 -m http.server 8765 --bind 127.0.0.1',url:'http://127.0.0.1:8765/app/',reuseExistingServer:false,timeout:15000}});
+export default defineConfig({
+ testDir:'./e2e',fullyParallel:false,workers:1,retries:0,timeout:90000,globalSetup:'./e2e/readiness.mjs',
+ reporter:[['list'],['json',{outputFile:'playwright-report/real-results.json'}]],
+ use:{baseURL:process.env.E2E_BASE_URL||'http://127.0.0.1:8765',headless:true,trace:'off',screenshot:'only-on-failure',video:'off',launchOptions:{executablePath:process.env.CHROME_BIN||undefined,args:['--no-sandbox']}},
+ webServer:process.env.E2E_BASE_URL?undefined:{command:'python3 -m http.server 8765 --bind 127.0.0.1 --directory dist',url:'http://127.0.0.1:8765/app/',reuseExistingServer:false,timeout:15000}
+});
