@@ -1,0 +1,302 @@
+[
+  {
+    "id": "T01",
+    "title": "DB migration parity",
+    "status": "tested_local",
+    "evidence": "32 applied versions matched and replayed; full database snapshot not proved"
+  },
+  {
+    "id": "T02",
+    "title": "143-commit Git audit and rollback",
+    "status": "tested_local",
+    "evidence": "143 commits and 137 files inventoried; code branches checkpointed"
+  },
+  {
+    "id": "T03",
+    "title": "Isolated staging and credentials",
+    "status": "partial",
+    "evidence": "Ephemeral Auth/REST/Storage working; persistent hosted staging deferred"
+  },
+  {
+    "id": "T04",
+    "title": "RLS and privileged RPC audit",
+    "status": "tested_local",
+    "evidence": "45 tables RLS on; local catalog permissions and rollback tests passed"
+  },
+  {
+    "id": "T05",
+    "title": "Owner lock and AAL2",
+    "status": "partial",
+    "evidence": "Local role/session tests passed; no real Owner account enrolled"
+  },
+  {
+    "id": "T06",
+    "title": "Rate limits and audit logs",
+    "status": "partial",
+    "evidence": "Stored financial ops limited and idempotent; denied/API attempts not gated"
+  },
+  {
+    "id": "T07",
+    "title": "Git branch CI protection",
+    "status": "blocked",
+    "evidence": "Both main/develop unprotected; Rulesets 0; repository admin permissions needed"
+  },
+  {
+    "id": "T08",
+    "title": "Live phone preview",
+    "status": "blocked",
+    "evidence": "Vercel scope 403; GitHub debug APK exists but no authorized hosted preview"
+  },
+  {
+    "id": "T09",
+    "title": "UI UX screen and responsive QA",
+    "status": "partial",
+    "evidence": "Approved design assets preserved; full manual device checklist pending"
+  },
+  {
+    "id": "T10",
+    "title": "Remove production mocks",
+    "status": "partial",
+    "evidence": "Native demo-URL bypass blocked; some legacy preview-only data remains"
+  },
+  {
+    "id": "T11",
+    "title": "All controls functional states",
+    "status": "partial",
+    "evidence": "Selected rooms/economy flows linked; unconnected controls explicitly warned"
+  },
+  {
+    "id": "T12",
+    "title": "Email registration SMTP recovery",
+    "status": "partial",
+    "evidence": "Auth REST integration coded and local GoTrue tested; SMTP unconfigured"
+  },
+  {
+    "id": "T13",
+    "title": "Google Apple Facebook OAuth",
+    "status": "blocked",
+    "evidence": "Callback code exists, provider secrets and device callbacks unverified"
+  },
+  {
+    "id": "T14",
+    "title": "Real profile identity",
+    "status": "partial",
+    "evidence": "Profile SQL/CRUD exists and local Auth creates profile"
+  },
+  {
+    "id": "T15",
+    "title": "Session MFA logout security",
+    "status": "partial",
+    "evidence": "Revocation/AAL gates tested local; real user MFA/device still missing"
+  },
+  {
+    "id": "T16",
+    "title": "Create join private rooms",
+    "status": "partial",
+    "evidence": "DB RPC rollback tests exist; hosted two-user test pending"
+  },
+  {
+    "id": "T17",
+    "title": "Realtime room list presence",
+    "status": "partial",
+    "evidence": "Directory fetch exists; real-time multi-device proof pending"
+  },
+  {
+    "id": "T18",
+    "title": "15 mic seats and moderation",
+    "status": "partial",
+    "evidence": "15-seat SQL RPC tested; device microphone policies unproven"
+  },
+  {
+    "id": "T19",
+    "title": "In-room chat and moderation",
+    "status": "partial",
+    "evidence": "Chat SQL tested local; multi-user abuse and moderation pending"
+  },
+  {
+    "id": "T20",
+    "title": "LiveKit SFU TURN tokens",
+    "status": "blocked",
+    "evidence": "Voice token Edge code deployed, but LIVEKIT/TURN service settings not verified"
+  },
+  {
+    "id": "T21",
+    "title": "Two-phone live voice",
+    "status": "blocked",
+    "evidence": "No two physical Android devices tested"
+  },
+  {
+    "id": "T22",
+    "title": "Voice messages stored securely",
+    "status": "partial",
+    "evidence": "Database/storage flow and browser contracts exist; two device acceptance pending"
+  },
+  {
+    "id": "T23",
+    "title": "Synchronized music playlists",
+    "status": "blocked",
+    "evidence": "Real shared music synchronization and persistent playlist not verified"
+  },
+  {
+    "id": "T24",
+    "title": "Atomic wallet ledger",
+    "status": "partial",
+    "evidence": "SQL rollback tests for transfers/gifts exist; adversarial hosted load missing"
+  },
+  {
+    "id": "T25",
+    "title": "Gift selection recipient send",
+    "status": "partial",
+    "evidence": "Gifts and ledger code exists; complete physical UI run unverified"
+  },
+  {
+    "id": "T26",
+    "title": "Luck gifts probability and audit",
+    "status": "blocked",
+    "evidence": "Certified probability/payout system not verified"
+  },
+  {
+    "id": "T27",
+    "title": "Store and inventory",
+    "status": "partial",
+    "evidence": "Catalog/ownership SQL and tests exist; complete mobile acceptance pending"
+  },
+  {
+    "id": "T28",
+    "title": "P2P coins",
+    "status": "partial",
+    "evidence": "Local conservation/idempotency tests passed; real-account E2E pending"
+  },
+  {
+    "id": "T29",
+    "title": "Owner treasury issuance",
+    "status": "partial",
+    "evidence": "SQL/T06 test validates ledger idempotency, actual cash workflow untested"
+  },
+  {
+    "id": "T30",
+    "title": "Agency reseller recharge cash",
+    "status": "partial",
+    "evidence": "RPC exists; external cash/reference reconciliation E2E untested"
+  },
+  {
+    "id": "T31",
+    "title": "Recharge packages bonuses",
+    "status": "partial",
+    "evidence": "Catalog/reward SQL exists; business acceptance and load testing pending"
+  },
+  {
+    "id": "T32",
+    "title": "CP relationships levels",
+    "status": "partial",
+    "evidence": "CP DB tests/UI exist; all status rules not accepted on devices"
+  },
+  {
+    "id": "T33",
+    "title": "Diamonds 30 percent redemption",
+    "status": "partial",
+    "evidence": "Redemption SQL and UI contracts exist; real user test pending"
+  },
+  {
+    "id": "T34",
+    "title": "Host agency application via support",
+    "status": "partial",
+    "evidence": "Agency register and review RPC exists; formal CS journey needs validation"
+  },
+  {
+    "id": "T35",
+    "title": "Host transfers and exception",
+    "status": "partial",
+    "evidence": "Old-agent consent & exceptional transfer rollback tests exist"
+  },
+  {
+    "id": "T36",
+    "title": "Monthly payroll and safe zeroing",
+    "status": "blocked",
+    "evidence": "Month-close durable entitlements and authorized zeroing not verified"
+  },
+  {
+    "id": "T37",
+    "title": "VIP1 through VIP10",
+    "status": "partial",
+    "evidence": "VIP visuals/catalog present; fully enforced tiers not verified"
+  },
+  {
+    "id": "T38",
+    "title": "Owner main partner and admin roles",
+    "status": "partial",
+    "evidence": "SQL owner/partner negative tests pass locally; live Owner absent"
+  },
+  {
+    "id": "T39",
+    "title": "Restricted host-agency management",
+    "status": "partial",
+    "evidence": "Main-partner role logic exists; DB delegated workflow needs validation"
+  },
+  {
+    "id": "T40",
+    "title": "Users rooms VIP moderation dashboard",
+    "status": "partial",
+    "evidence": "Admin catalog features exist; full management not proven"
+  },
+  {
+    "id": "T41",
+    "title": "Finance/admin pricing and audit",
+    "status": "partial",
+    "evidence": "RPC and catalog control exists; cash/price acceptance pending"
+  },
+  {
+    "id": "T42",
+    "title": "Customer support and tickets",
+    "status": "blocked",
+    "evidence": "Complete CRM/support ticket backend and moderation SLA not verified"
+  },
+  {
+    "id": "T43",
+    "title": "Admin reports exports stats",
+    "status": "partial",
+    "evidence": "Reports SQL and CSV UI exist; management dataset acceptance pending"
+  },
+  {
+    "id": "T44",
+    "title": "Solo and multiplayer in-room games",
+    "status": "blocked",
+    "evidence": "Server game service not integrated while preserving audio/seat"
+  },
+  {
+    "id": "T45",
+    "title": "Battery RAM performance",
+    "status": "blocked",
+    "evidence": "No physical Android performance budget/measurements recorded"
+  },
+  {
+    "id": "T46",
+    "title": "Authorization pentest IDOR replay",
+    "status": "partial",
+    "evidence": "Local RLS/role tests pass; adversarial independent review missing"
+  },
+  {
+    "id": "T47",
+    "title": "Full two-device E2E and regressions",
+    "status": "blocked",
+    "evidence": "Credentials/hosted staging and real physical device tests missing"
+  },
+  {
+    "id": "T48",
+    "title": "Signed APK AAB install",
+    "status": "partial",
+    "evidence": "Debug APK CI builds; signed AAB and install acceptance not proven"
+  },
+  {
+    "id": "T49",
+    "title": "Observability backup and recovery",
+    "status": "blocked",
+    "evidence": "Git rollback exists; no verified full production DB restore/PITR"
+  },
+  {
+    "id": "T50",
+    "title": "True 30-day beta",
+    "status": "blocked",
+    "evidence": "Cannot begin before signing, providers, two-device E2E, recovery and Owner acceptance"
+  }
+]
