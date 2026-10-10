@@ -54,7 +54,7 @@ test('T42 extended staff roster and bounded message paging keep SQL authorizatio
  assert(ui.includes("rpc('thread_page'"));
  assert(ui.includes('data-t42-staff-roster'));
  assert(ui.includes('data-offset='));
- assert(/(?:^|\\n)begin;/i.test(sqlTest));
+ assert(sqlTest.split('\n').some(line=>line.trim().toLowerCase()==='begin;'));
  assert(sqlTest.includes('rollback;'));
  assert(sqlTest.includes('T42 outsider can page a private ticket'));
  assert(sqlTest.includes('T42 revoked staff retained ticket history access'));
