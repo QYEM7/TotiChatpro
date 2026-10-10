@@ -26,3 +26,15 @@ Date: 2026-10-10. Repository: QYEM7/TotiChatpro / develop/phase-2.
 - Production use is blocked until rollout validation, recoverability and permissions review.
 
 No production tables, wallets, rooms, diamonds or historical records were changed by T42.
+
+## Follow-up: Owner staff management and real browser behavior verified
+- Added a real Owner-only support-staff assignment form in the support sheet. The Owner can grant or revoke support permission by the verified account UUID. No financial/agency authorization is assigned in this workflow.
+- The Owner capability is fetched from `phase3_admin_session` and checked on the server again by `phase5_support_action`; an old async capability response is ignored after a user/account/dialog change.
+- A dedicated quick Chromium workflow was added for customer ticket creation and response, Owner staff grant, non-owner restriction, all-inbox visibility, logout removal, and mobile viewport width using isolated API fixtures. No fake records are inserted into production.
+- Chrome acceptance exposed an input typo: UUID was validated as 8-4-4-4-4-12 rather than 8-4-4-4-12. Corrected in commit `a756e3289b06`.
+- Latest [isolated Chromium T42 QA](https://github.com/QYEM7/TotiChatpro/actions/runs/38059820436): **PASS**.
+- Latest [foundation CI](https://github.com/QYEM7/TotiChatpro/actions/runs/38059820406): **PASS**.
+- Local disposable five-actor PostgreSQL transaction replay remains previously [PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38058790264); it is unchanged by this UI-only follow-up.
+- Full Royal browser suite and APK rebuild are checked separately; passing unit/sandbox tests does not prove live device acceptance.
+
+Remaining: Support staff inventory, SLA, escalation, message paging, hosted staging and two physical Android accounts; T42 stays **partial**.
