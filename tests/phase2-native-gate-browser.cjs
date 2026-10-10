@@ -35,7 +35,7 @@ if(!executablePath)throw Error('System chromium unavailable');
    },body:JSON.stringify(response)});
   });
   // Force the identical live startup behavior on the local HTTP test origin.
-  await page.goto('http://127.0.0.1:8765/dist/?mode=live',{waitUntil:'domcontentloaded'});
+  await page.goto('http://127.0.0.1:8765/dist/?mode=live&phase2Demo=1',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('#app.rf-app');
   await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='loginPreview');
   assert.equal(await page.$('.royal-room-tile'),null,'No demo rooms displayed before login');
@@ -60,6 +60,11 @@ if(!executablePath)throw Error('System chromium unavailable');
   await page.waitForFunction(()=>window.TotiPhase2Auth?.state()?.profile?.display_name==='الحساب الحقيقي');
   await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='home');
   await page.waitForFunction(()=>window.TotiPhase2Rooms?.getStatus()?.roomCount===0);
+  assert.equal(await page.evaluate(()=>window.TotiLiveMode?.enabled),true,'Demo URL must not disable real Auth');
+  const games=await page.$('[data-royal="category"][data-cat="games"]');
+  assert.ok(games,'Approved games button must stay visible');
+  await games.click();
+  assert.equal(await page.$eval('#app',e=>e.dataset.route),'home','Live games button cannot enter fake room');
   assert.equal(await page.$$eval('.royal-room-gallery .royal-room-tile',i=>i.length),0,
    'Signed-in user sees zero real rooms instead of six fake ones');
   assert.ok(await page.$('#tc-phase2-online-state'),'Live UI states supported capabilities clearly');
