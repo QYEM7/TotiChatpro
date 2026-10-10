@@ -28,12 +28,12 @@
       "id": "google_oauth",
       "provider": "Google OAuth via Supabase",
       "purpose": "Only beta login",
-      "stage": "provider_setup_unverified",
+      "stage": "owner_reports_console_oauth_client_and_supabase_provider_configured_live_validation_pending",
       "billing": "no_card_for_oauth_setup",
       "enable_now": false,
       "account_required": true,
       "doc": "https://supabase.com/docs/guides/auth/social-login/auth-google",
-      "caveat": "Needs Google Cloud OAuth credentials, allowed callbacks, identity mapping and live Android device tests; do not disable existing login prematurely."
+      "caveat": "Owner added Google OAuth client ID and client secret directly in Supabase, enabled provider and allowlisted Android callback. Provider flag and complete Android OAuth handshake must be independently verified; rotate exposed legacy secrets before public launch; never store credentials here."
     },
     {
       "id": "livekit",
@@ -156,5 +156,6 @@
       "doc": "https://developers.cloudflare.com/workers/platform/pricing/",
       "caveat": "Do not duplicate financial ledger or room state without proof of necessity."
     }
-  ]
+  ],
+  "latest_owner_setup_note": "User confirmed Supabase Google provider save and Android callback URI visible on dashboard; no live sign-in or Google Auth provider live-probe proof yet."
 }
