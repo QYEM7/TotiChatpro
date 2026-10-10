@@ -138,6 +138,26 @@ window.addEventListener('click',e=>{
   const route=item.dataset.v||'';
   const op=item.dataset.a||'';
   const royal=item.dataset.royal||'';
+  if(screen==='room'&&op==='sheet'&&route==='roomInfo'){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    const info=window.TotiPhase2Rooms?.getRoomSummary?.();
+    if(!info){warn('لا توجد غرفة حقيقية مفتوحة');return;}
+    showSheet('<div class="tc-live-room-info"><h3></h3><p></p><p></p><button class="primary" data-a="close">إغلاق</button></div>',true);
+    const box=document.querySelector('#sheet .tc-live-room-info');
+    if(box){
+      box.querySelector('h3').textContent='🎙️ '+info.title;
+      box.querySelectorAll('p')[0].textContent='ID: '+info.id;
+      box.querySelectorAll('p')[1].textContent='الأعضاء: '+info.memberCount;
+    }return;
+  }
+  if(screen==='room'&&(
+    (op==='sheet'&&['tools','messagesRoom'].includes(route))||
+    (op==='chatTab'&&['هدية','أدخل'].includes(route))||
+    op==='shareRoom')){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    warn('هذه الوظيفة غير مفعّلة بعد على الخادم');return;
+  }
+
   if(op==='go'&&route==='rechargePreview'){
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
     go('wallet');
