@@ -6,6 +6,7 @@ on:
       - 'scripts/t03-local-auth-smoke.mjs'
       - 'scripts/t16-rooms-e2e.mjs'
       - 'scripts/t14-avatar-e2e.mjs'
+      - 'scripts/t17-realtime-e2e.mjs'
       - 'scripts/t16-rooms-e2e.mjs'
       - 'scripts/t03-secret-audit.mjs'
       - 'tests/t03-secret-audit.test.mjs'
@@ -64,10 +65,11 @@ jobs:
           node scripts/t03-local-auth-smoke.mjs "$RUNNER_TEMP/t03-local-status.json"
           node scripts/t16-rooms-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           node scripts/t14-avatar-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
+          node scripts/t17-realtime-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           # Strictly on a disposable unlinked Docker instance.
           mapfile -t db_containers < <(docker ps --format '{{.Names}}' | grep '^supabase_db_' || true)
           test "${#db_containers[@]}" -eq 1 || { echo "::error::Ambiguous local Postgres container"; exit 1; }
-          for test_sql in t04_security_invariants.sql phase3_admin.sql phase4_sessions.sql t06_financial_limits.sql t14_avatar_storage.sql phase3_rooms.sql phase3_gifts.sql phase3_store.sql phase3_transfer.sql phase4_agencies.sql phase4_cp.sql phase4_redemption.sql phase4_reports.sql phase4_voice_messages.sql; do
+          for test_sql in t04_security_invariants.sql phase3_admin.sql phase4_sessions.sql t06_financial_limits.sql t14_avatar_storage.sql t17_room_realtime.sql phase3_rooms.sql phase3_gifts.sql phase3_store.sql phase3_transfer.sql phase4_agencies.sql phase4_cp.sql phase4_redemption.sql phase4_reports.sql phase4_voice_messages.sql; do
             echo "T04/T05 local security test: $test_sql"
             docker exec -i "${db_containers[0]}" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres < "$GITHUB_WORKSPACE/supabase/tests/$test_sql" | grep -E "^PASS|^DO$|^ROLLBACK$"
           done

@@ -16,6 +16,7 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let currentUser='',rooms=null,active=null,members=[],messages=[],loadingRooms=null,refreshing=null,entering=false;
 let roomListError='';
 let sequence=0,sending=false;
+let realtime=null,realtimeUser='';
 function session(){return auth.state();}
 async function query(path,options){return auth.requestData(path,options);}
 async function rpc(name,args){
@@ -398,11 +399,29 @@ document.addEventListener('click',event=>{
   else if(kind==='invite-generate')void generateInvite();
   else if(kind==='invite-copy')void copyInvite();
 },true);
+function resumeRealRoomReads(){
+  if(!session().signedIn||document.hidden)return;
+  if(screen==='room'&&active)void refreshRoom();
+  if(screen==='home')void listRooms();
+}
+window.addEventListener('online',resumeRealRoomReads);
+window.addEventListener('focus',resumeRealRoomReads);
+document.addEventListener('visibilitychange',resumeRealRoomReads);
 window.addEventListener('totichat-phase2-auth',()=>{
   const id=session().user?.id||'';
   if(id!==currentUser){
     currentUser=id;sequence++;rooms=null;roomListError='';loadingRooms=null;active=null;members=[];messages=[];
     if(id){void listRooms();void resume();}
+  }
+  // User switches/revocations dispose the old socket, so no stale events
+  // cross account boundaries. Disconnected sockets fall back to 7.5s polling.
+  if(realtimeUser!==id){
+    realtime?.close();realtime=null;realtimeUser=id;
+    if(id)realtime=auth.watchRoomUpdates(table=>{
+      if(!session().signedIn)return;
+      if(table==='rooms'||table==='room_members')void listRooms();
+      if(active&&screen==='room')void refreshRoom();
+    });
   }
   apply();
 });
