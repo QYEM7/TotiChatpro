@@ -8,10 +8,10 @@ const rpc=(name,body)=>auth.requestData('/rest/v1/rpc/phase5_support_'+name,{met
 const $=s=>document.querySelector(s);
 const categories={general:'استفسار عام',technical:'مشكلة تقنية',account:'الحساب',recharge:'الشحن',host_agency:'طلب وكالة مضيفين',host_transfer:'شكوى انتقال مضيف'};
 const names={open:'مفتوحة',in_progress:'قيد المعالجة',waiting_user:'بانتظار المستخدم',resolved:'تم الحل',closed:'مغلقة'};
-let generation=0,owner=null,scope='mine',page=0,canHandle=false,busy=false,selected=null,pending=null;
+let generation=0,owner=null,scope='mine',page=0,canHandle=false,isOwner=false,busy=false,selected=null,pending=null;
 const alive=(g,u)=>g===generation&&auth.state().signedIn&&auth.state().user?.id===u;
 function notify(msg){const n=$('[data-t42-status]');if(n)n.textContent=msg;}
-function reset(){generation++;owner=null;scope='mine';page=0;selected=null;canHandle=false;pending=null;$('#t42-support-sheet')?.remove();}
+function reset(){generation++;owner=null;scope='mine';page=0;selected=null;canHandle=false;isOwner=false;pending=null;$('#t42-support-sheet')?.remove();}
 function markup(){
  return '<section dir="rtl" id="t42-support-sheet" class="tc-phase2-account-sheet">'+
  '<h3>الدعم الفني الرسمي · TotiChat</h3><p>كل الرسائل تُحفظ في حسابك الحقيقي. طلب وكالة المضيفين أو الشكوى هنا لا يفتح وكالة ولا ينقل مضيفاً تلقائياً.</p>'+
@@ -21,7 +21,13 @@ function markup(){
 }
 async function open(){
  if(!auth.state().signedIn)return;
- reset();owner=auth.state().user?.id;showSheet(markup(),true);await load();
+ reset();owner=auth.state().user?.id;const uid=owner;showSheet(markup(),true);
+ // Presentation-only Owner check; phase5_support_action independently verifies Owner on the server.
+ try{const a=await auth.requestData('/rest/v1/rpc/phase3_admin_session',{method:'POST',body:{}});
+  if(owner!==uid||!auth.state().signedIn)return;
+  isOwner=a?.isOwner===true;
+ }catch{if(owner!==uid)return;isOwner=false;}
+ if(owner===uid)await load();
 }
 function ticketView(t){
  return '<article><button type="button" data-t42="thread" data-id="'+esc(t.id)+'" class="primary">'+esc(t.subject)+'</button>'+
@@ -49,6 +55,11 @@ async function load(){
   '<label>العنوان<input name="subject" minlength="5" maxlength="120" required></label>'+
   '<label>شرح الطلب<textarea name="message" minlength="2" maxlength="2500" required></textarea></label>'+
   '<button class="primary" type="submit">إرسال التذكرة</button></form>':'')+
+  (isOwner?'<form data-t42-form="staff"><h4>صلاحيات موظفي الدعم · Owner فقط</h4>'+ 
+   '<p>هذه الصلاحية للدعم والتذاكر فقط؛ لا تسمح بفتح وكالات أو شحن محافظ.</p>'+ 
+   '<label>معرّف حساب الموظف (UUID)<input type="text" name="user_id" required pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" maxlength="36"></label>'+ 
+   '<label>الإجراء<select name="decision"><option value="staff_grant">منح صلاحية الدعم</option><option value="staff_revoke">سحب صلاحية الدعم</option></select></label>'+ 
+   '<button type="submit" class="primary">حفظ صلاحية الموظف</button></form>':'')+
   '<div data-t42-thread></div>';
   notify('تم تحميل البيانات الحقيقية من الخادم');
  }catch(e){if(alive(g,u))notify('تعذّر تحميل خدمة الدعم: '+e.message);}
@@ -105,14 +116,17 @@ window.addEventListener('submit',event=>{
  if(!form.reportValidity()||busy||!owner)return;
  const actionType=form.dataset.t42Form;
  const values=Object.fromEntries(new FormData(form));
- if(actionType!=='create'&&!selected){notify('اختر تذكرة أولاً');return;}
+ if(actionType!=='create'&&actionType!=='staff'&&!selected){notify('اختر تذكرة أولاً');return;}
  const data=actionType==='create'?values:
+  actionType==='staff'?{user_id:String(values.user_id||'').trim()}:
   actionType==='reply'?{ticket_id:selected.id,message:values.message}:
   {ticket_id:selected.id,status:values.status};
  if(actionType==='status'&&!canHandle){notify('هذه العملية للإدارة فقط');return;}
+ if(actionType==='staff'&&!isOwner){notify('تعيين موظفي الدعم للمالك فقط');return;}
  if(actionType==='status'&&!confirm('تأكيد تغيير حالة التذكرة؟'))return;
+ if(actionType==='staff'&&!confirm(values.decision==='staff_grant'?'تأكيد إعطاء صلاحية الدعم للحساب المحدد؟':'تأكيد سحب صلاحية الدعم عن الحساب المحدد؟'))return;
  busy=true;const b=form.querySelector('button[type="submit"]');if(b)b.disabled=true;
- void action(actionType,data).catch(e=>notify('تعذّر حفظ العملية: '+e.message))
+ void action(actionType==='staff'?values.decision:actionType,data).catch(e=>notify('تعذّر حفظ العملية: '+e.message))
  .finally(()=>{busy=false;if(b?.isConnected)b.disabled=false;});
 },true);
 window.addEventListener('totichat-phase2-auth',()=>{if(owner&&owner!==auth.state().user?.id)reset();});
