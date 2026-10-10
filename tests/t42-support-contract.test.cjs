@@ -31,6 +31,15 @@ test('T42 private support tables, scoped RPC, owner-only staff assignment and au
  assert(sql.includes("body,message_text")===false);
  assert(sql.includes("jsonb_build_object('id',outcome->>'id','request_id',p_request_id)"));
 });
+test('T42 staff controls are visible to Owner only and enforce the real RPC',()=>{
+ assert(ui.includes("'/rest/v1/rpc/phase3_admin_session'"));
+ assert(ui.includes("isOwner=a?.isOwner===true"));
+ assert(ui.includes("isOwner?'<form data-t42-form=\"staff\""));
+ assert(ui.includes("if(actionType==='staff'&&!isOwner)"));
+ assert(ui.includes("actionType==='staff'?values.decision:actionType"));
+ assert(ui.includes("generation!==openGeneration"));
+ assert(sql.includes("if not is_owner then raise exception 'Owner alone grants support access'"));
+});
 test('T42 full PostgreSQL 5-account evidence is rollback-only',()=>{
  assert(/(?:^|\n)begin;/i.test(local));
  assert(local.includes('rollback;'));
