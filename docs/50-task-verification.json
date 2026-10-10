@@ -33,7 +33,7 @@
     "id": "T06",
     "title": "Rate limits and audit logs",
     "status": "partial",
-    "evidence": "T06/T29 concurrent real local GoTrue + PostgREST Owner issuance verified by CI 38065706706: six identical-key issues one operation; four distinct keys sharing cash receipt -> one success/three denied; 28 concurrent unique cash refs -> 30 total accepted and 46 synthetic coins matched treasury/issuance ledger; 31st denied, key conflict and non-Owner denied. T42 support parallel 20/min quota, distinct actors, IDOR tests also passed CI 38064686350. Still PARTIAL: remote production/staging and finance wider operational loads/security review pending."
+    "evidence": "T06 agency-action 30/min critical section now transaction-serialized INSIDE direct-callable phase3.agency_action. Real local GoTrue + concurrent PostgREST acceptance CI 38066242936: Owner 2 reviews + 28 parallel edits created precisely 30 audit requests; 31st new request refused. Support 20/min and Owner treasury/recharge 30/min concurrency tests also passed CI 38064686350/38065706706. Still PARTIAL: distributed/hosted abuse controls and independent security audit pending."
   },
   {
     "id": "T07",
@@ -201,13 +201,13 @@
     "id": "T34",
     "title": "Host agency application via support",
     "status": "partial",
-    "evidence": "Agency register and review RPC exists; formal CS journey needs validation"
+    "evidence": "Host agency registration/Owner review via real disposable GoTrue + PostgREST verified in CI 38066242936 including six same-key parallel registration requests yielding one application and separate Owner approvals; older support ticket path locally exercised. Formal request-to-customer-service-to-owner operational approval, tickets/notification/SLA and hosted validation are NOT fully integrated. PARTIAL."
   },
   {
     "id": "T35",
     "title": "Host transfers and exception",
     "status": "partial",
-    "evidence": "Old-agent consent & exceptional transfer rollback tests exist"
+    "evidence": "REAL disposable GoTrue/PostgREST 5-actor acceptance CI 38066242936: six duplicate concurrent register requests persisted one host-agency registration, Owner opened two separate host agencies, initial join accepted, host transfer created pending_old; premature new-agent acceptance and outsider/host approval refused. Six parallel old-agent same-key approvals advanced pending_new once; six new-agent same-key acceptances moved the host once, with verified old_approved_by/accepted_by and single membership, new-key duplicate accept denied. Existing investigated exception/immutable historical gift SQL rollback tests also green. Pending migration 20261010202000, NOT deployed to production, real hosted CS/legal review and device tests remain; status PARTIAL."
   },
   {
     "id": "T36",
@@ -231,7 +231,7 @@
     "id": "T39",
     "title": "Restricted host-agency management",
     "status": "partial",
-    "evidence": "Main-partner role logic exists; DB delegated workflow needs validation"
+    "evidence": "The SQL host-agency permission path and existing approval flow kept unchanged; disposable 5-actor concurrency test CI 38066242936 confirms the Owner can approve host agency applications and ordinary outsiders/hosts cannot authorize old-agent consent, with original old/new approval distinction. No extra Super Admin or DB employee given rights; explicit main-partner-only hosted test still pending; PARTIAL."
   },
   {
     "id": "T40",
