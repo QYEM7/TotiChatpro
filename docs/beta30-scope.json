@@ -1,0 +1,51 @@
+{
+  "project": "TotiChatpro",
+  "user_visible_brand": "TotiChat",
+  "branch": "develop/phase-2",
+  "approved_date": "2026-10-10",
+  "budget_usd_now": 0,
+  "beta_duration_days": 30,
+  "decision": "Freeze all nonessential expansion work for first viable high-quality voice-room beta; manual Owner/agent/host agency cash and monthly payroll actions handled in protected admin dashboard. Preserve design, existing source and historical task statuses.",
+  "do_not_do": [
+    "Do not modify or delete approved UI assets, room visuals, VIP frames, 15 seats, music/gift button layout without Owner decision.",
+    "Do not build APK or AAB before existing T48 gates, both 80% measures and explicit Owner approval.",
+    "Do not push ten pending migrations to production, invent real-backup evidence, or enable paid plans without consent.",
+    "Do not credit fake wallets, automate external cash acceptance, or zero diamonds before an immutable audited entitlement snapshot.",
+    "Do not split ledger/account authority between Supabase and Firebase.",
+    "Do not claim frozen visible buttons work if no real backend; obtain Owner decision and ensure honest accessible release presentation."
+  ],
+  "core_stack": [
+    "Supabase Auth/PostgreSQL as source of truth for users, rooms, moderation, coins, diamonds, agency relationships and financial ledger.",
+    "LiveKit/SFU/TURN for real tested two-phone audio; must be configured and measured under free quota.",
+    "Minimal Firebase Crashlytics/FCM only if integration solves a measured beta need and is free; Firebase not another financial database.",
+    "Cloudflare Pages for site, GitHub Releases for approved APK after gates, GitHub Actions for CI.",
+    "Email SMTP with an approved no-cost provider, uptime/error monitoring and separate backup/restore proof."
+  ],
+  "human_approvals": {
+    "recharge": "Customer sends request. Outside-app cash is checked manually by responsible agent or authorized management. Agent/Owner verifies receipt, then protected RPC atomically credits exactly once with unique receipt reference, audit and ledger.",
+    "owner_treasury": "Only Owner issues coins against externally verified cash reference; Owner manually allocates coins to approved recharge agents with atomic balanced ledgers.",
+    "host_agencies": "Customer service receives host-agency applications. Only Owner and designated main-partner Super Admin can enter full host-agency-management and approve/manage it; a DB employee may only use the narrowly delegated host-agency-opening workflow where explicitly authorized, without full management access and never opening recharge agencies.",
+    "host_transfer": "Old host agent consent and new-agent acceptance required; Owner/designated partner can investigate unfair refusal, ignored requests or closed agency and exceptionally authorize transfer with evidence.",
+    "monthly_close": "Staff prepare month-end agency/host diamond totals, targets, rates, salaries and liabilities manually. Protected admin workflow freezes immutable ledger/snapshot before any operational diamond clearing, requires authorized approval with retry/idempotency and audit, prevents duplicate close and preserves unpaid entitlements permanently; manual external payout is reconciled separately.",
+    "support": "Support agents handle tickets and issues manually under scoped roles; operations auditable; no staff may self-grant Owner or partner authority."
+  },
+  "beta_release_non_negotiables": [
+    "Real authenticated users, reset/recovery, no demo financial data",
+    "Real two-phone room audio with mic seat/moderation and reconnection",
+    "15-seat designed room UI, chat, gift selection-before-send and audited wallet",
+    "Manual recharge agent and Owner approval with unique cash reference and balanced immutable ledgers",
+    "Host agency/customer support workflows, permission isolation and documented exceptional transfers",
+    "Month-end manually approved immutable entitlement snapshot and no-loss diamond operational reset if operational diamond clearing is enabled",
+    "Admin dashboard functions actually wired, no dead / pretend controls for beta participants",
+    "Encrypted offsite production database AND Storage object backup independently restored, hosted staging and safe migration replay",
+    "No critical privacy/security/account/financial bugs, stable Android device tests",
+    "T48 gate unchanged: engineering>=80, beta>=80, 40/50 verified_live, nine evidence checks passed, reviewer + Owner APPROVED"
+  ],
+  "statuses_unchanged": true,
+  "estimate_unchanged": {
+    "engineering_percent": 63,
+    "beta_readiness_percent": 15
+  },
+  "release_allowed": false,
+  "note": "Task beta_30d_scope is a prioritization decision, not completion proof. The formal T48 40/50 live-verified gate remains binding; 7 paused tasks leave 43 candidate tasks, but task-level acceptance must be evidenced and cannot be fabricated."
+}
