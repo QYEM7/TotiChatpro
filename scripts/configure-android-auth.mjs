@@ -32,6 +32,16 @@ if(!xml.includes('android.permission.RECORD_AUDIO')){
     xml.slice(position);
   await writeFile(path,xml,'utf8');
 }
+// Capacitor BridgeWebChromeClient requests MODIFY_AUDIO_SETTINGS along with
+// RECORD_AUDIO for microphone WebView permissions.
+if(!xml.includes('android.permission.MODIFY_AUDIO_SETTINGS')){
+  const position=xml.indexOf('<application');
+  if(position<0)throw Error('Android Manifest application element missing');
+  xml=xml.slice(0,position)+
+    '<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    '+
+    xml.slice(position);
+  await writeFile(path,xml,'utf8');
+}
 if(!xml.includes('android.permission.RECORD_AUDIO'))throw Error('Microphone permission declaration missing');
 if(!xml.includes('android:scheme="com.totichat.beta"'))throw Error('Auth deep link missing');
 console.log('PASS: OAuth callback and WebRTC microphone manifest permission configured');
