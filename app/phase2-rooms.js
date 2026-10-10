@@ -393,6 +393,7 @@ window.TotiPhase2Rooms=Object.freeze({
   getStatus:()=>({signedIn:session().signedIn,activeRoomId:active?.id||null,roomCount:rooms?.length??null}),
   getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id}):null,
   getMyMicState:()=>{const m=members.find(x=>x.user_id===session().user?.id);return Object.freeze({seatNo:m?.seat_no??null,isMuted:m?.is_muted??true});},
+  getMembers:()=>members.map(m=>Object.freeze({user_id:m.user_id,display_name:m.display_name})),
   refreshRoom
 });
 })();

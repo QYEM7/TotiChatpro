@@ -80,6 +80,8 @@ function create(){
  document.body.classList.add('tc-auth-body');
  document.body.style.background='#fcf9fe';
  const formElement=root.querySelector('#tc-real-auth-form');
+ const rememberBox=root.querySelector('#tc-login-remember');
+ if(rememberBox)rememberBox.checked=auth.isRemembered();
  formElement.addEventListener('submit',event=>{
    event.preventDefault();
    if(!formElement.reportValidity())return;

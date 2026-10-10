@@ -8,7 +8,7 @@ const auth=window.TotiPhase2Auth;
 if(!auth||!window.TotiLiveMode?.enabled)return;
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-let wallet=null,ledger=null,error='',busy=false,owner='';
+let wallet=null,ledger=null,error='',busy=false,owner='',generation=0;
 const format=x=>{
  const n=Number(x);
  return Number.isSafeInteger(n)&&n>=0?n.toLocaleString('en-US'):'—';
@@ -74,8 +74,9 @@ function paint(){
 }
 async function load(){
  const user=auth.state().user;
- if(!user||busy)return;
+ if(!user||(busy&&owner===user.id))return;
  const current=user.id;
+ const requestGeneration=++generation;
  owner=current;busy=true;error='';wallet=null;ledger=null;paint();
  try{
   const id=encodeURIComponent(current);
@@ -85,26 +86,26 @@ async function load(){
    auth.requestData('/rest/v1/wallet_ledger?user_id=eq.'+id+
     '&select=id,currency,amount_change,kind,created_at&order=created_at.desc&limit=50')
   ]);
-  if(auth.state().user?.id!==current)return;
+  if(auth.state().user?.id!==current||requestGeneration!==generation)return;
   if(!Array.isArray(w)||w.length!==1||w[0].user_id!==current)
     throw new Error('لم يعثر الخادم على محفظة الحساب');
   wallet=w[0];ledger=Array.isArray(j)?j:[];error='';
- }catch(e){if(auth.state().user?.id===current){
+ }catch(e){if(auth.state().user?.id===current&&requestGeneration===generation){
     wallet=null;ledger=null;error=String(e?.message||'فشل الاتصال');}}
- finally{busy=false;paint();}
+ finally{if(requestGeneration===generation){busy=false;paint();}}
 }
 const original=render;
 render=function(){
  const result=original.apply(this,arguments);
  if(screen==='wallet'&&auth.state().signedIn){
   const current=auth.state().user?.id;
-  if(current!==owner){owner=current;wallet=null;ledger=null;error='';void load();}
+  if(current!==owner){void load();}
   paint();
  }
  return result;
 };
 window.addEventListener('totichat-phase2-auth',()=>{
- if(!auth.state().signedIn){owner='';wallet=null;ledger=null;error='';busy=false;}
+ if(!auth.state().signedIn){generation++;owner='';wallet=null;ledger=null;error='';busy=false;}
  else if(owner!==auth.state().user?.id){void load();}
 });
 window.addEventListener('click',e=>{

@@ -1,0 +1,1270 @@
+{
+  "sourceProject": "bfadhdnudmsggylunhlh",
+  "targetProject": "sqedsnyvjblvbjbizcay",
+  "capturedAt": "2026-10-10",
+  "tables": {
+    "cp_types": [
+      {
+        "id": "love",
+        "label": "رفيق الروح",
+        "enabled": true,
+        "is_primary": true,
+        "presentation": {
+          "icon": "💗",
+          "frame": "soft",
+          "accent": "#fb7185",
+          "effect": null,
+          "background": "#581c40"
+        },
+        "level_thresholds": []
+      }
+    ],
+    "gift_catalog": [
+      {
+        "id": "g1",
+        "icon": "🌹",
+        "name": "وردة دمشقية",
+        "price": 10,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "sparkle",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g10",
+        "icon": "🦅",
+        "name": "صقر الخليج الحر",
+        "price": 2500,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "pulse",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g11",
+        "icon": "🎲",
+        "name": "نرد الحظ الذهبي",
+        "price": 300,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "luck",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "pulse",
+        "diamond_source_type": "LUCKY_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g12",
+        "icon": "🏰",
+        "name": "قصر الأساطير الذهبي",
+        "price": 12000,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "crown",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g2",
+        "icon": "💖",
+        "name": "قلب الحب النقي",
+        "price": 50,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "pulse",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g3",
+        "icon": "💐",
+        "name": "باقة توليب ملكية",
+        "price": 120,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "sparkle",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g4",
+        "icon": "👑",
+        "name": "تاج الأمراء الذهبي",
+        "price": 500,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "crown",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g5",
+        "icon": "🏎️",
+        "name": "سيارة لامبورغيني",
+        "price": 1500,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "car",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g6",
+        "icon": "🦁",
+        "name": "أسد الصحراء الملكي",
+        "price": 3000,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "lion",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g7",
+        "icon": "🐉",
+        "name": "تنين النار الأسطوري",
+        "price": 5000,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "pulse",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g8",
+        "icon": "🚀",
+        "name": "صاروخ نحو الفضاء",
+        "price": 8000,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "rocket",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      },
+      {
+        "id": "g9",
+        "icon": "💍",
+        "name": "خاتم الألماس الفاخر",
+        "price": 2000,
+        "rarity": null,
+        "is_active": true,
+        "category_id": "gift",
+        "description": "",
+        "preview_url": null,
+        "duration_days": null,
+        "animation_type": "sparkle",
+        "diamond_source_type": "FIXED_GIFT",
+        "relationship_type_id": null,
+        "global_announcement_enabled": false
+      }
+    ],
+    "store_catalog": [
+      {
+        "id": "b1",
+        "icon": "💬",
+        "name": "فقاعة الملكية الذهبية",
+        "price": 800,
+        "category": "bubbles",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "لون ذهبي للرسائل الجديدة",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "b2",
+        "icon": "🔮",
+        "name": "فقاعة الفضاء الأرجوانية",
+        "price": 300,
+        "category": "bubbles",
+        "currency": "silver",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "لون أرجواني للرسائل الجديدة",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "bd1",
+        "icon": "💎",
+        "name": "وسام كبار الداعمين",
+        "price": 3500,
+        "category": "badges",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "وسام تجميلي في الملف الشخصي",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": null,
+        "relationship_type_id": null
+      },
+      {
+        "id": "bd2",
+        "icon": "🛡️",
+        "name": "وسام فارس المجلس",
+        "price": 500,
+        "category": "badges",
+        "currency": "silver",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "وسام تجميلي في الملف الشخصي",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": null,
+        "relationship_type_id": null
+      },
+      {
+        "id": "c1",
+        "icon": "🏎️",
+        "name": "لامبورغيني أفينتادور الذهبية",
+        "price": 9900,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "شارة دخول تظهر عند انضمامك للغرفة",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "c2",
+        "icon": "🚁",
+        "name": "طائرة الهيليكوبتر الخاصة",
+        "price": 6500,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "شارة دخول تظهر عند انضمامك للغرفة",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "c3",
+        "icon": "🛥️",
+        "name": "اليخت الملكي الفاخر",
+        "price": 8000,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "شارة دخول تظهر عند انضمامك للغرفة",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "c4",
+        "icon": "🐎",
+        "name": "الحصان العربي الأبيض",
+        "price": 800,
+        "category": "cars",
+        "currency": "silver",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "شارة دخول تظهر عند انضمامك للغرفة",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "cp_weekly_1",
+        "icon": "💖",
+        "name": "إطار رفقاء الروح TOP 1",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "إطار تصنيف الأسبوع الماضي",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 7,
+        "relationship_type_id": null
+      },
+      {
+        "id": "cp_weekly_2",
+        "icon": "💖",
+        "name": "إطار رفقاء الروح TOP 2",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "إطار تصنيف الأسبوع الماضي",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 7,
+        "relationship_type_id": null
+      },
+      {
+        "id": "cp_weekly_3",
+        "icon": "💖",
+        "name": "إطار رفقاء الروح TOP 3",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "إطار تصنيف الأسبوع الماضي",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 7,
+        "relationship_type_id": null
+      },
+      {
+        "id": "f1",
+        "icon": "🐉",
+        "name": "إطار التنين الذهبي",
+        "price": 2500,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "إطار ذهبي يظهر حول صورتك",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "f2",
+        "icon": "👑",
+        "name": "إطار الأجنحة الملكية",
+        "price": 1800,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "إطار ملكي حول صورتك",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "f3",
+        "icon": "🌸",
+        "name": "إطار زهرة الكرز الفضي",
+        "price": 450,
+        "category": "frames",
+        "currency": "silver",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "إطار وردي حول صورتك",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 7,
+        "relationship_type_id": null
+      },
+      {
+        "id": "f4",
+        "icon": "⚡",
+        "name": "إطار النيون الفضائي",
+        "price": 1200,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": null,
+        "description": "إطار نيون حول صورتك",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_100_1",
+        "icon": "🚢",
+        "name": "مركبة السفينة البحرية 3D",
+        "price": 1,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_100_2",
+        "icon": "🍄",
+        "name": "إطار الطبيعة الأخضر الفخم",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_1000_3",
+        "icon": "🏎️",
+        "name": "سيارة فيراري الخارقة 3D",
+        "price": 1,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_1000_4",
+        "icon": "🦅",
+        "name": "إطار أجنحة النسر الذهبية",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_10000_3",
+        "icon": "🚀",
+        "name": "طائرة نفاثة ألماسيّة ملكية 3D",
+        "price": 1,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_10000_7",
+        "icon": "👑",
+        "name": "إطار الذهب والماس الأسطوري $10000",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_1500_3",
+        "icon": "🌌",
+        "name": "عجلة الزمن الكونية النادرة 3D",
+        "price": 1,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_1500_4",
+        "icon": "👑",
+        "name": "إطار الياقوت الإمبراطوري المتوج",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_300_1",
+        "icon": "🐅",
+        "name": "دخولية النمر الأبيض الملكي 3D",
+        "price": 1,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_300_2",
+        "icon": "👑",
+        "name": "إطار التاج الإمبراطوري الذهبي",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_3000_4",
+        "icon": "🚀",
+        "name": "مركبة سفينة الفضاء النفاثة 3D",
+        "price": 1,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_3000_5",
+        "icon": "👑",
+        "name": "إطار العرش الماسي والياقوت الملكي",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_49_9_1",
+        "icon": "💎",
+        "name": "إطار الياقوت الأزرق المشع",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_500_1",
+        "icon": "🦁",
+        "name": "دخولية الأسد الإمبراطوري 3D",
+        "price": 1,
+        "category": "cars",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_500_2",
+        "icon": "💎",
+        "name": "إكليل الغار الماسي الأزرق المشع",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 15,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_5000_7",
+        "icon": "💎",
+        "name": "إطار الألماس الأخضر $5000",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "reward_tier_9_9_1",
+        "icon": "🔥",
+        "name": "إطار الأفاتار الناري الملكي",
+        "price": 1,
+        "category": "frames",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": true,
+        "vip_level": null,
+        "description": "مكافأة نشاط شحن معتمد",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 7,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip1",
+        "icon": "👑",
+        "name": "VIP 1",
+        "price": 63000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 1,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip2",
+        "icon": "👑",
+        "name": "VIP 2",
+        "price": 150000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 2,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip3",
+        "icon": "👑",
+        "name": "VIP 3",
+        "price": 490000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 3,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip4",
+        "icon": "👑",
+        "name": "VIP 4",
+        "price": 1960000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 4,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip5",
+        "icon": "👑",
+        "name": "VIP 5",
+        "price": 3900000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 5,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip6",
+        "icon": "👑",
+        "name": "VIP 6",
+        "price": 5800000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 6,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip7",
+        "icon": "👑",
+        "name": "VIP 7",
+        "price": 8300000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 7,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      },
+      {
+        "id": "vip8",
+        "icon": "👑",
+        "name": "VIP 8",
+        "price": 12000000,
+        "category": "vip",
+        "currency": "gold",
+        "is_active": true,
+        "is_reward": false,
+        "vip_level": 8,
+        "description": "عضوية لمدة 30 يومًا وشارة وإطار VIP ودخول غرف VIP",
+        "preview_url": null,
+        "presentation": {},
+        "duration_days": 30,
+        "relationship_type_id": null
+      }
+    ],
+    "gift_categories": [
+      {
+        "id": "cp",
+        "label": "CP",
+        "enabled": true,
+        "sort_order": 30
+      },
+      {
+        "id": "custom",
+        "label": "مخصص",
+        "enabled": true,
+        "sort_order": 20
+      },
+      {
+        "id": "gift",
+        "label": "هدية",
+        "enabled": true,
+        "sort_order": 50
+      },
+      {
+        "id": "luck",
+        "label": "حظ",
+        "enabled": true,
+        "sort_order": 10
+      },
+      {
+        "id": "nation",
+        "label": "الأمة",
+        "enabled": true,
+        "sort_order": 40
+      }
+    ],
+    "recharge_packages": [
+      {
+        "id": "13cc833c-d830-4cbf-91ae-c0badc1cbbc0",
+        "is_active": true,
+        "price_usd": 24.99,
+        "created_at": "2026-10-03T20:13:34.294433+00:00",
+        "updated_at": "2026-10-03T20:13:34.294433+00:00",
+        "gold_amount": 132447
+      },
+      {
+        "id": "31cf8afc-81a1-49c7-852c-21593fd75106",
+        "is_active": true,
+        "price_usd": 49.99,
+        "created_at": "2026-10-03T20:13:34.294433+00:00",
+        "updated_at": "2026-10-03T20:13:34.294433+00:00",
+        "gold_amount": 264947
+      },
+      {
+        "id": "631aaa0c-4315-4621-b541-2922382f000f",
+        "is_active": true,
+        "price_usd": 9.99,
+        "created_at": "2026-10-03T20:13:34.294433+00:00",
+        "updated_at": "2026-10-03T20:13:34.294433+00:00",
+        "gold_amount": 52947
+      },
+      {
+        "id": "adfc459a-a71c-494d-a867-39da71981636",
+        "is_active": true,
+        "price_usd": 0.99,
+        "created_at": "2026-10-03T20:13:34.294433+00:00",
+        "updated_at": "2026-10-03T20:13:34.294433+00:00",
+        "gold_amount": 5247
+      },
+      {
+        "id": "da13bdc5-134c-4d36-a0a6-5177af37c358",
+        "is_active": true,
+        "price_usd": 4.99,
+        "created_at": "2026-10-03T20:13:34.294433+00:00",
+        "updated_at": "2026-10-03T20:13:34.294433+00:00",
+        "gold_amount": 26447
+      },
+      {
+        "id": "f1f46308-de91-4930-9f91-85962a359002",
+        "is_active": true,
+        "price_usd": 99.99,
+        "created_at": "2026-10-03T20:13:34.294433+00:00",
+        "updated_at": "2026-10-03T20:13:34.294433+00:00",
+        "gold_amount": 529947
+      }
+    ],
+    "recharge_reward_tiers": [
+      {
+        "id": "tier_100",
+        "label": "إعادة شحن 100 دولار",
+        "rewards": [
+          {
+            "days": 15,
+            "name": "اشتراك VIP2 الملكي الفاخر",
+            "type": "vip",
+            "vipLevel": 2
+          },
+          {
+            "days": 15,
+            "name": "مركبة السفينة البحرية 3D",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_100_1"
+          },
+          {
+            "days": 15,
+            "name": "إطار الطبيعة الأخضر الفخم",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_100_2"
+          }
+        ],
+        "threshold_usd": 100
+      },
+      {
+        "id": "tier_1000",
+        "label": "إعادة شحن 1000 دولار",
+        "rewards": [
+          {
+            "name": "50,000 عملة ذهبية فورية",
+            "type": "coins",
+            "coins": 50000
+          },
+          {
+            "name": "معرف مميز سداسي AABBCCD",
+            "type": "request",
+            "category": "special_id"
+          },
+          {
+            "days": 15,
+            "name": "اشتراك VIP5 النبيل",
+            "type": "vip",
+            "vipLevel": 5
+          },
+          {
+            "days": 30,
+            "name": "سيارة فيراري الخارقة 3D",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_1000_3"
+          },
+          {
+            "days": 30,
+            "name": "إطار أجنحة النسر الذهبية",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_1000_4"
+          }
+        ],
+        "threshold_usd": 1000
+      },
+      {
+        "id": "tier_10000",
+        "label": "إعادة شحن 10000 دولار",
+        "rewards": [
+          {
+            "name": "بانر رئيسي فائق الفخامة $10000",
+            "type": "request",
+            "category": "feedback"
+          },
+          {
+            "name": "دخولية إمبراطورية أسطورية شاشة مفتوحة",
+            "type": "request",
+            "category": "feedback"
+          },
+          {
+            "name": "هدية سوبر أسطورية 3D الأغلى في التطبيق",
+            "type": "request",
+            "category": "custom_gift"
+          },
+          {
+            "days": 30,
+            "name": "طائرة نفاثة ألماسيّة ملكية 3D",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_10000_3"
+          },
+          {
+            "days": 30,
+            "name": "أعلى رتبة إمبراطورية VIP8 كاملة",
+            "type": "vip",
+            "vipLevel": 8
+          },
+          {
+            "name": "معرف رباعي أسطوري ملكي نادر AABB",
+            "type": "request",
+            "category": "special_id"
+          },
+          {
+            "name": "1,200,000 عملة ذهبية فورية",
+            "type": "coins",
+            "coins": 1200000
+          },
+          {
+            "days": 30,
+            "name": "إطار الذهب والماس الأسطوري $10000",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_10000_7"
+          }
+        ],
+        "threshold_usd": 10000
+      },
+      {
+        "id": "tier_1500",
+        "label": "إعادة شحن 1500 دولار",
+        "rewards": [
+          {
+            "name": "100,000 عملة ذهبية فورية",
+            "type": "coins",
+            "coins": 100000
+          },
+          {
+            "name": "معرف مميز سباعي فخم AABBCCC",
+            "type": "request",
+            "category": "special_id"
+          },
+          {
+            "days": 30,
+            "name": "اشتراك أسطوري VIP6",
+            "type": "vip",
+            "vipLevel": 6
+          },
+          {
+            "days": 30,
+            "name": "عجلة الزمن الكونية النادرة 3D",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_1500_3"
+          },
+          {
+            "days": 30,
+            "name": "إطار الياقوت الإمبراطوري المتوج",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_1500_4"
+          }
+        ],
+        "threshold_usd": 1500
+      },
+      {
+        "id": "tier_300",
+        "label": "إعادة شحن 300 دولار",
+        "rewards": [
+          {
+            "days": 15,
+            "name": "اشتراك VIP3 الملكي المتألق",
+            "type": "vip",
+            "vipLevel": 3
+          },
+          {
+            "days": 15,
+            "name": "دخولية النمر الأبيض الملكي 3D",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_300_1"
+          },
+          {
+            "days": 15,
+            "name": "إطار التاج الإمبراطوري الذهبي",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_300_2"
+          }
+        ],
+        "threshold_usd": 300
+      },
+      {
+        "id": "tier_3000",
+        "label": "إعادة شحن 3000 دولار",
+        "rewards": [
+          {
+            "name": "200,000 عملة ذهبية فورية",
+            "type": "coins",
+            "coins": 200000
+          },
+          {
+            "name": "هدية خاصة حصرية XXXXXX",
+            "type": "request",
+            "category": "custom_gift"
+          },
+          {
+            "days": 30,
+            "name": "اشتراك ملكي فائق VIP7",
+            "type": "vip",
+            "vipLevel": 7
+          },
+          {
+            "name": "معرف ملكي سداسي نادر AAABBB",
+            "type": "request",
+            "category": "special_id"
+          },
+          {
+            "days": 30,
+            "name": "مركبة سفينة الفضاء النفاثة 3D",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_3000_4"
+          },
+          {
+            "days": 30,
+            "name": "إطار العرش الماسي والياقوت الملكي",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_3000_5"
+          }
+        ],
+        "threshold_usd": 3000
+      },
+      {
+        "id": "tier_49_9",
+        "label": "إعادة شحن 49.9 دولارًا",
+        "rewards": [
+          {
+            "days": 7,
+            "name": "اشتراك VIP2 الإمبراطوري",
+            "type": "vip",
+            "vipLevel": 2
+          },
+          {
+            "days": 15,
+            "name": "إطار الياقوت الأزرق المشع",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_49_9_1"
+          },
+          {
+            "name": "15,000 عملة ذهبية إضافية",
+            "type": "coins",
+            "coins": 15000
+          }
+        ],
+        "threshold_usd": 49.9
+      },
+      {
+        "id": "tier_500",
+        "label": "إعادة شحن 500 دولار",
+        "rewards": [
+          {
+            "days": 15,
+            "name": "اشتراك VIP4 الإمبراطوري",
+            "type": "vip",
+            "vipLevel": 4
+          },
+          {
+            "days": 15,
+            "name": "دخولية الأسد الإمبراطوري 3D",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_500_1"
+          },
+          {
+            "days": 15,
+            "name": "إكليل الغار الماسي الأزرق المشع",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_500_2"
+          }
+        ],
+        "threshold_usd": 500
+      },
+      {
+        "id": "tier_5000",
+        "label": "إعادة شحن 5000 دولار",
+        "rewards": [
+          {
+            "name": "بانر رسمي باسمك بالتطبيق",
+            "type": "request",
+            "category": "feedback"
+          },
+          {
+            "name": "شاشة افتتاحية كاملة مفتوحة",
+            "type": "request",
+            "category": "feedback"
+          },
+          {
+            "name": "هدية مخصصة 3D خاصة بك",
+            "type": "request",
+            "category": "custom_gift"
+          },
+          {
+            "name": "مركبة نفاثة أسطورية مخصصة",
+            "type": "request",
+            "category": "feedback"
+          },
+          {
+            "days": 15,
+            "name": "أعلى رتبة إمبراطورية VIP8",
+            "type": "vip",
+            "vipLevel": 8
+          },
+          {
+            "name": "معرف خماسي ملكي نادر AAABB",
+            "type": "request",
+            "category": "special_id"
+          },
+          {
+            "name": "400,000 عملة ذهبية فورية",
+            "type": "coins",
+            "coins": 400000
+          },
+          {
+            "days": 30,
+            "name": "إطار الألماس الأخضر $5000",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_5000_7"
+          }
+        ],
+        "threshold_usd": 5000
+      },
+      {
+        "id": "tier_9_9",
+        "label": "إعادة شحن 9.9 دولارًا",
+        "rewards": [
+          {
+            "days": 3,
+            "name": "اشتراك VIP1 ملكي",
+            "type": "vip",
+            "vipLevel": 1
+          },
+          {
+            "days": 7,
+            "name": "إطار الأفاتار الناري الملكي",
+            "type": "cosmetic",
+            "catalog_id": "reward_tier_9_9_1"
+          }
+        ],
+        "threshold_usd": 9.9
+      }
+    ]
+  }
+}

@@ -46,6 +46,9 @@ jobs:
       - name: Verify real Auth and room integration (mock server, no data mutations)
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase2-browser.cjs
+      - name: Verify real catalog options and safe selection
+        if: github.ref == 'refs/heads/develop/phase-2'
+        run: node tests/phase2-catalog-browser.cjs
       - name: Verify Capacitor Android startup renders the actual Home page
         if: github.ref == 'refs/heads/develop/phase-2'
         run: |

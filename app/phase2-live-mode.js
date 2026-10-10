@@ -17,7 +17,7 @@ if(!auth||typeof window.render!=='function'){
 }
 let explicitPreview=false;
 const authScreens=new Set(['loginPreview','signupPreview','verifyAccountPreview','passwordResetPreview']);
-const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit',...authScreens]);
+const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview',...authScreens]);
 const $=(q,root=document)=>root.querySelector(q);
 const $$=(q,root=document)=>Array.from(root.querySelectorAll(q));
 let lastNotice='';
@@ -158,15 +158,9 @@ window.addEventListener('click',e=>{
     warn('هذه الوظيفة غير مفعّلة بعد على الخادم');return;
   }
 
-  if(op==='go'&&route==='rechargePreview'){
-    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-    go('wallet');
-    warn('شحن العملات عبر الوكلاء قيد التنفيذ. هنا تعرض محفظتك الحقيقية فقط.');
-    return;
-  }
   if((op==='go'&&!allowed.has(route))||
      (op==='go'&&route==='room'&&!window.TotiPhase2Rooms?.getStatus?.().activeRoomId)||
-     (op==='sheet'&&/^(gift|music|game|store|vip|recharge|lucky)/i.test(route))||
+     (op==='sheet'&&/^(music|game|store|vip|recharge|lucky)/i.test(route))||
      ['friends','notify','search'].includes(royal)){
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
     warn(op==='go'&&route==='room'?'اختر غرفة حقيقية من القائمة أو أنشئ غرفتك أولاً.':undefined);
