@@ -1,0 +1,35 @@
+name: T36 local host month preflight browser QA
+on:
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'app/phase4-agencies-ui.js'
+      - 'tests/t36-month-preflight.test.cjs'
+      - 'tests/t36-host-preflight-browser.cjs'
+      - '.github/workflows/t36-host-preflight-browser.yml'
+  pull_request:
+    branches: [develop/phase-2]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  month-preflight-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium driver and serve committed UI
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts puppeteer-core@24
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/t36-static.log 2>&1 &
+          sleep 2
+      - name: Assert schema safety and JavaScript syntax
+        run: |
+          node --check app/phase4-agencies-ui.js
+          node --check tests/t36-host-preflight-browser.cjs
+          node --test tests/t36-month-preflight.test.cjs
+      - name: Verify Owner history only and no payroll or balance mutations
+        run: node tests/t36-host-preflight-browser.cjs
