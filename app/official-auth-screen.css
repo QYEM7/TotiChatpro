@@ -61,3 +61,16 @@ body.tc-auth-body{background:#fcf9ff!important;overflow-x:hidden}
 #app.tc-auth-root .tc-login-layout{width:100%;max-width:none!important}
 #app.tc-auth-root .tc-login-layout>.tc-login-panel,
 #app.tc-auth-root .tc-login-layout>.tc-login-art{min-width:0}
+
+/* Prevent old general input selectors from creating a double-bordered field. */
+#app.rf-app.tc-auth-root .tc-login-input-wrap input,
+#app.rf-app.tc-auth-root .tc-login-input-wrap input:focus{
+ appearance:none!important;-webkit-appearance:none!important;
+ border:0!important;border-radius:0!important;outline:0!important;
+ box-shadow:none!important;background:transparent!important;
+ min-height:0!important;height:51px!important;
+ margin:0!important;padding:8px 12px!important;
+}
+#app.rf-app.tc-auth-root .tc-login-input-wrap:focus-within{
+ border-color:#8750ab!important;box-shadow:0 0 0 4px #9160b525!important;
+}
