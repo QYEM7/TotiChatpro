@@ -51,6 +51,8 @@ jobs:
           node --check app/phase2-voice-ui.js
           node --check app/phase2-livekit-sdk.mjs
           node --check tests/phase2-browser.cjs
+      - name: T06 verify durable voice Edge rate budget and fail-closed responses
+        run: node --test tests/t06-voice-edge-limit.test.mjs
       - name: T10 verify live Android never silently becomes sample-preview
         run: node --test tests/t10-no-demo-bypass.test.cjs
       - name: T50 create truthful release-blocker evidence without declaring readiness

@@ -2,6 +2,7 @@
 // Adapted conceptually from the old project; its data/config are NOT reused.
 import {createClient} from '@supabase/supabase-js';
 import {AccessToken,TrackSource} from 'livekit-server-sdk';
+import {rateVoiceRequest} from './rate-limit.mjs';
 
 const headers={
   'access-control-allow-origin':'*',
@@ -27,6 +28,12 @@ Deno.serve(async(request:Request)=>{
   if(request.method!=='POST')return json(405,{error:'METHOD_NOT_ALLOWED'});
   const bearer=request.headers.get('authorization')||'';
   if(!bearer.startsWith('Bearer '))return json(401,{error:'UNAUTHORIZED'});
+  // Auth failures are counted too. Credentials required before Edge cutover.
+  const budget=await rateVoiceRequest(bearer,{
+    url:env('UPSTASH_REDIS_REST_URL'),token:env('UPSTASH_REDIS_REST_TOKEN'),
+    salt:env('VOICE_RATE_LIMIT_SALT')
+  });
+  if(!budget.allowed)return json(budget.status,{error:budget.code});
   let roomId:string;
   try{
     const body=await request.json();
