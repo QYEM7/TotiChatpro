@@ -316,9 +316,17 @@
       history.replaceState(null,'',clean.href);
     }).catch(error=>console.warn('OAuth resume:',String(error.message)));
   }
+  async function requestVoiceToken(roomId){
+    if(typeof roomId!=='string'||!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(roomId))
+      throw new Error('Invalid room');
+    const token=await validToken();
+    return request('/functions/v1/phase2-voice-token',{
+      method:'POST',body:{roomId},accessToken:token
+    });
+  }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
     verifySignup,readProfile,updateProfile,resume,refresh,requestData,
-    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered});
+    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken});
   window.TotiPhase2Auth=api;
   if(session){void resume();}
   else queueMicrotask(notify);
