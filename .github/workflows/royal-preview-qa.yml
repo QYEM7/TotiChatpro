@@ -10,6 +10,7 @@ on:
       - "tests/phase2-android-root-browser.cjs"
       - "tests/phase2-native-gate-browser.cjs"
       - "tests/official-auth-layout-browser.cjs"
+      - "tests/phase2-voice-browser.cjs"
       - "scripts/build-approved-web.mjs"
       - "tests/agency-flow-browser.cjs"
       - "tests/bloom-design-browser.cjs"
@@ -52,6 +53,7 @@ jobs:
           node tests/phase2-android-root-browser.cjs
           node tests/phase2-native-gate-browser.cjs
           node tests/official-auth-layout-browser.cjs
+          node tests/phase2-voice-browser.cjs
       - name: Save browser review screenshots
         if: always()
         uses: actions/upload-artifact@v4
