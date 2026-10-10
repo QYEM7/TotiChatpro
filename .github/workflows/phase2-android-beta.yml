@@ -1,22 +1,13 @@
 name: Build TotiChat Phase 2 Android debug APK
+# APK builds are explicitly blocked until a measured readiness score >=80% and
+# independent release evidence is committed. No auto-builds on development pushes.
 on:
   workflow_dispatch:
-  push:
-    branches: [develop/phase-2]
-    paths:
-      - 'app/**'
-      - 'assets/**'
-      - 'scripts/build-approved-web.mjs'
-      - 'tests/phase2-foundation.test.mjs'
-      - 'tests/phase2-auth.test.cjs'
-      - 'tests/phase2-wallet-security.test.cjs'
-      - 'tests/phase2-voice-security.test.cjs'
-      - 'scripts/configure-android-auth.mjs'
-      - 'tests/phase2-native-gate-browser.cjs'
-      - 'supabase/migrations/**'
-      - 'package.json'
-      - 'capacitor.config.ts'
-      - '.github/workflows/phase2-android-beta.yml'
+    inputs:
+      release_review:
+        description: 'Explicit Owner release review completed? Type APPROVED when evidence is verified'
+        required: true
+        type: string
 permissions:
   contents: read
 jobs:
@@ -25,6 +16,10 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+      - name: Hard stop unless >=80% measured readiness and independent release proof
+        env:
+          OWNER_REVIEW: ${{ inputs.release_review }}
+        run: node scripts/t48-apk-readiness-gate.cjs
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
