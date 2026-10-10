@@ -36,6 +36,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/t03-unlinked-replay"
           cd "$RUNNER_TEMP/t03-unlinked-replay"
           supabase init
+          mkdir -p supabase/migrations
           cp "$GITHUB_WORKSPACE"/supabase/migrations/*.sql ./supabase/migrations/
           test "$(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)" -eq 32
           # Start isolated local containers. Never call "supabase link", "db push", or remote reset.
