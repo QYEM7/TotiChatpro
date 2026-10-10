@@ -21,7 +21,7 @@
     "id": "T04",
     "title": "RLS and privileged RPC audit",
     "status": "tested_local",
-    "evidence": "45 tables RLS on; local catalog permissions and rollback tests passed"
+    "evidence": "Verified private RLS and 32 historical production DB migrations. Added 5 production-advisor-confirmed missing FK covering indexes in pending forward-only migration 20261010193000_t04_foreign_key_index_cover.sql; disposable PostgreSQL schema+privilege acceptance in successful CI 38061920190. Not applied to production; performance load testing pending."
   },
   {
     "id": "T05",
@@ -33,7 +33,7 @@
     "id": "T06",
     "title": "Rate limits and audit logs",
     "status": "partial",
-    "evidence": "Stored financial ops limited and idempotent; denied/API attempts not gated"
+    "evidence": "Hardened T42 support RPC with per-verified-actor transaction advisory lock before replay and rolling-window rate count. SHA-256 fingerprint replaces duplicated sensitive ticket text in private idempotency ledger, supports previous legacy row replay. Rollback-only PostgreSQL test checks 20 accepted, 21st denied, idempotent replay without duplicate messages/ledger plaintext (CI 38061920190), foundation static QA 38061780438. True multi-connection stress and global financial/API throttling not completed; T06 remains partial."
   },
   {
     "id": "T07",
@@ -267,7 +267,7 @@
     "id": "T45",
     "title": "Battery RAM performance",
     "status": "blocked",
-    "evidence": "No physical Android performance budget/measurements recorded"
+    "evidence": "Physical Android RAM/battery benchmarks not recorded; 5 missing FK covering indexes identified from live advisor and verified only on disposable PostgreSQL, not production. Performance and load testing on actual devices still blocked."
   },
   {
     "id": "T46",
