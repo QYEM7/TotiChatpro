@@ -54,7 +54,7 @@ jobs:
           node --check app/phase2-livekit-sdk.mjs
           node --check tests/phase2-browser.cjs
       - name: T48 block all APK builds before independently verified 80% readiness
-        run: node --test tests/t48-no-apk-before-80.test.cjs
+        run: node --test tests/t48-no-apk-before-80.test.cjs tests/t48-release-threshold-matrix.test.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
         run: node --test tests/t06-voice-edge-limit.test.mjs
       - name: T06 harden support concurrency and keep private messages out of retry ledger
