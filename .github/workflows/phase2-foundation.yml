@@ -51,6 +51,10 @@ jobs:
           node --check app/phase2-voice-ui.js
           node --check app/phase2-livekit-sdk.mjs
           node --check tests/phase2-browser.cjs
+      - name: T03 scan committed code for private tokens and credential files
+        run: |
+          node scripts/t03-secret-audit.mjs
+          node --test tests/t03-secret-audit.test.mjs
       - name: T03 isolated staging and public-config safety tests
         run: node --test tests/t03-staging-safety.test.mjs
       - name: T02 check commit and changed-path audit snapshots (no network writes)

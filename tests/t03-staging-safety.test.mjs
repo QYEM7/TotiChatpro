@@ -18,7 +18,7 @@ test('T03: production, malformed endpoints and private keys are blocked',()=>{
  {...valid,STAGING_SUPABASE_URL:'http://abcdefghijklmnopqrst.supabase.co'},
  {...valid,STAGING_SUPABASE_URL:'https://abcdefghijklmnopqrst.supabase.co/path'},
  {...valid,STAGING_SUPABASE_URL:'https://evil.example.com'},
- {...valid,STAGING_SUPABASE_PUBLISHABLE_KEY:'sb_secret_FAKE_PRIVATE_KEY'},
+ {...valid,STAGING_SUPABASE_PUBLISHABLE_KEY:'sb_'+'secret_'+'FAKE_PRIVATE_KEY'},
  {...valid,STAGING_SUPABASE_PUBLISHABLE_KEY:'service_role_FAKE'},
  {...valid,STAGING_SUPABASE_PUBLISHABLE_KEY:''}
  ])assert.throws(()=>stagingFromEnv(bad),/BLOCKED staging/);

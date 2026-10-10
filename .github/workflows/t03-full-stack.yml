@@ -1,0 +1,60 @@
+name: T03 isolated local full-stack integration
+on:
+  pull_request:
+    branches: [develop/phase-2]
+    paths:
+      - 'scripts/t03-local-auth-smoke.mjs'
+      - 'scripts/t03-secret-audit.mjs'
+      - 'tests/t03-secret-audit.test.mjs'
+      - '.github/workflows/t03-full-stack.yml'
+      - 'supabase/migrations/**'
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'scripts/t03-local-auth-smoke.mjs'
+      - 'scripts/t03-secret-audit.mjs'
+      - 'tests/t03-secret-audit.test.mjs'
+      - '.github/workflows/t03-full-stack.yml'
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-services:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate tracked files have no private credentials
+        run: |
+          node scripts/t03-secret-audit.mjs
+          node --test tests/t03-secret-audit.test.mjs
+      - name: Validate 32 migration fingerprint baseline
+        run: node --test tests/t01-migration-history.test.cjs
+      - name: Setup pinned Supabase CLI (unlinked, local only)
+        uses: supabase/setup-cli@v3
+        with:
+          version: 2.84.2
+      - name: Launch disposable local Auth, REST, Storage and PostgreSQL services
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ''
+          SUPABASE_DB_PASSWORD: ''
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/t03-full-stack"
+          cd "$RUNNER_TEMP/t03-full-stack"
+          supabase init > "$RUNNER_TEMP/t03-init.log" 2>&1
+          mkdir -p supabase/migrations
+          cp "$GITHUB_WORKSPACE"/supabase/migrations/*.sql supabase/migrations/
+          # No supabase link; no production data, no external secrets, no db push.
+          if ! supabase start > "$RUNNER_TEMP/t03-start.log" 2>&1; then
+            echo "::error::Disposable local Supabase services could not start; raw token-bearing CLI output withheld"
+            exit 1
+          fi
+          supabase status --output json > "$RUNNER_TEMP/t03-local-status.json"
+          cd "$GITHUB_WORKSPACE"
+          node scripts/t03-local-auth-smoke.mjs "$RUNNER_TEMP/t03-local-status.json"
