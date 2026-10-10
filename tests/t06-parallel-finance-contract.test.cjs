@@ -12,7 +12,7 @@ test('T06 finance parallel test rejects remote Supabase/credentials and uses loc
 });
 test('T06 financial conservation tested using genuine concurrent POSTs and ledger',()=>{
  for(const item of ['Promise.all','length:6','length:4','length:28','BigInt(after.treasury)',
-   'BigInt(after.issued)','operation_id','===46n','!==30','Rate limit exceeded',
+   'BigInt(after.issued)','operation_id','!==46n','!==30','Rate limit exceeded',
    'Cash issuance reference already used','Idempotency key conflict','ordinary user'])
   assert(s.includes(item),item);
  assert(!wf.includes('actions/upload-artifact@'));
