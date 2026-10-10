@@ -51,19 +51,19 @@
     "id": "T09",
     "title": "UI UX screen and responsive QA",
     "status": "partial",
-    "evidence": "Approved design assets preserved; full manual device checklist pending"
+    "evidence": "Chromium browser checks succeeded at 320/360/390/430/768/1280px; screenshots and preserved approved VIP seat CSS/classes verified. Physical Android accessibility/IME remains unverified."
   },
   {
     "id": "T10",
     "title": "Remove production mocks",
     "status": "partial",
-    "evidence": "Native demo-URL bypass blocked; some legacy preview-only data remains"
+    "evidence": "Closed demo URL override in both phase2-live-mode.js and phase2-ui.js; native sign-in regression passes even with phase2Demo=1. Other preview-only frontend content still requires audit."
   },
   {
     "id": "T11",
     "title": "All controls functional states",
     "status": "partial",
-    "evidence": "Selected rooms/economy flows linked; unconnected controls explicitly warned"
+    "evidence": "Signed-in Royal categories no longer navigate to fake users/games or hide real rooms; a room directory 503 now shows Retry and recovers; stale loading on account switch/exit guarded. Full button inventory not complete."
   },
   {
     "id": "T12",
