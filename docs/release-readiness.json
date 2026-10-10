@@ -1,0 +1,53 @@
+{
+  "project": "TotiChatpro",
+  "branch": "develop/phase-2",
+  "updated": "2026-10-10",
+  "engineering_percent": 53,
+  "beta_readiness_percent": 15,
+  "release_allowed": false,
+  "reviewer": null,
+  "verified_date": null,
+  "notes": "Evidence-based estimate only; explicit Owner review + independent signed live user and restore evidence required. Do not increase percentages without evidence.",
+  "evidence": {
+    "production_backup_restore": {
+      "passed": false,
+      "url": null,
+      "notes": "No verified external snapshot and restore."
+    },
+    "independent_staging": {
+      "passed": false,
+      "url": null,
+      "notes": "Supabase project has no development branches; no persistent isolated staging."
+    },
+    "real_auth_two_users": {
+      "passed": false,
+      "url": null,
+      "notes": "No two independent real production-like accounts tested on hosted staging."
+    },
+    "two_physical_android_phones": {
+      "passed": false,
+      "url": null,
+      "notes": "No two-phone physical Android acceptance."
+    },
+    "live_voice_and_moderation": {
+      "passed": false,
+      "url": null,
+      "notes": "LiveKit/TURN unavailable for verified two-phone calls."
+    },
+    "financial_conservation_and_month_close": {
+      "passed": false,
+      "url": null,
+      "notes": "True month-end immutable payroll snapshot and zeroing not completed."
+    },
+    "account_agency_security": {
+      "passed": false,
+      "url": null,
+      "notes": "Local role negative tests passed, but real Owner/partner/agent hosted tests missing."
+    },
+    "full_mobile_regression": {
+      "passed": false,
+      "url": null,
+      "notes": "Automated browser checks passed; hardware battery/memory/navigation/accessibility not proven."
+    }
+  }
+}
