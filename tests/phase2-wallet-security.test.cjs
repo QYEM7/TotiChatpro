@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
-const sql=read('supabase/migrations/20261010160000_phase2_readonly_wallet_foundation.sql');
+const sql=read('supabase/migrations/20261009235109_phase2_readonly_wallet_foundation.sql');
 const api=read('app/phase2-wallet.js');
 test('new accounts start at zero coins/diamonds and wallets have row-level protection',()=>{
  assert.match(sql,/coins bigint not null default 0 check \(coins >= 0\)/);

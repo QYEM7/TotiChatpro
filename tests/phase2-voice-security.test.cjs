@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const get=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const edge=get('supabase/functions/phase2-voice-token/index.ts');
-const rpc=get('supabase/migrations/20261010170000_phase2_actual_mic_mute.sql');
+const rpc=get('supabase/migrations/20261010003152_phase2_actual_mic_mute.sql');
 const media=get('app/phase2-voice-ui.js');
 const realSdk=get('app/phase2-livekit-sdk.mjs');
 const manifest=get('scripts/configure-android-auth.mjs');

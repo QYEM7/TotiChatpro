@@ -53,7 +53,6 @@ create function phase3.can_manage_agency(p_kind text) returns boolean language p
 declare s jsonb:=phase3.admin_session();
 begin return case p_kind when 'host' then (s->>'canManageHostAgencies')::boolean when 'recharge' then (s->>'canManageRechargeAgencies')::boolean else false end;end $$;
 create function phase3.agency_action(p_action text,p_data jsonb,p_request_id uuid) returns jsonb language plpgsql security definer set search_path='' as $$
-<<agency_action>>
 declare u uuid:=phase3.actor();body jsonb;prior phase3.agency_requests%rowtype;reg public.agency_registrations%rowtype;a public.agencies%rowtype;j public.agency_join_requests%rowtype;kind text;name text;note text;commission numeric;old_id uuid;id uuid;answer jsonb;
 begin
  if p_action is null or p_action not in('register','approve_registration','reject_registration','edit','close','join','approve_old','accept_join','reject_join','exception_transfer') or p_data is null or jsonb_typeof(p_data)<>'object' or octet_length(p_data::text)>5000 or p_request_id is null then raise exception 'Invalid agency operation';end if;
@@ -77,7 +76,7 @@ begin
    commission:=(p_data->>'commission_percent')::numeric;if commission is null or commission<0 or commission>100 or commission='NaN'::numeric then raise exception 'Explicit valid commission required';end if;
    insert into public.agencies(owner_id,kind,name,commission_percent,created_by) values(reg.applicant_id,reg.kind,reg.name,commission,u) returning agencies.id into id;
   end if;
-  update public.agency_registrations set status=case p_action when 'approve_registration' then 'approved' else 'rejected' end,agency_id=agency_action.id,reviewed_by=u,review_note=note,reviewed_at=now() where agency_registrations.id=reg.id returning * into reg;answer:=to_jsonb(reg);
+  update public.agency_registrations set status=case p_action when 'approve_registration' then 'approved' else 'rejected' end,agency_id=id,reviewed_by=u,review_note=note,reviewed_at=now() where agency_registrations.id=reg.id returning * into reg;answer:=to_jsonb(reg);
  elsif p_action in('edit','close') then
   select * into a from public.agencies where agencies.id=(p_data->>'id')::uuid for update;
   if not found then raise exception 'Agency not found';end if;
