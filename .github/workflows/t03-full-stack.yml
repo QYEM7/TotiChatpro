@@ -62,7 +62,7 @@ jobs:
           # Strictly on a disposable unlinked Docker instance.
           mapfile -t db_containers < <(docker ps --format '{{.Names}}' | grep '^supabase_db_' || true)
           test "${#db_containers[@]}" -eq 1 || { echo "::error::Ambiguous local Postgres container"; exit 1; }
-          for test_sql in t04_security_invariants.sql phase3_admin.sql phase4_sessions.sql; do
+          for test_sql in t04_security_invariants.sql phase3_admin.sql phase4_sessions.sql t06_financial_limits.sql; do
             echo "T04/T05 local security test: $test_sql"
             docker exec -i "${db_containers[0]}" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres < "$GITHUB_WORKSPACE/supabase/tests/$test_sql" | grep -E "^PASS|^DO$|^ROLLBACK$"
           done
