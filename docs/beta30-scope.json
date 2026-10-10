@@ -5,7 +5,7 @@
   "approved_date": "2026-10-10",
   "budget_usd_now": 0,
   "beta_duration_days": 30,
-  "decision": "Freeze all nonessential expansion work for first viable high-quality voice-room beta; manual Owner/agent/host agency cash and monthly payroll actions handled in protected admin dashboard. Preserve design, existing source and historical task statuses.",
+  "decision": "Freeze nonessential expansion for 30-day beta, but Google-only sign-in, authorized manual premium IDs, server-audited luck gifts and purchase/activation of existing VIP1..VIP10 are ESSENTIAL alongside manual protected admin operations. No new VIP tiers/features.",
   "do_not_do": [
     "Do not modify or delete approved UI assets, room visuals, VIP frames, 15 seats, music/gift button layout without Owner decision.",
     "Do not build APK or AAB before existing T48 gates, both 80% measures and explicit Owner approval.",
@@ -19,7 +19,7 @@
     "LiveKit/SFU/TURN for real tested two-phone audio; must be configured and measured under free quota.",
     "Minimal Firebase Crashlytics/FCM only if integration solves a measured beta need and is free; Firebase not another financial database.",
     "Cloudflare Pages for site, GitHub Releases for approved APK after gates, GitHub Actions for CI.",
-    "Email SMTP with an approved no-cost provider, uptime/error monitoring and separate backup/restore proof."
+    "Google sign-in through Supabase Auth PKCE only; optional SMTP solely for business notifications if needed, never email/password fallback; uptime/error monitoring and independent backup/restore proof."
   ],
   "human_approvals": {
     "recharge": "Customer sends request. Outside-app cash is checked manually by responsible agent or authorized management. Agent/Owner verifies receipt, then protected RPC atomically credits exactly once with unique receipt reference, audit and ledger.",
@@ -27,16 +27,17 @@
     "host_agencies": "Customer service receives host-agency applications. Only Owner and designated main-partner Super Admin can enter full host-agency-management and approve/manage it; a DB employee may only use the narrowly delegated host-agency-opening workflow where explicitly authorized, without full management access and never opening recharge agencies.",
     "host_transfer": "Old host agent consent and new-agent acceptance required; Owner/designated partner can investigate unfair refusal, ignored requests or closed agency and exceptionally authorize transfer with evidence.",
     "monthly_close": "Staff prepare month-end agency/host diamond totals, targets, rates, salaries and liabilities manually. Protected admin workflow freezes immutable ledger/snapshot before any operational diamond clearing, requires authorized approval with retry/idempotency and audit, prevents duplicate close and preserves unpaid entitlements permanently; manual external payout is reconciled separately.",
-    "support": "Support agents handle tickets and issues manually under scoped roles; operations auditable; no staff may self-grant Owner or partner authority."
+    "support": "Support agents handle tickets and issues manually under scoped roles; operations auditable; no staff may self-grant Owner or partner authority.",
+    "premium_user_id": "Owner or specifically delegated authorized admin can manually grant/reassign a unique premium public ID via protected dashboard with audit and server uniqueness; cannot override immutable internal Supabase UUID or self-grant ID."
   },
   "beta_release_non_negotiables": [
-    "Real authenticated users, reset/recovery, no demo financial data",
+    "Only Google OAuth real accounts with PKCE Android callback verified, mapped Owner/partner roles, no legacy password/social alternatives, no fake financial data",
     "Real two-phone room audio with mic seat/moderation and reconnection",
-    "15-seat designed room UI, chat, gift selection-before-send and audited wallet",
+    "Approved 15-seat room UI/chat, gift recipient selection and explicit confirmation, normal plus disclosed-odds audited luck gifts, real wallet and existing VIP1..VIP10 purchasable/activatable",
     "Manual recharge agent and Owner approval with unique cash reference and balanced immutable ledgers",
     "Host agency/customer support workflows, permission isolation and documented exceptional transfers",
     "Month-end manually approved immutable entitlement snapshot and no-loss diamond operational reset if operational diamond clearing is enabled",
-    "Admin dashboard functions actually wired, no dead / pretend controls for beta participants",
+    "Audited admin-only assignment of unique special public user IDs, manual finance/host operations, VIP purchase/entitlements; every beta-visible action truly server-backed",
     "Encrypted offsite production database AND Storage object backup independently restored, hosted staging and safe migration replay",
     "No critical privacy/security/account/financial bugs, stable Android device tests",
     "T48 gate unchanged: engineering>=80, beta>=80, 40/50 verified_live, nine evidence checks passed, reviewer + Owner APPROVED"
@@ -47,5 +48,14 @@
     "beta_readiness_percent": 15
   },
   "release_allowed": false,
-  "note": "Task beta_30d_scope is a prioritization decision, not completion proof. The formal T48 40/50 live-verified gate remains binding; 7 paused tasks leave 43 candidate tasks, but task-level acceptance must be evidenced and cannot be fabricated."
+  "note": "Task beta_30d_scope is a prioritization decision, not completion proof. The formal T48 40/50 live-verified gate remains binding; 7 paused tasks leave 43 candidate tasks, but task-level acceptance must be evidenced and cannot be fabricated.",
+  "owner_scope_refinements": {
+    "approved_date": "2026-10-10",
+    "login": "Google OAuth ONLY for beta using Supabase Auth PKCE on Android and web. No email/password, Apple or Facebook options in beta UI or allowed enabled Auth providers. Must configure Google OAuth and verify real Android deep-link and two-device flow BEFORE disabling existing working login in any environment. No simulated OAuth success or secret in source. Support/admin identities require mapped Google account, role verification and MFA where mandated; account recovery through Google, not local password reset.",
+    "premium_user_id": "Only explicitly authorized admin role may assign/reserve/reassign a UNIQUE special public ID manually inside audited admin dashboard. No random issuance of premium/special ID, no user self-assignment, no collisions or impersonation. Internal immutable Supabase Auth UUID remains automatic and never replaced; normal non-premium account identification remains distinct from special public ID. Server-side uniqueness checks and RLS/role controls; safe audit on edits.",
+    "luck_gifts": "ESSENTIAL in first beta: explicit gift selection, recipient, cost and confirm, immutable atomic wallet transfer/debit and audited server-controlled chance outcome, documented and publicly disclosed probabilities for each reward tier, cryptographically secure server RNG, replay/idempotency protection, deterministic verifiable payout accounting and caps. NEVER simulate wins, bias odds per user or alter odds silently. Escalate legal/store-policy review for chance-based paid virtual currency/diamonds with any redemption. No launch until approved chance rules and odds specified by Owner and legal checks.",
+    "vip": "Existing VIP1..VIP10 available for purchase with supported in-app coins and activation on real user profile; atomic ledger debit and durable entitlement, duration/expiry where applicable, idempotency, ability to view owned VIP and its already approved frames/features. STOP adding new VIP tiers, benefits or new visual items. Existing approved VIP aesthetics remain intact.",
+    "transactional_email": "Email/password registration and local password recovery are OUT of beta login scope; optional email sender only if a separate transactional/support notification requirement justifies it."
+  },
+  "luck_gifts_pending_parameters": "Owner must approve exact tier prices, odds, noncash/nonwithdrawal terms and payouts; do not fabricate rates or turn on economic chance mechanics without compliance review."
 }
