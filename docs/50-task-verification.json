@@ -249,7 +249,7 @@
     "id": "T42",
     "title": "Customer support and tickets",
     "status": "partial",
-    "evidence": "Authenticated audited private ticket backend and account support UI; Owner-only real support staff grant/revoke interface; stale account authorization guarded. Five-identity PostgreSQL rollback CI 38058790264, frontend foundation CI 38059820406 and isolated Chromium customer/staff/Owner workflow CI 38059820436 passed after UUID format fix. STILL PARTIAL: five migrations pending production; two-phone hosted verification, notifications, SLA and staff list pending."
+    "evidence": "Real authenticated private support tickets, Owner-only staff grant/revoke plus paged Owner staff roster and 30-message history paging; per-user auth and IDOR restricted by database. 6+ actor tests in disposable PostgreSQL rollback passed 38061109118; isolated Chromium Owner/agent/customer + message paging passed 38061220445, foundation 38061220423. STILL PARTIAL: 6 repo migrations unapplied to production; hosted/two-device real users, CS SLA, push/email notifications and staff ops pending."
   },
   {
     "id": "T43",
@@ -285,13 +285,13 @@
     "id": "T48",
     "title": "Signed APK AAB install",
     "status": "partial",
-    "evidence": "Debug APK CI builds; signed AAB and install acceptance not proven"
+    "evidence": "Historical debug APK build exists from before release freeze; NEW GitHub development push builds disabled. Manual builds blocked by explicit release_allowed, Owner APPROVED, >=80% engineering and beta, >=40/50 verified_live tasks and full external evidence (T48 unit/foundation CI 38060888902 and follow-up 38061220423). Real signed install/AAB not done; NO new APK should be built before evidence and approval."
   },
   {
     "id": "T49",
     "title": "Observability backup and recovery",
     "status": "blocked",
-    "evidence": "Git rollback exists; no verified full production DB restore/PITR"
+    "evidence": "Git rollback baseline exists. Supabase project read-only check healthy but ZERO Supabase development branches; no persistent staging and no verified backup/restore/PITR. Must confirm recoverability before migrations."
   },
   {
     "id": "T50",
