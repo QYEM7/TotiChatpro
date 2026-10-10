@@ -22,6 +22,15 @@ await rm(destination,{recursive:true,force:true});
 await mkdir(destination,{recursive:true});
 await cp(path.join(root,'app'),path.join(destination,'app'),{recursive:true});
 await cp(path.join(root,'assets'),path.join(destination,'assets'),{recursive:true});
+
+const {build:bundle}=await import('esbuild');
+await bundle({
+ entryPoints:[path.join(root,'app','phase2-livekit-sdk.mjs')],
+ outfile:path.join(destination,'app','phase2-livekit-sdk.bundle.js'),
+ bundle:true,format:'esm',platform:'browser',target:'es2022',
+ sourcemap:false,minify:true,logLevel:'warning'
+});
+
 // CRITICAL ANDROID WEBVIEW FIX (2026-10-10):
 // Android's embedded Capacitor server opens dist/index.html at https://localhost/.
 // A redirect to './app/' can fail to resolve a folder-style URL on-device,
