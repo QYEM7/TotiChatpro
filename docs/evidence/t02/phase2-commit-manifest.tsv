@@ -1,0 +1,144 @@
+sha	commit_timestamp_utc	group	subject
+95bdba4ea82e99cdb25d65e544c3b32fee4a798e	2026-10-10T11:15:04Z	merge	Merge T01: reconcile TotiChatpro Supabase migration history
+fc6170f18fc68b3a9816ef5a940e236d04faea87	2026-10-10T11:13:34Z	tests_ci_build	test(t01): resolve regression fixtures using applied migration filenames
+1d07ab6b0e00fe214e7bd6e0f043ca8c00ab3946	2026-10-10T11:11:16Z	fix_performance	fix(t01): reconcile 32 applied Supabase migrations with GitHub history
+598d92d1bd42d51e90c59adfa12bea2e59df65f4	2026-10-10T03:03:56Z	feature_integration	feat: protect private room recordings and verify audio cleanup
+699b784e05a9a0714161a41111bc3deef1ad9863	2026-10-10T02:49:56Z	feature_integration	feat: add audited agency applications and consent-based host transfers
+698dad8779eefae94b4880b981deac4e0d318b0e	2026-10-10T02:38:53Z	feature_integration	feat: add audited CP relationships, tracked diamond redemption and SQL reports
+897cecfff49dcf4e106763739bb35851a412c82b	2026-10-10T01:38:49Z	feature_integration	feat: add secure account controls, atomic gifts/store/transfers and protected catalog administration
+b1ed40bbedc6a818f07f36124d758b70dc510cf0	2026-10-10T01:01:43Z	feature_integration	Import reviewed reference catalogs into independent backend and wire live options
+1a9b2e45b776a958e1e518c0f7f9f9050d9742eb	2026-10-10T00:44:52Z	tests_ci_build	test(voice): correctly handle CORS OPTIONS preflight without pretending it sends token body
+c4f4f8321b2ccaa0181bbb4de65478f883618986	2026-10-10T00:43:53Z	feature_integration	feat(beta): real member-authenticated feedback with RLS and retained report history
+985bdf9af4869a0f417052374281380d9b3c4079	2026-10-10T00:43:08Z	tests_ci_build	ci(audio): ensure missing SFU service does not simulate a voice connection
+e4336b76caeca5350654137a10375a4c774d7c9d	2026-10-10T00:42:57Z	tests_ci_build	test(voice): signed-in room rejects missing LiveKit service without fake sound or phantom mic
+d43f88781b4c505dcef731d5469d172c1aab8402	2026-10-10T00:42:29Z	docs	docs(voice): record bundled real LiveKit client, Android permission, token config and moderation caveats
+e13b111bab34e1d5c66e2b68f9757830c1c72cec	2026-10-10T00:41:43Z	fix_performance	fix(android): declare audio settings plus microphone permissions requested by Capacitor WebChromeClient
+badc60386c15edfec7866b5f9f41e9c865872f41	2026-10-10T00:40:31Z	fix_performance	fix(audio): close active microphone media tracks before changing seat or leaving room
+70bb4e979576201bea45a38330d1c313483fcba8	2026-10-10T00:39:36Z	tests_ci_build	ci(voice): fail build for missing real SFU client or unsafe microphone permissions
+819512db21a7d65217d526d879d68e8d456ef16a	2026-10-10T00:39:30Z	tests_ci_build	ci(voice): fail build for missing real SFU client or unsafe microphone permissions
+5019b08274cb04f72b8fabc5c3fd3a1a026b6ce3	2026-10-10T00:39:16Z	tests_ci_build	test(voice): enforce room-bound real JWT audio, mic permissions and no fake sound
+65ddffd8bd8d0fe5c20836f194783e4a3acbd610	2026-10-10T00:39:01Z	tests_ci_build	test(voice): require bundled real LiveKit SDK, authenticated mic control and exact Android payload
+c628a73282ed1c9bb62bead53063c3792c42c670	2026-10-10T00:38:22Z	fix_performance	fix(android): add RECORD_AUDIO permission for real WebRTC voice microphone
+86a1410bdb0f7b39a38aa9cfd53bf463d1ded55f	2026-10-10T00:38:02Z	tests_ci_build	test(voice): preserve exact approved HTML contract with isolated voice integration layers
+7180ff74995095380e4b9fe44dc36de43ff8cab5	2026-10-10T00:37:49Z	feature_integration	feat(voice): enable SFU-backed room audio with server authorization; no simulated audio
+a4fa4f8cb1917054af5063ca45695b5a7fb935c2	2026-10-10T00:37:38Z	ui_visual	style(voice): show minimal real SFU connection/mic controls without altering room design
+d988064b36d3c212469f5610c6ad06c7777b0c62	2026-10-10T00:37:25Z	feature_integration	feat(voice): expose verified mic seat state and refresh updates to real LiveKit client
+5839976aced5e9183fbe017ebced4eb5f14704cb	2026-10-10T00:36:00Z	feature_integration	feat(voice): real server-token audio connect, listener and seat-gated microphone controls
+6700252c742dce756826191b876127e7fce218d5	2026-10-10T00:35:24Z	tests_ci_build	ci: install dependencies before checking locally bundled voice SDK
+76f65c3cba1dad0b8fb438d4acaf479943b185e9	2026-10-10T00:35:14Z	tests_ci_build	build(audio): ship a local offline LiveKit browser SDK bundle inside Android WebView
+66784f8fae87ac34aaf44f0bfd1d1efb045b945f	2026-10-10T00:34:55Z	feature_integration	feat(audio): locally bundled real LiveKit subscriber, microphone publisher and reconnect handling
+233033f07b1921b5f479b6e0e694b36dbcb79b74	2026-10-10T00:34:41Z	tests_ci_build	build: add bundled LiveKit media browser dependency and esbuild
+8aaac9c1cc0ed9e547f190e7bc3da22e444d7ab2	2026-10-10T00:34:20Z	tests_ci_build	test(visual): wait for Login fade-in completion before reference screenshots
+8be7d00e0f4f95a795b52d47a76da7b1d9e9ee64	2026-10-10T00:34:10Z	ui_visual	style(auth): remove nested input outlines and maintain accessible focus on whole field
+085ec1b828bfd43ef57a7d223804cb35904dd12a	2026-10-10T00:33:01Z	docs	docs(voice): document live membership-gated SFU endpoint and required external setup
+3615cbd3f4d26a56e74f87d50ca7e0e42ff1abab	2026-10-10T00:32:06Z	feature_integration	feat(voice): call JWT-protected real LiveKit token endpoint using logged-in Supabase identity
+f344c1392600a745dd6994a0bf9d212955549c48	2026-10-10T00:31:41Z	feature_integration	feat: server checks microphone seat before changing own mute state
+b19b7bb06a5377bb73485b06782529db08cab4dc	2026-10-10T00:30:30Z	feature_integration	feat(voice): authenticated SFU token endpoint checked against new room membership and mic seat
+83ea2491ef61890ac6e495ca1cc1df02679e473d	2026-10-10T00:30:25Z	feature_integration	feat(voice): authenticated SFU token endpoint checked against new room membership and mic seat
+118830bec669e052fe56ef9d0da27ac1d87b8df3	2026-10-10T00:28:22Z	tests_ci_build	test(visual): attach desktop/mobile official falcon login screenshots to QA artifacts
+e65dda0352610bf5ec9b923a48fbc48189c529ab	2026-10-10T00:26:46Z	docs	docs(beta): record real account audit, external service blockers and 30-day test plan
+04f3d6b78b8e163250e6bc2fea5c899159f1175f	2026-10-10T00:25:12Z	fix_performance	fix(auth): escape mobile 438px preview shell so desktop login becomes true equal 50/50 split
+d7213ef21ecfe0fce8237a8b664e64bb53197476	2026-10-10T00:24:46Z	ui_visual	style(real-room): style server-confirmed room info overlay using approved theme
+adee9486672ab7cb6c32254d813f3ba0bef884e8	2026-10-10T00:24:34Z	fix_performance	fix(real-room): show actual room details and prevent demo-only interactions
+38fa7b88aef8b16c5b298b0ad5ce4748fe8ef9f3	2026-10-10T00:24:00Z	fix_performance	fix(live room): replace fake room activity counts with actual server-backed room status
+cc754e236eafa03495164adc2431a9da20daf828	2026-10-10T00:22:41Z	tests_ci_build	ci(auth): require responsive falcon login and no fake OAuth readiness before Android beta
+0f9a02a3d52ffe5e65ed0fbe9b2a0843fedb8ce7	2026-10-10T00:22:28Z	tests_ci_build	test(auth): desktop 50/50 and mobile falcon login, real provider availability and no fake navigation
+3e1ee67bd9da1bf3d7e0cf671f2049a447f1411c	2026-10-10T00:21:49Z	tests_ci_build	test: count social options safely in redesigned login browser QA
+e4b6edde1127e60bc4d59656bc838b97445fa9c2	2026-10-10T00:20:12Z	tests_ci_build	test: inspect absence of navigation without selecting a missing node
+f173185480120a5afb01d449b081e5291e07916e	2026-10-10T00:18:32Z	tests_ci_build	test(auth): include official falcon login assets in isolated UI snapshot allowances
+09957bd16a5272bbcc22a98e58895ca793302f7c	2026-10-10T00:17:57Z	tests_ci_build	test(auth): verify new official split login, no demo links/navigation and genuine login state
+98ea64ee5e6521ceb6e2a681fd0aa62b71c8e05d	2026-10-10T00:17:40Z	fix_performance	fix(auth): guard OAuth callback detection in headless/runtime non-browser test environments
+08e630acfb89ddf77e971c0f331d0937b207ea7f	2026-10-10T00:17:19Z	tests_ci_build	ci(android): ship new official login and real PKCE deep-link instead of static login preview
+cc9c61e3a7a581ef2344427ae30c0678341a1721	2026-10-10T00:17:08Z	tests_ci_build	build(android): register secure OAuth callback deep link in generated Capacitor manifest
+0f4cdc0b1ae9dbf79388980efc6bcd6c0d8f3e2b	2026-10-10T00:16:53Z	tests_ci_build	build(auth): add native OAuth deep-link and system-browser Capacitor plugins
+da8a64e33e9593766b18d96e2a8590d8c14e60d5	2026-10-10T00:16:39Z	feature_integration	feat(auth): activate complete falcon-brand split login only in real beta (approved home/room untouched)
+f0af9636e4939506d495c4952f40d1b367fe1eef	2026-10-10T00:16:26Z	fix_performance	fix(auth): base64url-encode OAuth PKCE verifier/challenge correctly
+25849c84620f8235444b30edb219e7da3fa8e23f	2026-10-10T00:16:12Z	feature_integration	feat(auth): remember-me persistence, provider detection and PKCE callback for enabled OAuth providers
+ec204b2ed31f6663e109d45056f1605731ad446f	2026-10-10T00:15:41Z	ui_visual	style(auth): responsive split screen falcon branding with accessible mobile login
+512f00fe7e66c4f0f2408fbe59c865b79ef7dffe	2026-10-10T00:15:09Z	feature_integration	feat(auth): modern falcon-branded minimal RTL responsive login without fake screens or navigation
+2d38f715d5869aad3caead581960a0af8aa9d418	2026-10-09T23:54:35Z	docs	docs(phase2): evidence-based audit of real vs demo data and live-account first beta changes
+34ac1d14a68dae59848f177290f3abbf1c3c2e76	2026-10-09T23:54:06Z	tests_ci_build	ci(android): rebuild beta with real-account first entry, protected wallet and financial security checks
+933b248911751b48cd459f81f02cf95e6bb93ea3	2026-10-09T23:53:54Z	tests_ci_build	ci(phase2): enforce real wallet ledger and native gate syntax/security checks
+3c9ca48ed4e5ac3d1d8f4bf61cd3b876d628b4e2	2026-10-09T23:53:45Z	tests_ci_build	test(phase2): enforce zero-start financial ledger, no client writes, and truthful wallet read UI
+979aaedd103a62b7a682ad2ada377783bc16552e	2026-10-09T23:52:36Z	tests_ci_build	test(phase2): validate zero-balance read-only wallet replaces fake wallet on authenticated Android
+9fdff2d82bba759c49ef88ad026208d740b7cf03	2026-10-09T23:52:20Z	tests_ci_build	test(phase2): verify real wallet adapter imported without altering approved visual master
+d56d14ea08d5aada64f81fabdfab52d7d6960634	2026-10-09T23:52:10Z	feature_integration	feat(wallet): activate read-only real financial balance UI in native beta
+1af86c07bc958ddf3de58b27af04e7e0d256550e	2026-10-09T23:51:59Z	feature_integration	feat(wallet): route authenticated account to genuine wallet and block demo top-ups
+6c1f3ae2a72b103ddbb24136b7c88541284816da	2026-10-09T23:51:45Z	feature_integration	feat(phase2): read true zero-start wallet balances and ledger from protected Supabase
+2111b734b12efa5890625acea0a42836cedbea46	2026-10-09T23:51:42Z	feature_integration	feat(phase2): read true zero-start wallet balances and ledger from protected Supabase
+922a69d1c8b9ea8bbff57212311f08f3e1bae543	2026-10-09T23:50:59Z	feature_integration	feat(phase2): zeroed real wallet with read-only RLS and ledger foundation, no fake coins
+287bcbb95c6f4c01c1dcc3840cbe7993d001d378	2026-10-09T23:49:23Z	tests_ci_build	ci(beta): verify no fake data is shown on Android guest startup or authenticated profile
+5c240e5179a3e43268198b73d42ad6b1cf4857ac	2026-10-09T23:49:12Z	tests_ci_build	test(android): ensure first boot never shows fake data as real and empty accounts stay empty
+aeb0f77be4c5c1287719781213744ef9abc48a1a	2026-10-09T23:48:48Z	tests_ci_build	test(phase2): allow isolated Android live-gate layers while protecting approved HTML
+62e4c1030bab1b2d4808537614e311d458169b7c	2026-10-09T23:48:29Z	fix_performance	fix(auth): signed-in Android accounts open live room directory instead of old demo profile
+75afd94b7998bceadf9b74fa47338ae256cdc11d	2026-10-09T23:48:20Z	fix_performance	fix(android): wire real-account-first startup, explicit demo only and safe feature boundaries
+3bf33c27ffc91bd2167427eba4d0128f04ed339f	2026-10-09T23:48:07Z	fix_performance	fix(beta): require explicit real account entry and mark guest preview fake, without redesigning UI
+b119627596cd5e866ede5a39aa194f2751e093ff	2026-10-09T23:48:04Z	fix_performance	fix(beta): require explicit real account entry and mark guest preview fake, without redesigning UI
+38ab70d23c981da0a894e3ebdbfee5f8876bc296	2026-10-09T23:38:05Z	tests_ci_build	ci(android): inspect built APK ZIP for complete WebView root and reject blank-link package
+004021339618b85da2c860c7d7a1a72559f4e132	2026-10-09T23:36:40Z	tests_ci_build	ci(android): include exact packaged WebView root browser smoke, prevent white-screen APKs
+b08f31779e2e2cea0ba1e8b2f68447c5d31863c0	2026-10-09T23:36:30Z	tests_ci_build	test(android): enforce full in-app Home on Capacitor root URL, no blank fallback redirect
+2274773fccdc497db743b342bdb8f9d33eed9015	2026-10-09T23:36:14Z	tests_ci_build	test(android): detect blank-link WebView regression and require full approved app in APK root
+3e651cac923936c8bbce02fec9917166e218f85a	2026-10-09T23:35:50Z	fix_performance	fix(android): render approved app directly at Capacitor WebView root instead of broken /app/ redirect
+ebbbb7a0ac6e04cccce4eff838e22ec32a952300	2026-10-09T23:18:26Z	docs	docs(phase2): record protected private invitation flow, security findings and passing E2E evidence
+39b4d8e4f38fdb9bde1a90912b7dfdbaae1cb7f6	2026-10-09T23:17:44Z	fix_performance	perf(phase2): index invitation and message foreign keys without changing data
+50faebb3dcf74fb1c736d7d85bee4a74bfd7314c	2026-10-09T23:16:23Z	tests_ci_build	test(phase2): owner and invited member browser journey verifies private-room isolation and join
+e6566c2c87b446cfcf3d3fe121d2bf6d6bdc6034	2026-10-09T23:14:33Z	tests_ci_build	test(phase2): await server logout navigation after session is invalidated
+3b3f9b78d6bb009700426b73326b9cf101a87a16	2026-10-09T23:14:11Z	tests_ci_build	ci(phase2): early JS syntax preflight and private invitation security checks
+11005245c94143e277041c30217d4554ba1670ce	2026-10-09T23:14:01Z	tests_ci_build	test(security): match authorized private owner check precisely
+e6f421dfafd3d85209fab2f702112e7c008731b7	2026-10-09T23:13:50Z	tests_ci_build	test(security): guard one-use invite secrecy, private room visibility and server-backed chat
+48224d90db18f9cc12a4284cd18d816363a761ee	2026-10-09T23:13:24Z	fix_performance	fix(test): restore valid phase2 browser test and verify server-backed Enter chat
+b13dca1ac3ecc4649a6aa7169e7264a3295df822	2026-10-09T23:12:39Z	fix_performance	fix(phase2): route Enter-key room messages to authenticated server and block duplicate sends
+3d4eb694462610993216192d71674435920dbdae	2026-10-09T23:11:53Z	tests_ci_build	test(phase2): browser flow verifies owner-only one-use private room invitations
+1771cbcea3cd439a36d3600b42dccbc77be20b0f	2026-10-09T23:11:28Z	ui_visual	style(phase2): small royal-themed secure private room invitation controls
+bc6f2612a9308910d11952f0065aaeff3c3bbc48	2026-10-09T23:11:07Z	fix_performance	fix(security): private joined-room read policy and serialized message rate limiting
+b946856aef3b6c31ef381d54fec3342cafca94aa	2026-10-09T23:10:51Z	feature_integration	feat(phase2): private-room invite generation and redemption in approved mobile UI
+776a488d59b51f944a66609fce791e392a35b5ea	2026-10-09T23:10:16Z	feature_integration	feat(phase2): short-lived, single-use private room invite codes with server-side authorization
+f6ab36c646a34aa50f86148a3ddee7c77b38c308	2026-10-09T23:01:05Z	docs	docs(phase2): verified real account-room-chat beta status, CI evidence and release blockers
+39936f8f2f6706d7f27468946f7fa76adeb626de	2026-10-09T22:59:31Z	tests_ci_build	test(browser): dispatch explicit logout from account bottom sheet despite overlay transition
+4cba5fe9bd5498ae915e3573bce313feac93a26b	2026-10-09T22:58:15Z	tests_ci_build	test(browser): invoke real profile-save control regardless of mobile bottom-sheet overlay
+58787f0723b45c4c67663b115ce633048f489dea	2026-10-09T22:56:54Z	fix_performance	fix(phase2): stop legacy demo MutationObserver from overwriting real room metadata
+1a29a7fde1ac7ef21c651425e441caedcefac9fb	2026-10-09T22:55:38Z	tests_ci_build	test(browser): print room title and state after create/join transition timeout
+6889f59f3a955da3217239239869fd97ad18961a	2026-10-09T22:54:30Z	fix_performance	fix(phase2): let signed-in main Create Room button reach real server flow
+7c666450eef57ffe06fa10f56940bd81010fb430	2026-10-09T22:54:05Z	tests_ci_build	test(browser): dispatch intended create-room button action despite overlapping mobile overlay animation
+05df89971c99fde6b0e910c1f124858552f95324	2026-10-09T22:52:29Z	tests_ci_build	test(browser): avoid rotating-hero DOM race when tapping stable Me navigation
+e36b216c3b6d610363272889ee4c315d63132bcd	2026-10-09T22:51:36Z	tests_ci_build	test(browser): wait for stable home before testing its background
+cb1cdd2e404422cc14da68273414a4afe84dc181	2026-10-09T22:49:25Z	tests_ci_build	test(phase2): capture mocked room endpoints and user-facing errors on create-room timeout
+2f3ee31dfd4929ff19d5a2572daaf4f53d3b3f8c	2026-10-09T22:47:50Z	tests_ci_build	test(phase2): isolate old visual-demo auth assertions from live auth integration suite
+a499eb32fd9e5e978d7ba727a537c2f28faaa6d4	2026-10-09T22:47:43Z	fix_performance	fix(phase2): delegate authenticated account forms to server-backed bridge
+fb834c127be66df21b532c4227b4f3624a2df411	2026-10-09T22:47:36Z	fix_performance	fix(phase2): reliable live auth form handler with explicit visual-demo test mode
+55788b48e7e09f15d7596a5a92cf3007412e1231	2026-10-09T22:45:32Z	tests_ci_build	test(browser): inspect loaded integration modules before form submission
+78b9d30e0463bd1d346b0bc28fe3cd8d7a8fdecc	2026-10-09T22:44:36Z	fix_performance	fix(android): install TypeScript required by Capacitor configuration parser
+4942429609c3f1ceb2af1546434de3c9683c9367	2026-10-09T22:44:09Z	tests_ci_build	test(browser): log route and form status when integration step times out
+43219d4131b040b45fb30c6e6a6185ba8c579194	2026-10-09T22:43:54Z	tests_ci_build	ci(phase2): rerun browser QA when signed-in room test changes
+45c1ec5a3dc91cce255040108e0ee78135e7aa46	2026-10-09T22:43:47Z	fix_performance	fix(android): use maintained Ubuntu Android SDK instead of failing legacy setup action
+9694ca0b778bd8d5193e0da18b062ae773a414ff	2026-10-09T22:43:28Z	tests_ci_build	test(phase2): print isolated browser errors to diagnose integration failure
+e6a02f305a2d9a8894d789cd239a80e27e8e3005	2026-10-09T22:42:40Z	tests_ci_build	ci(phase2): build installable isolated Android debug APK directly from approved UI
+53cff66e23ef58557a6992c5956cee477c0cccf1	2026-10-09T22:41:51Z	tests_ci_build	ci(phase2): run isolated browser journey for real authenticated rooms and chat
+6e3504e24d3b9a9803ad2acc780c45f95c65003c	2026-10-09T22:41:43Z	tests_ci_build	test(phase2): end-to-end mock browser auth, real room reservations/chat and profile editing
+62370e0f63c52cfdfb7f7d1c66936cff1089d4da	2026-10-09T22:40:59Z	tests_ci_build	test(phase2): validate live-room overlay without changing approved UI master
+3c924ea953cfb3d775415e53363be1fd3bd0b776	2026-10-09T22:40:49Z	feature_integration	feat(phase2): render live rooms and microphone seat/chat state only for signed-in users
+dc43ece5bd05c93890d7c7d820c395b19a2025f9	2026-10-09T22:40:42Z	fix_performance	fix(phase2): allow newly created room to be entered after RPC succeeds
+1dd1ca7a98c5b70c5b4abc539d468f5331ed137b	2026-10-09T22:40:31Z	feature_integration	feat(phase2): real room directory, server seats and message UI adapter
+34440a0e9508b13869b80cf5437d4a4f70eb6a2b	2026-10-09T22:40:29Z	feature_integration	feat(phase2): real room directory, server seats and message UI adapter
+ac19b3fb74c19b3b34f2d35514e284f5962b33ed	2026-10-09T22:39:20Z	feature_integration	feat(phase2): expose authenticated RLS-only REST adapter for rooms and chat
+61ae3141e77cc69c46fb5cb47c18333d293ff391	2026-10-09T22:38:38Z	feature_integration	feat(phase2): isolated RLS room directory, exclusive mic seats and persistent text chat
+3b3833a3b9405133823e86be49d626bec4ba8d64	2026-10-09T22:37:00Z	tests_ci_build	ci(phase2): include automated auth/profile contract checks
+8532a4efd00aad94cdf1483c82592a80a5b14bff	2026-10-09T22:36:54Z	tests_ci_build	test(phase2): mock real auth signup/login/RLS profile update and logout contracts
+47d169afe2599c7d578b05a021585d8baba6d835	2026-10-09T22:36:37Z	tests_ci_build	test(phase2): acknowledge auth integration layers while enforcing immutable approved HTML
+4137fcd33097b742860bb29f697c2855630cc41e	2026-10-09T22:36:21Z	feature_integration	feat(phase2): activate independent account integration in approved app preview
+2ceb87daf18b1f9afc2065b0496de50d3863cf30	2026-10-09T22:36:05Z	feature_integration	feat(phase2): connect existing login and account UI to real Supabase auth
+ee07e20728d5ec935ae6006116677f50050779b9	2026-10-09T22:36:03Z	feature_integration	feat(phase2): connect existing login and account UI to real Supabase auth
+fe342a313ea3b308d75538f1d16942da593c6496	2026-10-09T22:35:06Z	feature_integration	feat(phase2): real email auth, verified sessions and RLS profile adapter
+ac56eb2132023937c18270fce8074094879a80b9	2026-10-09T22:34:28Z	feature_integration	feat(auth): populate verified profile name from signup metadata only
+c67a77f2c2b407d51a6b6d19b1c67ad571c8d524	2026-10-09T22:30:02Z	fix_performance	fix(phase2): keep original CommonJS banner tests working alongside .mjs builder
+50d763037b453df6aaccfd1da6bb1d3bc10561b6	2026-10-09T22:29:47Z	tests_ci_build	ci(phase2): enforce existing full mobile-browser visual QA on development branch
+93ded097cd42acc0370219611ccc85e5378e7bfa	2026-10-09T22:29:24Z	tests_ci_build	test(phase2): ignore security guidance comments when scanning executable config
+7716141d3d403f0aa6277706906f5c3907b4c439	2026-10-09T22:28:57Z	tests_ci_build	ci(phase2): verify Android web payload and approved UI invariants on development branch
+afe0e3bf53dd6ad2079aa0fadb35d66ba6bad91d	2026-10-09T22:28:46Z	tests_ci_build	chore(phase2): prepare unchanged approved UI for isolated Android foundation
+f30dd3dd960b260f572f28056062819e517caef6	2026-10-09T22:28:44Z	tests_ci_build	chore(phase2): prepare unchanged approved UI for isolated Android foundation
+5fe587a1c46888702036961add3f060708936664	2026-10-09T22:28:40Z	tests_ci_build	chore(phase2): prepare unchanged approved UI for isolated Android foundation
+828e711c43b268dcb16dbfe99a47db7a898e5127	2026-10-09T22:28:38Z	tests_ci_build	chore(phase2): prepare unchanged approved UI for isolated Android foundation
+4f6458b249a3c6a6db2f1297b83e3cf1a65c5559	2026-10-09T22:28:36Z	tests_ci_build	chore(phase2): prepare unchanged approved UI for isolated Android foundation
+2348b5f65947fce1ee1e84e054242f8a08ca6497	2026-10-09T22:27:21Z	feature_integration	feat(phase2): secure new-project auth profiles with RLS and signup trigger
+87928ac19f7344bcb3d4c68da19748bff228a1ad	2026-10-09T22:27:04Z	docs	docs(phase2): choose independent backend and preserve approved UI as Capacitor web source
+b8f20866b70178074859eb53a09bda8f36491401	2026-10-09T22:07:25Z	docs	docs: record approved Phase 1 visual baseline and Phase 2 safety rules
