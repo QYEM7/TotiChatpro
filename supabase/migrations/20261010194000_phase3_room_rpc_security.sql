@@ -1,0 +1,22 @@
+-- Expose invoker wrappers only. Existing room implementations retain their checks.
+alter function public.phase2_room_create(text,boolean) set schema phase3;
+alter function public.phase2_room_invite_create(uuid) set schema phase3;
+alter function public.phase2_room_invite_join(uuid,text) set schema phase3;
+alter function public.phase2_room_join(uuid) set schema phase3;
+alter function public.phase2_room_leave(uuid) set schema phase3;
+alter function public.phase2_room_members(uuid) set schema phase3;
+alter function public.phase2_room_send_message(uuid,text) set schema phase3;
+alter function public.phase2_room_set_muted(uuid,boolean) set schema phase3;
+alter function public.phase2_room_take_seat(uuid,integer) set schema phase3;
+grant execute on function phase3.actor() to authenticated;
+create function public.phase2_room_create(p_title text,p_is_private boolean default false) returns uuid language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_create(p_title,p_is_private);end$$;
+create function public.phase2_room_invite_create(p_room_id uuid) returns text language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_invite_create(p_room_id);end$$;
+create function public.phase2_room_invite_join(p_room_id uuid,p_token text) returns boolean language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_invite_join(p_room_id,p_token);end$$;
+create function public.phase2_room_join(p_room_id uuid) returns boolean language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_join(p_room_id);end$$;
+create function public.phase2_room_leave(p_room_id uuid) returns boolean language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_leave(p_room_id);end$$;
+create function public.phase2_room_members(p_room_id uuid) returns table(user_id uuid,display_name text,seat_no integer,is_muted boolean) language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return query select * from phase3.phase2_room_members(p_room_id);end$$;
+create function public.phase2_room_send_message(p_room_id uuid,p_body text) returns bigint language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_send_message(p_room_id,p_body);end$$;
+create function public.phase2_room_set_muted(p_room_id uuid,p_muted boolean) returns boolean language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_set_muted(p_room_id,p_muted);end$$;
+create function public.phase2_room_take_seat(p_room_id uuid,p_seat integer default null) returns integer language plpgsql security invoker set search_path='' as $$begin perform phase3.actor();return phase3.phase2_room_take_seat(p_room_id,p_seat);end$$;
+revoke all on function public.phase2_room_create(text,boolean),public.phase2_room_invite_create(uuid),public.phase2_room_invite_join(uuid,text),public.phase2_room_join(uuid),public.phase2_room_leave(uuid),public.phase2_room_members(uuid),public.phase2_room_send_message(uuid,text),public.phase2_room_set_muted(uuid,boolean),public.phase2_room_take_seat(uuid,integer) from public,anon;
+grant execute on function public.phase2_room_create(text,boolean),public.phase2_room_invite_create(uuid),public.phase2_room_invite_join(uuid,text),public.phase2_room_join(uuid),public.phase2_room_leave(uuid),public.phase2_room_members(uuid),public.phase2_room_send_message(uuid,text),public.phase2_room_set_muted(uuid,boolean),public.phase2_room_take_seat(uuid,integer) to authenticated;

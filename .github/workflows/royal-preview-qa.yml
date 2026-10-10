@@ -49,6 +49,9 @@ jobs:
       - name: Verify real catalog options and safe selection
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase2-catalog-browser.cjs
+      - name: Verify protected catalog administration contract
+        if: github.ref == 'refs/heads/develop/phase-2'
+        run: node tests/phase3-admin-browser.cjs
       - name: Verify Capacitor Android startup renders the actual Home page
         if: github.ref == 'refs/heads/develop/phase-2'
         run: |

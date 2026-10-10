@@ -100,3 +100,32 @@ test('phase2 source has no old database or embedded elevated key',()=>{
   assert.doesNotMatch(src,/sb_secret_|service_role\s*[:=]/);
   assert.match(src,/credentials:'omit'/);
 });
+test('account security changes use authenticated endpoints and reject invalid MFA input',async()=>{
+ const token={access_token:'access.SECURITY',refresh_token:'refresh.SECURITY',expires_in:3600,user:{id:UUID,email:'security@test.invalid'}};
+ const app=init(async(url,opts)=>{
+  if(url.includes('grant_type=password'))return {status:200,data:token};
+  if(url.includes('/rest/v1/profiles'))return {status:200,data:[row]};
+  assert.equal(opts.headers.Authorization,'Bearer access.SECURITY');
+  if(url.endsWith('/auth/v1/user')&&opts.method==='GET')return {status:200,data:{...token.user,email_confirmed_at:'2026-10-10',factors:[{id:UUID,status:'verified',factor_type:'totp'}],identities:[{provider:'google',identity_id:UUID}]}};
+  if(url.endsWith('/auth/v1/user')&&opts.method==='PUT'){assert.deepEqual(JSON.parse(opts.body),{password:'new-long-password-123'});return{status:200,data:token.user};}
+  if(url.endsWith('/auth/v1/logout?scope=others'))return {status:204,data:null};
+  throw Error('Unexpected security request');
+ });
+ await app.auth.signIn({email:token.user.email,password:'strong-pass-123'});
+ const security=await app.auth.securityState();assert.equal(security.emailConfirmed,true);assert.equal(security.factors[0].type,'totp');assert.equal(security.identities[0].provider,'google');
+ await assert.rejects(app.auth.changePassword('short'),/12/);
+ await assert.rejects(app.auth.verifyMFA(UUID,'123'),/غير صالح/);
+ await app.auth.changePassword('new-long-password-123');await app.auth.revokeOtherSessions();assert.equal(app.auth.state().signedIn,true);
+});
+test('MFA verification exchanges challenge and stores the returned session, never the OTP',async()=>{
+ const base={access_token:'access.AAL1',refresh_token:'refresh.AAL1',expires_in:3600,user:{id:UUID,email:'mfa@test.invalid'}};
+ const app=init(async(url,opts)=>{
+  if(url.includes('grant_type=password'))return{status:200,data:base};
+  if(url.includes('/rest/v1/profiles'))return{status:200,data:[row]};
+  if(url.endsWith('/challenge')){assert.deepEqual(JSON.parse(opts.body),{});return{status:200,data:{id:UUID}};}
+  if(url.endsWith('/verify')){assert.deepEqual(JSON.parse(opts.body),{challenge_id:UUID,code:'654321'});return{status:200,data:{...base,access_token:'access.AAL2',refresh_token:'refresh.AAL2'}};}
+  throw Error('Unexpected request');
+ });
+ await app.auth.signIn({email:base.user.email,password:'strong-pass-123'});await app.auth.verifyMFA(UUID,'654321');
+ assert.match(app.map.get('totichat.phase2.session.v1'),/access.AAL2/);assert.doesNotMatch(app.map.get('totichat.phase2.session.v1'),/654321/);
+});

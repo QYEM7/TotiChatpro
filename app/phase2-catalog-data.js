@@ -41,5 +41,6 @@ async function list(table,{force=false}={}){
  finally{if(pending.get(table)===job)pending.delete(table);}
 }
 window.addEventListener('totichat-phase2-auth',sync);
+window.addEventListener('totichat-catalog-changed',()=>{generation++;cache.clear();pending.clear();});
 window.TotiPhase2Catalogs=Object.freeze({list});
 })();

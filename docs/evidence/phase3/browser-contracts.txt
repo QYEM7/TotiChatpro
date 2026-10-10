@@ -1,0 +1,9 @@
+PASS: live catalog pages, 40 store items, search focus, 6 packs, 10 tiers, CP, recipient/gift selection and XSS protection.
+Console error: Failed to load resource: net::ERR_EMPTY_RESPONSE
+Stage 2 runtime modules {"auth":true,"rooms":true,"render":"function","base":true}
+Console error: Failed to load resource: the server responded with a status of 404 (Not Found)
+PASS: real Auth, private invites, profile editing, 15 seats, chat and logout (mock backend)
+PASS: Official falcon login, no fake guest mode, sign-in, server zero wallet and empty room state
+PASS: real LiveKit token call with signed-in session; missing SFU rejected; no fake audio
+PASS official login: 50/50 desktop, one-column mobile, falcon, focus/OTP/forgot/signup, safe provider states
+Royal browser QA passed: 6 major flows, 36 routes, 15 unchanged seats, 0 uncaught page errors

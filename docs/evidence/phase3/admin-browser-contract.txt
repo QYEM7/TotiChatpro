@@ -1,0 +1,1 @@
+PASS: server-authorized admin entry, schema-driven catalog edit, one idempotent RPC, mobile overflow and logout cleanup (browser contract).

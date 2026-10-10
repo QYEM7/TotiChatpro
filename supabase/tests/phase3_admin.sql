@@ -1,0 +1,31 @@
+begin;
+do $$
+declare qa_owner uuid:=gen_random_uuid();regular uuid:=gen_random_uuid();so uuid:=gen_random_uuid();sr uuid:=gen_random_uuid();key uuid:=gen_random_uuid();record_id text:='qa_'||replace(gen_random_uuid()::text,'-','');a jsonb;b jsonb;rejected boolean;
+begin
+ insert into auth.users(id,email,email_confirmed_at,is_anonymous) values(qa_owner,qa_owner::text||'@test.invalid',now(),false),(regular,regular::text||'@test.invalid',now(),false);
+ update phase3.system_authority set owner_id=null,main_partner_id=null,owner_email=qa_owner::text||'@test.invalid' where singleton;
+ insert into auth.sessions(id,user_id) values(so,qa_owner),(sr,regular);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',qa_owner,'session_id',so,'aal','aal1')::text,true);
+ if not(public.phase3_admin_session()->>'isOwner')::boolean then raise exception 'Owner not recognized';end if;
+ a:=public.phase3_catalog_write('gift_categories','create',null,jsonb_build_object('id',record_id,'label','Temporary SQL test','sort_order',999),key);
+ b:=public.phase3_catalog_write('gift_categories','create',null,jsonb_build_object('id',record_id,'label','Temporary SQL test','sort_order',999),key);
+ if a<>b then raise exception 'Catalog idempotency';end if;
+ perform public.phase3_catalog_write('gift_categories','update',record_id,'{"label":"Updated SQL test"}',gen_random_uuid());
+ if not exists(select 1 from public.gift_categories where id=record_id and label='Updated SQL test') then raise exception 'Catalog update';end if;
+ rejected:=false;begin perform public.phase3_catalog_write('wallets','delete',qa_owner::text,null,gen_random_uuid());exception when others then rejected:=true;end;if not rejected then raise exception 'Noncatalog table permitted';end if;
+ rejected:=false;begin perform public.phase3_catalog_write('gift_categories','update',record_id,'{"id":"hijack"}',gen_random_uuid());exception when others then rejected:=true;end;if not rejected then raise exception 'Primary key changed';end if;
+ perform public.phase3_manage_access(regular,'super_admin','{}',false);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',regular,'session_id',sr,'aal','aal1')::text,true);
+ a:=public.phase3_admin_session();if (a->>'canManageHostAgencies')::boolean or (a->>'canManageRechargeAgencies')::boolean or (a->>'canManageCatalogs')::boolean then raise exception 'Super Admin inherited restricted access';end if;
+ rejected:=false;begin perform public.phase3_catalog_list('gift_categories');exception when insufficient_privilege then rejected:=true;end;if not rejected then raise exception 'Unauthorized catalog list';end if;
+ rejected:=false;begin perform public.phase3_manage_access(qa_owner,'db','{}',false);exception when insufficient_privilege then rejected:=true;end;if not rejected then raise exception 'Nonowner altered roles';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',qa_owner,'session_id',so,'aal','aal1')::text,true);
+ perform public.phase3_manage_access(regular,'super_admin','{}',true);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',regular,'session_id',sr,'aal','aal1')::text,true);
+ a:=public.phase3_admin_session();if not (a->>'canManageHostAgencies')::boolean or (a->>'canManageRechargeAgencies')::boolean then raise exception 'Main partner permission boundary';end if;
+ perform public.phase3_catalog_list('gift_categories');
+ perform public.phase3_catalog_write('gift_categories','delete',record_id,null,gen_random_uuid());
+ if exists(select 1 from public.gift_categories where id=record_id) then raise exception 'Catalog delete';end if;
+end $$;
+rollback;
+select 'PASS: Owner pin, catalog CRUD/idempotency/column/table restrictions, default Super Admin denial, main partner boundary; fixtures rolled back' as result;

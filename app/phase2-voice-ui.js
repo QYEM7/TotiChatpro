@@ -7,7 +7,7 @@
 const auth=window.TotiPhase2Auth;
 const rooms=window.TotiPhase2Rooms;
 if(!window.TotiLiveMode?.enabled||!auth||!rooms)return;
-let sdk=null,connecting=false,voiceRoom='',connected=false,audioError='',needsGesture=false;
+let sdk=null,connecting=false,voiceRoom='',connected=false,audioError='',needsGesture=false,attempt=0,pendingRoom='',voiceOwner='';
 const $=(sel,root=document)=>root.querySelector(sel);
 function error(e){
  const s=String(e?.message||'تعذر الاتصال الصوتي');
@@ -48,6 +48,7 @@ function controls(){
  if(audioError)area.setAttribute('aria-label',audioError);else area.removeAttribute('aria-label');
 }
 async function tearDown(){
+ attempt++;pendingRoom='';voiceOwner='';
  const current=sdk;sdk=null;voiceRoom='';connected=false;needsGesture=false;
  if(current)await current.disconnect().catch(()=>{});
  controls();
@@ -60,24 +61,30 @@ async function connect(){
    try{await sdk?.resumeAudio?.();}catch(_){}
    return notify('أنت متصل بالصوت الحقيقي');
  }
+ const version=++attempt,user=auth.state().user?.id;pendingRoom=info.id;voiceOwner=user;
+ const valid=()=>version===attempt&&auth.state().user?.id===user&&ownerRoom()?.id===info.id;
  connecting=true;audioError='';controls();
  try{
   const grant=await auth.requestVoiceToken(info.id);
+  if(!valid())return;
   if(!grant?.token||grant.roomId!==info.id||!grant?.url)throw new Error('خادم الصوت لم يؤكد الاتصال');
   const module=await import('./phase2-livekit-sdk.bundle.js');
+  if(!valid())return;
   sdk=module;
   await module.connect(grant.url,grant.token,state=>{
+    if(!valid())return;
     if(state.connected!==undefined)connected=state.connected;
     if(state.needsAudioGesture)needsGesture=true;
     if(!state.connecting)controls();
   });
+  if(!valid()){await module.disconnect();return;}
   voiceRoom=info.id;connected=true;
   const mic=ownMic();
   if(grant.canPublish&&mic.seatNo!=null&&!mic.isMuted)await module.microphone(true);
   notify('تم الاتصال بالصوت الحقيقي للغرفة');
  }catch(e){
-  audioError=error(e);await tearDown();notify(audioError);
- }finally{connecting=false;controls();}
+  if(valid()){audioError=error(e);await tearDown();notify(audioError);}
+ }finally{connecting=false;pendingRoom='';controls();}
 }
 async function muteToggle(){
  if(connecting||!connected)return;
@@ -85,22 +92,30 @@ async function muteToggle(){
  if(!info||!mic||mic.seatNo==null){
    notify('لازم تحجز مقعد مايك حقيقي أولاً');return;
  }
- connecting=true;controls();
+ const user=auth.state().user?.id,version=attempt;
+ const valid=()=>version===attempt&&auth.state().user?.id===user&&ownerRoom()?.id===info.id;
+ connecting=true;pendingRoom=info.id;controls();
  const updated=!mic.isMuted;
  try{
   await auth.requestData('/rest/v1/rpc/phase2_room_set_muted',{
    method:'POST',body:{p_room_id:info.id,p_muted:updated}
   });
+  if(!valid())return;
   await rooms.refreshRoom();
+  if(!valid())return;
   // Grants are server-authored. Reconnect with a new JWT after any mic change.
   const grant=await auth.requestVoiceToken(info.id);
+  if(!valid())return;
   if(!grant?.token||grant.roomId!==info.id)throw new Error('تعذر تحديث صلاحيات الصوت');
   const client=sdk||await import('./phase2-livekit-sdk.bundle.js');
+  if(!valid())return;
   sdk=client;
   await client.connect(grant.url,grant.token,state=>{
+    if(!valid())return;
     if(state.connected!==undefined)connected=state.connected;
     controls();
   });
+  if(!valid()){await client.disconnect();return;}
   connected=true;voiceRoom=info.id;
   if(!updated&&grant.canPublish){
     await client.microphone(true);
@@ -108,6 +123,7 @@ async function muteToggle(){
   }else{notify('تم كتم الميكروفون الحقيقي');}
  }catch(e){
   audioError=error(e);
+  if(!valid())return;
   if(!updated){
     // If enabling audio fails, revoke publishing at the database immediately.
     try{await auth.requestData('/rest/v1/rpc/phase2_room_set_muted',{
@@ -116,7 +132,7 @@ async function muteToggle(){
     await rooms.refreshRoom().catch(()=>{});
   }
   notify(audioError);
- }finally{connecting=false;controls();}
+ }finally{connecting=false;pendingRoom='';controls();}
 }
 const before=render;
 render=function(){const result=before.apply(this,arguments);controls();return result;};
@@ -128,9 +144,9 @@ document.addEventListener('click',event=>{
  else if(b.dataset.realVoice==='mic')void muteToggle();
 },true);
 window.addEventListener('totichat-phase2-auth',()=>{
- if(!auth.state().signedIn)void tearDown();
+ if(!auth.state().signedIn||(voiceOwner&&auth.state().user?.id!==voiceOwner))void tearDown();
 });
-window.addEventListener('totichat-real-room-state',controls);
+window.addEventListener('totichat-real-room-state',()=>{if((voiceRoom||pendingRoom)&&ownerRoom()?.id!==(voiceRoom||pendingRoom))void tearDown();controls();});
 setInterval(()=>{
  if(voiceRoom&&ownerRoom()?.id!==voiceRoom)void tearDown();
  else if(screen==='room')controls();

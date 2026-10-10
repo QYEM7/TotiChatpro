@@ -11,3 +11,12 @@
 .tc-phase2-account-sheet h3{color:#71478a}
 .tc-phase2-account-info{overflow-wrap:anywhere}
 .tc-phase2-account-sheet .primary{min-height:44px}
+/* Authenticated security forms keep the approved account sheet responsive. */
+.tc-phase2-account-sheet label{display:block;text-align:start;margin:10px 0}
+.tc-phase2-account-sheet input{display:block;box-sizing:border-box;width:100%;max-width:100%;min-height:44px;margin-top:6px}
+.tc-phase2-account-sheet img{display:block;max-width:100%;margin:12px auto}
+.tc-phase2-account-sheet code{direction:ltr;display:block;overflow-wrap:anywhere}
+.tc-phase2-account-sheet .primary{min-height:44px;margin:6px 0}
+.tc-phase2-account-sheet select,.tc-phase2-account-sheet textarea{display:block;box-sizing:border-box;width:100%;max-width:100%;min-height:44px;margin-top:6px}
+.tc-phase2-account-sheet input[type=checkbox]{display:inline-block;width:auto;min-height:0;margin-inline-end:8px}
+[data-admin-records] article{border-bottom:1px solid #ddd;padding:12px 0;overflow-wrap:anywhere}

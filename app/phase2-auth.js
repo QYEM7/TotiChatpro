@@ -20,7 +20,7 @@
   const PENDING_EMAIL='totichat.phase2.pending-email.v1';
   const REMEMBER_KEY='totichat.phase2.remember.session.v1';
   let remember=false;
-  let session=null,profile=null,refreshInFlight=null,clock=0,requestGeneration=0;
+  let session=null,profile=null,refreshInFlight=null,clock=0,requestGeneration=0,recoveryRequired=false;
   function safeLoad(){
     try{
       const persistent=localStorage.getItem(REMEMBER_KEY);
@@ -53,6 +53,7 @@
     return Object.freeze({
       signedIn:!!session?.user?.id,
       loading:!!refreshInFlight,
+      recoveryRequired,
       user:session?.user?Object.freeze({id:session.user.id,email:session.user.email||''}):null,
       profile:profile?Object.freeze({...profile}):null
     });
@@ -131,9 +132,10 @@
   }
   async function readProfile(){
     if(!session?.user?.id)return null;
-    const generation=requestGeneration;
+    const generation=requestGeneration,owner=session.user.id;
     const token=await validToken();
-    const id=encodeURIComponent(session.user.id);
+    if(generation!==requestGeneration||owner!==session?.user?.id)return null;
+    const id=encodeURIComponent(owner);
     const data=await request('/rest/v1/profiles?id=eq.'+id+
       '&select=id,display_name,bio,avatar_url,created_at,updated_at&limit=1',
       {accessToken:token});
@@ -148,8 +150,9 @@
     const bio=String(input.bio||'');
     if(displayName.length<2||displayName.length>35)throw new Error('الاسم يجب أن يكون من 2 إلى 35 حرفاً');
     if(bio.length>150)throw new Error('النبذة أطول من 150 حرفاً');
+    const id=session?.user?.id,generation=requestGeneration;
     const token=await validToken();
-    const id=session.user.id,generation=requestGeneration;
+    if(!id||generation!==requestGeneration||id!==session?.user?.id)throw new Error('الجلسة تغيرت أثناء حفظ البيانات');
     const data=await request('/rest/v1/profiles?id=eq.'+encodeURIComponent(id)+
       '&select=id,display_name,bio,avatar_url,created_at,updated_at',{
       method:'PATCH',accessToken:token,
@@ -206,12 +209,19 @@
   async function recover(email){
     email=String(email||'').trim().toLowerCase();
     if(!emailValid(email))throw new Error('البريد الإلكتروني غير صالح');
-    await request('/auth/v1/recover',{method:'POST',body:{email}});
+    const verifier=base64Url(crypto.getRandomValues(new Uint8Array(48)));
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));
+    const challenge=base64Url(new Uint8Array(digest));
+    const redirect=callbackDestination();
+    sessionStorage.setItem(OAUTH_PENDING,JSON.stringify({verifier,created:Date.now(),redirect,kind:'recovery'}));
+    await request('/auth/v1/recover?redirect_to='+encodeURIComponent(redirect),{
+      method:'POST',body:{email,code_challenge:challenge,code_challenge_method:'s256'}
+    });
     return true;
   }
   async function signOut(){
     const old=session?.access_token;
-    requestGeneration++;session=null;profile=null;clearTimeout(clock);persist();notify();
+    requestGeneration++;session=null;profile=null;recoveryRequired=false;sessionStorage.removeItem(OAUTH_PENDING);clearTimeout(clock);persist();notify();
     if(old){
       try{await request('/auth/v1/logout',{method:'POST',accessToken:old});}
       catch(_){/* Local session already revoked; server revocation may retry online. */}
@@ -234,13 +244,15 @@
   }
   async function requestData(path,{method='GET',body,prefer}={}){
     if(typeof path!=='string'||!path.startsWith('/rest/v1/'))throw new Error('Forbidden service path');
+    const generation=requestGeneration,owner=session?.user?.id;
     const accessToken=await validToken();
+    if(generation!==requestGeneration||!owner||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');
     return request(path,{method,body,accessToken,prefer});
   }
   // Public GoTrue provider settings: never guess an OAuth button is available.
-  let providerCache=null;
+  let providerCache=null,providerCacheTime=0;
   async function providers(){
-    if(providerCache)return {...providerCache};
+    if(providerCache&&Date.now()-providerCacheTime<60000)return {...providerCache};
     const response=await request('/auth/v1/settings');
     const enabled=response?.external||response?.external_providers||{};
     providerCache={
@@ -248,6 +260,7 @@
       apple:enabled.apple===true,
       facebook:enabled.facebook===true
     };
+    providerCacheTime=Date.now();
     return {...providerCache};
   }
   function base64Url(array){
@@ -256,6 +269,10 @@
       .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
   const OAUTH_PENDING='totichat.phase2.oauth.pending';
+  function callbackDestination(){
+    if(location.hostname==='localhost'&&location.protocol==='https:')return 'com.totichat.beta://auth/callback';
+    const url=new URL('./',location.href);url.searchParams.set('mode','live');return url.href;
+  }
   async function signInWithProvider(provider){
     if(!['google','apple','facebook'].includes(provider))throw new Error('Invalid provider');
     const enabled=await providers();
@@ -267,8 +284,7 @@
     const verifier=base64Url(crypto.getRandomValues(new Uint8Array(48)));
     const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));
     const challenge=base64Url(new Uint8Array(digest));
-    const redirect=native?'com.totichat.beta://auth/callback':
-      new URL('./',location.href).href;
+    const redirect=callbackDestination();
     // GoTrue uses the code challenge + code verifier pair for the one-time exchange.
     const loginUrl=origin+'/auth/v1/authorize?provider='+encodeURIComponent(provider)+
       '&redirect_to='+encodeURIComponent(redirect)+
@@ -277,15 +293,29 @@
       verifier,created:Date.now(),provider,redirect
     }));}catch(_){throw new Error('OAuth temporary storage unavailable');}
     if(native){
-      await app.addListener('appUrlOpen',async event=>{
-        try{
-          if(!event?.url?.startsWith('com.totichat.beta://auth/callback'))return;
-          await browser.close().catch(()=>{});
-          await handleOAuthCallback(event.url);
-        }catch(error){console.warn('TotiChat OAuth callback error',String(error.message));}
-      });
       await browser.open({url:loginUrl});
     }else location.assign(loginUrl);
+  }
+  async function linkProvider(provider){
+    const expectedUser=session?.user?.id,generation=requestGeneration;
+    if(!expectedUser)throw new Error('يجب تسجيل الدخول أولاً');
+    if(!['google','apple','facebook'].includes(provider))throw new Error('Invalid provider');
+    if(!(await providers())[provider])throw new Error('مزود الهوية غير مفعّل في الخادم');
+    const accessToken=await validToken();
+    if(generation!==requestGeneration||session?.user?.id!==expectedUser)throw new Error('تغير الحساب أثناء طلب الربط');
+    const verifier=base64Url(crypto.getRandomValues(new Uint8Array(48)));
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));
+    const redirect=callbackDestination();
+    const result=await request('/auth/v1/user/identities/authorize?provider='+encodeURIComponent(provider)+
+      '&redirect_to='+encodeURIComponent(redirect)+'&code_challenge='+encodeURIComponent(base64Url(new Uint8Array(digest)))+'&code_challenge_method=s256&skip_http_redirect=true',{accessToken});
+    if(session?.user?.id!==expectedUser)throw new Error('تغير الحساب أثناء طلب الربط');
+    if(!result?.url||new URL(result.url).protocol!=='https:')throw new Error('رابط مزود الهوية غير صالح');
+    sessionStorage.setItem(OAUTH_PENDING,JSON.stringify({verifier,created:Date.now(),provider,redirect,expectedUser,kind:'link'}));
+    if(redirect.startsWith('com.totichat.beta:')){
+      const browser=window.Capacitor?.Plugins?.Browser;
+      if(!browser)throw new Error('Android OAuth bridge غير مثبت');
+      await browser.open({url:result.url});
+    }else location.assign(result.url);
   }
   async function handleOAuthCallback(callbackUrl){
     const parsed=new URL(callbackUrl);
@@ -298,14 +328,19 @@
     if(!code)throw new Error('Missing OAuth authorization code');
     const raw=sessionStorage.getItem(OAUTH_PENDING);
     const pending=JSON.parse(raw||'null');
-    if(!pending?.verifier||Date.now()-pending.created>10*60*1000)
+    if(typeof pending?.verifier!=='string'||!Number.isFinite(pending.created)||Date.now()-pending.created<0||Date.now()-pending.created>(pending.kind==='recovery'?60:10)*60*1000)
       throw new Error('انتهت صلاحية محاولة تسجيل الدخول');
+    const expected=new URL(pending.redirect);
+    if(parsed.protocol!==expected.protocol||parsed.host!==expected.host||parsed.pathname!==expected.pathname)
+      throw new Error('Wrong authentication callback');
     // Delete the verifier BEFORE network exchange: no code can be used twice.
     sessionStorage.removeItem(OAUTH_PENDING);
     const generation=requestGeneration;
     const response=await request('/auth/v1/token?grant_type=pkce',{
       method:'POST',body:{auth_code:code,code_verifier:pending.verifier}
     });
+    if(pending.expectedUser&&response?.user?.id!==pending.expectedUser)throw new Error('رفض الخادم ربط الهوية بالحساب الحالي');
+    recoveryRequired=pending.kind==='recovery';
     if(!storeToken(response,generation))throw new Error('تعذر إكمال الجلسة');
     await readProfile();
     return publicState();
@@ -314,20 +349,80 @@
     void handleOAuthCallback(location.href).then(()=>{
       const clean=new URL(location.href);clean.searchParams.delete('code');
       history.replaceState(null,'',clean.href);
-    }).catch(error=>console.warn('OAuth resume:',String(error.message)));
+    }).catch(error=>window.dispatchEvent(new CustomEvent('totichat-auth-error',{detail:String(error.message)})));
   }
   async function requestVoiceToken(roomId){
     if(typeof roomId!=='string'||!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(roomId))
       throw new Error('Invalid room');
+    const generation=requestGeneration,owner=session?.user?.id;
     const token=await validToken();
+    if(generation!==requestGeneration||!owner||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');
     return request('/functions/v1/phase2-voice-token',{
       method:'POST',body:{roomId},accessToken:token
     });
   }
+  async function accountRequest(path,options={}){
+    const generation=requestGeneration,owner=session?.user?.id;
+    const accessToken=await validToken();
+    if(generation!==requestGeneration||!owner||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');
+    const result=await request(path,{...options,accessToken});
+    if(generation!==requestGeneration||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');
+    return result;
+  }
+  async function securityState(){
+    const user=await accountRequest('/auth/v1/user');
+    return {factors:(user.factors||[]).map(f=>({id:f.id,status:f.status,type:f.factor_type,name:f.friendly_name||''})),
+      identities:(user.identities||[]).map(i=>({id:i.identity_id||i.id,provider:i.provider})),
+      emailConfirmed:!!user.email_confirmed_at};
+  }
+  async function changePassword(password){
+    if(typeof password!=='string'||password.length<12||password.length>128)throw new Error('كلمة المرور يجب أن تكون 12–128 حرفاً');
+    const result=await accountRequest('/auth/v1/user',{method:'PUT',body:{password}});
+    if(result?.id!==session?.user?.id)throw new Error('لم يؤكد الخادم تحديث كلمة المرور');
+    recoveryRequired=false;notify();return true;
+  }
+  async function revokeOtherSessions(){
+    await accountRequest('/auth/v1/logout?scope=others',{method:'POST'});
+    return true;
+  }
+  async function enrollMFA(){
+    return accountRequest('/auth/v1/factors',{method:'POST',
+      body:{factor_type:'totp',friendly_name:'TotiChat Authenticator',issuer:'TotiChat'}});
+  }
+  async function verifyMFA(factorId,code){
+    if(!/^[0-9a-f-]{36}$/i.test(factorId)||!/^\d{6}$/.test(code))throw new Error('عامل التحقق أو الرمز غير صالح');
+    const generation=requestGeneration;
+    const challenge=await accountRequest('/auth/v1/factors/'+factorId+'/challenge',{method:'POST',body:{}});
+    const result=await accountRequest('/auth/v1/factors/'+factorId+'/verify',{method:'POST',
+      body:{challenge_id:challenge.id,code}});
+    if(!storeToken(result,generation))throw new Error('لم يؤكد الخادم جلسة التحقق بخطوتين');
+    await readProfile();return true;
+  }
+  async function unenrollMFA(factorId){
+    if(!/^[0-9a-f-]{36}$/i.test(factorId))throw new Error('عامل التحقق غير صالح');
+    await accountRequest('/auth/v1/factors/'+factorId,{method:'DELETE'});return true;
+  }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
     verifySignup,readProfile,updateProfile,resume,refresh,requestData,
-    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken});
+    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,
+    securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider});
   window.TotiPhase2Auth=api;
+  if(typeof location!=='undefined'&&location.hostname==='localhost'){
+    const app=window.Capacitor?.Plugins?.App;
+    if(app?.addListener){
+      let callbackInFlight=false;
+      const callback=async event=>{
+        if(callbackInFlight||!sessionStorage.getItem(OAUTH_PENDING))return;
+        if(!event?.url?.startsWith('com.totichat.beta://auth/callback'))return;
+        callbackInFlight=true;
+        try{try{await window.Capacitor?.Plugins?.Browser?.close?.();}catch(_){}await handleOAuthCallback(event.url);}
+        catch(error){window.dispatchEvent(new CustomEvent('totichat-auth-error',{detail:String(error.message)}));}
+        finally{callbackInFlight=false;}
+      };
+      void app.addListener('appUrlOpen',callback);
+      if(app.getLaunchUrl)void app.getLaunchUrl().then(callback).catch(error=>console.warn(String(error.message)));
+    }
+  }
   if(session){void resume();}
   else queueMicrotask(notify);
 })();

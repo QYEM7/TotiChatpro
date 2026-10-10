@@ -29,7 +29,7 @@ function paint(){
  const container=hero.parentElement;
  if(!container)return;
  const oldWarn=$('.visual-warn',container);
- if(oldWarn)oldWarn.textContent='✓ الأرصدة والمعاملات أدناه تُقرأ من خادم TotiChat. الشحن والهدايا والتحويلات غير مفعّلة بعد.';
+ if(oldWarn)oldWarn.textContent='✓ الأرصدة والمعاملات أدناه تُقرأ من خادم TotiChat. إرسال الهدايا وشراء المتجر والتحويل تتم بعد تأكيد الخادم؛ الشحن عبر الوكلاء يحتاج تفعيل الخزينة.';
  const small=$('small',hero);
  if(small)small.textContent=error?'فشل الاتصال بخادم المحفظة':wallet?'الرصيد الحقيقي':'جارٍ تحميل الرصيد الحقيقي…';
  const coin=$('h2',hero);if(coin)coin.textContent=(wallet?format(wallet.coins):'—')+' 🪙';
@@ -65,7 +65,7 @@ function paint(){
  }
  const info=document.createElement('p');
  info.className='tc-wallet-read-only';
- info.textContent='لا يمكن للواجهة تعديل العملات أو الماس. عمليات الشحن عبر الوكلاء ستُفعّل فقط بعد اكتمال نظام الخزينة والصلاحيات.';
+ info.textContent='تُنفّذ عمليات الإرسال والشراء والتحويل على الخادم بمعاملات مترابطة وسجل تدقيق.';
  card.appendChild(info);
  const refresh=document.createElement('button');
  refresh.type='button';refresh.className='primary';refresh.dataset.liveWallet='refresh';

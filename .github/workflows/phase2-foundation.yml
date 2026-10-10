@@ -33,6 +33,9 @@ jobs:
           node --check scripts/build-approved-web.mjs
           node --check app/phase2-rooms.js
           node --check app/phase2-auth.js
+          node --check app/phase2-security-ui.js
+          node --check app/phase3-transfer-ui.js
+          node --check app/phase3-admin-ui.js
           node --check app/phase2-ui.js
           node --check app/phase2-live-mode.js
           node --check app/phase2-wallet.js

@@ -7,3 +7,8 @@
 #app .tc-live-wallet-records button{padding:10px 15px;min-height:43px;
   border-radius:14px;align-self:stretch;font-weight:900;background:#653076;color:#fff3d0;}
 #app .tc-live-wallet-records button:disabled{opacity:.65}
+[data-wallet-transfer] label{display:block;text-align:start;margin:10px 0}
+[data-wallet-transfer] input,[data-wallet-transfer] select{display:block;box-sizing:border-box;width:100%;min-height:44px;max-width:100%;margin-top:6px}
+[data-wallet-transfer] .primary{min-height:44px}
+
+.tc-wallet-transfer{background:var(--card,#fff);color:var(--text,#302447);padding:16px;border-radius:18px;margin:12px 0}

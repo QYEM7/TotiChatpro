@@ -5,6 +5,7 @@ import {Room,RoomEvent,ConnectionState} from 'livekit-client';
 let current=null;
 let audio=[];
 let onState=null;
+let speakerVolume=1;
 function signal(detail){
   if(typeof onState==='function')onState(detail);
 }
@@ -28,7 +29,7 @@ export async function connect(serverUrl,token,callback){
    if(track.kind!=='audio')return;
    const media=track.attach();
    media.setAttribute('playsinline','');
-   media.autoplay=true;
+   media.autoplay=true;media.volume=speakerVolume;
    media.style.display='none';
    media.dataset.totiLiveAudio='1';
    document.body.appendChild(media);
@@ -52,6 +53,16 @@ export async function connect(serverUrl,token,callback){
 export async function microphone(enabled){
  if(!current||current.state!==ConnectionState.Connected)
    throw new Error('اتصل بالغرفة الصوتية أولاً');
- await current.localParticipant.setMicrophoneEnabled(Boolean(enabled));
+ await current.localParticipant.setMicrophoneEnabled(Boolean(enabled),{echoCancellation:true,noiseSuppression:true,autoGainControl:true});
  signal({micEnabled:Boolean(enabled)});
+}
+
+export async function resumeAudio(){
+ if(!current)throw new Error("اتصل بالصوت أولاً");
+ await current.startAudio();
+ await Promise.all(audio.map(el=>el.play()));
+}
+export function setSpeakerVolume(value){
+ if(typeof value!=="number"||!Number.isFinite(value)||value<0||value>1)throw new Error("مستوى الصوت غير صالح");
+ speakerVolume=value;for(const el of audio)el.volume=value;
 }

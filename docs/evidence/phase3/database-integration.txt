@@ -1,0 +1,10 @@
+Project: sqedsnyvjblvbjbizcay. 2026-10-10 UTC.
+All integration fixtures run inside BEGIN/ROLLBACK. No fake production records persisted.
+PASS phase3_gifts.sql: duplicate/conflict, atomic debit/credit/ledger/audit, insufficient funds rollback, nonmember, anonymous, confirmed-price mismatch.
+PASS phase3_store.sql: gold/silver debit, idempotency/conflict, ownership/equipment category, insufficient funds rollback, confirmed-price mismatch.
+PASS phase3_transfer.sql: conservation, idempotency/conflict, overdraft rollback, self-transfer, revoked session.
+PASS phase3_rooms.sql: verified authenticated room create/members, seats15/14, mute, chat, private invitation/join/leave.
+PASS phase3_admin.sql: owner pin, catalog CRUD/idempotency/column/table restriction, default Super Admin denial, main partner boundary.
+Supabase security advisor: 0 WARN/ERROR, 2 INFO (intentionally inaccessible invitations and audit tables).
+Auth public settings: google=false, apple=false, facebook=false, email=true, mailer_autoconfirm=false.
+Post-test checks: users=0, financial_operations=0, audits=0, authority owner/main_partner unassigned.
