@@ -58,7 +58,11 @@ jobs:
         run: node --test tests/beta30-scope-freeze.test.cjs
       - name: Verify real Firebase Android registration, offline Gradle staging and no APK
         run: node --test tests/firebase-android-config.test.mjs
-      - name: Source-only provider, voice and Firebase preflight (never APK)\n        run: |\n          node scripts/check-beta-integrations.mjs --strict-source\n          node --test tests/beta-integrations.test.cjs\n      - name: T48 block all APK builds before independently verified 80% readiness
+      - name: Source-only provider, voice and Firebase preflight (never APK)
+        run: |
+          node scripts/check-beta-integrations.mjs --strict-source
+          node --test tests/beta-integrations.test.cjs
+      - name: T48 block all APK builds before independently verified 80% readiness
         run: node --test tests/t48-no-apk-before-80.test.cjs tests/t48-release-threshold-matrix.test.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
         run: node --test tests/t06-voice-edge-limit.test.mjs
