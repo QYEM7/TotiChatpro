@@ -9,7 +9,7 @@ const scope=JSON.parse(fs.readFileSync('docs/beta30-scope.json','utf8'));
 const tasks=JSON.parse(fs.readFileSync('docs/50-task-verification.json','utf8'));
 const release=JSON.parse(fs.readFileSync('docs/release-readiness.json','utf8'));
 const gate=fs.readFileSync('scripts/t48-apk-readiness-gate.cjs','utf8');
-const canonical=['T13','T22','T26','T28','T32','T37','T44'];
+const canonical=['T22','T28','T32','T44'];
 test('Owner approved minimal beta scope covers 50 tasks but never fabricates completion',()=>{
  assert.equal(scope.project,'TotiChatpro');
  assert.equal(scope.user_visible_brand,'TotiChat');
@@ -27,7 +27,7 @@ test('Owner approved minimal beta scope covers 50 tasks but never fabricates com
  assert.equal(tasks.filter(t=>t.status==='verified_live').length,0);
 });
 test('Manual agency recharge, documented payroll liabilities and scoped admin roles are not deferred',()=>{
- for(const id of ['T05','T12','T14','T16','T18','T20','T21','T24','T25','T29','T30','T33','T34','T35','T36','T38','T39','T40','T41','T42','T49']){
+ for(const id of ['T05','T12','T13','T14','T16','T18','T20','T21','T24','T25','T26','T27','T29','T30','T33','T34','T35','T36','T37','T38','T39','T40','T41','T42','T49']){
   assert.notEqual(tasks.find(t=>t.id===id).beta_30d_scope,'paused_after_beta',id);
  }
  const decisions=scope.human_approvals;
@@ -35,6 +35,20 @@ test('Manual agency recharge, documented payroll liabilities and scoped admin ro
   assert(typeof decisions[key]==='string'&&decisions[key].length>95,key);
  assert.match(decisions.monthly_close,/before any operational diamond clearing/i);
  assert.match(decisions.host_agencies,/never opening recharge agencies/);
+});
+test('Google-only, manually issued unique premium IDs, luck gifts and existing VIP purchase are essential',()=>{
+ const d=scope.owner_scope_refinements;
+ assert.match(d.login,/Google OAuth ONLY/);
+ assert.match(d.login,/No email\/password, Apple or Facebook/);
+ assert.match(d.premium_user_id,/Only explicitly authorized admin role may assign/);
+ assert.match(d.premium_user_id,/Internal immutable Supabase Auth UUID/);
+ assert.match(d.luck_gifts,/disclosed probabilities/);
+ assert.match(d.luck_gifts,/cryptographically secure server RNG/);
+ assert.match(d.vip,/Existing VIP1\.\.VIP10 available for purchase/);
+ assert.equal(tasks.find(t=>t.id==='T13').beta_30d_scope,'required_for_beta');
+ assert.equal(tasks.find(t=>t.id==='T26').beta_30d_scope,'required_for_beta');
+ assert.equal(tasks.find(t=>t.id==='T37').beta_30d_scope,'minimum_for_beta');
+ assert.equal(tasks.find(t=>t.id==='T12').beta_30d_scope,'minimum_for_beta');
 });
 test('The 80/80 APK+40 verified live gate remains fail-closed after scope freeze',()=>{
  assert.equal(release.engineering_percent,63);
