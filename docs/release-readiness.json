@@ -2,12 +2,12 @@
   "project": "TotiChatpro",
   "branch": "develop/phase-2",
   "updated": "2026-10-10",
-  "engineering_percent": 62,
+  "engineering_percent": 63,
   "beta_readiness_percent": 15,
   "release_allowed": false,
   "reviewer": null,
   "verified_date": null,
-  "notes": "Tenth conservative checkpoint: directional 62% engineering after real concurrent Owner treasury issuance/idempotency/30-min cap and fully simulated Owner->recharge agent->customer 500-coin conservation with once-only 7-coin topup, tested with 3 real disposable GoTrue users and PostgREST/PostgreSQL CI 38065706706. Beta remains 15%: no real cash receipts, hosted staging, independent production DB and Storage backups, physical two-phone voice or immutable monthly payroll settlement. No APK built; release_allowed=false.",
+  "notes": "Eleventh cautious estimate: 63% directional engineering after hardened private phase3.agency_action per-verified-actor transaction locking and real disposable 5-account parallel host-agency registration/old-consent/new-agent transfer with 30/min cap CI 38066242936; 15% genuine beta remains until real production/offsite recovery, staged deploy of 10 pending migrations, 2-phone LiveKit, monthly payroll settlement and full production-like tests. T48 release_allowed remains false; NO APK.",
   "evidence": {
     "production_backup_restore": {
       "passed": false,
