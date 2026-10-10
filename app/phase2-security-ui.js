@@ -24,6 +24,7 @@ async function open(){
    const button=document.createElement('button');button.type='button';button.className='primary';button.dataset.adminOpen='';button.textContent='إدارة الإعدادات';node.appendChild(button);
   }).catch(()=>{});
   const agencies=document.createElement('button');agencies.type='button';agencies.className='primary';agencies.dataset.agenciesOpen='';agencies.textContent='الوكالات والطلبات';node.appendChild(agencies);
+  const support=document.createElement('button');support.type='button';support.className='primary';support.dataset.supportOpen='';support.textContent='الدعم الفني والتذاكر';node.appendChild(support);
   status(auth.state().recoveryRequired?'أدخل كلمة مرور جديدة لإكمال الاستعادة':'تم تحميل إعدادات حسابك');
  }catch(e){status(e.message,true);}
 }
@@ -66,4 +67,13 @@ window.addEventListener('totichat-phase2-auth',e=>{
  if(!e.detail.signedIn){generation++;factor=null;recoveryShown=false;document.querySelector('[data-security-sheet]')?.remove();}
  if(e.detail.recoveryRequired&&!recoveryShown){recoveryShown=true;setTimeout(()=>void open(),0);}
 });
+})();
+
+/* T42 live tickets load independently, without touching the approved UI master. */
+(function(){
+ const base=document.currentScript?.src;if(!base)return;
+ const node=document.createElement('script');
+ node.src=new URL('./phase5-support-ui.js?v=t42-real-support-20261010-1',base).href;
+ node.onerror=()=>console.warn('T42 support not available; no demo tickets shown');
+ document.head.appendChild(node);
 })();
