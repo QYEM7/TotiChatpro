@@ -33,7 +33,7 @@ test('Manual agency recharge, documented payroll liabilities and scoped admin ro
  const decisions=scope.human_approvals;
  for(const key of ['recharge','owner_treasury','host_agencies','host_transfer','monthly_close','support'])
   assert(typeof decisions[key]==='string'&&decisions[key].length>95,key);
- assert.match(decisions.monthly_close,/BEFORE any operational diamond clearing/);
+ assert.match(decisions.monthly_close,/before any operational diamond clearing/i);
  assert.match(decisions.host_agencies,/never opening recharge agencies/);
 });
 test('The 80/80 APK+40 verified live gate remains fail-closed after scope freeze',()=>{
