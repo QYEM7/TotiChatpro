@@ -53,6 +53,8 @@ jobs:
           node --check app/phase2-voice-ui.js
           node --check app/phase2-livekit-sdk.mjs
           node --check tests/phase2-browser.cjs
+      - name: Verify Owner's manual-operations-only beta scope and no release-gate bypass
+        run: node --test tests/beta30-scope-freeze.test.cjs
       - name: T48 block all APK builds before independently verified 80% readiness
         run: node --test tests/t48-no-apk-before-80.test.cjs tests/t48-release-threshold-matrix.test.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
