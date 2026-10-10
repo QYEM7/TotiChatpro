@@ -81,7 +81,7 @@
     "id": "T14",
     "title": "Real profile identity",
     "status": "partial",
-    "evidence": "Profile SQL/CRUD exists and local Auth creates profile"
+    "evidence": "Real authenticated profile avatar save exists: WebP 512x512 conversion and up to 2 MB upload in private user-owned Storage object path of intentionally PUBLIC avatar bucket. Two real disposable GoTrue users, RLS upload denial and read-back passed. Pending migration unapplied in production; real mobile acceptance incomplete."
   },
   {
     "id": "T15",
@@ -99,7 +99,7 @@
     "id": "T17",
     "title": "Realtime room list presence",
     "status": "partial",
-    "evidence": "Directory fetch exists; real-time multi-device proof pending"
+    "evidence": "Authenticated Supabase Realtime Postgres Changes WebSocket implementation verified with two real disposable GoTrue JWT users, public room INSERT emitted and received under existing RLS. Foreground/online recovery, token updates and 7.5s polling fallback. Pending publication migration not applied to production; two physical Android tests still missing."
   },
   {
     "id": "T18",
