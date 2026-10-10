@@ -4,8 +4,8 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
-const sql=read('supabase/migrations/20261010133000_phase2_private_room_invitations.sql');
-const hardening=read('supabase/migrations/20261010133500_phase2_private_room_rls_and_chat_race.sql');
+const sql=read('supabase/migrations/20261009231024_phase2_private_room_invitations.sql');
+const hardening=read('supabase/migrations/20261009231117_phase2_private_room_rls_and_chat_race.sql');
 const js=read('app/phase2-rooms.js');
 test('private invitation rows are unreadable and no anonymous RPC calls are possible',()=>{
   assert.match(sql,/alter table public\.phase2_room_invites enable row level security/i);

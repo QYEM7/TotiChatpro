@@ -152,7 +152,7 @@ test('all frontend scripts compile and original 27 images match source hashes',(
   }
 });
 test('database schema exposes only active published ads, never enables public writes or fake seeds',()=>{
-  const sql=read('supabase/migrations/20261009150000_home_banners.sql');
+  const sql=read('supabase/migrations/20261009115627_home_banners.sql');
   assert.match(sql,/enable row level security/i);
   assert.match(sql,/status = 'published'/);
   assert.match(sql,/starts_at is null or starts_at <= now\(\)/);

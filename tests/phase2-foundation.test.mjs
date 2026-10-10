@@ -65,7 +65,7 @@ test('New app points ONLY at independent Supabase and preserves official banner'
 });
 
 test('Identity migration follows fail-closed minimum-security pattern',async()=>{
- const sql=(await get('supabase/migrations/20261010120000_phase2_identity_profiles.sql')).toString();
+ const sql=(await get('supabase/migrations/20261009222727_phase2_identity_profiles.sql')).toString();
  assert.match(sql,/alter table public\.profiles enable row level security/);
  assert.match(sql,/grant update \(display_name, bio, avatar_url\)/);
  assert.match(sql,/phase2_after_auth_signup/);
