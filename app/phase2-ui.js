@@ -139,9 +139,16 @@ async function submitAuth(route,button){
   go(window.TotiLiveMode?.enabled?'home':'me');
   if(typeof showToast==='function')showToast('تم تسجيل الدخول وربط الملف الشخصي بنجاح');
 }
-const phase2Demo=new URLSearchParams(location.search).get('phase2Demo')==='1';
+// Live / Android mode must never use a URL demo flag to disable real Auth.
+const demoParam=new URLSearchParams(location.search).get('phase2Demo')==='1';
+function previewOnly(){
+ const params=new URLSearchParams(location.search);
+ const native=(location.protocol==='https:'&&location.hostname==='localhost')||
+   !!window.Capacitor?.isNativePlatform?.();
+ return demoParam&&params.get('mode')!=='live'&&!native&&!window.TotiLiveMode?.enabled;
+}
 function handleAuthClick(route,button){
-  if(phase2Demo)return false;
+  if(previewOnly())return false;
   if(busy)return true;
   busy=true;button.disabled=true;
   notify('جارٍ التواصل مع الخادم…');
@@ -156,7 +163,7 @@ document.addEventListener('click',event=>{
   const action=el.dataset.phase2||el.dataset.fc||el.dataset.a;
   const state=auth.state();
   if(action==='saveProfilePreview'&&!state.signedIn)return; // Preserve guest demo edits.
-  if(action==='validate-auth'&&phase2Demo)return; // Visual-only regression mode.
+  if(action==='validate-auth'&&previewOnly())return; // Visual-only regression mode.
   if(!['validate-auth','saveProfilePreview','account','logout'].includes(action))return;
   event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
   if(action==='account'){

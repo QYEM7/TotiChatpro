@@ -18,6 +18,8 @@ on:
       - "tests/bloom-design-browser.cjs"
       - "tests/frontend-finish-browser.cjs"
       - ".github/workflows/royal-preview-qa.yml"
+  pull_request:
+    branches: [develop/phase-2]
   workflow_dispatch:
 permissions:
   contents: read
@@ -60,6 +62,10 @@ jobs:
       - name: Verify private audio UI with Chromium test microphone
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase4-voice-messages-browser.cjs
+      - name: T09 responsive live login on six device widths
+        run: |
+          npm run build
+          node tests/t09-live-responsive-browser.cjs
       - name: Verify Capacitor Android startup renders the actual Home page
         if: github.ref == 'refs/heads/develop/phase-2'
         run: |

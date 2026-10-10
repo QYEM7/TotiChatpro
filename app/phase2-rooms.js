@@ -14,6 +14,7 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
 }[c]));
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let currentUser='',rooms=null,active=null,members=[],messages=[],loadingRooms=null,refreshing=null,entering=false;
+let roomListError='';
 let sequence=0,sending=false;
 function session(){return auth.state();}
 async function query(path,options){return auth.requestData(path,options);}
@@ -53,6 +54,14 @@ function homeContent(){
       }).join('');
     }
   }
+  // A failed backend request is NOT an empty directory. Keep last-known real cards.
+  if(gallery&&roomListError){
+    if(!rooms?.length)gallery.replaceChildren();
+    gallery.insertAdjacentHTML('afterbegin',
+      '<div class="tc-phase2-empty" role="alert"><b>تعذّر تحديث الغرف الحقيقية</b>'+
+      '<span>'+esc(roomListError)+'</span>'+
+      '<button type="button" data-phase2="retry-rooms">إعادة المحاولة</button></div>');
+  }
   // A separate server-backed entry point for private rooms, which are deliberately
   // hidden from other members in the public directory by the RLS policy.
   const listing=$('.royal-home .royal-room-gallery');
@@ -67,7 +76,8 @@ function homeContent(){
   // Do not represent the old hardcoded 'nearby' people or counts as live room data.
   const near=$('.royal-home .royal-near');
   if(near){
-    near.innerHTML=rooms===null?'<p class="tc-phase2-near-note">جارٍ تحميل الغرف…</p>':
+    near.innerHTML=roomListError?'<p class="tc-phase2-near-note" role="status">تعذّر تحديث الغرف الحقيقية.</p>':
+      rooms===null?'<p class="tc-phase2-near-note">جارٍ تحميل الغرف…</p>':
       rooms.length?rooms.slice(0,4).map((r,i)=>
         '<button class="royal-near-tile" data-phase2="open-room" data-room="'+esc(r.id)+'" aria-label="دخول '+esc(r.title)+'">'+
         '<img src="'+esc(roomImage(i))+'" alt=""><span>🎙️ حقيقي</span></button>').join(''):
@@ -109,16 +119,27 @@ function roomContent(){
     for(const [index,button] of all.entries()){
       const slot=index+1;
       const p=members.find(x=>x.seat_no===slot);
-      button.className='seat'+(p?' occupied':'');
+      // Do not overwrite the approved VIP/decorative seat classes on every refresh.
+      button.classList.toggle('occupied',!!p);
+      button.classList.toggle('locked',!p);
       button.setAttribute('aria-label',p?'المقعد '+slot+': '+p.display_name:'المقعد '+slot+' متاح');
       const face=$('.seatface',button);
       if(face){
-        face.replaceChildren();
-        face.textContent=p?(p.user_id===session().user?.id?'🎙️':'🎤'):'＋';
-        if(p?.user_id===session().user?.id){
-          const badge=document.createElement('span');
-          badge.className='seatbadge';badge.textContent='✦';face.appendChild(badge);
+        // Replace the sample face with a truthful local status once, then
+        // update only that status; keep CSS frames, effects and custom children.
+        let glyph=$('[data-real-seat-glyph]',face);
+        if(!glyph){
+          face.replaceChildren();
+          glyph=document.createElement('span');
+          glyph.dataset.realSeatGlyph='';face.appendChild(glyph);
         }
+        glyph.textContent=p?(p.user_id===session().user?.id?'🎙️':'🎤'):'＋';
+        const own=!!p&&p.user_id===session().user?.id;
+        let badge=$('.seatbadge',face);
+        if(own&&!badge){
+          badge=document.createElement('span');
+          badge.className='seatbadge';badge.textContent='✦';face.appendChild(badge);
+        }else if(!own&&badge)badge.remove();
       }
       const label=$('.seatname',button);if(label)label.textContent=p?.display_name||'مقعد '+slot;
       const level=$('.seatlv',button);
@@ -165,10 +186,11 @@ async function listRooms(){
     try{
       const data=await query('/rest/v1/rooms?select=id,title,owner_id,is_private,created_at&order=created_at.desc&limit=40');
       if(before!==sequence)return;
-      rooms=Array.isArray(data)?data:[];
+      if(!Array.isArray(data))throw new Error('استجابة قائمة الغرف غير صالحة');
+      rooms=data;roomListError='';
       homeContent();
-    }catch(err){if(before===sequence){rooms=[];homeContent();toast('فشل تحميل الغرف: '+failure(err));}}
-    finally{loadingRooms=null;}
+    }catch(err){if(before===sequence){roomListError=failure(err);homeContent();toast('فشل تحميل الغرف: '+roomListError);}}
+    finally{if(before===sequence)loadingRooms=null;}
   })();
   return loadingRooms;
 }
@@ -313,7 +335,7 @@ async function leaveRoom(){
   try{
     await window.TotiRealVoice?.disconnect?.();
     await rpc('phase2_room_leave',{p_room_id:room.id});
-    active=null;members=[];messages=[];sequence++;
+    active=null;members=[];messages=[];sequence++;loadingRooms=null;roomListError='';
     if(typeof closeSheet==='function')closeSheet();
     minimizedRoom=false;rooms=null;
     go('home');void listRooms();
@@ -360,10 +382,11 @@ document.addEventListener('click',event=>{
   const b=event.target.closest('[data-phase2],[data-royal="create-room"],[data-royal="hero"],[data-a="leaveRoom"],[data-a="seat"],[data-a="sendPreview"]');
   if(!b)return;
   const kind=b.dataset.phase2||b.dataset.royal||b.dataset.a;
-  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy'].includes(kind))return;
+  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy','retry-rooms'].includes(kind))return;
   if((kind==='seat'||kind==='seat-action'||kind==='leaveRoom'||kind==='sendPreview')&&!active)return;
   event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-  if(kind==='create-room')showCreate();
+  if(kind==='retry-rooms')void listRooms();
+  else if(kind==='create-room')showCreate();
   else if(kind==='hero')toast('اختر غرفة حقيقية من قائمة الغرف');
   else if(kind==='create-room-submit'){void createRoom();}
   else if(kind==='open-room')void enterRoom(b.dataset.room||'');
@@ -378,7 +401,7 @@ document.addEventListener('click',event=>{
 window.addEventListener('totichat-phase2-auth',()=>{
   const id=session().user?.id||'';
   if(id!==currentUser){
-    currentUser=id;sequence++;rooms=null;active=null;members=[];messages=[];
+    currentUser=id;sequence++;rooms=null;roomListError='';loadingRooms=null;active=null;members=[];messages=[];
     if(id){void listRooms();void resume();}
   }
   apply();

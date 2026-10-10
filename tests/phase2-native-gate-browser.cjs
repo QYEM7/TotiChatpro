@@ -18,11 +18,19 @@ if(!executablePath)throw Error('System chromium unavailable');
    user:{id:uid,email:'newuser@test.invalid'}};
   const userProfile={id:uid,display_name:'الحساب الحقيقي',bio:'',
    avatar_url:null,created_at:'2026-10-10T00:00:00Z',updated_at:'2026-10-10T00:00:00Z'};
+  let failFirstRoomFetch=true;
   await page.setRequestInterception(true);
   page.on('request',r=>{
    const url=r.url(),method=r.method();
    if(!url.startsWith('https://sqedsnyvjblvbjbizcay.supabase.co/'))return r.continue();
    const path=new URL(url).pathname;
+   if(path==='/rest/v1/rooms'&&failFirstRoomFetch){
+    failFirstRoomFetch=false;
+    return r.respond({status:503,contentType:'application/json',headers:{
+     'access-control-allow-origin':'*',
+     'access-control-allow-headers':'authorization,apikey,content-type,prefer'
+    },body:JSON.stringify({message:'Simulated network unavailable'})});
+   }
    const response=path==='/auth/v1/token'?authResult:
     path==='/rest/v1/profiles'?[userProfile]:
     path==='/rest/v1/wallets'?[{user_id:uid,coins:0,diamonds:0,updated_at:'2026-10-10T00:00:00Z'}]:
@@ -35,7 +43,7 @@ if(!executablePath)throw Error('System chromium unavailable');
    },body:JSON.stringify(response)});
   });
   // Force the identical live startup behavior on the local HTTP test origin.
-  await page.goto('http://127.0.0.1:8765/dist/?mode=live',{waitUntil:'domcontentloaded'});
+  await page.goto('http://127.0.0.1:8765/dist/?mode=live&phase2Demo=1',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('#app.rf-app');
   await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='loginPreview');
   assert.equal(await page.$('.royal-room-tile'),null,'No demo rooms displayed before login');
@@ -59,7 +67,18 @@ if(!executablePath)throw Error('System chromium unavailable');
   await page.$eval('[data-fc="validate-auth"]',b=>b.click());
   await page.waitForFunction(()=>window.TotiPhase2Auth?.state()?.profile?.display_name==='الحساب الحقيقي');
   await page.waitForFunction(()=>document.querySelector('#app')?.dataset.route==='home');
+  await page.waitForSelector('[data-phase2="retry-rooms"]');
+  assert.equal(await page.evaluate(()=>window.TotiPhase2Rooms?.getStatus()?.roomCount),null,
+    'Network error must not fake an empty room directory');
+  await page.$eval('[data-phase2="retry-rooms"]',button=>button.click());
   await page.waitForFunction(()=>window.TotiPhase2Rooms?.getStatus()?.roomCount===0);
+  assert.equal(await page.$('[data-phase2="retry-rooms"]'),null,
+    'Retry must clear the real network outage warning');
+  assert.equal(await page.evaluate(()=>window.TotiLiveMode?.enabled),true,'Demo URL must not disable real Auth');
+  const games=await page.$('[data-royal="category"][data-cat="games"]');
+  assert.ok(games,'Approved games button must stay visible');
+  await games.click();
+  assert.equal(await page.$eval('#app',e=>e.dataset.route),'home','Live games button cannot enter fake room');
   assert.equal(await page.$$eval('.royal-room-gallery .royal-room-tile',i=>i.length),0,
    'Signed-in user sees zero real rooms instead of six fake ones');
   assert.ok(await page.$('#tc-phase2-online-state'),'Live UI states supported capabilities clearly');
