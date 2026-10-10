@@ -490,7 +490,7 @@
         if(!active||session?.user?.id!==owner||socket!==channel)return cleanupSocket();
         lastToken=token;
         send('phx_join',{config:{
-          broadcast:{ack:false,self:false},presence:{enabled:false},private:false,
+          broadcast:{ack:false,self:false,replication_ready:true},presence:{enabled:false},private:false,
           postgres_changes:[
             {event:'*',schema:'public',table:'rooms'},
             {event:'*',schema:'public',table:'room_members'},
