@@ -406,6 +406,19 @@ window.addEventListener('totichat-phase2-auth',()=>{
   }
   apply();
 });
+// Reconcile server state quickly after Android switches apps or regains signal.
+ // Keep the existing low-frequency RLS-authorized polling as a fallback;
+ // do not claim that the room service is socket-based Realtime yet.
+let lastForegroundSync=0;
+function syncVisibleRoom(){
+  if(!session().signedIn||document.hidden||Date.now()-lastForegroundSync<2500)return;
+  lastForegroundSync=Date.now();
+  if(screen==='room'&&active)void refreshRoom();
+  else if(screen==='home'&&!loadingRooms)void listRooms();
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncVisibleRoom();});
+window.addEventListener('online',syncVisibleRoom);
+window.addEventListener('focus',syncVisibleRoom);
 setInterval(()=>{
   if(!session().signedIn||document.hidden)return;
   if(screen==='room'&&active)void refreshRoom();
