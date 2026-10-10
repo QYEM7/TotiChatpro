@@ -69,3 +69,12 @@ window.addEventListener('click',e=>{if(e.target.closest('[data-a="close"]')&&doc
  node.onerror=()=>console.warn('T23 music module unavailable; no demo playback used');
  document.head.appendChild(node);
 })();
+
+/* T42 support is loaded after approved UI without changing the master HTML. */
+(function(){
+ const url=document.currentScript?.src;if(!url)return;
+ const el=document.createElement('script');
+ el.src=new URL('./phase5-support-ui.js?v=t42-real-support-20261010-1',url).href;
+ el.onerror=()=>console.warn('T42 customer support module unavailable');
+ document.head.appendChild(el);
+})();
