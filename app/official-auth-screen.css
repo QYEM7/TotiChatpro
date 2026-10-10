@@ -1,0 +1,55 @@
+/* TotiChat official clean Auth screen: approved falcon and brand. */
+body.tc-auth-body{background:#fcf9ff!important;overflow-x:hidden}
+#app.tc-auth-root,#app.tc-auth-root *{box-sizing:border-box}
+#app.tc-auth-root{min-height:100dvh;background:#fcf9ff!important;color:#352445}
+#app.tc-auth-root .tc-login-layout{display:grid;grid-template-columns:1fr 1fr;min-height:100dvh;direction:rtl;font-family:Cairo,Tajawal,system-ui,sans-serif}
+#app.tc-auth-root .tc-login-panel{display:flex;align-items:center;justify-content:center;padding:clamp(25px,5vw,72px)}
+#app.tc-auth-root .tc-login-panel-inner{width:100%;max-width:480px;animation:tcAuthIn .5s ease-out both}
+#app.tc-auth-root .tc-login-brand{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:900;color:#4d2767;margin-bottom:36px}
+#app.tc-auth-root .tc-login-brand img{width:70px;height:70px;object-fit:contain;border-radius:17px;box-shadow:0 8px 25px #46236830}
+#app.tc-auth-root .tc-login-intro{margin-bottom:25px}
+#app.tc-auth-root .tc-login-intro h1{font-size:clamp(27px,3vw,35px);margin:0 0 7px;color:#3c214d;line-height:1.4}
+#app.tc-auth-root .tc-login-intro p{color:#73627e;font-size:15px;margin:0}
+#app.tc-auth-root .tc-login-form{display:flex;flex-direction:column;gap:9px}
+#app.tc-auth-root .tc-login-label{margin-top:10px;font-size:13px;font-weight:800;color:#513960}
+#app.tc-auth-root .tc-login-input-wrap{min-height:53px;display:flex;align-items:center;border-radius:12px;border:1.5px solid #dfd4e4;background:#fff;box-shadow:0 4px 15px #52266710;transition:.18s}
+#app.tc-auth-root .tc-login-input-wrap:focus-within{border-color:#9456b5;box-shadow:0 0 0 4px #8a50aa18}
+#app.tc-auth-root .tc-login-input-wrap>svg{width:20px;height:20px;flex-shrink:0;color:#836b95;margin-right:15px}
+#app.tc-auth-root .tc-login-input-wrap input{flex:1;min-width:0;height:50px;border:0!important;background:transparent!important;outline:none!important;color:#342147;font:inherit;font-size:14px;text-align:right;padding:8px 11px;box-shadow:none!important}
+#app.tc-auth-root .tc-login-input-wrap input::placeholder{color:#a194ac}
+#app.tc-auth-root .tc-password-toggle{width:44px;height:48px;display:grid;place-items:center;border:0;background:transparent;color:#71547d}
+#app.tc-auth-root .tc-password-toggle svg{width:20px;height:20px}
+#app.tc-auth-root .tc-login-extras{display:flex;align-items:center;justify-content:space-between;gap:9px;margin:12px 0;font-size:13px}
+#app.tc-auth-root .tc-remember,#app.tc-auth-root .tc-consent{display:flex;align-items:center;gap:7px;color:#554267;cursor:pointer}
+#app.tc-auth-root .tc-consent{font-size:12px;margin:14px 0}
+#app.tc-auth-root input[type=checkbox]{width:17px;height:17px;accent-color:#754296}
+#app.tc-auth-root .tc-login-text-btn,#app.tc-auth-root .tc-login-footer button{border:0;background:none;color:#704496;font-weight:900;font:inherit;cursor:pointer;padding:6px}
+#app.tc-auth-root .tc-login-submit{width:100%;min-height:52px;border:0!important;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:11px;margin-top:9px;background:linear-gradient(105deg,#4f2868,#8750a0);color:white!important;box-shadow:0 8px 19px #5228692e;font-size:15px;font-weight:900;cursor:pointer;transition:transform .2s}
+#app.tc-auth-root .tc-login-submit:hover:not(:disabled){transform:translateY(-2px)}
+#app.tc-auth-root .tc-login-submit:disabled{opacity:.65;cursor:wait}
+#app.tc-auth-root .tc-login-submit>svg{width:18px;height:18px}
+#app.tc-auth-root .tc-login-spinner{display:none;border:2px solid #ffffff66;border-top-color:white;border-radius:50%;width:18px;height:18px;animation:tcSpin .7s linear infinite}
+#app.tc-auth-root .tc-login-submit:disabled .tc-login-spinner{display:block}
+#app.tc-auth-root .tc-login-divider{display:flex;align-items:center;gap:12px;margin:26px 0 17px;font-size:12px;white-space:nowrap;color:#817289}
+#app.tc-auth-root .tc-login-divider:before,#app.tc-auth-root .tc-login-divider:after{content:"";flex:1;height:1px;background:#e2d8e5}
+#app.tc-auth-root .tc-social-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#app.tc-auth-root .tc-social-button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:47px;background:white!important;border:1px solid #ddd0e1!important;border-radius:12px!important;color:#4d365b!important;font-size:12px;font-weight:800;cursor:pointer}
+#app.tc-auth-root .tc-social-button:disabled{opacity:.45;cursor:not-allowed}
+#app.tc-auth-root .tc-social-button:hover:not(:disabled){transform:translateY(-2px)}
+#app.tc-auth-root .tc-social-icon{font-size:19px;font-weight:900}
+#app.tc-auth-root .tc-social-icon.google{color:#4285f4}
+#app.tc-auth-root .tc-social-icon.facebook{color:#1877f2}
+#app.tc-auth-root .tc-social-explain,#app.tc-auth-root .tc-login-safety{font-size:11px;color:#756581;text-align:center;line-height:1.7}
+#app.tc-auth-root .tc-login-footer{text-align:center;color:#70647c;margin-top:22px;font-size:13px}
+#app.tc-auth-root .tc-auth-status{min-height:18px;margin:0;color:#ae245a;font-weight:800;font-size:12px}
+#app.tc-auth-root .tc-login-art{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;text-align:center;padding:35px;background:linear-gradient(145deg,#29143e,#5c3473,#8d539d);color:#fbe6c4}
+#app.tc-auth-root .tc-login-art-glow{position:absolute;inset:-20%;background:radial-gradient(ellipse,#e8b9e02e,transparent 60%);pointer-events:none}
+#app.tc-auth-root .tc-login-art img{width:min(60%,290px);object-fit:contain;z-index:1;border-radius:24px;box-shadow:0 15px 55px #1c092c70}
+#app.tc-auth-root .tc-login-art strong{font-size:clamp(24px,3vw,38px)}
+#app.tc-auth-root .tc-login-art>span{letter-spacing:5px;font-weight:900}
+#app.tc-auth-root .tc-login-art p{color:#e5d2df;font-size:15px}
+#app.tc-auth-root button:focus-visible,#app.tc-auth-root input:focus-visible{outline:3px solid #ab75cb;outline-offset:3px}
+@media(max-width:760px){#app.tc-auth-root .tc-login-layout{display:block}#app.tc-auth-root .tc-login-art{display:none}#app.tc-auth-root .tc-login-panel{min-height:100dvh;align-items:flex-start;padding:28px 22px 40px}#app.tc-auth-root .tc-login-panel-inner{max-width:520px;margin:auto}#app.tc-auth-root .tc-login-brand{margin:10px 0 28px}}
+@media(prefers-reduced-motion:reduce){#app.tc-auth-root .tc-login-panel-inner{animation:none}#app.tc-auth-root .tc-login-submit{transition:none}#app.tc-auth-root .tc-login-spinner{animation:none}}
+@keyframes tcAuthIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tcSpin{to{transform:rotate(360deg)}}
