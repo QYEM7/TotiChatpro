@@ -31,7 +31,7 @@ async function preflight(){
  const chosen=input.value;
  const current=new Date();
  const latest=new Date(Date.UTC(current.getUTCFullYear(),current.getUTCMonth()-1,1)).toISOString().slice(0,7);
- if(!/^\\d{4}-(0[1-9]|1[0-2])$/.test(chosen)||chosen<'2025-01'||chosen>latest){
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(chosen)||chosen<'2025-01'||chosen>latest){
    statusNode.textContent='اختر شهراً مغلقاً وصحيحاً بتوقيت UTC';return;
  }
  if(chosen!==monthPeriod){monthPeriod=chosen;monthOffset=0;}
