@@ -44,5 +44,6 @@ window.addEventListener('click',e=>{
 window.addEventListener('totichat-gift-completed',()=>{void play();if(screen==='wallet')void history();});
 const renderBefore=render;render=function(){const result=renderBefore.apply(this,arguments);hydrate();return result;};
 window.addEventListener('totichat-phase2-auth',()=>{generation++;clearTimeout(timer);cursor=null;enabled=false;sound.pause();document.querySelector('[data-gift-history-panel]')?.remove();hydrate();if(auth.state().signedIn)void poll(generation,owner());});
+window.TotiPhase4GiftReceipts=Object.freeze({audioState:()=>Object.freeze({enabled,errorCode:sound.error?.code??null,readyState:sound.readyState,networkState:sound.networkState,currentSrc:sound.currentSrc,paused:sound.paused})});
 if(auth.state().signedIn)void poll(generation,owner());
 })();

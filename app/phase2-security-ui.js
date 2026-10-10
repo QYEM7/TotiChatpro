@@ -23,6 +23,7 @@ async function open(){
    if(!authority.canManageCatalogs)return;
    const button=document.createElement('button');button.type='button';button.className='primary';button.dataset.adminOpen='';button.textContent='إدارة الإعدادات';node.appendChild(button);
   }).catch(()=>{});
+  const agencies=document.createElement('button');agencies.type='button';agencies.className='primary';agencies.dataset.agenciesOpen='';agencies.textContent='الوكالات والطلبات';node.appendChild(agencies);
   status(auth.state().recoveryRequired?'أدخل كلمة مرور جديدة لإكمال الاستعادة':'تم تحميل إعدادات حسابك');
  }catch(e){status(e.message,true);}
 }

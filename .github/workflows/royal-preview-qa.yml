@@ -11,6 +11,7 @@ on:
       - "tests/phase2-native-gate-browser.cjs"
       - "tests/official-auth-layout-browser.cjs"
       - "tests/phase2-voice-browser.cjs"
+      - "tests/phase4-browser.cjs"
       - "scripts/build-approved-web.mjs"
       - "tests/agency-flow-browser.cjs"
       - "tests/bloom-design-browser.cjs"
