@@ -92,16 +92,16 @@
     "title": "Email registration SMTP recovery",
     "status": "partial",
     "evidence": "Auth REST integration coded and local GoTrue tested; SMTP unconfigured",
-    "beta_30d_scope": "required_for_beta",
-    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "حسابات Beta عبر Google فقط؛ SMTP وكلمات المرور ليست شرط دخول. البريد اختياري للتنبيهات الإدارية ولا يُعتمد كبديل للدخول."
   },
   {
     "id": "T13",
     "title": "Google Apple Facebook OAuth",
     "status": "blocked",
     "evidence": "Callback code exists, provider secrets and device callbacks unverified",
-    "beta_30d_scope": "paused_after_beta",
-    "beta_30d_scope_note": "تسجيل البريد الآمن يكفي للبيتا؛ OAuth متعدد المزودين لا يفتح حتى تُعتمد أسراره واختبارات العودة."
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "Google OAuth فقط إلزامي؛ تفعيل المزود وربطه بـSupabase، PKCE، Android callback، اختبارات دخول وخروج فعلية. Apple/Facebook مؤجلان؛ منع الرجوع للبريد/كلمة المرور ضمن بيتا."
   },
   {
     "id": "T14",
@@ -109,7 +109,7 @@
     "status": "partial",
     "evidence": "Authenticated 512x512 WebP avatar upload in PUBLIC bucket, RLS owner path, real disposable GoTrue user tests; local destructive Storage byte-restore/owner-vs-outsider checks additionally passed CI 38063377960. Unapplied production migration, real devices not tested; remains partial.",
     "beta_30d_scope": "required_for_beta",
-    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
+    "beta_30d_scope_note": "الملف الشخصي الحقيقي + ID مميز اختياري يُمنح يدوياً حصراً من الإدارة المخوّلة عبر RPC مؤمن مع تفرد ومنع الانتحال وسجل تدقيق؛ لا توليد عشوائي للمعرف المميز ولا تغيير UUID الداخلي."
   },
   {
     "id": "T15",
@@ -197,15 +197,15 @@
     "status": "partial",
     "evidence": "Gifts and ledger code exists; complete physical UI run unverified",
     "beta_30d_scope": "required_for_beta",
-    "beta_30d_scope_note": "يُنفّذ فقط الحد الضروري لنطاق الصوت والحسابات والمال والصلاحيات والاختبار الآمن."
+    "beta_30d_scope_note": "هدايا عادية وحظ: اختيار المستلم والهدية، عرض السعر ثم تأكيد صريح، خصم وتوزيع محميان مع سجل فريد."
   },
   {
     "id": "T26",
     "title": "Luck gifts probability and audit",
     "status": "blocked",
     "evidence": "Certified probability/payout system not verified",
-    "beta_30d_scope": "paused_after_beta",
-    "beta_30d_scope_note": "مضاعفات هدايا الحظ والمخاطر الاحتمالية تُجمّد حتى التوثيق والتدقيق؛ الهدايا الأساسية مطلوبة."
+    "beta_30d_scope": "required_for_beta",
+    "beta_30d_scope_note": "هدايا الحظ ضرورية للبيتا؛ احتمالات معلنة معتمدة مسبقاً، قرار عشوائي آمن على الخادم وسجل احتمالات/مدفوعات غير قابل للتلاعب؛ لا أرباح نقدية أو احتمالات مختلقة، مراجعة الامتثال قبل التشغيل."
   },
   {
     "id": "T27",
@@ -213,7 +213,7 @@
     "status": "partial",
     "evidence": "Catalog/ownership SQL and tests exist; complete mobile acceptance pending",
     "beta_30d_scope": "minimum_for_beta",
-    "beta_30d_scope_note": "المتجر والحقيبة لعناصر الهدايا وVIP المدعومة في البيتا فقط؛ لا توسع كتالوج."
+    "beta_30d_scope_note": "المتجر والحقيبة تشمل شراء VIP1–VIP10 الموجود فعلياً وظهوره بالحساب وتفعيله، بجانب عناصر البيتا فقط؛ لا منتجات أو مستويات جديدة."
   },
   {
     "id": "T28",
@@ -292,8 +292,8 @@
     "title": "VIP1 through VIP10",
     "status": "partial",
     "evidence": "VIP visuals/catalog present; fully enforced tiers not verified",
-    "beta_30d_scope": "paused_after_beta",
-    "beta_30d_scope_note": "توسيع منافع VIP وشرائحها غير لازم الآن؛ الإطارات والتصميم المعتمدان يبقيان كما هما دون منح مزايا وهمية."
+    "beta_30d_scope": "minimum_for_beta",
+    "beta_30d_scope_note": "الإبقاء على شراء وتفعيل VIP1–VIP10 الحالية في حساب المستخدم مع حفظ الملكية والمدة والصلاحيات والإطارات المعتمدة؛ وقف تطوير رتب أو مزايا أو إطارات جديدة."
   },
   {
     "id": "T38",
@@ -317,7 +317,7 @@
     "status": "partial",
     "evidence": "Admin catalog features exist; full management not proven",
     "beta_30d_scope": "minimum_for_beta",
-    "beta_30d_scope_note": "لوحة Owner ومشرف أساسية للتحكم بالمستخدمين والغرف والدعم؛ لا إدارة موارد بشرية موسعة."
+    "beta_30d_scope_note": "لوحة الإدارة الضرورية + منح ID مميز يدوياً بصلاحية محددة، تحقق تفرد وسجل تدقيق، والتحكم بالمستخدمين والغرف والشحن. لا توسعات غير ضرورية."
   },
   {
     "id": "T41",
