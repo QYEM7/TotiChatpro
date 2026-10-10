@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
 import {stagingFromEnv,publicRuntime,assertStagingRuntime,prepareStagingRuntime,PRODUCTION_SUPABASE_URL} from '../scripts/t03-staging-config.mjs';
 const valid={STAGING_SUPABASE_URL:'https://abcdefghijklmnopqrst.supabase.co',STAGING_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_TESTING_PUBLIC_ONLY'};
 test('T03: staging runtime is browser safe and not production',()=>{
@@ -34,7 +34,7 @@ test('T03: output only rewritten in isolated build, not source',async()=>{
   assert.equal(result.projectRef,'abcdefghijklmnopqrst');
   assert.equal(await readFile(source,'utf8'),'source config\n');
   assertStagingRuntime(await readFile(output,'utf8'),stagingFromEnv(valid));
-  await assert.rejects(()=>prepareStagingRuntime(valid,join(tmp,'app')),/BLOCKED staging/);
+  await assert.rejects(()=>prepareStagingRuntime(valid,resolve('app')),/BLOCKED staging/);
  }finally{await rm(tmp,{recursive:true,force:true});}
 });
 test('T03: all dotenv variants ignored, E2E verifies served stage config',async()=>{
