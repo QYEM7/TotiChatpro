@@ -96,7 +96,18 @@ function handle(e){
  const a=el.dataset.royal;
  // The approved top buttons route to the REAL phase-2 room flow after sign-in.
  // Guest users continue to see the original non-mutating visual preview.
- if(window.TotiPhase2Auth?.state()?.signedIn && (a==='create-room'||a==='hero'))return;
+ // Live users must never navigate to fake rooms/games or have real room cards hidden.
+ if(window.TotiLiveMode?.enabled&&window.TotiPhase2Auth?.state()?.signedIn){
+  if(a==='create-room'||a==='hero'||a==='close')return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(a==='view-all'||(a==='category'&&['all','popular'].includes(el.dataset.cat))){
+   document.querySelectorAll('.royal-room-gallery .royal-room-tile').forEach(b=>b.hidden=false);
+   if(a==='category')document.querySelectorAll('.royal-cat').forEach(b=>b.classList.toggle('active',b===el));
+   if(typeof showToast==='function')showToast('هذه جميع الغرف المحمّلة من الخادم');
+  }else if(typeof showToast==='function')showToast('هذه الميزة غير متصلة بخادم TotiChat بعد');
+  return;
+ }
+ // Guest visual-only preview remains unchanged.
  e.preventDefault();e.stopImmediatePropagation();
  if(a==='category'){
   const cat=el.dataset.cat;
