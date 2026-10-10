@@ -17,6 +17,13 @@ if(!Number.isFinite(report.engineering_percent)||report.engineering_percent<80||
   fail('Engineering implementation is below 80%.');
 if(!Number.isFinite(report.beta_readiness_percent)||report.beta_readiness_percent<80||report.beta_readiness_percent>100)
   fail('Real-world beta readiness is below 80%.');
+// An entered percentage is insufficient: 40 of 50 tasks require live verification.
+let tasks;
+try { tasks=JSON.parse(fs.readFileSync(path.join(process.cwd(),'docs/50-task-verification.json'),'utf8')); }
+catch(e) { fail('Missing 50-task verification ledger.'); }
+if(!Array.isArray(tasks)||tasks.length!==50)fail('Expected 50 reviewed tasks.');
+const verified=tasks.filter(t=>t.status==='verified_live'&&typeof t.evidence==='string'&&t.evidence.length>=45);
+if(verified.length<40)fail('Only '+verified.length+'/50 tasks verified live; need 40 or more.');
 const required=['production_backup_restore','independent_staging','real_auth_two_users',
   'two_physical_android_phones','live_voice_and_moderation','financial_conservation_and_month_close',
   'account_agency_security','full_mobile_regression'];
