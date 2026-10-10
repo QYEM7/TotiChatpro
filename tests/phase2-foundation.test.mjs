@@ -36,6 +36,13 @@ test('Android web payload uses exact approved HTML, CSS, JS and asset bytes',asy
    'APK WebView root MUST contain the exact original approved app with only a base tag');
  assert.match(entry,/id="app"/);
  assert.match(entry,/royal-visuals\.js/);
+ assert.match(entry,/phase2-voice-ui\.js/);
+ const sdk=await stat(path.join(root,'dist/app/phase2-livekit-sdk.bundle.js'));
+ assert.ok(sdk.size>100000,'Real LiveKit WebRTC library is not bundled into Android APK');
+ const voice=(await get('dist/app/phase2-voice-ui.js')).toString();
+ assert.match(voice,/requestVoiceToken/);
+ assert.match(voice,/phase2_room_set_muted/);
+
  assert.doesNotMatch(entry,/http-equiv="refresh"|window\.location\.replace\('\.\/app\/'\)/i,
    'Never redirect Capacitor WebView to an unsupported /app/ directory');
  assert.doesNotMatch(entry,/jsjsnsnsnsn0-pixel\/TotiChat/);
