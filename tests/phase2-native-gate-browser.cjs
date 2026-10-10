@@ -44,7 +44,7 @@ if(!executablePath)throw Error('System chromium unavailable');
     'No distracting bottom navigation on Login');
   assert.ok(await page.$('.tc-login-brand img'),'Approved official falcon must display');
   assert.match(await page.$eval('.tc-login-intro h1',x=>x.textContent),/مرحباً بعودتك/);
-  assert.equal(await page.$eval('[data-auth-social]',items=>items.length),3);
+  assert.equal(await page.evaluate(()=>document.querySelectorAll('[data-auth-social]').length),3);
   await page.$eval('[data-auth-action="toggle-password"]',b=>b.click());
   assert.equal(await page.$eval('#fc-pass',el=>el.type),'text','Show password works');
   await page.$eval('[data-auth-action="toggle-password"]',b=>b.click());
