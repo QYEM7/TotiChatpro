@@ -15,7 +15,7 @@
     "id": "T03",
     "title": "Isolated staging and credentials",
     "status": "partial",
-    "evidence": "Ephemeral Auth/REST/Storage working; persistent hosted staging deferred"
+    "evidence": "Disposable isolated full-stack Supabase migrations/Auth/REST/Storage plus local PostgreSQL pg_dump/pg_restore drill passes CI 38062789341; separate production-grade hosted staging is NOT deployed. Supabase org confirmed Free and project has zero branches; paid setup not authorized. Stays partial."
   },
   {
     "id": "T04",
@@ -285,13 +285,13 @@
     "id": "T48",
     "title": "Signed APK AAB install",
     "status": "partial",
-    "evidence": "Historical debug APK build exists from before release freeze; NEW GitHub development push builds disabled. Manual builds blocked by explicit release_allowed, Owner APPROVED, >=80% engineering and beta, >=40/50 verified_live tasks and full external evidence (T48 unit/foundation CI 38060888902 and follow-up 38061220423). Real signed install/AAB not done; NO new APK should be built before evidence and approval."
+    "evidence": "APK builds are frozen on develop: no push build, manual release gate requires explicit Owner approval, release_allowed, both engineering+beta >=80, 40/50 live-verified tasks and independently reviewable DB AND Storage recovery evidence, plus two-phone voice/finance/security/mobile. T49 Storage gate proof in foundation CI 38062861141. Historical debug APK predates freeze; no new APK built. Real signed AAB/install remains unproven."
   },
   {
     "id": "T49",
     "title": "Observability backup and recovery",
     "status": "blocked",
-    "evidence": "Git rollback baseline exists. Supabase project read-only check healthy but ZERO Supabase development branches; no persistent staging and no verified backup/restore/PITR. Must confirm recoverability before migrations."
+    "evidence": "Reusable T49 pg_dump -Fc / pg_restore mechanism with temporary scratch-source corruption and restore to a distinct disposable LOCAL database passed CI 38062789341; SQL checked 1,200 fake coins, ledger equality, 155 fake unpaid diamonds, foreign keys, RLS and no table grant widening. No production access, dump not uploaded and trap cleans scratch. Local mechanism verified; production-derived export, independent offsite restore, actual Storage object backup and byte restore, PITR and hosted RPO/RTO STILL NOT VERIFIED. Supabase project org Free with no branching; remains BLOCKED."
   },
   {
     "id": "T50",
