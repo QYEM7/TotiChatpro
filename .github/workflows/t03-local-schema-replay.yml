@@ -25,9 +25,9 @@ jobs:
       - name: Verify all 32 historical migration files before database work
         run: node --test tests/t01-migration-history.test.cjs
       - name: Install Supabase CLI for LOCAL-ONLY Docker database
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 2.84.2
       - name: Replay in an unlinked disposable runner directory (NEVER production)
         shell: bash
         run: |
