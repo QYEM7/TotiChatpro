@@ -47,6 +47,10 @@ if(!chrome)throw Error('T36 Chromium required');
   await page.waitForFunction(()=>document.querySelector('[data-agency-month-results]')?.textContent.includes('120'));
   assert.match(await page.$eval('[data-agency-month-results]',e=>e.textContent),/لم تُنفذ|لم تُنفذ/);
   assert.equal(await page.evaluate(()=>window.__fixture.calls.filter(c=>c.path.includes('host_month_preflight')).length),1);
+  await page.$eval('[data-agency-month]',el=>{el.value=new Date().toISOString().slice(0,7);});
+  await page.click('[data-agency-action="month-preflight"]');
+  assert.match(await page.$eval('[data-agency-month-status]',el=>el.textContent),/اختر شهراً مغلقاً/);
+  assert.equal(await page.evaluate(()=>window.__fixture.calls.filter(c=>c.path.includes('host_month_preflight')).length),1,'Current open month must never reach API');
   assert.equal(await page.evaluate(()=>window.__fixture.calls.some(c=>/phase4_agency_action|recharge_action|month_close/i.test(c.path))),false);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true);
   await page.evaluate(()=>{
