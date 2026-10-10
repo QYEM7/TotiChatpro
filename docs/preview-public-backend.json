@@ -1,0 +1,6 @@
+{
+  "project": "TotiChat Staging",
+  "supabaseUrl": "https://rziaedugbdwefbefcxjt.supabase.co",
+  "publishableKey": "sb_publishable_vVYku5VtyohuiGgehC3EdA_rSDGOUKB",
+  "purpose": "public browser staging configuration, never production"
+}

@@ -1,0 +1,12 @@
+# TotiChat Staging — isolated Supabase handoff (2026-10-11)
+- Existing production project: `sqedsnyvjblvbjbizcay` (unchanged).
+- Newly created isolated staging: `rziaedugbdwefbefcxjt`, Free plan, `eu-central-1`, ACTIVE_HEALTHY.
+- This repo records ONLY the NEW project's publishable (browser-safe) API key in `docs/preview-public-backend.json` to avoid manual app wiring. Never commit service_role, secret API keys, Google OAuth client secrets, LiveKit private keys or database password.
+- Nine original ordered Phase 2 migration CONTENTS were applied to staging, using fresh Supabase-generated migration history IDs: home banners, profiles, signup display name, room messages/15 seats, private invitations, private-room RLS/chat concurrency, indexes, read-only zero wallets, real mic mute reservation flag.
+- One STAGING-ONLY hardening migration `staging_lock_auto_rls_trigger_rpc` revoked PUBLIC, anon and authenticated EXECUTE on `public.rls_auto_enable()` installed by the Supabase automatic RLS UI option; event trigger `ensure_rls` remains enabled. Verified anon/authenticated cannot invoke the function and there are zero unprotected public tables.
+- Security Advisor remaining: intentional INFO `phase2_room_invites` has RLS without any public policy; nine authenticated SECDEF RPC warnings correspond to caller-checked room operations. Review detailed function boundaries before treating any finding as safe to waive.
+- Staging contains zero Auth users, profiles, rooms and wallets at this checkpoint. No production user, balance, agency or financial record was copied.
+- GitHub Actions now builds a full app WEB artifact from the approved original UI with staging public config, without creating APK/AAB or changing the production landing site. External Cloudflare deployment runs only if GitHub repository variable `CLOUDFLARE_ACCOUNT_ID` is configured and `CLOUDFLARE_API_TOKEN` secret is available in environment `live-preview`.
+- The link `https://preview.totichatpro.pages.dev` is still a TARGET, not confirmed online. Don't announce it as live until deployment workflow and HTTP verification succeed.
+- Critical next steps: configure Google OAuth in STAGING Supabase (allow preview callback), Cloudflare Pages token/account variable, enable TotiChat on the site, real 2-user sign-in, two-phone audio, isolated full finance/agency migration testing. No real staging user tests performed at this checkpoint.
+- T48 release gate for APK remains unchanged. No paid subscriptions or production writes.

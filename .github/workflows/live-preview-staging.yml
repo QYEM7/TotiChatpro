@@ -8,6 +8,9 @@ on:
       - 'scripts/build-live-preview.mjs'
       - 'scripts/t03-staging-config.mjs'
       - 'tests/live-preview-build.test.mjs'
+      - 'tests/registered-staging-preview.test.mjs'
+      - 'scripts/build-registered-staging-preview.mjs'
+      - 'docs/preview-public-backend.json'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/live-preview-staging.yml'
@@ -25,7 +28,7 @@ jobs:
           node-version: '22'
       - run: npm ci --no-audit --no-fund
       - name: Verify no production backend and no fake preview entry
-        run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs
+        run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs tests/registered-staging-preview.test.mjs
       - name: Assemble approved browser UI only (NEVER Gradle or APK)
         run: npm run build
       - name: Smoke-build full approved website with SYNTHETIC isolated public config (never deploy)
@@ -37,9 +40,21 @@ jobs:
           node --check dist-live-preview/app/config.js
           node --check dist-live-preview/app/phase2-live-mode.js
           node -e "const s=require('./dist-live-preview/preview-status.json');if(!s.backend_isolated||s.release_allowed||s.apk_built!==false)process.exit(1)"
+      - name: Build TotiChat browser app against the real staging PUBLIC endpoint (never deploy here)
+        run: |
+          node scripts/build-registered-staging-preview.mjs
+          node --check dist-live-preview/app/config.js
+          node --check dist-live-preview/app/phase2-live-mode.js
+      - name: Keep the approved WEB staging app as a short-lived QA artifact (not an APK)
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-approved-live-staging-web
+          path: dist-live-preview/
+          retention-days: 7
+          if-no-files-found: error
   publish-preview:
     needs: source-check
-    if: ${{ vars.STAGING_SUPABASE_URL != '' && vars.STAGING_SUPABASE_PUBLISHABLE_KEY != '' }}
+    if: ${{ vars.CLOUDFLARE_ACCOUNT_ID != '' }}
     runs-on: ubuntu-latest
     environment: live-preview
     timeout-minutes: 12
@@ -51,17 +66,14 @@ jobs:
       - name: Refuse Cloudflare deploy when account/token have not been connected
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "BLOCKED: Cloudflare credentials not connected"; exit 2; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "BLOCKED: Cloudflare account not connected"; exit 2; }
       - run: npm ci --no-audit --no-fund
       - run: npm run build
-      - name: Compile browser preview with real isolated Supabase credentials only
-        env:
-          STAGING_SUPABASE_URL: ${{ vars.STAGING_SUPABASE_URL }}
-          STAGING_SUPABASE_PUBLISHABLE_KEY: ${{ vars.STAGING_SUPABASE_PUBLISHABLE_KEY }}
-        run: node scripts/build-live-preview.mjs
+      - name: Compile browser preview using registered PUBLIC staging config only
+        run: node scripts/build-registered-staging-preview.mjs
       - name: Deploy Cloudflare Pages preview branch without affecting public landing
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
