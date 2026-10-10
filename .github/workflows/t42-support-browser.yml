@@ -1,0 +1,35 @@
+name: T42 isolated support browser QA
+on:
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'app/phase5-support-ui.js'
+      - 'tests/t42-support-browser.cjs'
+      - 'tests/t42-support-contract.test.cjs'
+      - '.github/workflows/t42-support-browser.yml'
+  pull_request:
+    branches: [develop/phase-2]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  support-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare isolated browser runtime
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts puppeteer-core@24
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/t42-static.log 2>&1 &
+          sleep 2
+      - name: Verify support module and test harness syntax
+        run: |
+          node --check app/phase5-support-ui.js
+          node --check tests/t42-support-browser.cjs
+          node --test tests/t42-support-contract.test.cjs
+      - name: Verify Owner/staff/customer support browser journeys without external API
+        run: node tests/t42-support-browser.cjs
