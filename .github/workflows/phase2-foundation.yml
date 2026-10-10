@@ -41,6 +41,7 @@ jobs:
           node --check app/phase4-reports-ui.js
           node --check app/phase4-gift-receipts.js
           node --check app/phase4-agencies-ui.js
+          node --check app/phase4-voice-messages-ui.js
           node --check e2e/critical-flow.spec.mjs
           node --check app/phase2-ui.js
           node --check app/phase2-live-mode.js

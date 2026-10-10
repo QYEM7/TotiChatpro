@@ -20,14 +20,14 @@ function init(responder){
     dispatchEvent:(e)=>events.push(e),
     addEventListener:()=>{}
   };
-  const ctx={window:win,sessionStorage:storage,URL,Date,console,
+  const ctx={window:win,sessionStorage:storage,URL,Date,console,Blob,
     clearTimeout:()=>{},setTimeout:()=>1,queueMicrotask:()=>{},
     CustomEvent:function(type,opts){this.type=type;this.detail=opts.detail;},
     fetch:async (url,options)=>{
       requests.push({url,options});
       const response=await responder(url,options);
       return {ok:response.status<400,status:response.status,
-        text:async()=>JSON.stringify(response.data)};
+        text:async()=>JSON.stringify(response.data),json:async()=>response.data,blob:async()=>response.data};
     }
   };
   vm.runInNewContext(src,ctx,{filename:'phase2-auth.js'});
@@ -128,4 +128,23 @@ test('MFA verification exchanges challenge and stores the returned session, neve
  });
  await app.auth.signIn({email:base.user.email,password:'strong-pass-123'});await app.auth.verifyMFA(UUID,'654321');
  assert.match(app.map.get('totichat.phase2.session.v1'),/access.AAL2/);assert.doesNotMatch(app.map.get('totichat.phase2.session.v1'),/654321/);
+});
+
+test('private audio storage rejects foreign uploads and late responses after logout',async()=>{
+ const token={access_token:'access.VOICE',refresh_token:'refresh.VOICE',expires_in:3600,user:{id:UUID,email:'voice@test.invalid'}};
+ let resolveRead,readStarted;
+ const started=new Promise(resolve=>readStarted=resolve);
+ const app=init(async(url,opts)=>{
+  if(url.includes('grant_type=password'))return{status:200,data:token};
+  if(url.includes('/rest/v1/profiles'))return{status:200,data:[row]};
+  if(url.includes('/auth/v1/logout'))return{status:204,data:null};
+  if(url.includes('/storage/v1/object/authenticated/')){assert.equal(opts.headers.Authorization,'Bearer access.VOICE');readStarted();return new Promise(resolve=>resolveRead=resolve);}
+  throw Error('Unexpected upload escaped validation');
+ });
+ await app.auth.signIn({email:token.user.email,password:'strong-pass-123'});
+ const other='294b758b-2cdd-437f-bf20-8b31daea4b53',path=other+'/'+UUID+'/'+UUID+'.webm';
+ await assert.rejects(app.auth.voiceStorage('upload',path,new Blob(['audio'],{type:'audio/webm'})));
+ const pending=app.auth.voiceStorage('read',path);await started;await app.auth.signOut();resolveRead({status:200,data:new Blob(['private'],{type:'audio/webm'})});
+ await assert.rejects(pending,/تغير الحساب/);
+ assert.equal(app.requests.filter(x=>x.options.method==='POST'&&x.url.includes('/storage/')).length,0);
 });

@@ -249,6 +249,23 @@
     if(generation!==requestGeneration||!owner||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');
     return request(path,{method,body,accessToken,prefer});
   }
+  async function voiceStorage(operation,path,blob){
+    if(!['upload','read','delete'].includes(operation)||typeof path!=='string'||!path.match(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(webm|ogg|mp4)$/))throw new Error('مسار الملف الصوتي غير صالح');
+    const generation=requestGeneration,owner=session?.user?.id,token=await validToken();
+    if(!owner||generation!==requestGeneration||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');
+    if(operation!=='read'&&!path.startsWith(owner+'/'))throw new Error('لا يمكنك تعديل ملف حساب آخر');
+    const headers={apikey:apiKey,Authorization:'Bearer '+token},encoded=path.split('/').map(encodeURIComponent).join('/');
+    let url=origin+'/storage/v1/object/'+(operation==='read'?'authenticated/':'')+'voice-messages'+(operation==='delete'?'':'/'+encoded),body;
+    if(operation==='upload'){
+      if(!(blob instanceof Blob)||blob.size<1||blob.size>10485760||!['audio/webm','audio/ogg','audio/mp4'].includes(blob.type.split(';')[0]))throw new Error('الملف الصوتي غير صالح أو تجاوز 10 ميغابايت');
+      headers['Content-Type']=blob.type.split(';')[0];headers['x-upsert']='false';body=blob;
+    }else if(operation==='delete'){headers['Content-Type']='application/json';body=JSON.stringify({prefixes:[path]});}
+    const response=await fetch(url,{method:operation==='upload'?'POST':operation==='delete'?'DELETE':'GET',headers,body,credentials:'omit',cache:'no-store'});
+    if(generation!==requestGeneration||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');
+    if(!response.ok){const data=await response.json().catch(()=>({message:'تعذر الاتصال بتخزين الصوت'}));if(generation!==requestGeneration||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');if(operation==='upload'&&(response.status===409||data.error==='Duplicate'))return {exists:true};throw apiError(data,response.status);}
+    const result=operation==='read'?await response.blob():await response.json();
+    if(generation!==requestGeneration||owner!==session?.user?.id)throw new Error('تغير الحساب؛ أعد المحاولة');return result;
+  }
   // Public GoTrue provider settings: never guess an OAuth button is available.
   let providerCache=null,providerCacheTime=0;
   async function providers(){
@@ -403,7 +420,7 @@
     await accountRequest('/auth/v1/factors/'+factorId,{method:'DELETE'});return true;
   }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
-    verifySignup,readProfile,updateProfile,resume,refresh,requestData,
+    verifySignup,readProfile,updateProfile,resume,refresh,requestData,voiceStorage,
     providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,
     securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider});
   window.TotiPhase2Auth=api;

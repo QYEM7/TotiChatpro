@@ -3,7 +3,7 @@
 'use strict';
 const auth=window.TotiPhase2Auth;if(!auth||!window.TotiLiveMode?.enabled)return;
 const sound=new Audio(new URL('../assets/audio/gift-chime.wav',document.baseURI).href);sound.preload='auto';
-let enabled=false,generation=0,cursor=null,timer=null,polling=null,historyBusy=null;
+let enabled=false,generation=0,cursor=null,timer=null,polling=null,historyBusy=null,receiptOwner=auth.state().user?.id||null;
 const owner=()=>auth.state().user?.id;
 function status(text){const node=document.querySelector('[data-gift-history-status]');if(node)node.textContent=text;}
 async function play(){if(!enabled)return;try{sound.currentTime=0;await sound.play();}catch{enabled=false;status('اضغط تفعيل صوت الهدايا للسماح بالتشغيل');}}
@@ -43,7 +43,7 @@ window.addEventListener('click',e=>{
 },true);
 window.addEventListener('totichat-gift-completed',()=>{void play();if(screen==='wallet')void history();});
 const renderBefore=render;render=function(){const result=renderBefore.apply(this,arguments);hydrate();return result;};
-window.addEventListener('totichat-phase2-auth',()=>{generation++;clearTimeout(timer);cursor=null;enabled=false;sound.pause();document.querySelector('[data-gift-history-panel]')?.remove();hydrate();if(auth.state().signedIn)void poll(generation,owner());});
+window.addEventListener('totichat-phase2-auth',()=>{const next=owner()||null;if(next===receiptOwner){hydrate();return;}receiptOwner=next;generation++;clearTimeout(timer);cursor=null;enabled=false;sound.pause();document.querySelector('[data-gift-history-panel]')?.remove();hydrate();if(auth.state().signedIn)void poll(generation,owner());});
 window.TotiPhase4GiftReceipts=Object.freeze({audioState:()=>Object.freeze({enabled,errorCode:sound.error?.code??null,readyState:sound.readyState,networkState:sound.networkState,currentSrc:sound.currentSrc,paused:sound.paused})});
 if(auth.state().signedIn)void poll(generation,owner());
 })();

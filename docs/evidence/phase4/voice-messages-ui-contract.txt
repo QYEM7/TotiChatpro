@@ -1,0 +1,1 @@
+PASS isolated voice UI: native MediaRecorder using Chromium test microphone, draft Blob, explicit stop, overlay removal and account change stop capture. No real device/Storage delivery claimed.

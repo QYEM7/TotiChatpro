@@ -151,7 +151,7 @@ window.addEventListener('click',e=>{
     }return;
   }
   if(screen==='room'&&(
-    (op==='sheet'&&['tools','messagesRoom'].includes(route))||
+    (op==='sheet'&&['tools'].includes(route))||
     (op==='chatTab'&&['هدية','أدخل'].includes(route))||
     op==='shareRoom')){
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
