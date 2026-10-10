@@ -2,12 +2,12 @@
   "project": "TotiChatpro",
   "branch": "develop/phase-2",
   "updated": "2026-10-10",
-  "engineering_percent": 54,
+  "engineering_percent": 55,
   "beta_readiness_percent": 15,
   "release_allowed": false,
   "reviewer": null,
   "verified_date": null,
-  "notes": "Directional 54% engineering after tested support staff roster/history pagination and >=80% APK release gate; Beta stays 15% because hosted staging, backup restore, two-device voice and financial month close remain unverified. Evidence links are recorded in the fifth report.",
+  "notes": "Sixth checkpoint: estimated 55% engineering after T04 five FK indexes and T06 support retry-privacy/concurrency improvements passed local PostgreSQL rollback CI. Real beta stays 15%; backup restore, hosted staging, two phones, LiveKit/TURN, actual financial month close and signed delivery remain missing. APK release_allowed=false.",
   "evidence": {
     "production_backup_restore": {
       "passed": false,
