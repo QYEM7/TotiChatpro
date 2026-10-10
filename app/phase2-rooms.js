@@ -119,16 +119,27 @@ function roomContent(){
     for(const [index,button] of all.entries()){
       const slot=index+1;
       const p=members.find(x=>x.seat_no===slot);
-      button.className='seat'+(p?' occupied':'');
+      // Do not overwrite the approved VIP/decorative seat classes on every refresh.
+      button.classList.toggle('occupied',!!p);
+      button.classList.toggle('locked',!p);
       button.setAttribute('aria-label',p?'المقعد '+slot+': '+p.display_name:'المقعد '+slot+' متاح');
       const face=$('.seatface',button);
       if(face){
-        face.replaceChildren();
-        face.textContent=p?(p.user_id===session().user?.id?'🎙️':'🎤'):'＋';
-        if(p?.user_id===session().user?.id){
-          const badge=document.createElement('span');
-          badge.className='seatbadge';badge.textContent='✦';face.appendChild(badge);
+        // Replace the sample face with a truthful local status once, then
+        // update only that status; keep CSS frames, effects and custom children.
+        let glyph=$('[data-real-seat-glyph]',face);
+        if(!glyph){
+          face.replaceChildren();
+          glyph=document.createElement('span');
+          glyph.dataset.realSeatGlyph='';face.appendChild(glyph);
         }
+        glyph.textContent=p?(p.user_id===session().user?.id?'🎙️':'🎤'):'＋';
+        const own=!!p&&p.user_id===session().user?.id;
+        let badge=$('.seatbadge',face);
+        if(own&&!badge){
+          badge=document.createElement('span');
+          badge.className='seatbadge';badge.textContent='✦';face.appendChild(badge);
+        }else if(!own&&badge)badge.remove();
       }
       const label=$('.seatname',button);if(label)label.textContent=p?.display_name||'مقعد '+slot;
       const level=$('.seatlv',button);
