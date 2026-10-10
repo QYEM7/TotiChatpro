@@ -2,12 +2,12 @@
   "project": "TotiChatpro",
   "branch": "develop/phase-2",
   "updated": "2026-10-10",
-  "engineering_percent": 60,
+  "engineering_percent": 62,
   "beta_readiness_percent": 15,
   "release_allowed": false,
   "reviewer": null,
   "verified_date": null,
-  "notes": "Ninth conservative checkpoint: estimated 60% engineering (+1), 15% real beta unchanged. Genuine 2-user disposable GoTrue/PostgREST support HTTP stress CI 38064686350: six parallel identical requests -> one ticket, 28 simultaneous replies -> 19 accepted/9 quota-denied, replay privacy and separate actor quota verified. Production/Staging, independent backup restore, live voice on two Android phones, financial month close, and real security tests remain missing. No APK built, all release gates deny.",
+  "notes": "Tenth conservative checkpoint: directional 62% engineering after real concurrent Owner treasury issuance/idempotency/30-min cap and fully simulated Owner->recharge agent->customer 500-coin conservation with once-only 7-coin topup, tested with 3 real disposable GoTrue users and PostgREST/PostgreSQL CI 38065706706. Beta remains 15%: no real cash receipts, hosted staging, independent production DB and Storage backups, physical two-phone voice or immutable monthly payroll settlement. No APK built; release_allowed=false.",
   "evidence": {
     "production_backup_restore": {
       "passed": false,
