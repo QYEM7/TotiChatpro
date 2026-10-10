@@ -9,6 +9,8 @@ on:
       - 'scripts/t17-realtime-e2e.mjs'
       - 'scripts/t16-rooms-e2e.mjs'
       - 'scripts/t03-secret-audit.mjs'
+      - 'scripts/t49-disposable-restore-drill.sh'
+      - 'tests/t49-disposable-restore-contract.test.cjs'
       - 'tests/t03-secret-audit.test.mjs'
       - '.github/workflows/t03-full-stack.yml'
       - 'supabase/migrations/**'
@@ -18,6 +20,8 @@ on:
     paths:
       - 'scripts/t03-local-auth-smoke.mjs'
       - 'scripts/t03-secret-audit.mjs'
+      - 'scripts/t49-disposable-restore-drill.sh'
+      - 'tests/t49-disposable-restore-contract.test.cjs'
       - 'tests/t03-secret-audit.test.mjs'
       - '.github/workflows/t03-full-stack.yml'
       - 'supabase/migrations/**'
@@ -39,6 +43,10 @@ jobs:
           node --test tests/t03-secret-audit.test.mjs
       - name: Validate 32 migration fingerprint baseline
         run: node --test tests/t01-migration-history.test.cjs
+      - name: T49 refuse production recovery pretence or linked DB access
+        run: |
+          bash -n scripts/t49-disposable-restore-drill.sh
+          node --test tests/t49-disposable-restore-contract.test.cjs
       - name: Setup pinned Supabase CLI (unlinked, local only)
         uses: supabase/setup-cli@v3
         with:
@@ -74,3 +82,7 @@ jobs:
             echo "T04/T05 local security test: $test_sql"
             docker exec -i "${db_containers[0]}" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres < "$GITHUB_WORKSPACE/supabase/tests/$test_sql" | grep -E "^PASS|^DO$|^ROLLBACK$"
           done
+          # Separate local DB restored from test-only custom pg_dump. No production access.
+          T49_DISPOSABLE_ONLY=YES \
+            SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
+            bash "$GITHUB_WORKSPACE/scripts/t49-disposable-restore-drill.sh"
