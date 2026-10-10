@@ -50,7 +50,7 @@ test('T01: applied SQL migration history has 32 unique canonical filenames and h
  const cutoff=expectedFiles.at(-1).slice(0,14);
  const later=files.filter(f=>!Object.hasOwn(expected,f));
  for(const f of later){
-  assert.match(f,/^\\d{14}_[a-z0-9_]+\\.sql$/,'new migration filename must have Supabase timestamp format');
+  assert.match(f,/^\d{14}_[a-z0-9_]+\.sql$/,'new migration filename must have Supabase timestamp format');
   assert(f.slice(0,14)>cutoff,'Do not inject earlier migrations before production-applied SQL history');
  }
  assert.equal(new Set(files.map(f=>f.slice(0,14))).size,files.length,'Migration timestamps must be unique');
