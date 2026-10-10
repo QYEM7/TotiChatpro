@@ -310,7 +310,7 @@
     await readProfile();
     return publicState();
   }
-  if(location.search.includes('code=')){
+  if(typeof location!=='undefined'&&location.search.includes('code=')){
     void handleOAuthCallback(location.href).then(()=>{
       const clean=new URL(location.href);clean.searchParams.delete('code');
       history.replaceState(null,'',clean.href);
