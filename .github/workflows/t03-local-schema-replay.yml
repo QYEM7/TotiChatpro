@@ -1,0 +1,46 @@
+name: T03 isolated local Supabase schema replay
+on:
+  pull_request:
+    branches: [develop/phase-2]
+    paths:
+      - 'supabase/migrations/**'
+      - '.github/workflows/t03-local-schema-replay.yml'
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'supabase/migrations/**'
+      - '.github/workflows/t03-local-schema-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify all 32 historical migration files before database work
+        run: node --test tests/t01-migration-history.test.cjs
+      - name: Install Supabase CLI for LOCAL-ONLY Docker database
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Replay in an unlinked disposable runner directory (NEVER production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)" -eq 32
+          mkdir -p "$RUNNER_TEMP/t03-unlinked-replay"
+          cd "$RUNNER_TEMP/t03-unlinked-replay"
+          supabase init
+          cp "$GITHUB_WORKSPACE"/supabase/migrations/*.sql ./supabase/migrations/
+          test "$(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)" -eq 32
+          # Start isolated local containers. Never call "supabase link", "db push", or remote reset.
+          supabase db start
+          # Reset only the ephemeral Docker database. No production credentials are loaded.
+          supabase db reset
+          supabase migration list --local
+          echo "PASS: 32 canonical migrations replayed in disposable local Supabase database."
