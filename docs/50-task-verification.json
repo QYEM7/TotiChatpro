@@ -21,7 +21,7 @@
     "id": "T04",
     "title": "RLS and privileged RPC audit",
     "status": "tested_local",
-    "evidence": "Verified private RLS and 32 historical production DB migrations. Added 5 production-advisor-confirmed missing FK covering indexes in pending forward-only migration 20261010193000_t04_foreign_key_index_cover.sql; disposable PostgreSQL schema+privilege acceptance in successful CI 38061920190. Not applied to production; performance load testing pending."
+    "evidence": "Found 5 unindexed FKs with read-only live Supabase performance advisor, confirmed their column names, added pending forward-only indexes and verified all are usable without privilege widening in isolated CI 38062181018; 32 historical production migrations remain immutable and all public RLS audits locally tested. Production load and hosted migration acceptance incomplete."
   },
   {
     "id": "T05",
@@ -33,7 +33,7 @@
     "id": "T06",
     "title": "Rate limits and audit logs",
     "status": "partial",
-    "evidence": "Hardened T42 support RPC with per-verified-actor transaction advisory lock before replay and rolling-window rate count. SHA-256 fingerprint replaces duplicated sensitive ticket text in private idempotency ledger, supports previous legacy row replay. Rollback-only PostgreSQL test checks 20 accepted, 21st denied, idempotent replay without duplicate messages/ledger plaintext (CI 38061920190), foundation static QA 38061780438. True multi-connection stress and global financial/API throttling not completed; T06 remains partial."
+    "evidence": "Local hardening: support_action uses per-actor transaction advisory lock before 20/min counting and idempotency; SHA-256 replaces duplicate message plaintext in request retry ledger. Recharge gateway phase4_recharge_action uses verified-actor transaction lock before 30/min counting and Owner cash-reference issuance, without changing finance formulas. Disposable PostgreSQL SQL rollback CI 38062181018 and static foundation CI 38062197702 passed. MULTI-CONNECTION adversarial stress, global throttling and hosted validation still incomplete."
   },
   {
     "id": "T07",
@@ -171,13 +171,13 @@
     "id": "T29",
     "title": "Owner treasury issuance",
     "status": "partial",
-    "evidence": "SQL/T06 test validates ledger idempotency, actual cash workflow untested"
+    "evidence": "Owner treasury cash issuance and immutable financial ledgers exist, local rollback verified 30/min and new guarded recharge API prevents same-actor concurrent issuance reference races. Isolated CI 38062181018 confirms duplicate cash ref denied and same-key retry preserves issued coins; actual external cash proof, reconciliation and Owner live E2E pending."
   },
   {
     "id": "T30",
     "title": "Agency reseller recharge cash",
     "status": "partial",
-    "evidence": "RPC exists; external cash/reference reconciliation E2E untested"
+    "evidence": "External agent reseller recharge RPC and cash receipt reference flow exist. Safe per-verified-user recharge entry serializes quota and action before source financial logic, tested rollback-only in CI 38062181018. No hosted agent/customer cash reconciliation or real device E2E; still partial."
   },
   {
     "id": "T31",
