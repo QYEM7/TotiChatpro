@@ -33,7 +33,7 @@
     "id": "T06",
     "title": "Rate limits and audit logs",
     "status": "partial",
-    "evidence": "Local transactional actor advisory locks for T42 20/min and recharge 30/min, SHA-256 support retry privacy, and finance duplicate reference guard. New REAL concurrent PostgREST HTTP GoTrue tests (unlinked Supabase CI 38064686350): six identical concurrent creations persisted exactly one ticket; 28 concurrent replies -> 19 accepted, 9 quota-denied, 20 total messages; same-key replay after quota, changed-key content conflict, different user with fresh independent budget. Cross-user ticket access and self-staff escalation denied. Prior SQL 38062181018 also green. Still PARTIAL: real hosted production traffic, concurrent financial API stress, distributed quotas across actors, and independent security validation remain outstanding."
+    "evidence": "T06/T29 concurrent real local GoTrue + PostgREST Owner issuance verified by CI 38065706706: six identical-key issues one operation; four distinct keys sharing cash receipt -> one success/three denied; 28 concurrent unique cash refs -> 30 total accepted and 46 synthetic coins matched treasury/issuance ledger; 31st denied, key conflict and non-Owner denied. T42 support parallel 20/min quota, distinct actors, IDOR tests also passed CI 38064686350. Still PARTIAL: remote production/staging and finance wider operational loads/security review pending."
   },
   {
     "id": "T07",
@@ -171,13 +171,13 @@
     "id": "T29",
     "title": "Owner treasury issuance",
     "status": "partial",
-    "evidence": "Owner treasury cash issuance and immutable financial ledgers exist, local rollback verified 30/min and new guarded recharge API prevents same-actor concurrent issuance reference races. Isolated CI 38062181018 confirms duplicate cash ref denied and same-key retry preserves issued coins; actual external cash proof, reconciliation and Owner live E2E pending."
+    "evidence": "Local REAL concurrent Owner cash issuance test with disposable GoTrue/PostgREST/Postgres CI 38065706706 confirms 6 same-key simultaneous requests create one ledger issue; 4 different keys sharing cash reference mint once; 28 parallel distinct refs produce 30 successful issues, 46 synthetic coins balanced in Owner treasury and issuance ledgers; 31st refused. Subsequent synthetic 500-coin Owner issuance and allocation to Recharge Agent through real RPC also passed. No real receipt, hosted deployment or real cash bank reconciliation; PARTIAL."
   },
   {
     "id": "T30",
     "title": "Agency reseller recharge cash",
     "status": "partial",
-    "evidence": "External agent reseller recharge RPC and cash receipt reference flow exist. Safe per-verified-user recharge entry serializes quota and action before source financial logic, tested rollback-only in CI 38062181018. No hosted agent/customer cash reconciliation or real device E2E; still partial."
+    "evidence": "Local end-to-end RESSELLER flow via genuine disposable GoTrue Owner, recharge agent and customer, plus real agency request/Owner approval, synthetic 500 Owner coins allocated to agent, simulated 7-coin customer topup. Six concurrent same-key approvals credited once; customer self-approval and agent mint denied; different-key double approval refused. SQL state: Owner 0 / agent 493 / customer 7 with exact 500 conservation and wallet ledger/receipt link, CI 38065706706. NOT real cash receipt, production users, regulated IAP or hosted acceptance. PARTIAL."
   },
   {
     "id": "T31",
