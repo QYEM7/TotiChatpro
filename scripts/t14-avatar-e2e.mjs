@@ -34,7 +34,11 @@ const reject=await call(upload,ids[1].jwt,{method:'POST',contentType:'image/webp
 if(![400,401,403].includes(reject.status))die('other user was allowed to upload in owner directory: '+reject.status);
 const put=await call(upload,ids[0].jwt,{method:'POST',contentType:'image/webp',body:webp});
 if(![200,201].includes(put.status))die('owner upload failed '+put.status+' '+String(put.data).slice(0,80));
-const publicUrl=origin.origin+'/storage/v1/object/public/profile-avatars/'+path;
+// SQL deliberately requires HTTPS in public profile images; local Storage is
+// unlinked HTTP. Store a canonical future deployment URL ONLY in the local
+// ephemeral profile row; download bytes from the ephemeral local server.
+const publicUrl='https://sqedsnyvjblvbjbizcay.supabase.co/storage/v1/object/public/profile-avatars/'+path;
+const localDownload=origin.origin+'/storage/v1/object/public/profile-avatars/'+path;
 const updated=await call('/rest/v1/profiles?id=eq.'+ids[0].id+'&select=id,avatar_url,display_name',ids[0].jwt,{
  method:'PATCH',body:{avatar_url:publicUrl}
 });
@@ -46,6 +50,6 @@ const unauthorized=await call('/rest/v1/profiles?id=eq.'+ids[0].id+'&select=id,a
 if(![200,204,401,403].includes(unauthorized.status))die('unauthorized patch unexpected response');
 const verify=await call('/rest/v1/profiles?id=eq.'+ids[0].id+'&select=avatar_url',ids[0].jwt);
 if(verify.data?.[0]?.avatar_url!==publicUrl)die('another user tampered with avatar URL');
-const downloaded=await fetch(publicUrl,{signal:AbortSignal.timeout(12000)});
+const downloaded=await fetch(localDownload,{signal:AbortSignal.timeout(12000)});
 if(downloaded.status!==200||Number(downloaded.headers.get('content-length')||webp.length)!==webp.length)die('public avatar bytes missing');
 console.log('PASS T14: 2 real disposable GoTrue users, binary WebP Storage upload, public image read, profile update; cross-user upload and profile edit denied.');
