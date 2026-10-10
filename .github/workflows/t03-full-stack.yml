@@ -62,6 +62,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           node scripts/t03-local-auth-smoke.mjs "$RUNNER_TEMP/t03-local-status.json"
           node scripts/t16-rooms-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
+          node scripts/t14-profile-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           # Strictly on a disposable unlinked Docker instance.
           mapfile -t db_containers < <(docker ps --format '{{.Names}}' | grep '^supabase_db_' || true)
           test "${#db_containers[@]}" -eq 1 || { echo "::error::Ambiguous local Postgres container"; exit 1; }
