@@ -7,6 +7,8 @@ test('T36 Owner/main partner preview is read-only and not a payout form',()=>{
  assert(ui.includes("'/rest/v1/rpc/phase5_host_month_preflight'"));
  assert(ui.includes("p_month:monthPeriod+'-01'"));
  assert(ui.includes('data-agency-month-section'));
+ assert(ui.includes(String.raw`if(!/^\d{4}-`), 'YYYY-MM input must match digits, not a literal escaped sequence');
+ assert(!ui.includes(String.raw`if(!/^\\d{4}-`), 'reject overescaped month regex');
  assert(ui.includes('data-agency-month-results'));
  assert(ui.includes('data-agency-action="month-next"'));
  assert(ui.includes('data-agency-action="month-prev"'));
