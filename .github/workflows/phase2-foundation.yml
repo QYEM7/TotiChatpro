@@ -57,6 +57,8 @@ jobs:
         run: node --test tests/t48-no-apk-before-80.test.cjs
       - name: T06 verify durable voice Edge rate budget and fail-closed responses
         run: node --test tests/t06-voice-edge-limit.test.mjs
+      - name: T06 harden support concurrency and keep private messages out of retry ledger
+        run: node --test tests/t06-support-hardening.test.cjs
       - name: T42 verify ticket privacy, real API UI wiring and role boundaries
         run: node --test tests/t42-support-contract.test.cjs
       - name: T23 verify actual music bookmark and queue UI safety
