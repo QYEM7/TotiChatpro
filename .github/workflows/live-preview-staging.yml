@@ -1,0 +1,60 @@
+name: TotiChat REAL isolated web preview (no APK)
+on:
+  push:
+    branches: [develop/phase-2]
+    paths:
+      - 'app/**'
+      - 'assets/**'
+      - 'scripts/build-live-preview.mjs'
+      - 'scripts/t03-staging-config.mjs'
+      - 'tests/live-preview-build.test.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/live-preview-staging.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Verify no production backend and no fake preview entry
+        run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs
+      - name: Assemble approved browser UI only (NEVER Gradle or APK)
+        run: npm run build
+  publish-preview:
+    needs: source-check
+    if: ${{ vars.STAGING_SUPABASE_URL != '' && vars.STAGING_SUPABASE_PUBLISHABLE_KEY != '' }}
+    runs-on: ubuntu-latest
+    environment: live-preview
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Refuse Cloudflare deploy when account/token have not been connected
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "BLOCKED: Cloudflare credentials not connected"; exit 2; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "BLOCKED: Cloudflare account not connected"; exit 2; }
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Compile browser preview with real isolated Supabase credentials only
+        env:
+          STAGING_SUPABASE_URL: ${{ vars.STAGING_SUPABASE_URL }}
+          STAGING_SUPABASE_PUBLISHABLE_KEY: ${{ vars.STAGING_SUPABASE_PUBLISHABLE_KEY }}
+        run: node scripts/build-live-preview.mjs
+      - name: Deploy Cloudflare Pages preview branch without affecting public landing
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.45.0 pages deploy dist-live-preview --project-name totichatpro --branch preview
