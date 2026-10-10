@@ -2,12 +2,12 @@
   "project": "TotiChatpro",
   "branch": "develop/phase-2",
   "updated": "2026-10-10",
-  "engineering_percent": 57,
+  "engineering_percent": 59,
   "beta_readiness_percent": 15,
   "release_allowed": false,
   "reviewer": null,
   "verified_date": null,
-  "notes": "Seventh report: directional 57% engineering from repeatable disposable PostgreSQL custom-format dump+restore with deliberate fixture loss, coin ledger and unpaid diamond entitlement verification, and separate Storage recovery release gate. CI 38062789341/38062861141 pass. Free org has no automatic production backups or hosted staging, DB snapshot and Storage object restore not verified; 15% beta remains. Explicit release_allowed=false; NO APK.",
+  "notes": "Eighth conservative checkpoint: 59% directional engineering after verified local PUBLIC avatar + PRIVATE room audio Supabase Storage object delete/byte-for-byte SHA256 recovery (CI 38063377960) and Owner/main partner read-only prior UTC month diamond history Chromium UI (CI 38063822554). Both are LOCAL only or frontend fixtures; no production/offsite DB/Storage restore, hosted staging, two physical phones, LiveKit, or monthly payroll + clearing. Actual beta readiness stays 15%. No new APK; release_allowed=false.",
   "evidence": {
     "production_backup_restore": {
       "passed": false,
