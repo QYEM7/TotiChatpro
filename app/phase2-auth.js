@@ -18,22 +18,37 @@
   }
   const SESSION_KEY='totichat.phase2.session.v1';
   const PENDING_EMAIL='totichat.phase2.pending-email.v1';
+  const REMEMBER_KEY='totichat.phase2.remember.session.v1';
+  let remember=false;
   let session=null,profile=null,refreshInFlight=null,clock=0,requestGeneration=0;
   function safeLoad(){
     try{
-      const obj=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+      const persistent=localStorage.getItem(REMEMBER_KEY);
+      const obj=JSON.parse(persistent||sessionStorage.getItem(SESSION_KEY)||'null');
       if(obj&&typeof obj.access_token==='string'&&
-        typeof obj.refresh_token==='string'&&
-        obj.user&&typeof obj.user.id==='string')session=obj;
-    }catch(_){}
+        typeof obj.refresh_token==='string'&&obj.user&&typeof obj.user.id==='string'){
+        session=obj;remember=Boolean(persistent);
+      }
+    }catch(_){
+      try{
+        const obj=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+        if(obj?.access_token&&obj?.refresh_token&&obj?.user?.id)session=obj;
+      }catch(_){}
+    }
   }
   safeLoad();
   function persist(){
     try{
-      if(session)sessionStorage.setItem(SESSION_KEY,JSON.stringify(session));
+      if(session&&remember)localStorage.setItem(REMEMBER_KEY,JSON.stringify(session));
+      else localStorage.removeItem(REMEMBER_KEY);
+    }catch(_){}
+    try{
+      if(session&&!remember)sessionStorage.setItem(SESSION_KEY,JSON.stringify(session));
       else sessionStorage.removeItem(SESSION_KEY);
     }catch(_){}
   }
+  function setRememberMe(selected){remember=Boolean(selected);persist();}
+  function isRemembered(){return remember;}
   function publicState(){
     return Object.freeze({
       signedIn:!!session?.user?.id,
@@ -222,8 +237,88 @@
     const accessToken=await validToken();
     return request(path,{method,body,accessToken,prefer});
   }
+  // Public GoTrue provider settings: never guess an OAuth button is available.
+  let providerCache=null;
+  async function providers(){
+    if(providerCache)return {...providerCache};
+    const response=await request('/auth/v1/settings');
+    const enabled=response?.external||response?.external_providers||{};
+    providerCache={
+      google:enabled.google===true,
+      apple:enabled.apple===true,
+      facebook:enabled.facebook===true
+    };
+    return {...providerCache};
+  }
+  function base64Url(array){
+    const arr=Array.from(array);
+    return btoa(arr.map(byte=>String.fromCharCode(byte)).join(''))
+      .replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
+  }
+  const OAUTH_PENDING='totichat.phase2.oauth.pending';
+  async function signInWithProvider(provider){
+    if(!['google','apple','facebook'].includes(provider))throw new Error('Invalid provider');
+    const enabled=await providers();
+    if(!enabled[provider])throw new Error('طريقة الدخول غير مفعّلة في خادم TotiChat الجديد');
+    const native=location.hostname==='localhost'&&location.protocol==='https:';
+    const app=window.Capacitor?.Plugins?.App;
+    const browser=window.Capacitor?.Plugins?.Browser;
+    if(native&&(!app||!browser))throw new Error('Android OAuth bridge غير مثبت في هذه النسخة');
+    const verifier=base64Url(crypto.getRandomValues(new Uint8Array(48)));
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));
+    const challenge=base64Url(new Uint8Array(digest));
+    const redirect=native?'com.totichat.beta://auth/callback':
+      new URL('./',location.href).href;
+    // GoTrue uses the code challenge + code verifier pair for the one-time exchange.
+    const loginUrl=origin+'/auth/v1/authorize?provider='+encodeURIComponent(provider)+
+      '&redirect_to='+encodeURIComponent(redirect)+
+      '&code_challenge='+encodeURIComponent(challenge)+'&code_challenge_method=s256';
+    try{sessionStorage.setItem(OAUTH_PENDING,JSON.stringify({
+      verifier,created:Date.now(),provider,redirect
+    }));}catch(_){throw new Error('OAuth temporary storage unavailable');}
+    if(native){
+      await app.addListener('appUrlOpen',async event=>{
+        try{
+          if(!event?.url?.startsWith('com.totichat.beta://auth/callback'))return;
+          await browser.close().catch(()=>{});
+          await handleOAuthCallback(event.url);
+        }catch(error){console.warn('TotiChat OAuth callback error',String(error.message));}
+      });
+      await browser.open({url:loginUrl});
+    }else location.assign(loginUrl);
+  }
+  async function handleOAuthCallback(callbackUrl){
+    const parsed=new URL(callbackUrl);
+    const native=parsed.protocol==='com.totichat.beta:';
+    if(native&&(parsed.hostname!=='auth'||parsed.pathname!=='/callback'))
+      throw new Error('Wrong OAuth callback');
+    if(parsed.searchParams.has('error'))
+      throw new Error('لم يكتمل تسجيل الدخول بواسطة مزود الهوية');
+    const code=parsed.searchParams.get('code');
+    if(!code)throw new Error('Missing OAuth authorization code');
+    const raw=sessionStorage.getItem(OAUTH_PENDING);
+    const pending=JSON.parse(raw||'null');
+    if(!pending?.verifier||Date.now()-pending.created>10*60*1000)
+      throw new Error('انتهت صلاحية محاولة تسجيل الدخول');
+    // Delete the verifier BEFORE network exchange: no code can be used twice.
+    sessionStorage.removeItem(OAUTH_PENDING);
+    const generation=requestGeneration;
+    const response=await request('/auth/v1/token?grant_type=pkce',{
+      method:'POST',body:{auth_code:code,code_verifier:pending.verifier}
+    });
+    if(!storeToken(response,generation))throw new Error('تعذر إكمال الجلسة');
+    await readProfile();
+    return publicState();
+  }
+  if(location.search.includes('code=')){
+    void handleOAuthCallback(location.href).then(()=>{
+      const clean=new URL(location.href);clean.searchParams.delete('code');
+      history.replaceState(null,'',clean.href);
+    }).catch(error=>console.warn('OAuth resume:',String(error.message)));
+  }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
-    verifySignup,readProfile,updateProfile,resume,refresh,requestData});
+    verifySignup,readProfile,updateProfile,resume,refresh,requestData,
+    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered});
   window.TotiPhase2Auth=api;
   if(session){void resume();}
   else queueMicrotask(notify);
