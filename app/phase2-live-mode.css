@@ -19,3 +19,8 @@
   grid-column:1/-1;color:#f6dca9;text-align:center;
   padding:20px 12px;font-size:12px;
 }
+
+#sheet .tc-live-room-info{padding:22px;display:grid;gap:12px;text-align:right;color:#4c2b62}
+#sheet .tc-live-room-info h3{font-size:18px;color:#5c2e75}
+#sheet .tc-live-room-info p{overflow-wrap:anywhere;font-size:13px}
+#sheet .tc-live-room-info button{min-height:44px;border-radius:13px}
