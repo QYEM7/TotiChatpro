@@ -29,6 +29,7 @@ function changePreviewIdentity(){
     previewProfileName=p.display_name;
     previewProfileBio=p.bio||'';
     editForm.name=p.display_name;editForm.bio=p.bio||'';
+    previewProfilePic=p.avatar_url||''; // Only the authenticated server value is displayed.
     currentUser=state.user?.id||'';
   }else if(!state.signedIn&&currentUser){
     // Never show the previous account identity after sign-out.
@@ -94,7 +95,7 @@ function hydrate(){
   }
   if(screen==='profileEdit'&&s.signedIn){
     const help=$('.edit-help');
-    if(help)help.textContent='حفظ الاسم والنبذة يتم على خادم TotiChat. رفع الصورة وباقي الحقول قيد الربط.';
+    if(help)help.textContent='الاسم والنبذة وصورة الملف تُحفظ على الخادم. بقية الحقول قيد الربط.';
   }
   if(screen==='settings'){
     const logout=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.trim()==='تسجيل الخروج');
@@ -207,6 +208,46 @@ document.addEventListener('click',event=>{
       .finally(()=>{busy=false;el.disabled=false;});
   }
 },true);
+
+  // Capture BEFORE the approved guest FileReader listener to avoid falsely
+  // claiming a local preview image was saved to a signed-in account.
+  let photoBusy=false;
+  async function avatarWebp(file){
+    if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||
+      file.size<1||file.size>6*1024*1024)throw new Error('اختر JPG أو PNG أو WebP بحجم لا يزيد عن 6 ميغابايت');
+    const image=await createImageBitmap(file);
+    try{
+      if(image.width<1||image.height<1||image.width>8192||image.height>8192)
+        throw new Error('أبعاد الصورة غير مدعومة');
+      const canvas=document.createElement('canvas');
+      canvas.width=512;canvas.height=512;
+      const ctx=canvas.getContext('2d');
+      if(!ctx)throw new Error('تعذّر معالجة الصورة');
+      const side=Math.min(image.width,image.height);
+      ctx.drawImage(image,(image.width-side)/2,(image.height-side)/2,side,side,0,0,512,512);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.84));
+      if(!blob||blob.type!=='image/webp'||blob.size>2097152)throw new Error('تعذّر تصغير الصورة إلى الحد الآمن');
+      return blob;
+    }finally{image.close?.();}
+  }
+  document.addEventListener('change',event=>{
+    const input=event.target;
+    if(!auth.state().signedIn||!['editAvatar','avatar'].includes(input?.dataset?.previewUpload))return;
+    event.preventDefault();event.stopImmediatePropagation();
+    if(photoBusy)return;
+    const selected=input.files?.[0];if(!selected)return;
+    const owner=auth.state().user?.id;photoBusy=true;input.disabled=true;
+    notify('جارٍ رفع صورة الحساب الحقيقية…');
+    void avatarWebp(selected).then(blob=>auth.uploadAvatar(blob)).then(p=>{
+      if(auth.state().user?.id!==owner)return;
+      previewProfilePic=p.avatar_url||'';editDraftPhoto='';
+      if(typeof render==='function')render();
+      if(typeof showToast==='function')showToast('تم حفظ صورة الحساب على الخادم');
+    }).catch(err=>notify(errorMessage(err),true)).finally(()=>{
+      photoBusy=false;if(input.isConnected){input.disabled=false;input.value='';}
+    });
+  },true);
+
 window.addEventListener('totichat-phase2-auth',()=>{
   changePreviewIdentity();
   if(!['loginPreview','signupPreview','passwordResetPreview','verifyAccountPreview'].includes(screen))
