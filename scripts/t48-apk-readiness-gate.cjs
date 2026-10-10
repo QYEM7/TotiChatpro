@@ -11,6 +11,7 @@ if(process.env.OWNER_REVIEW!=='APPROVED')fail('Explicit Owner approval is requir
 if(!fs.existsSync(file))fail('Missing independently reviewed docs/release-readiness.json.');
 let report;
 try{report=JSON.parse(fs.readFileSync(file,'utf8'));}catch(e){fail('Invalid readiness evidence JSON.');}
+if(report.release_allowed!==true)fail('Release approval remains explicitly disabled.');
 if(report.project!=='TotiChatpro'||report.branch!=='develop/phase-2')
   fail('Unexpected repository or branch in readiness declaration.');
 if(!Number.isFinite(report.engineering_percent)||report.engineering_percent<80||report.engineering_percent>100)
