@@ -20,7 +20,7 @@ for(const i of [1,2]){
  if(s.status!==200||!s.data?.access_token)die('disposable signup failed');
  users.push(s.data);
 }
-let joinConfirmed=false;const seen=[];let resolveJoined;
+let joinConfirmed=false;const seen=[],signals=[];let resolveJoined;
 const joined=new Promise((resolve,reject)=>{
  resolveJoined=resolve;
  setTimeout(()=>reject(Error('WebSocket channel join timeout')),14000);
@@ -31,7 +31,7 @@ try{
  ws.onopen=()=>ws.send(JSON.stringify({
   topic:'realtime:totichat-room-change',event:'phx_join',ref:'1',join_ref:'1',
   payload:{access_token:users[0].access_token,config:{
-   broadcast:{ack:false,self:false},presence:{enabled:false},private:false,
+   broadcast:{ack:false,self:false,replication_ready:true},presence:{enabled:false},private:false,
    postgres_changes:[{event:'*',schema:'public',table:'rooms'},
      {event:'*',schema:'public',table:'room_members'},
      {event:'*',schema:'public',table:'room_messages'}]
@@ -40,14 +40,21 @@ try{
  ws.onmessage=message=>{
   let m;try{m=JSON.parse(message.data)}catch{return}
   if(m.event==='phx_reply'&&m.ref==='1'){
-   if(m.payload?.status==='ok'){joinConfirmed=true;resolveJoined();}
+   if(m.payload?.status==='ok'){joinConfirmed=true;signals.push({joined:true,changes:m.payload?.response?.postgres_changes?.length||0});resolveJoined();}
    else resolveJoined=()=>{},console.error('Realtime join denied'),ws.close();
   }
+  if(m.event==='system')signals.push({extension:m.payload?.extension,status:m.payload?.status,message:String(m.payload?.message||'').slice(0,100)});
   if(m.event==='postgres_changes')seen.push(m.payload?.data);
  };
  ws.onerror=()=>{};
  await joined;
  if(!joinConfirmed)die('no confirmed PG changes subscription');
+ // A joined channel may not yet have an active logical replication stream.
+ // Wait for the server's explicit replication/subscription readiness signal.
+ for(let i=0;i<80&&!signals.some(x=>x.extension==='postgres_changes'&&x.status==='ok'||x.extension==='system'&&x.status==='ok');i++)
+   await new Promise(done=>setTimeout(done,250));
+ if(!signals.some(x=>(x.extension==='postgres_changes'||x.extension==='system')&&x.status==='ok'))
+   die('Realtime replication not ready: '+JSON.stringify(signals));
  const created=await get('/rest/v1/rpc/phase2_room_create',users[1].access_token,{p_title:'T17 live event '+nonce,p_is_private:false});
  if(created.status!==200||typeof created.data!=='string')die('second local user failed create room');
  const id=created.data;
@@ -58,7 +65,7 @@ try{
   }
   return false;
  };
- if(!await waitUntil())die('no RLS-authenticated room event within 10s');
+ if(!await waitUntil())die('no RLS-authenticated room event within 10s: '+JSON.stringify({signals,events:seen.map(x=>({table:x?.table,type:x?.type,id:x?.record?.id}))}));
  // RLS guarantees that subscription events expose only rows user can SELECT.
  console.log('PASS T17: verified local WebSocket joined with real GoTrue JWT, other user created a public room, subscribed user received PostgreSQL INSERT event.');
 }finally{try{ws?.close()}catch{}}
