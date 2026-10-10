@@ -28,6 +28,7 @@ const result=(data,status=200)=>({status,contentType:'application/json',
     const u=request.url();if(!u.startsWith('https://sqedsnyvjblvbjbizcay.supabase.co/'))
       return request.continue();
     const url=new URL(u),route=url.pathname;
+    if(request.method()==='OPTIONS')return request.respond({status:204,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'POST,GET,OPTIONS','access-control-allow-headers':'authorization,apikey,content-type,prefer'}});
     const body=(()=>{try{return JSON.parse(request.postData()||'null')}catch{return null}})();
     let out;
     if(route==='/auth/v1/settings')out=result({external:{google:false,apple:false,facebook:false}});
