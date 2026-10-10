@@ -478,6 +478,9 @@
         socket?.readyState===0||socket?.readyState===1||typeof WebSocket!=='function')return;
       let token;
       try{token=await validToken();}catch{return schedule();}
+      // Browser QA must never connect to production with mock 'test-access'.
+      // Real Supabase GoTrue access tokens are JWTs.
+      if(!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token))return;
       if(!active||session?.user?.id!==owner||document.hidden)return;
       const wsUrl=origin.replace(/^https:/,'wss:')+
         '/realtime/v1/websocket?apikey='+encodeURIComponent(apiKey)+'&vsn=1.0.0';
