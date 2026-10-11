@@ -138,3 +138,17 @@ VIP purchase, approved price-based rewards, level XP/thresholds, medals earned a
 - Direct Staging post-check: 61 migrations; **zero** game matches, memberships, ledger/financial operations and notifications created by deploy. Anon access and direct game table access denied. The unchanged Auth leak warning remains.
 - Detailed [games implementation/QA record](./VERIFIED_ROOM_GAMES_2026-10-11.md).
 - **No percentage inflation or release authorization:** Backend ~65%, entire app ~50% are still the cautious directional estimates pending actual hosted device acceptance. `backend_room_games` release gate remains false until device and reconnect tests. Full game catalog, live SFU verification, hosted finance, approved payroll and probability rules, Google OAuth/Android, push, offsite backups, and final client signoff are still missing.
+
+## Additional verified delivery: personal gift receipts, host-month preflight, lucky safeguards and gift inbox
+
+**Staging migrations 62–64 now applied (64 total), no production writes.** The approved client HTML and 15 seats remain untouched.
+
+- **Gift history**: real sender/recipient-only `phase5_gift_summary` and paginated `phase5_gift_history`; verified completed financial-operation join and issued diamond-lot source. UI shows genuine receipts, not sample or salary balances.
+- **Host agency diamond report UI**: Owner / explicitly designated primary partner only, uses existing real UTC-month `phase5_host_month_preflight` and rejects any server response implying payment, approval or zeroing. No approved wage/commission/target terms exist, so month close and zero remain blocked.
+- **P0 Lucky Gift protection**: actual existing `g11` marked Lucky currently yields deterministic diamond credit; fixed by enabled transactional trigger that **blocks such new operations** until real approved probability/RNG/payout engine. Frontend visibly disables luck sending. Existing historical Lucky diamond redemptions remain testable in isolated ROLLBACK fixtures and safe ordinary fixed gifts still execute.
+- **Received-gift private inbox**: only verified completed `gift_sent` audit creates recipient-owned `gift_received` notification, deduped by source audit ID. UI renders actual confirmed count and coin value.
+- **Evidence:** [real T64 gifts and pagination](https://github.com/QYEM7/TotiChatpro/actions/runs/38155302663), [T65 lucky no-debit + legacy redemption](https://github.com/QYEM7/TotiChatpro/actions/runs/38155887324), [T66 gift recipient inbox](https://github.com/QYEM7/TotiChatpro/actions/runs/38155969583), and [239/239 full source/behavior tests](https://github.com/QYEM7/TotiChatpro/actions/runs/38156037147).
+- **Post-deploy SQL:** 64 migrations; 0 gift events, user notifications, wallet-ledger rows, finance operations and live members introduced; both relevant triggers enabled; anonymous gift-history, luck readiness and grant paths denied; only Auth warning remains `auth_leaked_password_protection`.
+- See [detailed certified evidence](./VERIFIED_GIFTS_MONTH_REPORT_AND_FINANCIAL_SAFETY_2026-10-11.md).
+
+**No production-ready claim; estimated Backend ~65%, whole app ~50% remain cautious until financial/voice/device/hosted acceptance.** `release_allowed=false` is unchanged. In particular the approved chance percentages, owner-approved host payroll rates and verified month-end liabilities and recovery still do not exist.
