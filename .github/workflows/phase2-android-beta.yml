@@ -12,6 +12,8 @@ permissions:
   contents: read
 jobs:
   build-android-debug:
+    # OWNER FREEZE: neither manual dispatch nor commit can build APK/AAB.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
