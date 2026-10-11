@@ -143,4 +143,17 @@ window.addEventListener('totichat-phase2-auth',()=>{
  if(id!==user){user='';authority=null;config=null;}
  if(id&&screen==='me')void loadAuthority();
 });
+// Approved HTML must stay byte-for-byte untouched. Enhance ONLY authenticated
+// live-mode sessions with independently tested modules, never demo preview.
+const moduleBase=new URL('.',document.currentScript?.src||location.href);
+const notificationsStyle=document.createElement('link');
+notificationsStyle.rel='stylesheet';
+notificationsStyle.href=new URL('phase5-notifications-ui.css',moduleBase).href;
+document.head.appendChild(notificationsStyle);
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js']){
+ const script=document.createElement('script');
+ script.async=false;
+ script.src=new URL(name,moduleBase).href;
+ document.body.appendChild(script);
+}
 })();
