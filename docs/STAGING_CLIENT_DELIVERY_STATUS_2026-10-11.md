@@ -48,3 +48,19 @@ Date: 2026-10-11
 - Owner/main partner and DB permission-denial tests pass, with no unauthorized access to recharge agency management.
 - Monthly payroll and agency settlement validated against business-approved rates before allowing resets.
 - No staging changes are merged into production without explicit approval and backups.
+
+## Delivery continuation — later on 2026-10-11 (additional staging-only work)
+- Applied migration `phase5_support_tickets`: real persisted support tickets, messages, pagination, staff-assignment permissions and idempotent audited actions. Staff may process tickets but cannot mutate balances or approve host transfers through a support ticket.
+- Activated `app/phase5-support-ui.js` in the real web entry and added a real support button to approved profile menu.
+- Applied migration `phase5_host_month_preflight`: Owner/designated-main-partner read-only closed-month host diamond summary, no payroll calculation or automatic zeroing. Its remaining-lot numbers represent the **current remaining values** of diamond lots originated in that month, not the exact balance at month close.
+- Verified 5/5 new public support/month RPCs are `SECURITY INVOKER`, anonymous cannot execute them, and support tables have RLS enabled. At verification, ticket, support-message, transaction and global gift event counts were all zero: no synthetic actions added.
+- Added two source-level contract tests for support and read-only agency preflight; their local JS and assertion subset passed.
+- Supabase advisor security results: only `rls_enabled_no_policy` INFO on intentionally private internal tables and `auth_leaked_password_protection` WARN remained. Performance advisor only flagged unused indexes in new/unused tables.
+- Vercel preview deployment could not be verified or triggered using the available connection: project listing worked, but scoped deployment access returned **403 Forbidden**. No production deployment was attempted.
+
+### Remaining blocking items for actual client acceptance
+- Configure STAGING LiveKit service credentials through a trusted secret-management UI (not plaintext chat). This tooling lacks an Edge Secrets write action.
+- Run authenticated two-device microphone / seat tests and two-account tests for support, DMs, agency workflow and money.
+- Confirm GitHub CI and deployed Cloudflare/Vercel preview at exact commit; do not call a source-only check a successful deployment.
+- Approve configurable host salary, commission and target policies and build/verify immutable monthly liabilities and controlled settlement **before** clearing any monthly diamonds.
+- Complete incomplete preview-only routes and Android install/sign/release verification. **Do not claim 100% complete** before these checks.
