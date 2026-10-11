@@ -197,6 +197,28 @@
       result[0].avatar_url!==avatarUrl)throw new Error('لم يؤكد الخادم حفظ صورة الحساب');
     profile=result[0];notify();return {...profile};
   }
+  async function uploadRoomImage(roomId,kind,blob){
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(roomId))||
+      !['cover','background'].includes(kind))throw Error('بيانات الصورة غير صحيحة');
+    if(!(blob instanceof Blob)||blob.type!=='image/webp'||blob.size<1||blob.size>2097152)
+      throw Error('يجب اختيار صورة WebP لا تتجاوز 2 ميغابايت');
+    const generation=requestGeneration,user=session?.user?.id;
+    const token=await validToken();
+    if(!user||generation!==requestGeneration||session?.user?.id!==user)throw Error('الجلسة تغيرت');
+    const path=roomId+'/'+kind+'.webp';
+    const encoded=path.split('/').map(encodeURIComponent).join('/');
+    const res=await fetch(origin+'/storage/v1/object/totichat-room-images/'+encoded,{
+      method:'POST',headers:{apikey:apiKey,Authorization:'Bearer '+token,
+        'Content-Type':'image/webp','x-upsert':'true','cache-control':'no-store'},
+      body:blob,credentials:'omit',cache:'no-store'
+    });
+    if(generation!==requestGeneration||session?.user?.id!==user)throw Error('تغير الحساب أثناء الرفع');
+    if(!res.ok){
+      const payload=await res.json().catch(()=>({message:'فشل رفع صورة الغرفة'}));
+      throw apiError(payload,res.status);
+    }
+    return path;
+  }
   function emailValid(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)&&s.length<=254;}
   async function signUp({email,password,displayName}){
     email=String(email||'').trim().toLowerCase();
@@ -545,7 +567,7 @@
   }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
     verifySignup,readProfile,updateProfile,resume,refresh,requestData,voiceStorage,
-    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,uploadAvatar,
+    providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,uploadAvatar,uploadRoomImage,
     securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider,watchRoomUpdates});
   window.TotiPhase2Auth=api;
   if(typeof location!=='undefined'&&location.hostname==='localhost'){
