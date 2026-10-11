@@ -37,13 +37,13 @@ function failure(e){
   return s.slice(0,160);
 }
 const imageServer=String(window.TOTICHAT_PUBLIC_BACKEND?.supabaseUrl||'');
-function publishedImage(path,id){
+function publishedImage(path,id,revision){
  if(!UUID.test(String(id))||!['cover','background'].some(kind=>path===id+'/'+kind+'.webp')||
     !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(imageServer))return '';
- return imageServer+'/storage/v1/object/public/totichat-room-images/'+path.split('/').map(encodeURIComponent).join('/');
+ return imageServer+'/storage/v1/object/public/totichat-room-images/'+path.split('/').map(encodeURIComponent).join('/')+(UUID.test(String(revision))?'?v='+encodeURIComponent(revision):'');
 }
 function roomImage(room,index){
- return publishedImage(room.cover_path,room.id)||A+assets[['room1','room2','room3','room4'][index%4]];
+ return publishedImage(room.cover_path,room.id,room.image_revision)||A+assets[['room1','room2','room3','room4'][index%4]];
 }
 function homeContent(){
   if(!session().signedIn||screen!=='home')return;
@@ -114,7 +114,7 @@ function roomContent(){
     }
     const title=$('.roomidentity span b',view);
     if(title)title.textContent=active.title;
-    const wallpaper=publishedImage(active.background_path,active.id);
+    const wallpaper=publishedImage(active.background_path,active.id,active.image_revision);
     if(wallpaper)view.style.setProperty('--tc-room-wallpaper','url("'+wallpaper+'")');
     else view.style.removeProperty('--tc-room-wallpaper');
     let welcome=$('[data-live-room-welcome]',view);
@@ -127,7 +127,7 @@ function roomContent(){
       }
       welcome.textContent='💜 '+active.welcome_message;
     }else welcome?.remove();
-    const cover=publishedImage(active.cover_path,active.id);
+    const cover=publishedImage(active.cover_path,active.id,active.image_revision);
     const roomAvatar=$('.roomidentity img',view);
     if(roomAvatar&&cover)roomAvatar.src=cover;
     const id=$('.roomidentity span small',view);
@@ -209,7 +209,7 @@ async function listRooms(){
   const before=sequence;
   loadingRooms=(async()=>{
     try{
-      const data=await query('/rest/v1/rooms?select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&order=created_at.desc&limit=40');
+      const data=await query('/rest/v1/rooms?select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&order=created_at.desc&limit=40');
       if(before!==sequence)return;
       if(!Array.isArray(data))throw new Error('استجابة قائمة الغرف غير صالحة');
       rooms=data;roomListError='';
@@ -229,7 +229,7 @@ async function refreshRoom(){
         query('/rest/v1/room_messages?room_id=eq.'+encodeURIComponent(current)+
           '&select=id,sender_id,body,created_at&order=created_at.desc&limit=80'),
         query('/rest/v1/rooms?id=eq.'+encodeURIComponent(current)+
-          '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1')
+          '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1')
       ]);
       if(before!==sequence||active?.id!==current)return;
       if(Array.isArray(roomMeta)&&roomMeta.length===1)active=roomMeta[0];
@@ -250,7 +250,7 @@ async function resume(){
     const own=await query('/rest/v1/room_members?user_id=eq.'+encodeURIComponent(session().user.id)+'&select=room_id&limit=1');
     if(before!==sequence||!own?.[0]?.room_id)return;
     const result=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(own[0].room_id)+
-      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1');
+      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(before!==sequence||!result?.length)return;
     active=result[0];members=[];messages=[];
     if(screen==='room')roomContent();
@@ -266,7 +266,7 @@ async function enterRoom(id){
     await rpc('phase2_room_join',{p_room_id:id});
     const existing=rooms?.find(x=>x.id===id);
     const rows=existing?[existing]:await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(id)+
-      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1');
+      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(!rows?.length)throw new Error('لم نعثر على الغرفة بعد الدخول');
     active=rows[0];members=[];messages=[];
     go('room');await refreshRoom();
@@ -311,7 +311,7 @@ async function redeemInvite(){
   try{
     await rpc('phase2_room_invite_join',{p_room_id:match[1],p_token:match[2]});
     const rows=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(match[1])+
-      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1');
+      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(!rows?.length)throw new Error('الغرفة ليست متاحة');
     active=rows[0];members=[];messages=[];
     if(typeof closeSheet==='function')closeSheet();
@@ -357,6 +357,10 @@ async function customizeRoom(id,welcome,cover,background,clearBackground=false){
   active={...active,welcome_message:welcome,
    cover_path:body.p_cover_path===undefined?active.cover_path:body.p_cover_path,
    background_path:body.p_background_path===undefined?active.background_path:body.p_background_path};
+  // Fetch the server-generated image revision so all devices invalidate cached art.
+  const rows=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(id)+
+    '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
+  if(Array.isArray(rows)&&rows.length===1&&active?.id===id)active=rows[0];
   roomContent();
  }
  rooms=null;void listRooms();
