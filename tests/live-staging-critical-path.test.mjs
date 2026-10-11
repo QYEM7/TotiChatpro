@@ -11,6 +11,8 @@ test('TotiChat live room is served from its real backend, not preview gifts',()=
  const catalog=file('app/phase2-catalog-ui.js');
  assert.match(catalog,/rpc\/phase3_send_gift/);
  assert.match(catalog,/p_expected_price/);
+ assert.match(catalog,/data-catalog-quantity/);
+ assert.match(catalog,/p_quantity:giftQuantity/);
 });
 test('room create keeps owner-only persisted image and welcome settings',()=>{
  const room=file('app/phase2-rooms.js');
