@@ -8,7 +8,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=s=>document.querySelector(s);
 const getUser=()=>auth.state().user?.id||'';
-let peer=null,peerName='',overlay=null,account=getUser(),epoch=0,sendBusy=false,pending=null,refreshing=false,inboxRefreshing=false,previousInbox=null;
+let peer=null,peerName='',overlay=null,account=getUser(),epoch=0,sendBusy=false,pending=null,refreshing=null,inboxRefreshing=null,previousInbox=null;
 const rpc=(name,args)=>auth.requestData('/rest/v1/rpc/phase2_dm_'+name,{method:'POST',body:args});
 const toast=s=>typeof showToast==='function'&&showToast(String(s).slice(0,170));
 const owns=(e,u)=>e===epoch&&getUser()===u&&auth.state().signedIn;
@@ -49,8 +49,11 @@ function newNode(tag,cls,txt){
 }
 async function loadInbox(){
  const node=$('#tc-dm-inbox-list'),label=$('[data-tc-dm-inbox-status]');
- if(!node||inboxRefreshing||!getUser())return;
- const stamp=epoch,owner=getUser();inboxRefreshing=true;
+ if(!node||!getUser())return;
+ const stamp=epoch,owner=getUser();
+ if(inboxRefreshing?.node===node&&inboxRefreshing?.owner===owner)return;
+ const request={node,owner,stamp};
+ inboxRefreshing=request;
  try{
   const rows=await rpc('inbox',{p_limit:40});
   if(!owns(stamp,owner)||!node.isConnected)return;
@@ -69,7 +72,7 @@ async function loadInbox(){
   if(label)label.textContent=rows.length+' محادثة حقيقية';
  }catch(e){
   if(owns(stamp,owner)&&label?.isConnected)label.textContent='تعذّر تحميل الرسائل: '+String(e.message).slice(0,130);
- }finally{inboxRefreshing=false;}
+ }finally{if(inboxRefreshing===request)inboxRefreshing=null;}
 }
 async function openConversation(id,name){
  if(!uuid.test(id)||!getUser()||id===getUser())return;
@@ -91,11 +94,13 @@ async function openConversation(id,name){
  await loadThread(stamp,owner);
 }
 async function loadThread(stamp=epoch,owner=getUser()){
- if(!peer||!owns(stamp,owner)||refreshing)return;
- refreshing=true;
+ if(!peer||!owns(stamp,owner))return;
+ const recipient=peer,request=stamp+'|'+owner+'|'+recipient;
+ if(refreshing===request)return;
+ refreshing=request;
  try{
-  const rows=await rpc('thread',{p_other_user:peer,p_before_id:null,p_limit:100});
-  if(!owns(stamp,owner)||!overlay?.isConnected)return;
+  const rows=await rpc('thread',{p_other_user:recipient,p_before_id:null,p_limit:100});
+  if(!owns(stamp,owner)||peer!==recipient||!overlay?.isConnected)return;
   if(!Array.isArray(rows))throw Error('استجابة المحادثة غير صالحة');
   const area=msg();if(!area)return;area.replaceChildren();
   for(const item of rows.slice().reverse()){
@@ -109,7 +114,7 @@ async function loadThread(stamp=epoch,owner=getUser()){
   const unread=rows.filter(x=>x.recipient_id===owner&&!x.read_at);
   if(unread.length)void rpc('mark_read',{p_other_user:peer,p_through_id:unread[0].id}).catch(()=>{});
  }catch(e){if(owns(stamp,owner))status('تعذّر تحميل المحادثة: '+String(e.message).slice(0,150))}
- finally{refreshing=false;}
+ finally{if(refreshing===request)refreshing=null;}
 }
 async function sendMessage(form){
  if(sendBusy||!peer||!getUser())return;
