@@ -69,11 +69,14 @@ jobs:
         if: github.ref == 'refs/heads/develop/phase-2'
         run: node tests/phase4-voice-messages-browser.cjs
       - name: T09 responsive live login on six device widths
+        # Temporarily pause app build; retain source and static browser checks.
+        if: ${{ false }}
         run: |
           npm run build
           node tests/t09-live-responsive-browser.cjs
       - name: Verify Capacitor Android startup renders the actual Home page
-        if: github.ref == 'refs/heads/develop/phase-2'
+        # Owner 2026-10-11: no app compilation or Android payload generation.
+        if: ${{ false }}
         run: |
           npm run build
           node tests/phase2-android-root-browser.cjs
