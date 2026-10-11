@@ -50,7 +50,8 @@ test('Android web payload uses exact approved HTML, CSS, JS and asset bytes',asy
 
 test('New app points ONLY at independent Supabase and preserves official banner',async()=>{
  const config=(await get('dist/app/config.js')).toString();
- assert.match(config,/sqedsnyvjblvbjbizcay\.supabase\.co/);
+ assert.match(config,/rziaedugbdwefbefcxjt\.supabase\.co/);
+ assert.doesNotMatch(config,/sqedsnyvjblvbjbizcay\.supabase\.co/);
  assert.doesNotMatch(config,/bfadhdnudmsggylunhlh/);
  assert.doesNotMatch(config.replace(/\/\*[\s\S]*?\*\//g,''),/service[_-]?role|sb_secret_/i);
  const banner=(await get('dist/app/home-banners.js')).toString();
