@@ -117,7 +117,7 @@ async function loadList(reset=false){
   // Lists are always for the logged-in account; known follow state derives
   // from list type; for "followers" we query status on-demand on tap.
   const newRows=result.items.filter(x=>validId(x.user_id)).map(x=>({
-   ...x,followedByMe:openTab!=='followers'
+   ...x,followedByMe:x.is_following===true
   }));
   rows=reset?newRows:rows.concat(newRows.filter(x=>!rows.some(y=>y.user_id===x.user_id)));
   cursor=result.items.length?result.items[result.items.length-1].created_at:before;
@@ -137,7 +137,7 @@ async function search(form){
   const result=await rpc('phase5_social_search',{p_prefix:prefix,p_limit:15});
   if(stamp!==generation||!current()||!show())return;
   if(!result||!Array.isArray(result.items)||result.items.length>15)throw Error('بحث غير صالح');
-  rows=result.items.filter(x=>validId(x.user_id)).map(x=>({...x,followedByMe:false}));
+  rows=result.items.filter(x=>validId(x.user_id)).map(x=>({...x,followedByMe:x.is_following===true}));
   more=false;cursor=null;paintList();status('');
  }catch(e){if(stamp===generation&&show())status('فشل البحث: '+String(e.message).slice(0,100))}
  finally{busy=false}
