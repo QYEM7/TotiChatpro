@@ -1,0 +1,6 @@
+/* Staging: gift animations only for verified financial events. */
+.tc-gift-global-live{position:fixed;z-index:240000;top:20%;left:50%;transform:translateX(-50%);width:min(92vw,410px);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:19px 15px;border:2px solid #f4d495;border-radius:24px;color:#ffeab6;background:linear-gradient(145deg,#153b30ee,#135840eb,#214542ef);box-shadow:0 12px 35px #061d1360;font-family:Cairo,Tajawal,system-ui,sans-serif;text-shadow:0 2px 4px #052b1b70}
+.tc-gift-global-art{font-size:55px;line-height:1.2;filter:drop-shadow(0 3px 5px #102b2c8f)}
+.tc-gift-global-live b{font-size:14px;font-weight:900;line-height:1.7;overflow-wrap:anywhere}
+.tc-gift-global-live small{font-size:11px;color:#e3ffe4}
+@media(prefers-reduced-motion:reduce){.tc-gift-global-live{animation:none!important}}
