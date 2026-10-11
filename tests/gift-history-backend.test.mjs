@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 const sql=readFileSync(new URL('../supabase/migrations/20261011213000_verified_personal_gift_history.sql',import.meta.url),'utf8');
 test('gift receipts count only real committed gift and diamonds; no salary claims',()=>{
  assert.match(sql,/from public\.gift_events e/);
+ assert.match(sql,/fin\.operation='gift' and fin\.status='completed'/);
  assert.match(sql,/public\.diamond_lots l/);
  assert.match(sql,/l\.gift_event_id=e\.id/);
  assert.match(sql,/where l\.user_id=me and e\.recipient_id=me/);
