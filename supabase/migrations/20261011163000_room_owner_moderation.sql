@@ -135,6 +135,12 @@ begin
   ('grant_moderator','revoke_moderator','ban','unban')) then
   raise exception 'Owner permission required' using errcode='42501';
  end if;
+ -- A moderator may neither clear NOR replace an Owner-enforced mute.
+ if not owner_action and p_action in ('mute','allow_mic') and exists(
+    select 1 from public.room_mutes m where m.room_id=p_room_id
+      and m.user_id=p_target and m.muted_by=owner
+ ) then raise exception 'Owner mute may be changed only by owner'
+   using errcode='42501';end if;
  if p_action='ban' and char_length(reason_text) not between 5 and 300 then
   raise exception 'Documented ban reason required';
  end if;
