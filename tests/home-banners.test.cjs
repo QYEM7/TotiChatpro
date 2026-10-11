@@ -127,6 +127,20 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
   assert.match(app, /<script src="\.\/room-ui-enhancements\.js"><\/script>/);
   app=app.replace('<link rel="stylesheet" href="./room-ui-enhancements.css">','');
   app=app.replace('<script src="./room-ui-enhancements.js"></script>','');
+  // Audited LIVE/Stage enhancements are external CSS/JS only. Strip only
+  // these explicitly approved references before comparing the *entire*
+  // original visual markup byte-for-byte. No blanket tag removal is allowed.
+  for(const name of ['phase2-private-messages','phase2-global-gifts']){
+    const re=new RegExp('<link rel="stylesheet" href="\\./'+name+'\\.css\\?v=[^"]+">');
+    assert.match(app,re);
+    app=app.replace(re,'');
+  }
+  for(const name of ['phase2-private-messages','phase2-global-gifts','phase2-backend-controls']){
+    const re=new RegExp('<script src="\\./'+name+'\\.js\\?v=[^"]+"><\\/script>');
+    assert.match(app,re);
+    app=app.replace(re,'');
+  }
+  app=app.replace('<!-- Final UI approved from visual-review-20261009; remove incompatible temporary lavender override. -->','');
   app=app.replaceAll('../assets/images/','assets/images/');
   for(const [oldCode,newCode] of substitutions){
     assert.equal(app.split(newCode).length,2,'replacement missing or duplicated');
