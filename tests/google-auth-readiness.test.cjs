@@ -8,10 +8,13 @@ const cfg=fs.readFileSync('app/config.js','utf8');
 test('public key only, Supabase allowed host only; never use private server key',async()=>{
  const {readPublicBackend}=await sdk();
  const s=readPublicBackend(cfg);
- assert.equal(s.url,'https://sqedsnyvjblvbjbizcay.supabase.co');
+ const expected=JSON.parse(fs.readFileSync('docs/preview-public-backend.json','utf8')).supabaseUrl;
+ assert.equal(s.url,expected);
+ assert.notEqual(s.url,'https://sqedsnyvjblvbjbizcay.supabase.co','Never inspect old production Auth');
  assert.ok(s.key.startsWith('sb_publishable_'));
  assert.throws(()=>readPublicBackend('supabaseUrl:"https://evil.example.com",publishableKey:"sb_publishable_fake"'),/non-Supabase/);
  assert.throws(()=>readPublicBackend('supabaseUrl:"https://sqedsnyvjblvbjbizcay.supabase.co",publishableKey:"sb_secret_fake"'),/publishable/);
+ assert.throws(()=>readPublicBackend('supabaseUrl:"https://sqedsnyvjblvbjbizcay.supabase.co",publishableKey:"sb_publishable_fake12345"'),/non-staging/);
 });
 test('Google provider OFF blocks readiness even if other providers are enabled',async()=>{
  const {inspect}=await sdk();
