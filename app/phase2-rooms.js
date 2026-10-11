@@ -224,12 +224,15 @@ async function refreshRoom(){
   const current=active.id,before=sequence;
   refreshing=(async()=>{
     try{
-      const [roster,history]=await Promise.all([
+      const [roster,history,roomMeta]=await Promise.all([
         rpc('phase2_room_members',{p_room_id:current}),
         query('/rest/v1/room_messages?room_id=eq.'+encodeURIComponent(current)+
-          '&select=id,sender_id,body,created_at&order=created_at.desc&limit=80')
+          '&select=id,sender_id,body,created_at&order=created_at.desc&limit=80'),
+        query('/rest/v1/rooms?id=eq.'+encodeURIComponent(current)+
+          '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1')
       ]);
       if(before!==sequence||active?.id!==current)return;
+      if(Array.isArray(roomMeta)&&roomMeta.length===1)active=roomMeta[0];
       members=Array.isArray(roster)?roster:[];
       messages=Array.isArray(history)?history.reverse():[];
       if(screen==='room')roomContent();
