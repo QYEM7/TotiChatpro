@@ -1,8 +1,31 @@
 -- TotiChat Phase 2: authentic room moderation, not a simulated UI.
 -- Forward-only on isolated Staging; the approved 15-seat UI stays untouched.
--- Owner appoints/revokes room moderators. Moderators may mute, release seats,
+-- Owner appoints/revokes room moderators. Moderators may enforce/release mute, release seats,
 -- or kick ordinary members. Only the Owner may ban/unban or change moderators.
 -- A short-lived LiveKit JWT is not equivalent to instant SFU-side revocation.
+-- A moderated member cannot unmute via the existing self-service RPC.
+-- This flag is independent of the user's own mute preference.
+alter table public.room_members
+ add column moderation_muted boolean not null default false;
+
+create or replace function phase3.phase2_room_set_muted(p_room_id uuid,p_muted boolean)
+returns boolean language plpgsql security definer set search_path='' as $fn$
+declare uid uuid;seat integer;admin_muted boolean;
+begin
+ uid:=auth.uid();
+ if uid is null then raise exception 'authentication required';end if;
+ select seat_no,moderation_muted into seat,admin_muted
+ from public.room_members where room_id=p_room_id and user_id=uid for update;
+ if not found then raise exception 'join the room first';end if;
+ if p_muted is not true and seat is null then raise exception 'take a seat first';end if;
+ if p_muted is not true and admin_muted then
+  raise exception 'ROOM_MODERATOR_MUTED' using errcode='42501';
+ end if;
+ update public.room_members set is_muted=coalesce(p_muted,true)
+ where room_id=p_room_id and user_id=uid;
+ return coalesce(p_muted,true);
+end $fn$;
+
 create table public.room_moderators(
  room_id uuid not null,
  user_id uuid not null,
@@ -73,7 +96,7 @@ declare
 begin
  if p_room_id is null or p_target is null or p_request_id is null
   or p_action is null or p_action not in
-   ('grant_moderator','revoke_moderator','kick','ban','unban','mute','release_seat')
+   ('grant_moderator','revoke_moderator','kick','ban','unban','mute','allow_mic','release_seat')
   or octet_length(coalesce(p_reason,''))>1000 then
    raise exception 'Invalid room moderation action';
  end if;
@@ -120,8 +143,13 @@ begin
  elsif p_action='revoke_moderator' then
   delete from public.room_moderators where room_id=p_room_id and user_id=p_target;
  elsif p_action='mute' then
-  -- Never remotely unmute another person's microphone.
-  update public.room_members set is_muted=true where room_id=p_room_id and user_id=p_target;
+  -- Persist moderator mute across any self-service mute RPC or seat changes.
+  update public.room_members set is_muted=true,moderation_muted=true
+  where room_id=p_room_id and user_id=p_target;
+ elsif p_action='allow_mic' then
+  -- Revoke the moderation restriction; the member must still unmute themself.
+  update public.room_members set is_muted=true,moderation_muted=false
+  where room_id=p_room_id and user_id=p_target;
  elsif p_action='release_seat' then
   update public.room_members set is_muted=true,seat_no=null
   where room_id=p_room_id and user_id=p_target;
