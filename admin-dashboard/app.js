@@ -42,6 +42,8 @@ const nav=[
 const names=Object.fromEntries(nav.map(x=>[x[0],x[1]]));
 let session=null,rights=null,current='overview',loading=false,banners=[],bannerTotal=0,bannerOffset=0;
 let editingId=null,previewBlob=null,previewUrl=null,toastTimer=null,epoch=0,writeBusy=false,detailOffset=0,directoryOffset=0,directoryQuery='';
+const localDay=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+let reportRange={from:localDay(new Date(Date.now()-29*86400000)),to:localDay(new Date()),status:''};
 function setError(text){$('#login-error').textContent=String(text||'').slice(0,320);}
 function toast(msg,failed=false){
  const el=$('#toast');el.textContent=String(msg||'').slice(0,260);
@@ -213,10 +215,24 @@ function navigate(route){
 function buildCard(label,val,icon,subtitle){
  return '<article class="surface metric-card"><div class="metric-icon">'+icon+'</div><label>'+safe(label)+'</label><strong>'+safe(val)+'</strong><small>'+safe(subtitle||'بيانات Staging الحقيقية')+'</small></article>';
 }
-async function readReport(offset=0){
- const to=new Date(),from=new Date(to.getTime()-30*86400000);
- return rpc('phase4_admin_report',{p_from:from.toISOString(),p_to:to.toISOString(),p_status:null,p_offset:offset,p_limit:50});
+async function readReport(offset=0,range=null){
+ let from,to,status=null;
+ if(range){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(range.from)||!/^\d{4}-\d{2}-\d{2}$/.test(range.to))
+   throw Error('تاريخ التقرير غير صالح');
+  from=new Date(range.from+'T00:00:00');
+  to=new Date(range.to+'T00:00:00');to.setDate(to.getDate()+1);
+  if(!Number.isFinite(from.getTime())||!Number.isFinite(to.getTime())||
+   from>=to||to.getTime()-from.getTime()>366*86400000)throw Error('الفترة المدخلة غير صالحة أو تتجاوز سنة');
+  status=range.status||null;
+  if(status&&!['pending','completed','failed','refunded'].includes(status))throw Error('حالة تقرير غير صالحة');
+ }else{
+  to=new Date();from=new Date(to.getTime()-30*86400000);
+ }
+ return rpc('phase4_admin_report',{p_from:from.toISOString(),p_to:to.toISOString(),
+  p_status:status,p_offset:offset,p_limit:50});
 }
+
 async function overview(){
  const stamp=epoch,route=current;
  let report=null,reportErr='',ban=null;
@@ -412,9 +428,16 @@ async function quickBanner(id,action){
  }catch(e){toast('تعذّر تغيير البنر: '+e.message,true);}finally{writeBusy=false;}
 }
 async function reportSection(){
- const r=await readReport(detailOffset);
+ const r=await readReport(detailOffset,reportRange);
  if(!Array.isArray(r.rows))throw Error('تقرير غير صالح');
- return '<div class="surface pad"><div class="surface-title"><h2>الملخص الحقيقي لآخر 30 يوم</h2><p>من Supabase Staging</p></div>'+
+ return '<div class="surface pad"><div class="surface-title"><h2>ملخص الفترة المحددة</h2><p>من Supabase Staging فقط</p></div>'+
+ '<form id="report-filter-form" class="admin-form-row" style="margin-bottom:22px">'+
+ '<label>من<input name="from" type="date" required value="'+safe(reportRange.from)+'"></label>'+
+ '<label>إلى (شامل)<input name="to" type="date" required value="'+safe(reportRange.to)+'"></label>'+
+ '<label>الحالة<select name="status">'+
+ [['','كل الحالات'],['pending','قيد الانتظار'],['completed','مكتملة'],['failed','فاشلة'],['refunded','مسترجعة']].map(([v,l])=>'<option value="'+v+'"'+(reportRange.status===v?' selected':'')+'>'+l+'</option>').join('')+
+ '</select></label><button type="submit" class="btn btn-primary">تطبيق الفلاتر</button>'+
+ '<button type="button" data-action="export-report" class="btn btn-secondary">تصدير CSV حقيقي</button></form>'+
  '<div class="metric-grid">'+[
   ['المستخدمون',fmt(r.summary?.users),'♙','إجمالي الحسابات'],
   ['هدايا الفترة',fmt(r.summary?.gift_count),'✧','هدايا موثّقة'],
@@ -424,6 +447,28 @@ async function reportSection(){
  (r.rows.length?table(['العملية','الحالة','التاريخ','المرجع'],r.rows.map(x=>[x.operation,x.status,x.created_at,x.id])):
  empty('لا توجد معاملات ضمن الفترة','هذا فراغ حقيقي ببيئة الاختبار، وليس فشلاً في الواجهة.'))+
  '<div class="control-strip" style="margin-top:15px"><button class="btn btn-secondary" data-action="report-prev" '+(detailOffset===0?'disabled':'')+'>السابق</button><button class="btn btn-secondary" data-action="report-next" '+(detailOffset+50>=r.total?'disabled':'')+'>التالي</button></div></div>';
+}
+function csvCell(v){
+ let text=String(v??'');
+ if(/^[\s]*[=+@-]/.test(text))text="'"+text;
+ return '"'+text.replaceAll('"','""')+'"';
+}
+async function exportReport(){
+ if(current!=='reports'||!canReports())throw Error('صلاحية التصدير غير متاحة');
+ let all=[],total=null;
+ for(let offset=0;offset<5000;offset+=50){
+  const result=await readReport(offset,reportRange);
+  if(!Array.isArray(result.rows)||!Number.isSafeInteger(result.total))throw Error('استجابة التصدير غير صالحة');
+  total=result.total;all.push(...result.rows);
+  if(result.rows.length<50||all.length>=total)break;
+ }
+ const cells=[['operation_id','operation','status','created_at','actor_id'],
+  ...all.map(x=>[x.id,x.operation,x.status,x.created_at,x.actor_id])];
+ const content='\uFEFF'+cells.map(row=>row.map(csvCell).join(',')).join('\r\n');
+ const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='totichat-admin-report-'+reportRange.from+'-'+reportRange.to+'.csv';a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+ toast(all.length<total?'تم تصدير أول 5000 معاملة، الباقي يتطلب تقسيم الفترة.':'تم تصدير '+all.length+' معاملة فعلية.');
 }
 async function reportsPage(){if(!canReports())throw Error('لا تملك صلاحية التقارير');const content=await reportSection();if(current==='reports')$('#page-body').innerHTML=content;}
 async function treasuryPage(){
@@ -541,6 +586,7 @@ document.addEventListener('click',async event=>{
   if(action==='report-next'){detailOffset+=50;await reportsPage();}
   if(action==='report-prev'){detailOffset=Math.max(0,detailOffset-50);await reportsPage();}
   if(action==='load-issues')await fetchIssues();
+  if(action==='export-report')await exportReport();
   if(action==='dir-next'){directoryOffset+=30;await directoryPage(current==='users'?'users':'rooms');}
   if(action==='dir-prev'){directoryOffset=Math.max(0,directoryOffset-30);await directoryPage(current==='users'?'users':'rooms');}
  }catch(e){toast(e.message,true);}
@@ -586,6 +632,11 @@ $('#page-body').addEventListener('input',e=>{
  }
 });
 $('#page-body').addEventListener('submit',async e=>{
+ if(e.target.id==='report-filter-form'){
+  e.preventDefault();const v=new FormData(e.target);
+  reportRange={from:String(v.get('from')||''),to:String(v.get('to')||''),status:String(v.get('status')||'')};
+  detailOffset=0;void reportsPage().catch(err=>toast(err.message,true));return;
+ }
  if(e.target.id==='directory-search-form'){
   e.preventDefault();directoryQuery=$('#directory-search').value.trim();directoryOffset=0;
   void directoryPage(current==='users'?'users':'rooms').catch(err=>toast(err.message,true));return;
