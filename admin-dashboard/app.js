@@ -90,6 +90,7 @@ const signed=()=>!!session&&!!rights;
 const isChief=()=>rights?.isOwner===true||rights?.isMainPartner===true;
 const canReports=()=>isChief()||rights?.canReadReports===true;
 const canCatalogs=()=>isChief()||rights?.canManageCatalogs===true;
+window.TotiAdminManagement?.configure({rpc,rights:()=>rights,current:()=>current,toast});
 function allowed(id){
  if(!rights)return false;
  if(id==='banners'||id==='treasury'||id==='team'||id==='settings'||id==='users'||id==='rooms')return isChief();
@@ -97,7 +98,7 @@ function allowed(id){
  if(id==='recharge')return rights.canManageRechargeAgencies===true;
  if(id==='reports'||id==='overview')return canReports()||canCatalogs();
  if(id==='catalog'||id==='medals'||id==='vip')return canCatalogs();
- if(id==='support')return isChief()||['support','admin','super_admin','db'].includes(rights.role);
+ if(id==='support')return rights.canSupport===true;
  return isChief()||['admin','super_admin'].includes(rights.role);
 }
 function showGuest(){
@@ -108,10 +109,12 @@ async function establish(s){
  try{r=await rpc('phase3_admin_session',{});}
  catch(e){session=null;throw Error('تعذر التحقق من صلاحية الإدارة: '+e.message);}
  if(!r||typeof r!=='object'||typeof r.role!=='string')throw Error('استجابة الصلاحيات غير صالحة');
- if(!(r.isOwner===true||r.isMainPartner===true||['admin','super_admin','db','support'].includes(r.role)||r.canManageCatalogs===true||r.canReadReports===true)){
+ let canSupport=false;
+ try{const supportStatus=await rpc('phase6_admin_support_access',{});canSupport=supportStatus?.canHandle===true;}catch(_){canSupport=false;}
+ if(!(r.isOwner===true||r.isMainPartner===true||['admin','super_admin','db'].includes(r.role)||r.canManageCatalogs===true||r.canReadReports===true||canSupport)){
   session=null;throw Error('هذا الحساب لا يمتلك صلاحية الدخول إلى لوحة الإدارة');
  }
- rights=r;epoch++;
+ rights={...r,canSupport};epoch++;
  $('#auth-screen').classList.add('hidden');$('#dashboard').classList.remove('hidden');
  $('#account-role').textContent=r.isOwner?'المالك الرئيسي':r.isMainPartner?'الشريك الرئيسي':r.role;
  $('#account-email').textContent=s.user?.email||$('#email').value||'حساب موثّق';
@@ -463,9 +466,9 @@ async function simpleModule(route,rpcName,body,warning){
  $('#page-body').innerHTML='<div class="surface pad"><div class="surface-title"><h2>البيانات المرتبطة بالنظام</h2><p>قراءة من Staging</p></div>'+prettyData(data)+
  (warning?'<div class="admin-alert">'+safe(warning)+'</div>':'')+'</div>';
 }
-async function hostsPage(){await simpleModule('hosts','phase4_agency_state',{},'الرواتب والنسب الشهرية والتصفير ليست مفعّلة قبل اعتماد السياسة المالية.');}
-async function rechargePage(){await simpleModule('recharge','phase4_recharge_state',{},'أي عملية شحن تحتاج تدقيق صلاحيات مستقل؛ لا توجد أرصدة وهمية.');}
-async function supportPage(){await simpleModule('support','phase5_support_list',{p_scope:'staff',p_limit:30,p_offset:0},'صلاحية خدمة العملاء تُطبَّق من الخادم، وقد تتطلب دوراً مخصّصاً.');}
+async function hostsPage(){return window.TotiAdminManagement.agencies('host');}
+async function rechargePage(){return window.TotiAdminManagement.agencies('recharge');}
+async function supportPage(){return window.TotiAdminManagement.support();}
 async function catalogPage(){
  const key='gift_catalog';
  const data=await rpc('phase3_catalog_list',{p_table:key,p_offset:0,p_limit:50});
@@ -477,12 +480,8 @@ async function catalogPage(){
  empty('الكتالوج فارغ حالياً','لا يتم اختراع هدايا للعرض.'))+
  '<div class="admin-alert">تعديل الكتالوجات الحساسة سيتطلب تدقيق نماذج الإدخال والصلاحيات قبل تفعيل أدوات الكتابة في الموقع.</div></div>';
 }
-async function vipPage(){
- $('#page-body').innerHTML='<div class="surface pad"><div class="surface-title"><h2>التحقق من امتيازات VIP</h2><p>قراءة حساب حقيقي بالمعرّف</p></div>'+
- '<form id="vip-lookup" class="admin-form-row"><label>معرف المستخدم UUID<input id="vip-user" type="text" required placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" pattern="[0-9a-fA-F-]{36}" style="min-width:310px"></label><button class="btn btn-primary" type="submit">تحقق من VIP</button></form><div id="vip-result"></div>'+
- '<div class="admin-alert">لا تمنح الواجهة VIP افتراضياً أو تغيّر مستويات مستخدمين بدون موافقة إدارية.</div></div>';
-}
-async function medalsPage(){await simpleModule('medals','phase5_medal_catalog',{},'المنح والسحب تبقى محكومة بإجراءات المالك الموثّقة فقط.');}
+async function vipPage(){return window.TotiAdminManagement.vip();}
+async function medalsPage(){return window.TotiAdminManagement.medals();}
 function notConnected(name,needed){
  $('#page-body').innerHTML='<div class="surface pad">'+empty('هيكل '+name+' مجهّز',
   'لم نربط إجراء كتابة أو قراءة إدارية لهذا القسم بعد، ولن نستخدم بيانات وهمية أو نعطي صلاحيات غير موجودة.')+
@@ -521,13 +520,7 @@ async function directoryPage(kind){
 }
 async function usersPage(){await directoryPage('users');}
 async function roomsPage(){await directoryPage('rooms');}
-async function teamPage(){
- $('#page-body').innerHTML='<div class="section-grid"><div class="surface pad"><div class="surface-title"><h2>هويتك وصلاحياتك الحالية</h2></div>'+
- prettyData({role:rights.role,isOwner:rights.isOwner,isMainPartner:rights.isMainPartner,permissions:rights.permissions})+
- '</div><div class="surface pad"><div class="surface-title"><h2>السلطات الحساسة</h2></div>'+
- stateNote('إدارة وكالات المضيفين الكاملة للمالك والشريك الرئيسي المعيّن، وليس لكل Super Admin.')+
- '<div class="admin-alert">توزيع الصلاحيات هنا يحتاج واجهة تغيير ذات تأكيدات ومراجعة مزدوجة قبل إتاحة الكتابة. قاعدة البيانات تفرض الصلاحية الفعلية.</div></div></div>';
-}
+async function teamPage(){return window.TotiAdminManagement.team();}
 async function settingsPage(){
  $('#page-body').innerHTML='<div class="surface pad"><div class="surface-title"><h2>الربط والأمان</h2></div><dl class="detail-list">'+
  [['Supabase Project','rziaedugbdwefbefcxjt'],['Environment','Staging — لا إنتاج'],['مصدر الصلاحيات','phase3_admin_session RPC'],['خزن البنرات','totichat-admin-banners (WebP ≤ 500KB)'],['جلسات الإدارة','تبقى بالذاكرة فقط وتُفقد عند تحديث الصفحة'],['البناء والنشر','غير منفذ']].map(x=>'<div class="detail-row"><dt>'+safe(x[0])+'</dt><dd>'+safe(x[1])+'</dd></div>').join('')+
