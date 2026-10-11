@@ -312,9 +312,15 @@ function roomMembershipRevoked(roomId){
   void listRooms();
 }
 async function refreshRoom(){
-  if(!active||!session().signedIn||refreshing)return;
+  if(!active||!session().signedIn)return;
   const current=active.id,before=sequence;
-  refreshing=(async()=>{
+  // Only coalesce reads for the SAME room and session generation.
+  // Never let a slow previous room block the new room's first snapshot.
+  if(refreshing?.roomId===current&&refreshing?.sequence===before)
+    return refreshing.promise;
+  const request={roomId:current,sequence:before,promise:null};
+  refreshing=request;
+  request.promise=(async()=>{
     try{
       const [roster,history,roomMeta]=await Promise.all([
         rpc('phase2_room_members_visual',{p_room_id:current}),
@@ -347,9 +353,9 @@ async function refreshRoom(){
         roomMembershipRevoked(current);return;
       }
       console.warn('TotiChat real room refresh:',failure(err));
-    }finally{refreshing=null;}
+    }finally{if(refreshing===request)refreshing=null;}
   })();
-  return refreshing;
+  return request.promise;
 }
 async function resume(){
   if(!session().signedIn)return;
@@ -369,14 +375,18 @@ async function enterRoom(id){
   if(entering)return;
   if(!UUID.test(id))return;
   if(active&&active.id!==id){toast('اخرج من غرفتك الحالية أولاً');return;}
+  const actor=session().user?.id,before=sequence;
+  if(!actor)return;
   entering=true;
   try{
     await rpc('phase2_room_join',{p_room_id:id});
+    if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     const existing=rooms?.find(x=>x.id===id);
     const rows=existing?[existing]:await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(id)+
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
+    if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     if(!rows?.length)throw new Error('لم نعثر على الغرفة بعد الدخول');
-    active=rows[0];members=[];messages=[];
+    sequence++;active=rows[0];members=[];messages=[];
     go('room');await refreshRoom();
   }catch(err){toast(failure(err));}
   finally{entering=false;}
@@ -415,13 +425,17 @@ async function redeemInvite(){
   const raw=String($('#tc-phase2-redeem-code')?.value||'').trim().toLowerCase();
   const match=INVITE.exec(raw);
   if(!match){toast('تنسيق رمز الدعوة غير صحيح');return;}
+  const actor=session().user?.id,before=sequence;
+  if(!actor)return;
   entering=true;
   try{
     await rpc('phase2_room_invite_join',{p_room_id:match[1],p_token:match[2]});
+    if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     const rows=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(match[1])+
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
+    if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     if(!rows?.length)throw new Error('الغرفة ليست متاحة');
-    active=rows[0];members=[];messages=[];
+    sequence++;active=rows[0];members=[];messages=[];
     if(typeof closeSheet==='function')closeSheet();
     go('room');await refreshRoom();
   }catch(err){toast(failure(err));}
