@@ -11,8 +11,8 @@ let sdk=null,connecting=false,voiceRoom='',connected=false,audioError='',needsGe
 const $=(sel,root=document)=>root.querySelector(sel);
 function error(e){
  const s=String(e?.message||'تعذر الاتصال الصوتي');
- if(/LIVEKIT_NOT_CONFIGURED|503/i.test(s))
-   return 'خدمة البث الصوتي لم تُفعّل بعد على الخادم. لا يمكن سماع أو إرسال صوت الآن.';
+ if(/Requested function was not found|Function not found|404|LIVEKIT_NOT_CONFIGURED|BACKEND_NOT_CONFIGURED|503/i.test(s))
+   return 'خدمة الصوت لم تُجهّز بالكامل في Staging. مطلوب نشر خادم الرموز وربط LiveKit؛ المايك والسماعة غير متصلين حالياً.';
  if(/ROOM_MEMBERSHIP_REQUIRED|403/i.test(s))
    return 'ادخل الغرفة بحسابك الحقيقي أولاً.';
  if(/notallowederror|permission denied|permission/i.test(s))
@@ -34,8 +34,13 @@ function controls(){
   listen.setAttribute('aria-label','توصيل الصوت الحقيقي للغرفة');area.appendChild(listen);
   const mic=document.createElement('button');mic.type='button';mic.dataset.realVoice='mic';
   mic.setAttribute('aria-label','كتم أو تشغيل الميكروفون الحقيقي');area.appendChild(mic);
+  const info=document.createElement('small');info.id='tc-real-voice-feedback';info.setAttribute('role','status');info.setAttribute('aria-live','polite');area.appendChild(info);
+  const resume=document.createElement('button');resume.type='button';resume.dataset.realVoice='resume';resume.textContent='▶ تشغيل السماعة';area.appendChild(resume);
   parent.appendChild(area);
  }
+ const feedback=$('#tc-real-voice-feedback',area);
+ if(feedback)feedback.textContent=audioError|| (connecting?'جاري الاتصال بالخادم الصوتي…':connected?'الصوت متصل بالخادم':'اضغط تفعيل الصوت للاستماع للغرفة');
+ const resume=$('[data-real-voice="resume"]',area);if(resume)resume.hidden=!needsGesture;
  const listen=$('[data-real-voice="connect"]',area);
  const mic=$('[data-real-voice="mic"]',area);
  const state=ownMic();
@@ -142,6 +147,7 @@ document.addEventListener('click',event=>{
  event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
  if(b.dataset.realVoice==='connect')void connect();
  else if(b.dataset.realVoice==='mic')void muteToggle();
+ else if(b.dataset.realVoice==='resume')void sdk?.resumeAudio?.().then(()=>{needsGesture=false;controls();}).catch(e=>{audioError=error(e);controls();});
 },true);
 window.addEventListener('totichat-phase2-auth',()=>{
  if(!auth.state().signedIn||(voiceOwner&&auth.state().user?.id!==voiceOwner))void tearDown();
