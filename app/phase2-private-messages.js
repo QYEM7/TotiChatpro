@@ -8,7 +8,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=s=>document.querySelector(s);
 const getUser=()=>auth.state().user?.id||'';
-let peer=null,peerName='',overlay=null,account=getUser(),epoch=0,sendBusy=false,pending=null,refreshing=null,inboxRefreshing=null,previousInbox=null;
+let peer=null,peerName='',overlay=null,account=getUser(),epoch=0,sendBusy=false,pending=null,refreshing=null,inboxRefreshing=null,previousInbox=null,unblockBusy=false;
 const rpc=(name,args)=>auth.requestData('/rest/v1/rpc/phase2_dm_'+name,{method:'POST',body:args});
 const toast=s=>typeof showToast==='function'&&showToast(String(s).slice(0,170));
 const owns=(e,u)=>e===epoch&&getUser()===u&&auth.state().signedIn;
@@ -25,6 +25,8 @@ function inboxView(){
  '<p data-tc-dm-inbox-status role="status">جارٍ تحميل المحادثات الحقيقية…</p>'+
  '<div id="tc-dm-inbox-list"></div>'+
  '<button type="button" class="tc-dm-reload" data-tc-dm-reload>تحديث المحادثات</button>'+
+ '<button type="button" class="tc-dm-reload" data-tc-dm-blocks>🚫 إدارة القائمة السوداء</button>'+
+ '<div id="tc-dm-block-list" hidden role="region" aria-label="القائمة السوداء"></div>'+
  '</div>';
 }
 const oldMsgs=typeof vMessages==='function'?vMessages:null;
@@ -73,6 +75,27 @@ async function loadInbox(){
  }catch(e){
   if(owns(stamp,owner)&&label?.isConnected)label.textContent='تعذّر تحميل الرسائل: '+String(e.message).slice(0,130);
  }finally{if(inboxRefreshing===request)inboxRefreshing=null;}
+}
+async function loadBlockedUsers(){
+ const user=getUser(),stamp=epoch,root=$('#tc-dm-block-list');
+ if(!user||!root)return;
+ root.hidden=false;root.textContent='جارٍ تحميل القائمة السوداء من الخادم…';
+ try{
+  const data=await auth.requestData('/rest/v1/dm_blocks?select=blocked_id,created_at&blocker_id=eq.'+
+   encodeURIComponent(user)+'&order=created_at.desc&limit=100');
+  if(!owns(stamp,user)||!root.isConnected)return;
+  if(!Array.isArray(data))throw Error('استجابة القائمة السوداء غير صالحة');
+  root.replaceChildren();
+  if(!data.length){root.appendChild(newNode('p','tc-dm-empty','لا توجد حسابات محظورة.'));return;}
+  for(const item of data){
+   if(!uuid.test(item.blocked_id))continue;
+   const wrapper=newNode('div','tc-dm-contact');
+   wrapper.appendChild(newNode('span','','حساب محظور · '+item.blocked_id.slice(0,8)));
+   const button=newNode('button','tc-dm-unblock','إلغاء الحظر');
+   button.type='button';button.dataset.tcDmUnblock=item.blocked_id;
+   wrapper.appendChild(button);root.appendChild(wrapper);
+  }
+ }catch(e){if(owns(stamp,user)&&root.isConnected)root.textContent='تعذّر تحميل القائمة: '+String(e.message).slice(0,120);}
 }
 async function openConversation(id,name){
  if(!uuid.test(id)||!getUser()||id===getUser())return;
@@ -135,6 +158,21 @@ async function sendMessage(form){
  }finally{sendBusy=false;if(button?.isConnected)button.disabled=false;}
 }
 document.addEventListener('click',e=>{
+ const manageBlocks=e.target.closest('[data-tc-dm-blocks]');
+ if(manageBlocks){e.preventDefault();e.stopImmediatePropagation();void loadBlockedUsers();return;}
+ const unblock=e.target.closest('[data-tc-dm-unblock]');
+ if(unblock){
+  e.preventDefault();e.stopImmediatePropagation();
+  const id=unblock.dataset.tcDmUnblock;
+  if(unblockBusy||!uuid.test(id)||!confirm('تأكيد إلغاء حظر هذا الحساب؟'))return;
+  unblockBusy=true;unblock.disabled=true;
+  void rpc('block',{p_other_user:id,p_block:false}).then(result=>{
+   if(result!==true)throw Error('الخادم لم يؤكد إلغاء الحظر');
+   toast('تم إلغاء حظر الحساب');return loadBlockedUsers();
+  }).catch(error=>toast('تعذّر إلغاء الحظر: '+String(error.message).slice(0,100)))
+    .finally(()=>{unblockBusy=false;if(unblock.isConnected)unblock.disabled=false;});
+  return;
+ }
  const member=e.target.closest('[data-tc-dm-recipient]');
  if(member){
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
