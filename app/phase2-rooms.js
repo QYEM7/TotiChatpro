@@ -325,32 +325,97 @@ async function copyInvite(){
   field.focus();field.select();
   toast('حدد رمز الدعوة وانسخه يدوياً');
 }
+
+async function imageToWebp(file){
+ if(!file)return null;
+ if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size<1||file.size>6291456)
+  throw Error('اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 6 ميغابايت');
+ const image=await createImageBitmap(file);
+ try{
+  const side=Math.min(image.width,image.height);
+  if(side<1||image.width>8192||image.height>8192)throw Error('أبعاد الصورة غير مدعومة');
+  const canvas=document.createElement('canvas');canvas.width=720;canvas.height=720;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw Error('تعذّرت معالجة الصورة');
+  ctx.drawImage(image,(image.width-side)/2,(image.height-side)/2,side,side,0,0,720,720);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.82));
+  if(!blob||blob.size<1||blob.size>2097152)throw Error('الصورة المعالجة تجاوزت 2 ميغابايت');
+  return blob;
+ }finally{image.close?.();}
+}
+async function customizeRoom(id,welcome,cover,background,clearBackground=false){
+ const body={p_room_id:id,p_welcome_message:welcome};
+ if(cover)body.p_cover_path=await auth.uploadRoomImage(id,'cover',await imageToWebp(cover));
+ if(background)body.p_background_path=await auth.uploadRoomImage(id,'background',await imageToWebp(background));
+ else if(clearBackground)body.p_background_path='';
+ const confirmed=await query('/rest/v1/rpc/phase2_room_customize',{method:'POST',body});
+ if(confirmed!==true)throw Error('الخادم لم يؤكد حفظ بيانات الغرفة');
+ if(active?.id===id){
+  active={...active,welcome_message:welcome,
+   cover_path:body.p_cover_path===undefined?active.cover_path:body.p_cover_path,
+   background_path:body.p_background_path===undefined?active.background_path:body.p_background_path};
+  roomContent();
+ }
+ rooms=null;void listRooms();
+}
 async function createRoom(){
-  if(entering)return;
-  const title=String($('#tc-phase2-room-title')?.value||'').trim();
-  const priv=!!$('#tc-phase2-room-private')?.checked;
-  if(title.length<2||title.length>60){toast('اسم الغرفة يجب أن يكون من حرفين إلى 60');return;}
-  entering=true;
-  try{
-    const roomId=await rpc('phase2_room_create',{p_title:title,p_is_private:priv});
-    if(!UUID.test(String(roomId)))throw new Error('لم يؤكد الخادم إنشاء الغرفة');
-    if(typeof closeSheet==='function')closeSheet();
-    rooms=null;await listRooms();
-    entering=false;
-    await enterRoom(roomId);
-  }catch(err){toast(failure(err));}
-  finally{entering=false;}
+ if(entering)return;
+ const title=String($('#tc-phase2-room-title')?.value||'').trim();
+ const priv=!!$('#tc-phase2-room-private')?.checked;
+ const welcome=String($('#tc-phase2-room-welcome')?.value||'').trim();
+ const cover=$('#tc-phase2-room-cover')?.files?.[0]||null;
+ const background=$('#tc-phase2-room-background')?.files?.[0]||null;
+ if(title.length<2||title.length>60){toast('اسم الغرفة يجب أن يكون من حرفين إلى 60');return;}
+ if(welcome.length>500){toast('الترحيب يجب ألا يتجاوز 500 حرف');return;}
+ entering=true;
+ try{
+  const roomId=await rpc('phase2_room_create',{p_title:title,p_is_private:priv});
+  if(!UUID.test(String(roomId)))throw new Error('لم يؤكد الخادم إنشاء الغرفة');
+  if(typeof closeSheet==='function')closeSheet();
+  try{await customizeRoom(roomId,welcome,cover,background);}
+  catch(err){toast('أُنشئت الغرفة لكن تعذّر حفظ الترحيب أو الصورة: '+failure(err));}
+  rooms=null;await listRooms();
+  entering=false;await enterRoom(roomId);
+ }catch(err){toast(failure(err));}
+ finally{entering=false;}
 }
 function showCreate(){
-  if(!session().signedIn){go('loginPreview');return;}
-  if(active){toast('اخرج من الغرفة الحالية قبل إنشاء غرفة جديدة');return;}
-  if(typeof showSheet!=='function')return;
-  showSheet('<div class="tc-phase2-create" dir="rtl"><h3>🎙️ إنشاء غرفة حقيقية</h3>'+
-    '<label>اسم الغرفة<input id="tc-phase2-room-title" maxlength="60" placeholder="اسم غرفتك"></label>'+
-    '<label class="tc-phase2-private"><input type="checkbox" id="tc-phase2-room-private"> غرفة خاصة بالدعوات</label>'+
-    '<p>الغرف والمقاعد والرسائل تُحفظ على الخادم. يتطلب الصوت إعداد الخدمة وإذن الميكروفون.</p>'+
-    '<button class="primary" data-phase2="create-room-submit">إنشاء الغرفة</button>'+
-    '<button class="primary" data-a="close">إلغاء</button></div>',true);
+ if(!session().signedIn){go('loginPreview');return;}
+ if(active){toast('اخرج من الغرفة الحالية قبل إنشاء غرفة جديدة');return;}
+ if(typeof showSheet!=='function')return;
+ showSheet('<div class="tc-phase2-create tc-room-editor" dir="rtl"><h3>🎙️ إنشاء غرفة TotiChat</h3>'+
+  '<label>اسم الغرفة *<input id="tc-phase2-room-title" maxlength="60" required placeholder="اسم غرفتك"></label>'+
+  '<label>صورة الغرفة<input id="tc-phase2-room-cover" type="file" accept="image/png,image/jpeg,image/webp"></label>'+
+  '<label>رسالة ترحيبية للأعضاء<textarea id="tc-phase2-room-welcome" rows="3" maxlength="500" placeholder="أهلاً بيكم بغرفتنا 💜"></textarea></label>'+
+  '<label>خلفية الغرفة (اختيارية)<input id="tc-phase2-room-background" type="file" accept="image/png,image/jpeg,image/webp"></label>'+
+  '<label class="tc-phase2-private"><input type="checkbox" id="tc-phase2-room-private"> غرفة خاصة بالدعوات</label>'+
+  '<p>الاسم والترحيب والصور تُحفظ على خادم Staging الحقيقي.</p>'+
+  '<button class="primary" data-phase2="create-room-submit">إنشاء الغرفة</button>'+
+  '<button class="primary" data-a="close">إلغاء</button></div>',true);
+}
+function openSettings(){
+ if(!active||active.owner_id!==session().user?.id){toast('الإعدادات لصاحب الغرفة فقط');return;}
+ showSheet('<div class="tc-phase2-create tc-room-editor" dir="rtl"><h3>🎨 إعدادات الغرفة</h3>'+
+  '<p>الغرفة: '+esc(active.title)+'</p>'+
+  '<label>الرسالة الترحيبية<textarea id="tc-phase2-room-welcome-edit" rows="3" maxlength="500">'+esc(active.welcome_message||'')+'</textarea></label>'+
+  '<label>صورة جديدة<input id="tc-phase2-room-cover-edit" type="file" accept="image/png,image/jpeg,image/webp"></label>'+
+  '<label>خلفية جديدة<input id="tc-phase2-room-background-edit" type="file" accept="image/png,image/jpeg,image/webp"></label>'+
+  '<label class="tc-phase2-private"><input type="checkbox" id="tc-phase2-room-clear-background"> استعادة الخلفية الافتراضية</label>'+
+  '<button class="primary" data-phase2="room-settings-save">حفظ التغييرات</button>'+
+  '<button class="primary" data-a="close">إغلاق</button></div>',true);
+}
+let roomSettingsSaving=false;
+async function saveRoomSettings(){
+ if(roomSettingsSaving||!active||active.owner_id!==session().user?.id)return;
+ const id=active.id,welcome=String($('#tc-phase2-room-welcome-edit')?.value||'').trim();
+ const cover=$('#tc-phase2-room-cover-edit')?.files?.[0]||null;
+ const background=$('#tc-phase2-room-background-edit')?.files?.[0]||null;
+ const clear=!!$('#tc-phase2-room-clear-background')?.checked;
+ if(welcome.length>500){toast('الرسالة الترحيبية طويلة');return;}
+ roomSettingsSaving=true;
+ try{await customizeRoom(id,welcome,cover,background,clear);closeSheet();toast('تم حفظ إعدادات الغرفة على الخادم');}
+ catch(err){toast('تعذّر حفظ الغرفة: '+failure(err));}
+ finally{roomSettingsSaving=false;}
 }
 async function leaveRoom(){
   if(!active)return;
@@ -407,13 +472,14 @@ document.addEventListener('click',event=>{
   const b=event.target.closest('[data-phase2],[data-royal="create-room"],[data-royal="hero"],[data-a="leaveRoom"],[data-a="seat"],[data-a="sendPreview"]');
   if(!b)return;
   const kind=b.dataset.phase2||b.dataset.royal||b.dataset.a;
-  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy','retry-rooms'].includes(kind))return;
+  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy','retry-rooms','room-settings-save'].includes(kind))return;
   if((kind==='seat'||kind==='seat-action'||kind==='leaveRoom'||kind==='sendPreview')&&!active)return;
   event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
   if(kind==='retry-rooms')void listRooms();
   else if(kind==='create-room')showCreate();
   else if(kind==='hero')toast('اختر غرفة حقيقية من قائمة الغرف');
   else if(kind==='create-room-submit'){void createRoom();}
+  else if(kind==='room-settings-save'){void saveRoomSettings();}
   else if(kind==='open-room')void enterRoom(b.dataset.room||'');
   else if(kind==='seat'||kind==='seat-action')void setSeat(Number(b.dataset.seat||Number(b.dataset.v)+1));
   else if(kind==='leaveRoom')void leaveRoom();
@@ -473,6 +539,6 @@ window.TotiPhase2Rooms=Object.freeze({
   getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id,welcomeMessage:active.welcome_message||''}):null,
   getMyMicState:()=>{const m=members.find(x=>x.user_id===session().user?.id);return Object.freeze({seatNo:m?.seat_no??null,isMuted:m?.is_muted??true});},
   getMembers:()=>members.map(m=>Object.freeze({user_id:m.user_id,display_name:m.display_name})),
-  refreshRoom
+  refreshRoom,openSettings
 });
 })();
