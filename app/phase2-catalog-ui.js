@@ -9,7 +9,7 @@ const live=()=>auth.state().signedIn;
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=x=>Number.isSafeInteger(Number(x))?Number(x).toLocaleString('en-US'):String(x);
 const categories={frames:'الإطارات',cars:'المركبات',bubbles:'الفقاعات',badges:'الأوسمة',vip:'VIP',entrances:'الدخول',cards:'CP'};
-let storeFilter='',giftCategory='',giftId='',recipientId='',viewVersion=0,giftBusy=false,pendingGift=null;
+let storeFilter='',giftCategory='',giftId='',recipientId='',giftQuantity=1,viewVersion=0,giftBusy=false,pendingGift=null;
 function shell(title,type){
  return page(title,'<section class="visual-dark" data-live-catalog="'+type+'"><p class="visual-warn">الخيارات والأسعار من قاعدة TotiChat الجديدة. الاختيار لا يخصم رصيداً؛ الشراء والإرسال يتطلبان تأكيدك وتأكيد الخادم.</p><div class="tc-catalog-content" role="status">جارٍ جلب الخيارات من الخادم…</div></section>');
 }
@@ -19,7 +19,7 @@ vRecharge=function(){return live()?shell('باقات الشحن عبر الوك�
 cp=function(){return live()?shell('رفقاء الروح · CP','cp'):prevCP.apply(this,arguments);};
 showGifts=function(){
  if(!live())return prevGifts.apply(this,arguments);
- giftId='';recipientId='';
+ giftId='';recipientId='';giftQuantity=1;
  showSheet(head('صندوق الهدايا')+'<section data-live-catalog="gift"><p class="vip-noteonly">إرسال الهدايا يخصم السعر الحقيقي ويضيف الماس للمستلم بعد تأكيد الخادم.</p><div class="tc-catalog-content" role="status">جارٍ تحميل الهدايا…</div></section>');
  void paint();
 };
@@ -97,7 +97,7 @@ async function paint(){
     '<div class="giftTabs">'+cats.map(c=>button(c.label,'gift-category',c.id,giftCategory===c.id)).join('')+'</div>'+
     '<div class="giftgrid">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small></button>').join('')+'</div>'+
     (!rows.length?'<p>لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+
-    '<div class="sendrow"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
+    '<div class="sendrow"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><label>العدد <select data-catalog-quantity aria-label="عدد الهدايا">'+[1,7,17,77,777].map(q=>'<option value="'+q+'" '+(giftQuantity===q?'selected':'')+'>'+q+'</option>').join('')+'</select></label><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
   }
   if(version!==viewVersion||owner!==auth.state().user?.id||!root.isConnected)return;
   const focused=root.querySelector('[data-catalog-search]');
@@ -121,10 +121,13 @@ async function sendGift(target){
  if(giftBusy||auth.state().user?.id!==owner||room.id!==window.TotiPhase2Rooms?.getRoomSummary?.()?.id)return;
  const gift=gifts.find(g=>g.id===chosenGift);
  if(!gift){showToast('الهدية غير متاحة');return;}
- const payload={p_room_id:room.id,p_recipient_id:chosenRecipient,p_gift_id:chosenGift,p_quantity:1,p_expected_price:gift.price};
+ if(![1,7,17,77,777].includes(giftQuantity))throw Error('عدد الهدايا غير صحيح');
+ const total=Number(gift.price)*giftQuantity;
+ if(!Number.isSafeInteger(total)||total<=0){showToast('سعر الهدية غير صالح');return;}
+ const payload={p_room_id:room.id,p_recipient_id:chosenRecipient,p_gift_id:chosenGift,p_quantity:giftQuantity,p_expected_price:gift.price};
  const signature=JSON.stringify([owner,payload]);
  if(!pendingGift||pendingGift.signature!==signature){
-  if(!confirm('إرسال '+gift.name+' مقابل '+num(gift.price)+' عملة؟'))return;
+  if(!confirm('إرسال '+gift.name+' × '+giftQuantity+' إلى العضو مقابل '+num(total)+' كوينز؟'))return;
   pendingGift={signature,requestId:crypto.randomUUID()};
  }
  giftBusy=true;target.disabled=true;target.textContent='جارٍ إرسال الهدية…';
@@ -158,6 +161,7 @@ window.addEventListener('click',event=>{
  else if(action==='recipient')recipientId=value;
  void paint();
 },true);
+document.addEventListener('change',event=>{if(event.target?.matches?.('[data-catalog-quantity]'))giftQuantity=Number(event.target.value);});
 document.addEventListener('input',event=>{if(event.target?.matches?.('[data-catalog-search]'))void paint();});
 window.addEventListener('totichat-phase2-auth',()=>{if(!live()){viewVersion++;pendingGift=null;pendingPurchase=null;visibleStore=[];giftId='';recipientId='';storeFilter='';}else void paint();});
 })();
