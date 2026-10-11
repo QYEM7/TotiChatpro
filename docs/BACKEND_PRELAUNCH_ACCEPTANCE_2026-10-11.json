@@ -1,0 +1,173 @@
+{
+  "project": "TotiChat",
+  "branch": "develop/phase-2",
+  "staging_project": "rziaedugbdwefbefcxjt",
+  "as_of": "2026-10-11",
+  "intent": "prelaunch beta acceptance; no production merge or release authorization",
+  "release_allowed": false,
+  "reviewer": null,
+  "reviewer_approved_at": null,
+  "gates": [
+    {
+      "id": "staging_schema_security",
+      "passed": true,
+      "required": true,
+      "evidence": "https://github.com/QYEM7/TotiChatpro/blob/develop/phase-2/docs/STAGING_BACKEND_DELIVERY_AUDIT_2026-10-11.md",
+      "scope": "Isolated staging schema, RLS and privileged RPC audit"
+    },
+    {
+      "id": "local_fullstack_auth_and_rooms",
+      "passed": true,
+      "required": true,
+      "evidence": "https://github.com/QYEM7/TotiChatpro/actions/runs/38143977169",
+      "scope": "Disposable GoTrue and RLS room/auth integration"
+    },
+    {
+      "id": "local_financial_conservation",
+      "passed": true,
+      "required": true,
+      "evidence": "https://github.com/QYEM7/TotiChatpro/actions/runs/38142630445",
+      "scope": "Disposable coin/ledger/agency concurrency only; no real money"
+    },
+    {
+      "id": "local_notifications_security",
+      "passed": true,
+      "required": true,
+      "evidence": "https://github.com/QYEM7/TotiChatpro/actions/runs/38144753771",
+      "scope": "Three disposable Auth accounts and actual moderation->private notification"
+    },
+    {
+      "id": "local_room_moderation_security",
+      "passed": true,
+      "required": true,
+      "evidence": "https://github.com/QYEM7/TotiChatpro/actions/runs/38143977169",
+      "scope": "Four disposable Auth identities, Owner hierarchy, kick/ban/mute"
+    },
+    {
+      "id": "local_vip_entitlements",
+      "passed": true,
+      "required": true,
+      "evidence": "https://github.com/QYEM7/TotiChatpro/actions/runs/38144280120",
+      "scope": "Owner-only VIP 1–10 grant/revoke and expiry; not VIP perks"
+    },
+    {
+      "id": "local_schema_replay",
+      "passed": true,
+      "required": true,
+      "evidence": "https://github.com/QYEM7/TotiChatpro/actions/runs/38144993507",
+      "scope": "Unlinked clean Postgres canonical migrations"
+    },
+    {
+      "id": "live_voice_two_phones",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Real LiveKit/TURN audio on two Android phones and separate networks"
+    },
+    {
+      "id": "sfu_kick_ban_mute",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Real remote LiveKit participant kick, mute, ban and token revocation"
+    },
+    {
+      "id": "hosted_two_users",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Two verified remote staging users execute room, wallet, agency and message flows"
+    },
+    {
+      "id": "cloudflare_updated_preview",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Approved UI build actually published and smoke-tested on hosted review URL"
+    },
+    {
+      "id": "auth_google_recovery_mail",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Google OAuth, account recovery, MFA, email confirmation across real devices"
+    },
+    {
+      "id": "leaked_password_protection",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Staging Auth leaked-password protection enabled and rechecked"
+    },
+    {
+      "id": "monthly_host_payroll_conservation",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Approved pay rates, earned diamond liabilities, immutable settlement, tested no-loss month close"
+    },
+    {
+      "id": "verified_gifts_wallet_remote",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Two hosted accounts transfer/spend/redeem coins and diamonds without counterparty double spend"
+    },
+    {
+      "id": "vip_benefits_and_medals",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Approved entitlement frames, visibility, medal milestones and duration rules end-to-end"
+    },
+    {
+      "id": "backend_room_games",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Multiplayer/solo room game state and presence with no interrupted audio"
+    },
+    {
+      "id": "notification_device_delivery",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "FCM/APNs delivery, opt-outs and Android background notification acceptance"
+    },
+    {
+      "id": "owner_partner_agent_permissions_hosted",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Owner, designated partner, DB, agency and support negative tests on hosted staging"
+    },
+    {
+      "id": "production_backup_offsite_restore",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Verified encrypted independent Postgres and Storage offsite backup/restore"
+    },
+    {
+      "id": "android_reinstall_update",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Signed Android install, upgrade, deep links, battery, mic permission and regression"
+    },
+    {
+      "id": "load_abuse_soak",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Rate limits, real-time channel stress, cancellation, 30-day reliability and security audit"
+    },
+    {
+      "id": "approval_client_beta",
+      "passed": false,
+      "required": true,
+      "evidence": null,
+      "scope": "Independent QA and explicit client sign-off for beta"
+    }
+  ]
+}
