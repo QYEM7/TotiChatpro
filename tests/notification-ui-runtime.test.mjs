@@ -14,6 +14,13 @@ function harness(){
   appendChild(node){this.children.push(node);return node}
   replaceChildren(...nodes){this.children=nodes}
   setAttribute(key,val){this.attributes[key]=val}
+  hasAttribute(key){
+   if(key.startsWith('data-')){
+    const camel=key.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase());
+    return Object.prototype.hasOwnProperty.call(this.dataset,camel);
+   }
+   return Object.prototype.hasOwnProperty.call(this.attributes,key);
+  }
   querySelector(selector){
    if(selector==='[data-t57-open]')return this.children.find(c=>c.dataset.t57Open!==undefined)||null;
    return null;
