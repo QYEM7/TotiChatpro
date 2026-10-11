@@ -20,7 +20,10 @@ test('T23 no fake playing, audio transport or blind HTML interpolation',()=>{
  assert(fs.readFileSync(root+'phase4-voice-messages-ui.js','utf8').includes('phase5-music-ui.js'));
 });
 test('T23 signed-in app keeps room screen and mic; Owner queues songs',()=>{
- assert(live.includes("'musicPreview',...authScreens"));
+ // Music must remain accessible, independent of newly added chat routes.
+ const routes=live.match(/const allowed=new Set\(\[([^\]]+)\]\)/)?.[1]||'';
+ assert.match(routes,/'musicPreview'/);
+ assert.match(routes,/'room'/);
  assert(ui.includes("screen==='room'&&getRoom()?.id"));
  assert(ui.includes('showSheet('));
  assert(ui.includes("if(!room?.isOwner"));
