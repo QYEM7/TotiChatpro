@@ -100,8 +100,11 @@ denied(await rpc('phase5_room_game_action',owner,{
 ok(await rpc('phase5_room_game_action',owner,{
  p_room_id:room,p_action:'start',p_cell:null,p_request_id:randomUUID()
 }),'second real game');
-ok(await rpc('phase2_room_leave',owner,{p_room_id:room}),'Owner room departure');
-const after=ok(await rpc('phase5_room_game_state',opponent,{p_room_id:room}),'room departure cancellation');
+ok(await rpc('phase5_room_game_action',opponent,{
+ p_room_id:room,p_action:'join',p_cell:null,p_request_id:randomUUID()
+}),'opponent joins second match');
+ok(await rpc('phase2_room_leave',opponent,{p_room_id:room}),'opponent room departure');
+const after=ok(await rpc('phase5_room_game_state',owner,{p_room_id:room}),'room departure cancellation');
 if(after.hasGame!==true||after.status!=='cancelled')stop('Room departure did not cancel stale live game');
 denied(await req('/rest/v1/room_game_matches?select=id',{jwt:opponent.jwt}),
  'direct match read without RPC');
