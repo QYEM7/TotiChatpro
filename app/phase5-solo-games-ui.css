@@ -1,0 +1,8 @@
+.tc-ttt-solo-game{direction:rtl;text-align:center;padding:14px 16px 25px;color:#244b3b;max-height:80dvh;overflow:auto}
+.tc-ttt-solo-game header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tc-ttt-solo-game h3{font-size:18px;margin:4px 0 10px}
+.tc-ttt-solo-game p{font-size:12px;line-height:1.6}
+.tc-ttt-solo-game .tc-ttt-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:285px;margin:15px auto}
+.tc-ttt-solo-game .tc-ttt-cell{aspect-ratio:1;min-width:0;background:#e8f5e8;border:2px solid #9bba9f;color:#174b3a;border-radius:13px;font-size:36px;font-weight:900}
+.tc-ttt-solo-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.tc-ttt-solo-actions button,.tc-ttt-solo-game header button{background:#e8f5e8;border:1px solid #9fbea5;border-radius:10px;color:#245b43;padding:10px;font-weight:750}
