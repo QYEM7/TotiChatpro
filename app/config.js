@@ -1,8 +1,8 @@
-/* Public, browser-safe configuration for independent TotiChatpro backend.
- * Supabase publishable key is not a secret. Security comes from RLS.
- * NEVER put a service_role key, secret key or database password here.
+/* TotiChat develop/phase-2 — verified ISOLATED staging public config.
+ * This is a browser-safe publishable key, never a secret.
+ * Production cutover requires a separate explicit release approval.
  */
 window.TOTICHAT_PUBLIC_BACKEND=Object.freeze({
-  supabaseUrl:"https://sqedsnyvjblvbjbizcay.supabase.co",
-  publishableKey:"sb_publishable_PkQg_zjbrhDmAj00qJa6Gg_6_86l0Ui"
+  supabaseUrl:"https://rziaedugbdwefbefcxjt.supabase.co",
+  publishableKey:"sb_publishable_vVYku5VtyohuiGgehC3EdA_rSDGOUKB"
 });
