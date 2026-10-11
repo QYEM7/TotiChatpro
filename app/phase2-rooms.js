@@ -140,6 +140,7 @@ function roomContent(){
     if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا حقيقية الآن';
     const count=$('.giftTicker .orb b',view);
     if(count)count.textContent='0';
+    window.TotiGlobalGiftFeed?.decorateTicker?.(view);
     const all=$$('.seats .seat',view);
     for(const [index,button] of all.entries()){
       const slot=index+1;
