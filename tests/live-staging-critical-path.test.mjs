@@ -113,9 +113,11 @@ test('admin controls are real, role-gated and never expose service-role secrets'
 test('connected support ticket center uses verified server-side actions',()=>{
  const html=file('app/index.html');
  const ui=file('app/phase5-support-ui.js');
+ const loader=file('app/phase2-security-ui.js');
  const controls=file('app/phase2-backend-controls.js');
  const sql=file('supabase/migrations/20261011000400_phase5_support_tickets.sql');
- assert.match(html,/phase5-support-ui/);
+ assert.match(loader,/phase5-support-ui/);
+ assert.doesNotMatch(html,/phase5-support-ui/);
  assert.match(ui,/phase5_support_/);
  assert.match(controls,/supportOpen/);
  assert.match(sql,/phase3\.actor/);
