@@ -88,3 +88,22 @@ test('voice UI reports unavailable SFU and allows explicit playback resume',()=>
  assert.match(voice,/resumeAudio/);
  assert.match(voice,/tc-real-voice-feedback/);
 });
+
+
+test('admin controls are real, role-gated and never expose service-role secrets',()=>{
+ const admin=file('app/phase2-backend-controls.js');
+ const html=file('app/index.html');
+ const sql=file('supabase/migrations/20261011000303_global_gift_owner_controls.sql');
+ const staff=file('supabase/migrations/20261011000302_db_staff_host_agency_open_only.sql');
+ const wrappers=file('supabase/migrations/20261011000300_secure_social_rpc_wrappers.sql');
+ assert.match(html,/phase2-backend-controls\.js/);
+ assert.match(admin,/phase3_admin_session/);
+ assert.match(admin,/phase3_global_gift_admin/);
+ assert.match(admin,/isMainPartner/);
+ assert.match(admin,/host_agency\.open/);
+ assert.doesNotMatch(admin,/service_role|SUPABASE_SERVICE_ROLE_KEY|LIVEKIT_API_SECRET/);
+ assert.match(sql,/isMainPartner/);
+ assert.match(sql,/gift_global_config/);
+ assert.match(staff,/p_action='approve_registration' and reg\.kind='host'/);
+ assert.match(wrappers,/security invoker/);
+});
