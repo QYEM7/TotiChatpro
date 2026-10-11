@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f8f5">
+<meta name="description" content="لوحة التحكم الرسمية والمحمية لتطبيق TotiChat — Staging فقط">
+<title>TotiChat | مركز الإدارة</title>
+<link rel="icon" href="../assets/images/toti_app_icon_1790712628579.jpg">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a href="#main" class="skip">الانتقال إلى المحتوى</a>
+<div id="auth-screen" class="auth-screen">
+ <div class="login-panel">
+  <div class="brand login-brand"><img src="../assets/images/toti_falcon_logo_1790422919580.jpg" alt="شعار TotiChat"><span><strong>TotiChat</strong><small>ADMIN CONTROL CENTER</small></span></div>
+  <p class="eyebrow">بوابتك الآمنة للتحكم</p>
+  <h1>إدارة بلا حدود.<br><em>برؤية أوضح.</em></h1>
+  <p class="login-lead">منصة خاصة لمالك TotiChat وفريقه المخوّل. البيانات والعمليات مرتبطة ببيئة الاختبار فقط.</p>
+  <form id="login-form" autocomplete="on">
+   <label for="email">البريد الإلكتروني</label>
+   <div class="field"><span class="field-ico">✉</span><input type="email" name="email" id="email" autocomplete="username" placeholder="name@example.com" required></div>
+   <label for="password">كلمة المرور</label>
+   <div class="field"><span class="field-ico">⌑</span><input type="password" name="password" id="password" autocomplete="current-password" minlength="6" placeholder="أدخل كلمة المرور" required></div>
+   <button type="submit" id="login-submit" class="btn btn-primary btn-full">تسجيل الدخول الآمن <span aria-hidden="true">←</span></button>
+  </form>
+  <div class="login-or">أو عبر حسابك المتصل</div>
+  <button type="button" id="github-login" class="btn btn-secondary btn-full">الدخول باستخدام GitHub</button>
+  <p id="login-error" role="alert" class="error-text"></p>
+  <div class="security-note"><span class="tiny-dot"></span> دخول محمي · جلسة محدودة · صلاحيات من الخادم</div>
+ </div>
+ <aside class="login-art" aria-label="هوية إدارة TotiChat">
+  <div class="art-glow"></div>
+  <div class="art-top"><span class="art-pill">PRIVATE ADMIN PANEL</span><span class="art-ring">✧</span></div>
+  <div class="art-logo"><img src="../assets/images/toti_falcon_logo_1790422919580.jpg" alt=""></div>
+  <div class="art-bottom"><p class="art-kicker">TotiChat / STAGING</p><h2>كل تفاصيل التطبيق.<br>تحت سيطرتك.</h2><p>تقارير واضحة، صلاحيات دقيقة، وتحكم مركزي مصمم لك.</p></div>
+ </aside>
+</div>
+<div id="dashboard" class="app-shell hidden">
+ <aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand brand"><img src="../assets/images/toti_falcon_logo_1790422919580.jpg" alt="شعار TotiChat"><span><strong>TotiChat</strong><small>ADMINISTRATION</small></span></div>
+  <div class="workspace-tag"><span class="live-circle"></span><span>بيئة الاختبار Staging</span></div>
+  <div class="nav-scroll"><nav id="side-nav" aria-label="قائمة الإدارة"></nav></div>
+  <div class="sidebar-footer"><div class="help-tile"><div class="tile-icon">✦</div><strong>مساحة إدارة آمنة</strong><small>كل إجراء حساس يخضع لصلاحيات قاعدة البيانات.</small></div><button id="logout" type="button" class="logout-btn">↪ <span>تسجيل الخروج</span></button></div>
+ </aside>
+ <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+ <div class="page-area">
+  <header class="topbar">
+   <div class="topbar-right"><button class="menu-toggle" id="menu-toggle" aria-label="فتح القائمة">☰</button><span class="breadcrumb">لوحة التحكم</span><span class="bread-sep">/</span><strong id="crumb">نظرة عامة</strong></div>
+   <div class="topbar-left"><span class="env-pill"><span></span> Staging only</span><button class="icon-btn" id="refresh-btn" title="تحديث البيانات" aria-label="تحديث البيانات">↻</button><div class="account-mini"><div class="account-avatar">T</div><span><strong id="account-role">موظف إدارة</strong><small id="account-email">—</small></span></div></div>
+  </header>
+  <main id="main" class="main-content" tabindex="-1">
+   <div id="page-heading"></div>
+   <div id="page-body" aria-live="polite"></div>
+  </main>
+  <footer class="app-footer"><span>© TotiChat — Admin Workspace</span><span>Staging · لا توجد بيانات تجريبية معروضة</span></footer>
+ </div>
+</div>
+<dialog id="banner-dialog" class="modal">
+ <form id="banner-form">
+  <div class="modal-top"><div><p class="eyebrow">إدارة المحتوى</p><h2 id="banner-dialog-title">إضافة بنر</h2></div><button type="button" id="close-banner" class="icon-btn" aria-label="إغلاق">✕</button></div>
+  <div class="modal-grid">
+   <div class="form-field wide"><label for="banner-title">عنوان البنر *</label><input id="banner-title" name="title" maxlength="120" required placeholder="مثلاً: فعاليات TotiChat"></div>
+   <div class="form-field wide"><label for="banner-image">صورة البنر (JPG / PNG / WebP — تحفظ WebP فقط)</label><input id="banner-image" name="image" type="file" accept="image/jpeg,image/png,image/webp"><div id="banner-preview" class="upload-preview"><span>المعاينة تظهر هنا بعد اختيار صورة</span></div><small>قص تلقائي بنسبة 3:1 · حد 500KB بعد الضغط · لا فيديو ولا GIF</small></div>
+   <div class="form-field"><label for="banner-status">حالة البنر</label><select id="banner-status" name="status"><option value="draft">مسودة</option><option value="published">منشور</option><option value="archived">مؤرشف</option></select></div>
+   <div class="form-field"><label for="banner-order">ترتيب الظهور</label><input id="banner-order" name="sort_order" type="number" min="0" max="10000" value="100" required></div>
+   <div class="form-field"><label for="banner-link-kind">عند الضغط</label><select id="banner-link-kind" name="link_kind"><option value="none">بدون إجراء</option><option value="screen">فتح شاشة بالتطبيق</option></select></div>
+   <div class="form-field"><label for="banner-link-target">شاشة الوجهة</label><select id="banner-link-target" name="link_target"><option value="">بدون وجهة</option><option value="home">الرئيسية</option><option value="room">غرفة صوتية</option><option value="vip">VIP</option><option value="wallet">المحفظة</option><option value="storePreview">المتجر</option><option value="me">ملفي</option><option value="cp">CP</option><option value="ranks">التصنيفات</option></select></div>
+   <div class="form-field"><label for="banner-starts">بداية العرض (اختياري)</label><input id="banner-starts" name="starts_at" type="datetime-local"></div>
+   <div class="form-field"><label for="banner-ends">نهاية العرض (اختياري)</label><input id="banner-ends" name="ends_at" type="datetime-local"></div>
+  </div>
+  <div class="modal-actions"><p id="banner-form-message" role="status"></p><button type="button" id="cancel-banner" class="btn btn-secondary">إلغاء</button><button type="submit" id="save-banner" class="btn btn-primary">حفظ البنر</button></div>
+ </form>
+</dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="./app.js" defer></script>
+</body>
+</html>
