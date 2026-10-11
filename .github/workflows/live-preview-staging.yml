@@ -12,6 +12,8 @@ on:
       - 'tests/live-staging-critical-path.test.mjs'
       - 'supabase/migrations/20261011000100_phase2_room_identity_background.sql'
       - 'supabase/migrations/20261011000101_phase2_room_image_revision.sql'
+      - 'supabase/migrations/**'
+      - 'docs/STAGING_BACKEND_HANDOFF_2026-10-11.md'
       - 'scripts/build-registered-staging-preview.mjs'
       - 'docs/preview-public-backend.json'
       - 'package.json'
@@ -38,6 +40,9 @@ jobs:
           node --check app/phase2-auth.js
           node --check app/phase2-voice-ui.js
           node --check app/phase2-live-mode.js
+          node --check app/phase2-private-messages.js
+          node --check app/phase2-global-gifts.js
+          node --check app/phase2-catalog-ui.js
       - name: Assemble approved browser UI only (NEVER Gradle or APK)
         run: npm run build
       - name: Smoke-build full approved website with SYNTHETIC isolated public config (never deploy)
