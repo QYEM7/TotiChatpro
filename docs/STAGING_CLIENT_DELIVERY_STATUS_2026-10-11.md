@@ -64,3 +64,8 @@ Date: 2026-10-11
 - Confirm GitHub CI and deployed Cloudflare/Vercel preview at exact commit; do not call a source-only check a successful deployment.
 - Approve configurable host salary, commission and target policies and build/verify immutable monthly liabilities and controlled settlement **before** clearing any monthly diamonds.
 - Complete incomplete preview-only routes and Android install/sign/release verification. **Do not claim 100% complete** before these checks.
+
+### Final QA update for this iteration
+- Fixed real room wallpaper display in approved visual identity by writing the existing `--room-art` CSS variable; reset restores the original artwork and keeps all 15 seats.
+- Revalidated 7/7 original static critical-path checks after this fix; 2/2 new support and closed-month checks also passed (9/9 static contract checks total). These are NOT live user end-to-end tests.
+- Latest Staging migration count is 46; Supabase still reports the unresolved leaked-password protection warning, and external Vercel deployment access is forbidden (403).
