@@ -48,8 +48,10 @@ jobs:
         run: node --test --test-concurrency=1 tests/*.test.cjs tests/*.test.mjs
       - name: Audit committed secrets (no remote database)
         run: node scripts/t03-secret-audit.mjs
-      - name: Build approved app and staging-only browser preview
-        run: npm run build:staging
+      - name: Build approved app and registered STAGING-only browser preview
+        run: |
+          npm run build
+          node scripts/build-registered-staging-preview.mjs
       - name: Verify preview contains no Android APK or production backend
         shell: bash
         run: |
