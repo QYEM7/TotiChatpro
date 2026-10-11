@@ -148,7 +148,18 @@ async function muteToggle(){
   audioError=error(e);
   if(!valid())return;
   if(!updated){
-    // If enabling audio fails, revoke publishing at the database immediately.
+    // Enabling may have partially published a local track before throwing.
+    // Revoke it locally first; if that fails, disconnect the entire media room.
+    try{
+      if(!sdk)throw new Error('Voice client missing');
+      await sdk.microphone(false);
+      if(!valid())return;
+      micPublished=false;
+    }catch(_){
+      if(!valid())return;
+      await tearDown();
+    }
+    // Independently roll back the server-side permission (best effort).
     try{await auth.requestData('/rest/v1/rpc/phase2_room_set_muted',{
       method:'POST',body:{p_room_id:info.id,p_muted:true}
     });}catch(_){}
