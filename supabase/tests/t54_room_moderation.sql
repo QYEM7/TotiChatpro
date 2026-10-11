@@ -51,6 +51,16 @@ begin
  begin perform public.phase2_room_set_muted(rid,false);
  exception when insufficient_privilege then denied:=true;end;
  if not denied then raise exception 'Muted member bypassed moderator with self-service unmute';end if;
+ -- Leaving and rejoining cannot erase a persistent moderator restriction.
+ perform public.phase2_room_leave(rid);
+ perform public.phase2_room_join(rid);
+ perform public.phase2_room_take_seat(rid,3);
+ if not (select moderation_muted from public.room_members where user_id=guest) then
+   raise exception 'Moderator mute disappeared after rejoin';end if;
+ denied:=false;
+ begin perform public.phase2_room_set_muted(rid,false);
+ exception when insufficient_privilege then denied:=true;end;
+ if not denied then raise exception 'Rejoined member bypassed persisted mute';end if;
  perform set_config('request.jwt.claims',
    jsonb_build_object('sub',mod_id,'session_id',mod_sid,'aal','aal1')::text,true);
  perform public.phase2_room_moderate(rid,guest,'allow_mic',gen_random_uuid());
@@ -61,6 +71,19 @@ begin
  perform public.phase2_room_set_muted(rid,false);
  if (select is_muted from public.room_members where user_id=guest)
  then raise exception 'Member cannot unmute after moderator clears restriction';end if;
+ -- Hierarchy: only the room Owner may revoke a mute that the Owner imposed.
+ perform set_config('request.jwt.claims',
+   jsonb_build_object('sub',own,'session_id',own_sid,'aal','aal1')::text,true);
+ perform public.phase2_room_moderate(rid,guest,'mute',gen_random_uuid());
+ perform set_config('request.jwt.claims',
+   jsonb_build_object('sub',mod_id,'session_id',mod_sid,'aal','aal1')::text,true);
+ denied:=false;
+ begin perform public.phase2_room_moderate(rid,guest,'allow_mic',gen_random_uuid());
+ exception when insufficient_privilege then denied:=true;end;
+ if not denied then raise exception 'Moderator removed room Owner imposed mute';end if;
+ perform set_config('request.jwt.claims',
+   jsonb_build_object('sub',own,'session_id',own_sid,'aal','aal1')::text,true);
+ perform public.phase2_room_moderate(rid,guest,'allow_mic',gen_random_uuid());
  perform set_config('request.jwt.claims',
    jsonb_build_object('sub',mod_id,'session_id',mod_sid,'aal','aal1')::text,true);
  perform public.phase2_room_moderate(rid,guest,'release_seat',gen_random_uuid());
