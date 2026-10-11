@@ -10,6 +10,7 @@ on:
       - 'tests/live-preview-build.test.mjs'
       - 'tests/registered-staging-preview.test.mjs'
       - 'tests/live-staging-critical-path.test.mjs'
+      - 'tests/live-dm-race.test.mjs'
       - 'tests/staging-release-regression.test.mjs'
       - 'tests/phase2-foundation.test.mjs'
       - 'supabase/migrations/20261011000100_phase2_room_identity_background.sql'
