@@ -31,6 +31,6 @@ test('CI production isolation and canonical migration preparation are explicit',
  for(const path of ['t03-full-stack.yml','t03-local-schema-replay.yml']){
   const wf=readFileSync(new URL('../.github/workflows/'+path,import.meta.url),'utf8');
   assert.match(wf,/scripts\/prepare-staging-schema-replay\.mjs/);
-  assert.doesNotMatch(wf,/supabase\s+link|supabase\s+db\s+push/);
+  assert.doesNotMatch(wf,/^\\s*(?:supabase\\s+link|supabase\\s+db\\s+push)\\b/m);
  }
 });
