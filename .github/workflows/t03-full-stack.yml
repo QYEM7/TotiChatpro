@@ -36,6 +36,7 @@ on:
     branches: [develop/phase-2]
     paths:
       - 'scripts/t03-local-auth-smoke.mjs'
+      - 'scripts/t59-social-e2e.mjs'
       - 'scripts/t06-parallel-support-e2e.mjs'
       - 'scripts/t06-parallel-finance-e2e.mjs'
       - 'scripts/t30-reseller-flow-e2e.mjs'
