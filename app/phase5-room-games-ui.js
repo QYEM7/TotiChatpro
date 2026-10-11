@@ -9,7 +9,7 @@ if(!auth||!rooms||!window.TotiLiveMode?.enabled)return;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
 const validUUID=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s||'');
-let owner='',roomId='',epoch=0,current=null,pending=false,failed=false,started=false;
+let owner='',roomId='',epoch=0,current=null,pending=false,failed=false,actionError='';
 function signed(){return auth.state().signedIn===true&&auth.state().user?.id===owner}
 function inside(){
  return signed()&&rooms.getRoomSummary?.()?.id===roomId&&
@@ -72,6 +72,7 @@ function render(){
  if(!finished&&(isPlayer||rooms.getRoomSummary?.()?.isOwner))
   makeAction(actions,'إلغاء المباراة','cancel',true);
  if(finished)makeAction(actions,'إنشاء مباراة جديدة','start',true);
+ if(actionError)msg(actionError);
 }
 function makeAction(parent,text,action,enabled){
  const b=document.createElement('button');b.type='button';b.dataset.tcGameAction=action;
@@ -83,7 +84,7 @@ async function refresh(){
  try{
   const result=await rpc('phase5_room_game_state',{p_room_id:room});
   if(stamp!==epoch||id!==owner||!inside())return;
-  validate(result);current=result;failed=false;
+  validate(result);current=result;failed=false;actionError='';
  }catch(e){if(stamp===epoch&&inside()){failed=true;msg('تعذّر الوصول للعبة: '+String(e.message).slice(0,95))}}
  finally{pending=false;if(stamp===epoch)render()}
 }
@@ -98,14 +99,14 @@ async function mutate(action,cell=null){
    p_room_id:oldRoom,p_action:action,p_cell:cell,p_request_id:crypto.randomUUID()
   });
   if(stamp!==epoch||owner!==oldOwner||!inside())return;
-  validate(data);current=data;failed=false;
- }catch(e){if(stamp===epoch&&inside())msg('تعذّر تنفيذ الحركة: '+String(e.message||'').slice(0,130))}
+  validate(data);current=data;failed=false;actionError='';
+ }catch(e){if(stamp===epoch&&inside())actionError='تعذّر تنفيذ الحركة: '+String(e.message||'').slice(0,130)}
  finally{pending=false;if(stamp===epoch)render()}
 }
 function open(){
  const room=rooms.getRoomSummary?.(),user=auth.state().user?.id;
  if(!auth.state().signedIn||!room?.id||!validUUID(room.id)||!user)return;
- owner=user;roomId=room.id;epoch++;current=null;pending=false;failed=false;
+ owner=user;roomId=room.id;epoch++;current=null;pending=false;failed=false;actionError='';
  if(typeof showSheet!=='function')return;
  // An ordinary overlay is independent of the room's WebRTC connection.
  showSheet('<section id="tc-real-room-game" dir="rtl" class="tc-real-room-game">'+
@@ -134,7 +135,7 @@ document.addEventListener('click',event=>{
 window.addEventListener('totichat-phase2-auth',()=>{
  const id=auth.state().user?.id||'';
  if(id!==owner){
-  epoch++;owner=id;current=null;roomId='';failed=false;pending=false;
+  epoch++;owner=id;current=null;roomId='';failed=false;pending=false;actionError='';
   if($('#tc-real-room-game')&&typeof closeSheet==='function')closeSheet();
  }
 });
