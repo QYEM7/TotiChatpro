@@ -18,9 +18,11 @@ const el=(tag,label,cls)=>{
 let owner='',epoch=0,loaded=0,items=[],pending=false,failed=false;
 let approvedOwner=false,checkingOwner=false,ownerChecked=0,busy=false;
 function signed(){return auth.state().signedIn===true&&auth.state().user?.id===owner}
+function show(){return Boolean($('#tc-medal-owner-sheet')&&$('#overlay')?.classList.contains('show'))}
 function reidentify(){
  const id=auth.state().user?.id||'';
  if(id===owner)return;
+ if(show())closeSheet();
  owner=id;epoch++;loaded=0;items=[];pending=false;failed=false;
  approvedOwner=false;checkingOwner=false;ownerChecked=0;busy=false;
 }
