@@ -57,6 +57,10 @@ test('private text inbox is authenticated and can be opened without leaving voic
  assert.match(dm,/rpc\('thread'/);
  assert.match(dm,/rpc\('mark_read'/);
  assert.match(dm,/rpc\('block'/);
+ assert.match(dm,/data-tc-dm-blocks/);
+ assert.match(dm,/tcDmUnblock/);
+ assert.match(dm,/p_block:false/);
+ assert.match(dm,/dm_blocks\?select/);
  assert.match(dm,/totichat-private-message-update/);
  assert.match(dm,/data-tc-dm-close/);
  assert.doesNotMatch(dm,/getUserMedia|MediaRecorder|microphone\(/);
