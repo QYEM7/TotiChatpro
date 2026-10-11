@@ -68,8 +68,12 @@ const list=ok(await rpc('phase5_social_list',a,{
  p_kind:'friends',p_limit:25,p_before:null}),'friend list');
 if(list.items?.length!==1||list.items[0].user_id!==b.id||
  list.items[0].is_following!==true)stop('Friend list contains wrong real account');
-const stranger=ok(await request('/rest/v1/social_follows?select=follower_id',{jwt:other.jwt}),'direct RLS probe');
-if(stranger.length!==0)stop('Private social edges exposed to unrelated account');
+const stranger=await request('/rest/v1/social_follows?select=follower_id',{jwt:other.jwt});
+if(stranger.status>=200&&stranger.status<300){
+ if(!Array.isArray(stranger.data)||stranger.data.length!==0)
+  stop('Private social edges exposed to unrelated account');
+}else denied(stranger,'direct social table read');
+
 denied(await request('/rest/v1/social_follows',{jwt:other.jwt,method:'POST',
  body:{follower_id:a.id,followed_id:b.id}}),'direct forged follow');
 ok(await rpc('phase2_dm_block',b,{p_other_user:a.id,p_block:true}),'real bidirectional social block');
