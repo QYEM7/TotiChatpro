@@ -140,7 +140,7 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     assert.match(app,re);
     app=app.replace(re,'');
   }
-  app=app.replace('<!-- Final UI approved from visual-review-20261009; remove incompatible temporary lavender override. -->','');
+  app=app.replace('\n<!-- Final UI approved from visual-review-20261009; remove incompatible temporary lavender override. -->','');
   app=app.replaceAll('../assets/images/','assets/images/');
   for(const [oldCode,newCode] of substitutions){
     assert.equal(app.split(newCode).length,2,'replacement missing or duplicated');
