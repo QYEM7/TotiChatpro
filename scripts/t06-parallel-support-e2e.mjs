@@ -68,6 +68,7 @@ const ownerRole=await act(user,'staff_grant',{user_id:other.id},randomUUID());
 if(ownerRole.status>=200&&ownerRole.status<300)
  stop('ordinary customer granted staff access');
 // Customer role denial and cross-account denials must not consume the quota.
+// The authoritative Phase 5 Staging support rate budget is 15/minute, not the older T42 20/minute.
 const batches=Array.from({length:28},(_,i)=>({
  key:randomUUID(),
  data:{ticket_id:ticket,message:'Concurrent support load '+String(i+1)}
@@ -75,27 +76,27 @@ const batches=Array.from({length:28},(_,i)=>({
 const results=await Promise.all(batches.map(x=>act(user,'reply',x.data,x.key)));
 const accepted=results.map((r,i)=>({r,i})).filter(x=>x.r.status>=200&&x.r.status<300);
 const denied=results.filter(r=>r.status<200||r.status>=300);
-if(accepted.length!==19||denied.length!==9)
- stop('quota race: 19 concurrent replies expected; accepted '+accepted.length+', rejected '+denied.length+
+if(accepted.length!==14||denied.length!==14)
+ stop('quota race: 14 concurrent replies expected; accepted '+accepted.length+', rejected '+denied.length+
   '; rejected HTTP statuses '+denied.map(r=>r.status).join(','));
-if(denied.some(r=>!msg(r).includes('Support rate limit exceeded')))
+if(denied.some(r=>!/(?:Support rate limit exceeded|Rate limit)/.test(msg(r))))
  stop('unexpected concurrent HTTP failure instead of server quota');
 thread=ok(await ticketPage(user),'creator after simultaneous replies');
-if(thread.total!==20||thread.messages?.length!==20)
- stop('support thread must have exactly 20 messages, observed total '+thread.total);
+if(thread.total!==15||thread.messages?.length!==20)
+ stop('support thread must have exactly 15 messages, observed total '+thread.total);
 const first=accepted[0];
 if(!first)stop('no successful concurrent mutation to replay');
 const cached=ok(await act(user,'reply',batches[first.i].data,batches[first.i].key),'retry past quota');
 if(cached.id!==ticket)
  stop('idempotent replay after quota was not accepted');
 const clash=await act(user,'reply',{ticket_id:ticket,message:'changed idempotency content'},batches[first.i].key);
-if(clash.status>=200&&clash.status<300||!msg(clash).includes('Idempotency key conflict'))
+if(clash.status>=200&&clash.status<300||!/(?:Idempotency key conflict|Request key conflict)/.test(msg(clash)))
  stop('different payload with same idempotency key was not refused');
 const over=await act(user,'reply',{ticket_id:ticket,message:'post-limit new request'},randomUUID());
-if(over.status>=200&&over.status<300||!msg(over).includes('Support rate limit exceeded'))
+if(over.status>=200&&over.status<300||!/(?:Support rate limit exceeded|Rate limit)/.test(msg(over)))
  stop('post-limit new support mutation escaped rate budget');
 thread=ok(await ticketPage(user),'final read-only message query');
-if(thread.total!==20)stop('replay or denied actions mutated support messages');
+if(thread.total!==15)stop('replay or denied actions mutated support messages');
 // Ensure a completely separate verified actor has their OWN budget; one saturated
 // customer must never block creation for another account.
 const otherKey=randomUUID();
