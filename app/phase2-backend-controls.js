@@ -29,6 +29,7 @@ function inject(){
   settings.removeAttribute('data-a');settings.removeAttribute('data-v');settings.dataset.phase2='account';
   const label=settings.querySelectorAll('span')[1];if(label)label.textContent='أمان الحساب';
  }
+ if(!panel.querySelector('[data-support-open]'))panel.appendChild(row('🛟','خدمة العملاء والتذاكر الحقيقية','supportOpen'));
  if(authority?.canManageCatalogs&&!panel.querySelector('[data-admin-open]'))
   panel.appendChild(row('⚙️','لوحة الكتالوجات الحقيقية','adminOpen'));
  if(authority?.canReadReports&&!panel.querySelector('[data-reports-open]'))
