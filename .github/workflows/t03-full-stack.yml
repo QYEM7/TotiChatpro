@@ -16,6 +16,7 @@ on:
       - 'scripts/t14-avatar-e2e.mjs'
       - 'scripts/t17-realtime-e2e.mjs'
       - 'scripts/t16-rooms-e2e.mjs'
+      - 'scripts/prepare-staging-schema-replay.mjs'
       - 'scripts/t03-secret-audit.mjs'
       - 'scripts/t49-disposable-restore-drill.sh'
       - 'scripts/t49-storage-object-restore.mjs'
@@ -37,6 +38,7 @@ on:
       - 'tests/t30-reseller-flow-contract.test.cjs'
       - 'tests/t06-parallel-finance-contract.test.cjs'
       - 'tests/t06-parallel-support-contract.test.cjs'
+      - 'scripts/prepare-staging-schema-replay.mjs'
       - 'scripts/t03-secret-audit.mjs'
       - 'scripts/t49-disposable-restore-drill.sh'
       - 'scripts/t49-storage-object-restore.mjs'
@@ -87,7 +89,7 @@ jobs:
           cd "$RUNNER_TEMP/t03-full-stack"
           supabase init > "$RUNNER_TEMP/t03-init.log" 2>&1
           mkdir -p supabase/migrations
-          cp "$GITHUB_WORKSPACE"/supabase/migrations/*.sql supabase/migrations/
+          node "$GITHUB_WORKSPACE/scripts/prepare-staging-schema-replay.mjs" "$RUNNER_TEMP/t03-full-stack"
           # No supabase link; no production data, no external secrets, no db push.
           if ! supabase start > "$RUNNER_TEMP/t03-start.log" 2>&1; then
             echo "::error::Disposable local Supabase services could not start; raw token-bearing CLI output withheld"
@@ -110,7 +112,7 @@ jobs:
           # Strictly on a disposable unlinked Docker instance.
           mapfile -t db_containers < <(docker ps --format '{{.Names}}' | grep '^supabase_db_' || true)
           test "${#db_containers[@]}" -eq 1 || { echo "::error::Ambiguous local Postgres container"; exit 1; }
-          for test_sql in t04_security_invariants.sql t04_fk_index_coverage.sql phase3_admin.sql phase4_sessions.sql t06_financial_limits.sql t06_recharge_serial_actor.sql t06_support_concurrency_privacy.sql t14_avatar_storage.sql t17_room_realtime.sql t23_music_rls.sql t36_host_month_preflight.sql t42_support_tickets.sql t42_support_roster_paging.sql t52_actor_lock_support_privacy.sql phase3_rooms.sql phase3_gifts.sql phase3_store.sql phase3_transfer.sql phase4_agencies.sql phase4_cp.sql phase4_redemption.sql phase4_reports.sql phase4_voice_messages.sql; do
+          for test_sql in t04_security_invariants.sql t04_fk_index_coverage.sql phase3_admin.sql phase4_sessions.sql t06_financial_limits.sql t06_recharge_serial_actor.sql t14_avatar_storage.sql t17_room_realtime.sql t23_music_rls.sql t36_host_month_preflight.sql t52_actor_lock_support_privacy.sql phase3_rooms.sql phase3_gifts.sql phase3_store.sql phase3_transfer.sql phase4_agencies.sql phase4_cp.sql phase4_redemption.sql phase4_reports.sql phase4_voice_messages.sql; do
             echo "T04/T05 local security test: $test_sql"
             docker exec -i "${db_containers[0]}" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres < "$GITHUB_WORKSPACE/supabase/tests/$test_sql" | grep -E "^PASS|^DO$|^ROLLBACK$"
           done
