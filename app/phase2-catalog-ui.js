@@ -91,11 +91,11 @@ async function paint(){
    const recipients=(window.TotiPhase2Rooms?.getMembers?.()||[]).filter(r=>r.user_id!==owner);
    if(!recipients.some(r=>r.user_id===recipientId))recipientId='';
    const rows=gifts.filter(g=>g.category_id===giftCategory);
-   if(!rows.some(g=>g.id===giftId))giftId='';
+   if(!rows.some(g=>g.id===giftId&&g.is_active===true&&g.diamond_source_type!=='LUCKY_GIFT'))giftId='';
    markup='<div class="recipient">'+recipients.map(r=>button(r.display_name||'مستخدم','recipient',r.user_id,recipientId===r.user_id)).join('')+'</div>'+
     (!recipients.length?'<p>لا يوجد أعضاء في غرفة حقيقية مفتوحة.</p>':'')+
     '<div class="giftTabs">'+cats.map(c=>button(c.label,'gift-category',c.id,giftCategory===c.id)).join('')+'</div>'+
-    '<div class="giftgrid">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small></button>').join('')+'</div>'+
+    '<div class="giftgrid">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||g.diamond_source_type==='LUCKY_GIFT'?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>⏳ الاحتمالات قيد الاعتماد</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+'</div>'+
     (!rows.length?'<p>لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+
     '<div class="sendrow"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><label>العدد <select data-catalog-quantity aria-label="عدد الهدايا">'+[1,7,17,77,777].map(q=>'<option value="'+q+'" '+(giftQuantity===q?'selected':'')+'>'+q+'</option>').join('')+'</select></label><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
   }
@@ -121,6 +121,12 @@ async function sendGift(target){
  if(giftBusy||auth.state().user?.id!==owner||room.id!==window.TotiPhase2Rooms?.getRoomSummary?.()?.id)return;
  const gift=gifts.find(g=>g.id===chosenGift);
  if(!gift){showToast('الهدية غير متاحة');return;}
+ if(gift.diamond_source_type==='LUCKY_GIFT'){
+  pendingGift=null;
+  showToast('هدايا الحظ متوقفة حتى اعتماد الاحتمالات وسحب الجوائز الحقيقي. لم يتم خصم أي كوينز.');
+  return;
+ }
+ if(gift.is_active!==true){pendingGift=null;showToast('الهدية غير مفعّلة حالياً');return;}
  if(![1,7,17,77,777].includes(giftQuantity))throw Error('عدد الهدايا غير صحيح');
  const total=Number(gift.price)*giftQuantity;
  if(!Number.isSafeInteger(total)||total<=0){showToast('سعر الهدية غير صالح');return;}
