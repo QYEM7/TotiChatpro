@@ -6,8 +6,8 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const uuid=v=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(v||''));
 const nat=v=>Number.isSafeInteger(v)&&v>=0?v.toLocaleString('ar-IQ'):'—';
 const date=v=>v?new Date(v).toLocaleString('ar-IQ'):'—';
-let api=null,auth=null,current=null,notify=null,busy=false,loadSerial=0,entries=[],tickets=[],agencies=[],ticketId=null;
-function configure(x){api=x.rpc;auth=x.rights;current=x.current;notify=x.toast;}
+let api=null,auth=null,current=null,notify=null,revision=()=>0,identity=()=>'',busy=false,loadSerial=0,entries=[],tickets=[],agencies=[],ticketId=null;
+function configure(x){api=x.rpc;auth=x.rights;current=x.current;notify=x.toast;revision=x.revision;identity=x.identity;}
 function ensure(){if(!api||!auth())throw Error('أكمل تسجيل الدخول الإداري أولاً');}
 function chief(){const r=auth?.();return r?.isOwner===true||r?.isMainPartner===true;}
 function owner(){return auth?.()?.isOwner===true;}
@@ -28,8 +28,8 @@ async function get(kind,offset=0,limit=30){
 function startPage(section){return current()===section;}
 async function team(){
  ensure();if(!chief())throw Error('صلاحية المالك والشريك الرئيسي مطلوبة');
- const token=++loadSerial,results=await Promise.all([get('staff'),get('audit',0,12),owner()?api('phase5_support_staff_list',{p_offset:0,p_limit:50}):Promise.resolve(null)]);
- if(token!==loadSerial||!startPage('team'))return;
+ const token=++loadSerial,stamp=revision(),account=identity(),results=await Promise.all([get('staff'),get('audit',0,12),owner()?api('phase5_support_staff_list',{p_offset:0,p_limit:50}):Promise.resolve(null)]);
+ if(token!==loadSerial||stamp!==revision()||account!==identity()||!startPage('team'))return;
  const staff=results[0],audit=results[1],supportUsers=results[2],s=staff.rows;
  const roles=lines(s,[['الحساب',r=>r.user_id],['الرتبة',r=>r.role],['الصلاحيات',r=>(r.permissions||[]).join('، ')||'—'],['آخر تعديل',r=>date(r.updated_at)]]);
  const auditing=lines(audit.rows,[['المسؤول',r=>r.actor_id||'—'],['الإجراء',r=>r.action],['التاريخ',r=>date(r.created_at)]]);
@@ -56,9 +56,9 @@ async function team(){
 async function agenciesPage(kind){
  ensure();if(!chief())throw Error('إدارة الوكالات للمالك والشريك الرئيسي فقط');
  const page=kind==='host'?'hosts':'recharge',type=kind==='host'?'host_agencies':'recharge_agencies';
- const token=++loadSerial;
+ const token=++loadSerial,stamp=revision(),account=identity();
  const [agency,registration,transfers]=await Promise.all([get(type),get('registrations'),kind==='host'?get('agency_transfers'):Promise.resolve({rows:[],total:0})]);
- if(token!==loadSerial||!startPage(page))return;
+ if(token!==loadSerial||stamp!==revision()||account!==identity()||!startPage(page))return;
  agencies=agency.rows;
  const arows=lines(agency.rows,[['الوكالة',x=>x.name],['المعرف',x=>x.id],['المالك',x=>x.owner_id],['النسبة',x=>x.commission_percent+'%'],['الحالة',x=>x.is_active?'نشطة':'متوقفة'],['الأعضاء',x=>nat(x.member_count)]]);
  const pending=registration.rows.filter(r=>r.kind===kind&&r.status==='pending');
@@ -86,9 +86,9 @@ async function agenciesPage(kind){
  '<button class="btn btn-secondary">فحص أرباح الماس الشهرية</button></form><div id="mgm-month-result"></div>'):'');
 }
 async function support(){
- ensure();const route='support',token=++loadSerial;
+ ensure();const route='support',token=++loadSerial,stamp=revision(),account=identity();
  const r=await api('phase5_support_list',{p_scope:'all',p_offset:0,p_limit:30});
- if(token!==loadSerial||!startPage(route))return;
+ if(token!==loadSerial||stamp!==revision()||account!==identity()||!startPage(route))return;
  if(!r.canHandle||!Array.isArray(r.rows))throw Error('الحساب لا يملك صلاحية فريق خدمة العملاء');
  tickets=r.rows;
  const rows=tickets.map(t=>'<article class="mgm-ticket"><div><strong>'+esc(t.subject)+'</strong>'+
@@ -99,7 +99,9 @@ async function support(){
 }
 async function ticket(id){
  if(!uuid(id))throw Error('معرف التذكرة غير صالح');ticketId=id;
+ const stamp=revision(),account=identity();
  const result=await api('phase5_support_thread_page',{p_ticket_id:id,p_offset:0,p_limit:30});
+ if(stamp!==revision()||account!==identity()||!startPage('support'))return;
  if(!result.canHandle||!Array.isArray(result.messages)||!result.ticket)throw Error('التذكرة غير متاحة للإدارة');
  const list=result.messages.slice().reverse().map(m=>'<div class="mgm-message"><strong>'+esc(m.author_id)+'</strong><p>'+esc(m.body)+'</p><small>'+esc(date(m.created_at))+'</small></div>').join('')||blank('للرسائل');
  $('#mgm-ticket-details').innerHTML=box('المحادثة: '+result.ticket.subject,list+
@@ -123,8 +125,8 @@ async function vip(){
  $('#page-body').innerHTML=box('الاستحقاق',form)+box('صلاحيات المنح',grant);
 }
 async function medals(){
- ensure();const token=++loadSerial,r=await api('phase5_medal_catalog',{});
- if(token!==loadSerial||!startPage('medals'))return;
+ ensure();const token=++loadSerial,stamp=revision(),account=identity(),r=await api('phase5_medal_catalog',{});
+ if(token!==loadSerial||stamp!==revision()||account!==identity()||!startPage('medals'))return;
  const rows=Array.isArray(r)?r:Array.isArray(r?.medals)?r.medals:Array.isArray(r?.rows)?r.rows:[];
  const t=lines(rows,[['المفتاح',x=>x.medal_key||x.key||'—'],['الاسم',x=>x.display_name||x.label||'—'],['الوصف',x=>x.description||'—']]);
  const add=owner()?'<form id="mgm-medal-change" class="mgm-form"><h3>إدارة منح المداليات</h3>'+
@@ -143,8 +145,9 @@ function checkReason(v){if(v.length<10||v.length>300)throw Error('يجب كتا�
 async function executeAction(fn,confirmation){
  if(busy)return;
  if(!window.confirm(confirmation))return;
- busy=true;try{await fn();notify('تم تنفيذ العملية على Staging وحفظها في سجل النظام');}
- catch(e){notify('فشل التنفيذ: '+e.message,true);}finally{busy=false;}
+ const stamp=revision(),account=identity();
+ busy=true;try{await fn();if(stamp===revision()&&account===identity())notify('تم تنفيذ العملية على Staging وحفظها في سجل النظام');}
+ catch(e){if(stamp===revision()&&account===identity())notify('فشل التنفيذ: '+e.message,true);}finally{busy=false;}
 }
 document.addEventListener('click',e=>{
  const btn=e.target.closest('[data-mgm]');if(!btn||!api)return;
@@ -235,7 +238,8 @@ document.addEventListener('submit',e=>{
     'هل تؤكد تغيير حالة التذكرة في قاعدة البيانات؟');
   }else if(id==='mgm-vip-check'){
    const id=formValue(form,'target');if(!uuid(id))throw Error('معرّف حساب غير صالح');
-   const r=await api('phase5_vip_status',{p_target:id});
+   const stamp=revision(),account=identity();const r=await api('phase5_vip_status',{p_target:id});
+   if(stamp!==revision()||account!==identity()||!startPage('vip'))return;
    const out=$('#mgm-vip-result');if(out)out.textContent=JSON.stringify(r,null,2);
   }else if(id==='mgm-vip-change'){
    if(!owner())throw Error('المالك فقط يستطيع تعديل VIP');
@@ -264,7 +268,9 @@ document.addEventListener('submit',e=>{
    if(!chief())throw Error('صلاحية مراجعة شهرية غير متاحة');
    const month=formValue(form,'month');
    if(!/^20[2-9]\d-(0[1-9]|1[0-2])$/.test(month))throw Error('اختر شهر صحيح');
+   const stamp=revision(),account=identity();
    const r=await api('phase5_host_month_preflight',{p_month:month+'-01',p_offset:0,p_limit:25});
+   if(stamp!==revision()||account!==identity()||!startPage('hosts'))return;
    const out=$('#mgm-month-result');
    if(out)out.innerHTML='<div class="mgm-warning">المراجعة قرائية فقط. لا يوجد صرف ولا تصفير.</div>'+
     lines(Array.isArray(r.entries)?r.entries:[],[['الوكالة',x=>x.agency_id],['المضيف',x=>x.user_id],
