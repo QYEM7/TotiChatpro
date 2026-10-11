@@ -1,5 +1,5 @@
 /* Live backend VIP identity: real entitlement only. Does not grant/charge VIP
- * or repaint approved frames; never displays the preview's sample VIP5/LV45.
+ * or repaint approved frames; it never displays preview example tiers/levels.
  */
 (function(){
 'use strict';
