@@ -36,7 +36,15 @@ function failure(e){
   if(/not owner of a private room/i.test(s))return 'الدعوات متاحة لمالك الغرفة الخاصة فقط';
   return s.slice(0,160);
 }
-function roomImage(index){return A+assets[['room1','room2','room3','room4'][index%4]];}
+const imageServer=String(window.TOTICHAT_PUBLIC_BACKEND?.supabaseUrl||'');
+function publishedImage(path,id){
+ if(!UUID.test(String(id))||!['cover','background'].some(kind=>path===id+'/'+kind+'.webp')||
+    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(imageServer))return '';
+ return imageServer+'/storage/v1/object/public/totichat-room-images/'+path.split('/').map(encodeURIComponent).join('/');
+}
+function roomImage(room,index){
+ return publishedImage(room.cover_path,room.id)||A+assets[['room1','room2','room3','room4'][index%4]];
+}
 function homeContent(){
   if(!session().signedIn||screen!=='home')return;
   const gallery=$('.royal-home .royal-room-gallery');
@@ -49,7 +57,7 @@ function homeContent(){
       gallery.innerHTML=rooms.map((r,i)=>{
         if(!UUID.test(r.id))return '';
         return '<button class="royal-room-tile" data-phase2="open-room" data-room="'+esc(r.id)+'" aria-label="دخول '+esc(r.title)+'">'+
-          '<img class="royal-tile-photo" src="'+esc(roomImage(i))+'" alt="">'+
+          '<img class="royal-tile-photo" src="'+esc(roomImage(r,i))+'" alt="">'+
           '<span class="royal-tile-top"><b>● غرفة حقيقية</b><small>🎙️ '+(r.is_private?'خاصة':'عامة')+'</small></span>'+
           '<span class="royal-tile-detail"><strong>👑 '+esc(r.title)+'</strong><span>اضغط للدخول</span></span></button>';
       }).join('');
@@ -81,7 +89,7 @@ function homeContent(){
       rooms===null?'<p class="tc-phase2-near-note">جارٍ تحميل الغرف…</p>':
       rooms.length?rooms.slice(0,4).map((r,i)=>
         '<button class="royal-near-tile" data-phase2="open-room" data-room="'+esc(r.id)+'" aria-label="دخول '+esc(r.title)+'">'+
-        '<img src="'+esc(roomImage(i))+'" alt=""><span>🎙️ حقيقي</span></button>').join(''):
+        '<img src="'+esc(roomImage(r,i))+'" alt=""><span>🎙️ حقيقي</span></button>').join(''):
       '<p class="tc-phase2-near-note">لا توجد غرف مفتوحة حالياً.</p>';
   }
 }
@@ -106,6 +114,22 @@ function roomContent(){
     }
     const title=$('.roomidentity span b',view);
     if(title)title.textContent=active.title;
+    const wallpaper=publishedImage(active.background_path,active.id);
+    if(wallpaper)view.style.setProperty('--tc-room-wallpaper','url("'+wallpaper+'")');
+    else view.style.removeProperty('--tc-room-wallpaper');
+    let welcome=$('[data-live-room-welcome]',view);
+    if(active.welcome_message){
+      if(!welcome){
+        welcome=document.createElement('aside');
+        welcome.dataset.liveRoomWelcome='';welcome.className='tc-room-welcome';
+        const top=$('.roomtop',view);
+        if(top)top.insertAdjacentElement('afterend',welcome);else view.prepend(welcome);
+      }
+      welcome.textContent='💜 '+active.welcome_message;
+    }else welcome?.remove();
+    const cover=publishedImage(active.cover_path,active.id);
+    const roomAvatar=$('.roomidentity img',view);
+    if(roomAvatar&&cover)roomAvatar.src=cover;
     const id=$('.roomidentity span small',view);
     if(id)id.textContent='Room: '+active.id.slice(0,8).toUpperCase();
     const activity=$('.roomevents > b',view);
@@ -113,7 +137,7 @@ function roomContent(){
     const crowd=$('.roomevents .crowd',view);
     if(crowd)crowd.textContent='👥 '+members.length;
     const ticker=$('.giftTicker .tickerBody',view);
-    if(ticker)ticker.textContent='🎁 إرسال الهدايا غير مفعّل بعد';
+    if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا حقيقية الآن';
     const count=$('.giftTicker .orb b',view);
     if(count)count.textContent='0';
     const all=$$('.seats .seat',view);
@@ -185,7 +209,7 @@ async function listRooms(){
   const before=sequence;
   loadingRooms=(async()=>{
     try{
-      const data=await query('/rest/v1/rooms?select=id,title,owner_id,is_private,created_at&order=created_at.desc&limit=40');
+      const data=await query('/rest/v1/rooms?select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&order=created_at.desc&limit=40');
       if(before!==sequence)return;
       if(!Array.isArray(data))throw new Error('استجابة قائمة الغرف غير صالحة');
       rooms=data;roomListError='';
@@ -223,7 +247,7 @@ async function resume(){
     const own=await query('/rest/v1/room_members?user_id=eq.'+encodeURIComponent(session().user.id)+'&select=room_id&limit=1');
     if(before!==sequence||!own?.[0]?.room_id)return;
     const result=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(own[0].room_id)+
-      '&select=id,title,owner_id,is_private,created_at&limit=1');
+      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1');
     if(before!==sequence||!result?.length)return;
     active=result[0];members=[];messages=[];
     if(screen==='room')roomContent();
@@ -239,7 +263,7 @@ async function enterRoom(id){
     await rpc('phase2_room_join',{p_room_id:id});
     const existing=rooms?.find(x=>x.id===id);
     const rows=existing?[existing]:await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(id)+
-      '&select=id,title,owner_id,is_private,created_at&limit=1');
+      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1');
     if(!rows?.length)throw new Error('لم نعثر على الغرفة بعد الدخول');
     active=rows[0];members=[];messages=[];
     go('room');await refreshRoom();
@@ -284,7 +308,7 @@ async function redeemInvite(){
   try{
     await rpc('phase2_room_invite_join',{p_room_id:match[1],p_token:match[2]});
     const rows=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(match[1])+
-      '&select=id,title,owner_id,is_private,created_at&limit=1');
+      '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message&limit=1');
     if(!rows?.length)throw new Error('الغرفة ليست متاحة');
     active=rows[0];members=[];messages=[];
     if(typeof closeSheet==='function')closeSheet();
@@ -446,7 +470,7 @@ setInterval(()=>{
 window.TotiPhase2Rooms=Object.freeze({
   // Deliberately do not expose raw tokens, owner-level mutations or balance writes.
   getStatus:()=>({signedIn:session().signedIn,activeRoomId:active?.id||null,roomCount:rooms?.length??null}),
-  getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id}):null,
+  getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id,welcomeMessage:active.welcome_message||''}):null,
   getMyMicState:()=>{const m=members.find(x=>x.user_id===session().user?.id);return Object.freeze({seatNo:m?.seat_no??null,isMuted:m?.is_muted??true});},
   getMembers:()=>members.map(m=>Object.freeze({user_id:m.user_id,display_name:m.display_name})),
   refreshRoom
