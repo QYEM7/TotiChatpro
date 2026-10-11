@@ -158,7 +158,11 @@ const identityStyle=document.createElement('link');
 identityStyle.rel='stylesheet';
 identityStyle.href=new URL('phase5-special-id-ui.css',moduleBase).href;
 document.head.appendChild(identityStyle);
-for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js']){
+const medalStyle=document.createElement('link');
+medalStyle.rel='stylesheet';
+medalStyle.href=new URL('phase5-medals-ui.css',moduleBase).href;
+document.head.appendChild(medalStyle);
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js']){
  const script=document.createElement('script');
  script.async=false;
  script.src=new URL(name,moduleBase).href;
