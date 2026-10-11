@@ -70,7 +70,9 @@ function start(){
  if(user){
   void refresh();
   stream=auth.watchSocialUpdates?.(table=>{
-   if(table==='gift_global_announcements'&&account===auth.state().user?.id)void refresh();
+   if(account!==auth.state().user?.id)return;
+   if(table==='gift_global_announcements')void refresh();
+   if(table==='direct_messages')window.dispatchEvent(new CustomEvent('totichat-private-message-update'));
   })||null;
  }
 }
