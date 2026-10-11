@@ -17,6 +17,7 @@ if(!auth||typeof window.render!=='function'){
   document.body.insertAdjacentHTML('afterbegin','<div role="alert" style="padding:20px;background:#431953;color:white">تعذّر بدء اتصال TotiChat الحقيقي. أعد تشغيل التطبيق بعد الاتصال بالإنترنت.</div>');
   return;
 }
+document.documentElement.classList.add('tc-live-visual-identity');
 let explicitPreview=false;
 const authScreens=new Set(['loginPreview','signupPreview','verifyAccountPreview','passwordResetPreview']);
 const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview','musicPreview',...authScreens]);
@@ -107,7 +108,7 @@ function decorate(){
                  screen==='profilePreview' ? $('.profile-royal'):
                  null;
     if(parent)banner(parent,'tc-phase2-online-state',
-      '✓ الحساب حقيقي · الغرف والمقاعد والدردشة مربوطة · الهدايا والعملات وVIP قيد التطوير');
+      '✓ الحساب حقيقي · الغرف والدردشة متصلة · الهدايا بأسعار الخادم · الصوت يحتاج خدمة بث مفعّلة');
   }
 }
 const originalRender=render;
@@ -135,7 +136,22 @@ window.addEventListener('click',e=>{
     return;
   }
   if(!live())return;
-  const item=e.target?.closest?.('[data-a="go"],[data-a="sheet"],[data-royal]');
+  const roomAction=e.target?.closest?.('[data-live-room-action]');
+  if(roomAction&&screen==='room'){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    const what=roomAction.dataset.liveRoomAction;
+    if(what==='gifts'){closeSheet();showGifts();}
+    else if(what==='voice'){closeSheet();document.querySelector('[data-real-voice="connect"]')?.click();}
+    else if(what==='settings'){closeSheet();window.TotiPhase2Rooms?.openSettings?.();}
+    else if(what==='members'){
+      const members=window.TotiPhase2Rooms?.getMembers?.()||[];
+      showSheet('<section class="tc-live-tools"><h3>أعضاء الغرفة الحقيقيون</h3><div id="tc-live-member-list"></div><button class="primary" data-a="close">إغلاق</button></section>',true);
+      const node=document.getElementById('tc-live-member-list');
+      if(node){for(const m of members){const p=document.createElement('p');p.textContent=m.display_name||m.user_id.slice(0,8);node.appendChild(p);}}
+    }else if(what==='info'){closeSheet();showSheet('<section class="tc-live-tools"><h3>معلومات الغرفة</h3><p id="tc-current-room-title"></p><button class="primary" data-a="close">إغلاق</button></section>',true);const n=document.getElementById('tc-current-room-title');if(n){const room=window.TotiPhase2Rooms?.getRoomSummary?.();n.textContent=room?room.title+' · '+room.id:'';}}
+    return;
+  }
+  const item=e.target?.closest?.('[data-a="go"],[data-a="sheet"],[data-a="chatTab"],[data-a="shareRoom"],[data-royal]');
   if(!item)return;
   const route=item.dataset.v||'';
   const op=item.dataset.a||'';
@@ -152,12 +168,30 @@ window.addEventListener('click',e=>{
       box.querySelectorAll('p')[1].textContent='الأعضاء: '+info.memberCount;
     }return;
   }
-  if(screen==='room'&&(
-    (op==='sheet'&&['tools'].includes(route))||
-    (op==='chatTab'&&['هدية','أدخل'].includes(route))||
-    op==='shareRoom')){
+  if(screen==='room'&&op==='chatTab'&&route==='هدية'){
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-    warn('هذه الوظيفة غير مفعّلة بعد على الخادم');return;
+    showGifts();return;
+  }
+  if(screen==='room'&&op==='sheet'&&route==='tools'){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    const info=window.TotiPhase2Rooms?.getRoomSummary?.();
+    showSheet('<section class="tc-live-tools" dir="rtl"><h3>🛠️ أدوات الغرفة</h3>'+
+      '<button class="primary" data-live-room-action="gifts">🎁 صندوق الهدايا الحقيقي</button>'+
+      '<button class="primary" data-live-room-action="voice">🔊 تشغيل صوت الغرفة</button>'+
+      '<button class="primary" data-live-room-action="members">👥 قائمة الأعضاء</button>'+
+      '<button class="primary" data-live-room-action="info">ℹ️ معلومات الغرفة</button>'+
+      (info?.isOwner?'<button class="primary" data-live-room-action="settings">🎨 إعدادات وخلفية الغرفة</button>':'')+
+      '<button class="primary" data-a="close">إغلاق</button></section>',true);
+    return;
+  }
+  if(screen==='room'&&op==='shareRoom'){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    const info=window.TotiPhase2Rooms?.getRoomSummary?.();
+    if(info?.isPrivate&&info?.isOwner){
+      document.querySelector('[data-phase2="invite-generate"]')?.click();return;
+    }
+    warn('لمشاركة الغرفة استخدم اسمها في قائمة الغرف؛ روابط الدخول المباشر قيد الربط.');
+    return;
   }
 
   if((op==='go'&&!allowed.has(route))||
