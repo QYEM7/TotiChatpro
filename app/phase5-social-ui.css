@@ -1,0 +1,17 @@
+/* Scope only to live authenticated social sheet. Approved master UI is untouched. */
+.tc-real-social{direction:rtl;text-align:right;padding:12px 14px 24px;color:#294439;max-height:80dvh;overflow:auto}
+.tc-real-social header{display:flex;justify-content:space-between;align-items:center}
+.tc-real-social h3{margin:5px 0 12px;font-size:20px}
+.tc-real-social header button,.tc-social-tabs button,.tc-real-social form button,.tc-social-person button,[data-tc-social-more]{border:1px solid #a3c7ad;background:#e5f5ea;border-radius:11px;color:#26563a;padding:9px 12px;font-weight:750}
+.tc-social-tabs{display:flex;gap:5px;flex-wrap:wrap;margin:11px 0}
+.tc-real-social form{display:grid;gap:6px;margin:12px 0}
+.tc-real-social form input{width:100%;background:#fff;color:#273c33;border:1px solid #b6d4bc;border-radius:11px;padding:11px;min-width:0}
+.tc-real-social form label,#tc-social-status{font-size:12px}
+#tc-social-status{min-height:21px;color:#537362}
+#tc-social-people{display:grid;gap:8px}
+.tc-social-person{display:grid;gap:5px;padding:10px 13px;background:#f5f8f4;border:1px solid #deeadc;border-radius:12px}
+.tc-social-person strong{font-size:14px}
+.tc-social-person small{font-size:11px;color:#5f7968}
+.tc-social-person button{justify-self:start}
+.tc-social-empty{text-align:center;padding:18px 0;color:#718676}
+[data-tc-social-more]{width:100%;margin-top:10px}
