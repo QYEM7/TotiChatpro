@@ -1,0 +1,156 @@
+/* TotiChat live-only 2026-10-11: approved lavender / sky / white identity.
+ * No microphone seats, VIP ornaments, gifts or room actions are hidden/reordered.
+ * Owner wallpaper sits beneath the controls with a readable pastel veil.
+ */
+html.tc-live-visual-identity{--tc-lilac:#8b5cf6;--tc-sky:#75a9f8;--tc-blush:#e9dcff;--tc-ink:#32234e;--tc-milk:#fcfaff}
+html.tc-live-visual-identity body{background:linear-gradient(135deg,#f3edff,#e7f0ff)!important;color:var(--tc-ink)}
+html.tc-live-visual-identity #app.phone{background:#faf7ff!important;color:var(--tc-ink)!important}
+html.tc-live-visual-identity #app .royal-home,
+html.tc-live-visual-identity #app .royal-home-main,
+html.tc-live-visual-identity #app .me-royal{
+  background:linear-gradient(155deg,#fffafd,#f1eaff 35%,#e6f2ff 75%,#faf7ff)!important;
+  color:var(--tc-ink)!important;
+}
+html.tc-live-visual-identity #app .primary,
+html.tc-live-visual-identity #sheet .tc-room-editor .primary,
+html.tc-live-visual-identity #sheet .tc-live-tools .primary{
+  background:linear-gradient(112deg,#a978f8,#7b7af9 58%,#6baef5)!important;
+  color:#fff!important;
+  border:1px solid #c5aafa!important;
+  border-radius:16px!important;
+  box-shadow:0 5px 13px #9560d52b!important;
+}
+html.tc-live-visual-identity #app .bottom{
+  background:rgba(255,252,255,.97)!important;
+  border-top:1px solid #e7ddff!important;
+  box-shadow:0 -6px 19px #875bca18!important;
+}
+html.tc-live-visual-identity #app .bottom button.active{color:#8455df!important}
+html.tc-live-visual-identity #app .royal-room-tile{
+ border:2px solid #bb9bf9!important;
+ box-shadow:0 8px 21px #9b72d833!important;
+}
+html.tc-live-visual-identity #app .tc-phase2-empty{
+ background:linear-gradient(145deg,#fffaff,#e9f1ff)!important;
+ border-color:#c4b1f3!important;color:#6b498c!important;
+}
+/* Room structure and all fifteen microphone seat positions stay untouched. */
+html.tc-live-visual-identity #app.rf-app.rf-room .roomview.room-v2,
+html.tc-live-visual-identity #app .roomview.room-v2{
+ --tc-room-wallpaper:none;
+ background-image:
+   linear-gradient(160deg,rgba(246,235,255,.93),rgba(237,240,255,.84) 44%,rgba(220,236,255,.9)),
+   var(--tc-room-wallpaper)!important;
+ background-position:center,center!important;
+ background-size:cover,cover!important;
+ background-repeat:no-repeat,no-repeat!important;
+ background-color:#efe8ff!important;
+ color:#372553!important;
+ min-height:calc(100dvh - 30px);
+}
+html.tc-live-visual-identity #app.rf-app.rf-room .roomview.room-v2 .roomtop,
+html.tc-live-visual-identity #app .roomview.room-v2 .roomtop{
+  background:linear-gradient(112deg,rgba(255,255,255,.88),rgba(239,230,255,.84))!important;
+  color:#462e68!important;
+  border:1px solid #d9c3fa!important;
+  border-radius:18px!important;
+  box-shadow:0 7px 18px #9666cf19!important;
+  padding:8px!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .roomidentity,
+html.tc-live-visual-identity #app .roomview.room-v2 .roomidentity span,
+html.tc-live-visual-identity #app .roomview.room-v2 .roomidentity b,
+html.tc-live-visual-identity #app .roomview.room-v2 .roomidentity small{
+  color:#3e265c!important;
+  text-shadow:none!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .roomevents,
+html.tc-live-visual-identity #app .roomview.room-v2 .giftTicker{
+  background:linear-gradient(110deg,rgba(255,255,255,.75),rgba(234,226,255,.68))!important;
+  border:1px solid #ddcbfc!important;border-radius:16px!important;
+  color:#593781!important;text-shadow:none!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .giftTicker .tickerBody{
+ color:#503674!important;text-shadow:none!important;
+}
+html.tc-live-visual-identity #app.rf-app.rf-room .roomview.room-v2 .seats .seat .seatname{
+  color:#51356f!important;
+  text-shadow:0 1px 2px #ffffffa8!important;
+}
+html.tc-live-visual-identity #app.rf-app.rf-room .roomview.room-v2 .seats .seat .seatlv{
+  color:#7358a5!important;text-shadow:0 1px 2px #fff!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .chatArea{
+  background:rgba(255,255,255,.23)!important;
+  color:#3c2a52!important;border-radius:15px!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .chatMsg{
+  background:rgba(255,255,255,.87)!important;color:#49336b!important;
+  border:1px solid #ddcbf6!important;border-radius:14px!important;
+  text-shadow:none!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .chatMsg.mine{
+ background:#e6dcff!important;color:#3e2b67!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .tc-room-welcome{
+  display:block!important;margin:8px 12px!important;padding:10px 14px!important;
+  color:#563778!important;background:linear-gradient(110deg,rgba(255,255,255,.87),rgba(226,218,255,.8))!important;
+  border:1px solid #cbb5f7!important;border-radius:17px!important;
+  font-size:12px!important;font-weight:800!important;line-height:1.8!important;
+  position:relative!important;z-index:3!important;
+  box-shadow:0 4px 12px #ae8ad71e!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .tc-real-voice-controls{
+ flex-wrap:wrap!important;gap:5px!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .tc-real-voice-controls button{
+ background:linear-gradient(115deg,#9963ec,#739cf6)!important;
+ border-color:#cab3fa!important;color:#fff!important;
+ box-shadow:0 3px 9px #9877d533!important;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 #tc-real-voice-feedback{
+ flex:1 0 100%;font-size:10px;line-height:1.45;color:#684aa0;
+ text-align:center;max-width:100%;white-space:normal;
+}
+html.tc-live-visual-identity #app .roomview.room-v2 .tc-phase2-live-banner{
+ background:rgba(255,255,255,.8)!important;color:#6f528e!important;
+ border-color:#d6c3fa!important;box-shadow:none!important;
+ font-size:10px!important;padding:5px 8px!important;
+}
+html.tc-live-visual-identity #sheet .tc-room-editor,
+html.tc-live-visual-identity #sheet .tc-live-tools{
+ display:flex;flex-direction:column;gap:12px;
+ padding:19px;max-height:80dvh;overflow-y:auto;
+ color:#4c336d!important;
+ background:linear-gradient(140deg,#fcf9ff,#f2ebff,#e8f3ff)!important;
+ border-radius:22px!important;
+}
+html.tc-live-visual-identity #sheet .tc-room-editor h3,
+html.tc-live-visual-identity #sheet .tc-live-tools h3{
+ color:#6c45b9!important;text-align:center;margin:0 0 7px!important;
+}
+html.tc-live-visual-identity #sheet .tc-room-editor p,
+html.tc-live-visual-identity #sheet .tc-live-tools p{
+ color:#70548f!important;font-size:12px;
+}
+html.tc-live-visual-identity #sheet .tc-room-editor label{
+ color:#4d326b!important;font-size:13px;font-weight:800;display:flex;
+ flex-direction:column;gap:7px;
+}
+html.tc-live-visual-identity #sheet .tc-room-editor input:not([type=checkbox]),
+html.tc-live-visual-identity #sheet .tc-room-editor textarea{
+ background:#fff!important;border:1px solid #cdb6f4!important;
+ color:#3e2b5e!important;padding:11px;border-radius:13px!important;
+ width:100%;min-height:43px;outline-offset:3px;
+}
+html.tc-live-visual-identity #sheet .tc-room-editor input[type=file]{
+ font-size:11px;padding:9px;
+}
+html.tc-live-visual-identity #sheet .tc-room-editor .tc-phase2-private{
+ flex-direction:row!important;align-items:center!important;
+}
+html.tc-live-visual-identity #sheet .tc-live-tools .primary{min-height:45px;text-align:center}
+@media(max-width:390px){
+ html.tc-live-visual-identity #app .roomview.room-v2 .roomtop{gap:4px!important}
+ html.tc-live-visual-identity #app .roomview.room-v2 .tc-real-voice-controls button{font-size:10px!important}
+}
