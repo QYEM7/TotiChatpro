@@ -42,6 +42,7 @@ jobs:
           node --check app/phase2-live-mode.js
           node --check app/phase2-private-messages.js
           node --check app/phase2-global-gifts.js
+          node --check app/phase2-backend-controls.js
           node --check app/phase2-catalog-ui.js
       - name: Assemble approved browser UI only (NEVER Gradle or APK)
         run: npm run build
