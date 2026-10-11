@@ -82,7 +82,7 @@ if(accepted.length!==14||denied.length!==14)
 if(denied.some(r=>!/(?:Support rate limit exceeded|Rate limit)/.test(msg(r))))
  stop('unexpected concurrent HTTP failure instead of server quota');
 thread=ok(await ticketPage(user),'creator after simultaneous replies');
-if(thread.total!==15||thread.messages?.length!==20)
+if(thread.total!==15||thread.messages?.length!==15)
  stop('support thread must have exactly 15 messages, observed total '+thread.total);
 const first=accepted[0];
 if(!first)stop('no successful concurrent mutation to replay');
@@ -113,8 +113,8 @@ if(otherThread.total!==1||otherThread.ticket?.creator_id!==other.id)
 const firstByOther=await ticketPage(other);
 if(firstByOther.status>=200&&firstByOther.status<300)
  stop('independent rate limit did not preserve first actor private ticket');
-console.log('PASS T06: a second GoTrue user retained a separate quota after first user hit the 20/min ceiling; ticket privacy preserved.');
+console.log('PASS T06: a second GoTrue user retained a separate quota after first user hit the 15/min ceiling; ticket privacy preserved.');
 console.log('PASS T06: genuine disposable GoTrue users + PostgREST; six parallel identical create requests committed ONE ticket, ONE first message.');
-console.log('PASS T06: 28 concurrent replies => 19 accepted and 9 bounded denials; total 20 messages; replay after limit retained same ticket.');
+console.log('PASS T06: 28 concurrent replies => 14 accepted and 14 bounded denials; total 15 messages; replay after limit retained same ticket.');
 console.log('PASS T06: outsider thread/reply denied, staff privilege escalation denied, conflicting idempotency key denied.');
 console.log('PASS T06: all checks LOCAL and temporary; no actual production concurrency or finance wallet stress is claimed.');
