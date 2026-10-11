@@ -1,0 +1,30 @@
+/* TotiChat — real text-only messages. Uses approved cream, mint and gold UI. */
+.tc-dm-inbox{min-height:calc(100dvh - 100px);padding:17px 13px 95px;color:#184e40;background:linear-gradient(160deg,#f7fff9,#e4f5ec)}
+.tc-dm-inbox .pagehead{display:flex;justify-content:space-between;align-items:center;font-size:18px;color:#075d45;margin:3px 0 13px}
+.tc-dm-explainer{font-size:12px;line-height:1.8;color:#5c8176;margin-bottom:13px}
+.tc-dm-inbox [data-tc-dm-inbox-status]{font-size:12px;color:#177e61;line-height:1.7;padding:8px 0}
+.tc-dm-contact{display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px 10px;width:100%;text-align:right;min-height:67px;padding:11px 14px;margin:7px 0;background:white;border:1px solid #c5e6d4;border-radius:17px;box-shadow:0 2px 10px #0c563113;color:#204d3d}
+.tc-dm-contact b{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.tc-dm-contact small{font-size:12px;color:#748b80;grid-column:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tc-dm-contact span{grid-row:1 / span 2;grid-column:2;background:#e3f8ef;color:#058760;border-radius:10px;padding:4px 8px;font-size:12px}
+.tc-dm-reload{width:100%;min-height:44px;background:#ebf9f1;border:1px solid #b5ddc7;border-radius:15px;color:#097757;font-weight:800}
+.tc-dm-overlay{position:fixed;z-index:250000;inset:0;width:100%;max-width:460px;margin:auto;display:flex;flex-direction:column;background:linear-gradient(168deg,#f2fff8,#e8f3ee 56%,#fffcef);color:#244c3b;box-shadow:0 0 40px #1e563d60;direction:rtl;font-family:Cairo,Tajawal,system-ui,sans-serif;overscroll-behavior:contain}
+.tc-dm-head{height:70px;flex-shrink:0;padding:12px 16px;display:flex;align-items:center;gap:14px;background:linear-gradient(110deg,#058f74,#08bd93);color:white;box-shadow:0 5px 14px #065d462b}
+.tc-dm-head strong{font-size:16px;flex:1;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.tc-dm-head span{font-size:11px;color:#e9ffed}
+.tc-dm-head button{background:#ffffff22;border:1px solid #ffffff66;border-radius:12px;padding:7px 13px;color:white;font-size:19px;min-width:42px;min-height:40px}
+.tc-dm-notice{flex-shrink:0;color:#476f61;background:#e3fbf1;padding:10px 14px;margin:0;font-size:11px;line-height:1.75}
+#tc-dm-status{padding:5px 14px;font-size:11px;min-height:26px;color:#187f62}
+.tc-dm-messages{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px 12px 22px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;scrollbar-gutter:stable;overscroll-behavior:contain}
+.tc-dm-bubble{max-width:82%;padding:11px 12px;border-radius:18px 18px 5px 18px;background:white;color:#204a39;font-size:13px;overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.8;box-shadow:0 3px 12px #1a673e12;border:1px solid #d3e8d8}
+.tc-dm-bubble.own{align-self:flex-end;background:linear-gradient(125deg,#daf9e6,#c8f1e4);border-radius:18px 18px 18px 5px;border-color:#a8e3cb}
+.tc-dm-time{font-size:9px;display:block;text-align:left;margin-top:4px;color:#6d887c}
+.tc-dm-empty{padding:20px 8px;text-align:center;color:#719081;font-size:12px;line-height:1.8;width:100%}
+.tc-dm-compose{display:flex;align-items:stretch;gap:8px;flex-shrink:0;padding:12px 13px;background:#ffffffef;border-top:1px solid #d4e6db}
+.tc-dm-compose input{flex:1;min-width:0;border-radius:14px;border:1px solid #b7dec9;padding:12px;background:#f9fffa;color:#154d34;font-size:14px;outline-offset:2px}
+.tc-dm-compose button{border-radius:13px;background:#0caf82;color:#fff;padding:0 16px;font-size:13px;font-weight:900;min-height:44px}
+.tc-dm-compose button:disabled{opacity:.4}
+.tc-dm-footer{flex-shrink:0;display:flex;gap:8px;padding:9px 14px calc(env(safe-area-inset-bottom) + 10px);background:#ffffffed}
+.tc-dm-footer button{flex:1;min-height:39px;border-radius:12px;background:#f2faf3;border:1px solid #cbe6d5;color:#23674b;font-size:12px;font-weight:800}
+.tc-dm-footer button:first-child{color:#b04040;background:#fff7f5;border-color:#f0dad8}
+#tc-live-member-list button[data-tc-dm-recipient]{display:block;padding:8px 14px;min-height:39px;border-radius:13px;background:#ebfbf1;color:#087b59;border:1px solid #c1e8d1;margin:4px 0 12px;font-weight:800}
