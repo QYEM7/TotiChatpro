@@ -19,7 +19,8 @@ const labels=Object.freeze({
  room_seat_released:'تم تحرير مقعدك',
  support_staff_replied:'لديك رد جديد من خدمة العملاء',
  medal_granted:'حصلت على ميدالية معتمدة',
- medal_revoked:'تم سحب ميدالية من حسابك'
+ medal_revoked:'تم سحب ميدالية من حسابك',
+ gift_received:'استلمت هدية حقيقية جديدة'
 });
 let owner='',epoch=0,loading=false,items=[],unread=0,before=null,end=false;
 function active(){
