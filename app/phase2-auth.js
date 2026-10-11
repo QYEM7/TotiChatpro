@@ -565,10 +565,97 @@
     void open();
     return Object.freeze({close,resume});
   }
+  function watchSocialUpdates(onChange){
+    if(typeof onChange!=='function'||!session?.user?.id)return {close(){}};
+    const owner=session.user.id;
+    let active=true,socket=null,timer=null,retryTimer=null,retryMs=1500,ref=1,lastToken='';
+    const topic='realtime:totichat-social-change';
+    function send(event,payload,refValue=String(++ref)){
+      if(socket?.readyState!==1)return;
+      socket.send(JSON.stringify({topic:event==='heartbeat'?'phoenix':topic,
+        event,payload,ref:refValue,join_ref:event==='heartbeat'?null:'1'}));
+    }
+    function cleanupSocket(){
+      if(socket){const old=socket;socket=null;old.onclose=null;old.onerror=null;old.onmessage=null;old.onopen=null;try{old.close();}catch(_){}}
+    }
+    function schedule(){
+      if(!active||retryTimer||document.hidden)return;
+      retryTimer=setTimeout(()=>{retryTimer=null;void open();},retryMs);
+      retryMs=Math.min(30000,retryMs*2);
+    }
+    async function open(){
+      if(!active||document.hidden||!session?.user?.id||session.user.id!==owner||
+        socket?.readyState===0||socket?.readyState===1||typeof WebSocket!=='function')return;
+      let token;
+      try{token=await validToken();}catch{return schedule();}
+      // Browser QA must never connect to production with mock 'test-access'.
+      // Real Supabase GoTrue access tokens are JWTs.
+      if(!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token))return;
+      if(!active||session?.user?.id!==owner||document.hidden)return;
+      const wsUrl=origin.replace(/^https:/,'wss:')+
+        '/realtime/v1/websocket?apikey='+encodeURIComponent(apiKey)+'&vsn=1.0.0';
+      let channel;try{channel=new WebSocket(wsUrl);}catch{return schedule();}
+      socket=channel;
+      channel.onopen=()=>{
+        if(!active||session?.user?.id!==owner||socket!==channel)return cleanupSocket();
+        lastToken=token;
+        send('phx_join',{config:{
+          broadcast:{ack:false,self:false,replication_ready:true},presence:{enabled:false},private:false,
+          postgres_changes:[
+            {event:'*',schema:'public',table:'direct_messages'},
+            {event:'INSERT',schema:'public',table:'gift_global_announcements'}
+          ]
+        },access_token:token},'1');
+      };
+      channel.onmessage=event=>{
+        if(!active||socket!==channel||session?.user?.id!==owner)return;
+        let msg;try{msg=JSON.parse(event.data);}catch{return}
+        if(!msg||msg.topic!==topic)return;
+        if(msg.event==='phx_reply'&&msg.payload?.status==='ok'){retryMs=1500;return}
+        if(msg.event==='phx_reply'&&msg.payload?.status==='error'){channel.close();return}
+        if(msg.event!=='postgres_changes')return;
+        const table=msg.payload?.data?.table;
+        if(['direct_messages','gift_global_announcements'].includes(table))onChange(table);
+      };
+      channel.onerror=()=>{try{channel.close()}catch(_){}};
+      channel.onclose=()=>{
+        if(socket===channel){socket=null;schedule();}
+      };
+    }
+    function authChanged(){
+      if(!active||session?.user?.id!==owner){close();return}
+      if(session.access_token&&session.access_token!==lastToken&&socket?.readyState===1){
+        lastToken=session.access_token;
+        send('access_token',{access_token:lastToken});
+      }
+    }
+    function heartbeat(){
+      if(active&&socket?.readyState===1)send('heartbeat',{});
+    }
+    function resume(){
+      if(!active)return;
+      if(document.hidden){cleanupSocket();clearTimeout(retryTimer);retryTimer=null;return}
+      void open();
+    }
+    function close(){
+      if(!active)return;active=false;
+      clearInterval(timer);clearTimeout(retryTimer);retryTimer=null;
+      document.removeEventListener('visibilitychange',resume);
+      window.removeEventListener('online',resume);
+      window.removeEventListener('totichat-phase2-auth',authChanged);
+      cleanupSocket();
+    }
+    timer=setInterval(heartbeat,25000);
+    document.addEventListener('visibilitychange',resume);
+    window.addEventListener('online',resume);
+    window.addEventListener('totichat-phase2-auth',authChanged);
+    void open();
+    return Object.freeze({close,resume});
+  }
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
     verifySignup,readProfile,updateProfile,resume,refresh,requestData,voiceStorage,
     providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,uploadAvatar,uploadRoomImage,
-    securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider,watchRoomUpdates});
+    securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider,watchRoomUpdates,watchSocialUpdates});
   window.TotiPhase2Auth=api;
   if(typeof location!=='undefined'&&location.hostname==='localhost'){
     const app=window.Capacitor?.Plugins?.App;
