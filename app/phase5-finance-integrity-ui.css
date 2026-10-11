@@ -1,0 +1,7 @@
+.tc-finance-integrity{direction:rtl;text-align:right;color:#24483b;padding:14px 16px 25px;max-height:80dvh;overflow:auto}
+.tc-finance-integrity h3{font-size:19px;margin:7px 0 12px}
+.tc-finance-integrity p{font-size:13px;line-height:1.75}
+.tc-finance-integrity button{padding:10px 13px;border-radius:11px;background:#edf7ee;border:1px solid #afd0b8;color:#20583c;font-weight:750;margin:7px}
+#tc-finance-integrity-message{min-height:28px;color:#936b33}
+#tc-finance-integrity-results{display:grid;gap:7px}
+.tc-finance-audit-line{margin:0;background:#f2f8ef;padding:9px 11px;border:1px solid #d3e8d7;border-radius:12px}
