@@ -36,7 +36,11 @@ function harness(){
   resolveRequest=resolve;
  });
  const document={
-  querySelector(selector){return nodes[selector]||null},
+  querySelector(selector){
+   if(selector==='[data-t57-count]')return panel.children[0]?.children
+    .find(x=>x.dataset?.t57Count!==undefined)||null;
+   return nodes[selector]||null;
+  },
   createElement(tag){return new El(tag)},
   addEventListener(name,fn){event['document:'+name]=fn},
   hidden:false
