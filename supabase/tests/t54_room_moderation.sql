@@ -78,6 +78,10 @@ begin
  perform set_config('request.jwt.claims',
    jsonb_build_object('sub',mod_id,'session_id',mod_sid,'aal','aal1')::text,true);
  denied:=false;
+ begin perform public.phase2_room_moderate(rid,guest,'mute',gen_random_uuid());
+ exception when insufficient_privilege then denied:=true;end;
+ if not denied then raise exception 'Moderator replaced room Owner imposed mute';end if;
+ denied:=false;
  begin perform public.phase2_room_moderate(rid,guest,'allow_mic',gen_random_uuid());
  exception when insufficient_privilege then denied:=true;end;
  if not denied then raise exception 'Moderator removed room Owner imposed mute';end if;
