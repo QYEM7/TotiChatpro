@@ -128,3 +128,33 @@ test('agency historical preflight is read-only by contract',()=>{
  assert.match(sql,/paysSalaries/);
  assert.match(ui,/phase5_host_month_preflight/);
 });
+
+
+test('real rooms revoke departed listeners, preserve all seats and hide preview identities',()=>{
+ const rooms=file('app/phase2-rooms.js');
+ const voice=file('app/phase2-voice-ui.js');
+ assert.match(rooms,/phase2_room_members_visual/);
+ assert.match(rooms,/function roomMembershipRevoked/);
+ assert.match(rooms,/roomMembershipRevoked\(current\)/);
+ assert.match(rooms,/roster\.some\(m=>m\.user_id===session\(\)\.user\?\.id\)/);
+ assert.match(rooms,/TotiRealVoice\?\.disconnect/);
+ assert.match(rooms,/button\.classList\.remove\('locked'\)/);
+ assert.match(rooms,/function clearUnjoinedRoom/);
+ assert.match(rooms,/button\.disabled=true/);
+ assert.match(rooms,/button\.disabled=false/);
+ assert.match(rooms,/roomAvatar\.hidden=true/);
+ assert.match(rooms,/syncPermission\?\.\(\)/);
+ assert.match(voice,/function syncPermission/);
+ assert.match(voice,/micPublished/);
+ assert.match(voice,/client\.microphone\(false\)/);
+});
+test('global gift ticker does not misattribute an illustrative portrait to a real sender',()=>{
+ const feed=file('app/phase2-global-gifts.js');
+ const css=file('app/phase2-global-gifts.css');
+ assert.match(feed,/gift_global_announcements\?select/);
+ assert.match(feed,/const sample=ticker\.querySelector\('img'\)/);
+ assert.match(feed,/if\(sample\)sample\.hidden=true/);
+ assert.match(feed,/current\.gift_icon/);
+ assert.match(feed,/data-tc-verified-gift-icon/);
+ assert.match(css,/\.giftTicker img\[hidden\]/);
+});
