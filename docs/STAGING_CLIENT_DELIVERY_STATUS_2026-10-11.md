@@ -83,3 +83,17 @@ Date: 2026-10-11
 - Remaining constraints: authentic LiveKit credentials in staging secrets, browser/device E2E, Cloudflare deploy confirmation, formal monthly payroll business rules/settlement, Android signed install test, and enabling Supabase Auth leaked-password protection. CI build/deploy result from GitHub Actions is NOT confirmed.
 
 **Status: STAGING INTEGRATION / NOT CLIENT-RELEASE-READY.**
+
+
+## 2026-10-11 — Live-room / DM stability follow-up
+- Revalidated **11/11 static critical-path contracts** against the current `develop/phase-2` source (two separate groups), plus one **asynchronous behavioural** regression test for concurrent private-chat loading. This behavioural test uses isolated mocks, not two real accounts.
+- `app/phase2-rooms.js`: fail closed when a room is deleted or membership is revoked; disconnect room audio, clear local room state, and replace illustrative room data with a neutral waiting state without removing the **15 approved seats** or decorative frames. Empty real seats are available, not falsely shown as locked.
+- `app/phase2-voice-ui.js`: when the backend reports a lost seat or moderator-imposed mute, revoke local microphone publication; disconnect as a fallback if microphone teardown fails.
+- `app/phase2-global-gifts.js`: replace the sample donor portrait with an icon from a **verified** gift event. No fake gift events or balances added.
+- `app/phase2-private-messages.js`: fixed cross-thread async loading race and inbox stale-request lock; exposed the authenticated user's actual blocked-account list and server-confirmed unblocking via `phase2_dm_block`. The approved message/room presentation stays intact.
+- CI: `tests/live-dm-race.test.mjs` now runs with the preview test suite. The new behavioural test passed with actual asynchronous completion/reordering of two requests.
+- Staging SQL read-only verification: blocked-users SELECT is RLS protected, authenticated clients **cannot** insert blocks directly, and the private messages / financial operations / global announcements remain free of synthetic test entries.
+- Supabase security advisor still warns that leaked-password protection must be enabled in Auth settings. The LiveKit token Edge Function is `ACTIVE`, but functional audio cannot be certified without Staging LiveKit secrets and two-device testing.
+- Supabase edge logs from the inspected interval show **no confirmed calls to the new voice-token, DM or global-gift endpoints**. Cloudflare deployment and real-device testing remain unverified.
+
+**Delivery decision unchanged: the code and staging backend are improved, but a fully operational client release is NOT yet verified.**
