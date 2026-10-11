@@ -17,5 +17,6 @@ test('disabling notifications removes registered device destinations without cla
  assert.match(migration,/delete from phase3\.push_devices where user_id=me/);
  assert.match(migration,/Maximum 5 registered devices/);
  assert.match(migration,/'deliveryConfigured',false/);
- assert.match(migration,/token_digest bytea generated always/);
+ assert.match(migration,/token_digest bytea not null/);
+ assert.match(migration,/token_hash:=sha256\(convert_to\(p_token,'UTF8'\)\)/);
 });
