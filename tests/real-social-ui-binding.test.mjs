@@ -30,3 +30,13 @@ test('social module is loaded through old approved backend script; no new master
  assert(!html.includes('phase5-social-ui.js'));
  assert(loader.indexOf('phase5-vip-status-ui.js')<loader.indexOf('phase5-social-ui.js'));
 });
+
+test('social overview and list fetches cannot invalidate each other while authenticating',()=>{
+ assert.match(js,/overviewSeq=0,listSeq=0/);
+ assert.match(js,/serial=\+\+overviewSeq/);
+ assert.match(js,/token=\+\+listSeq/);
+ assert.match(js,/serial!==overviewSeq/);
+ assert.match(js,/token!==listSeq/);
+ assert.doesNotMatch(js,/loadId/);
+ assert.match(js,/Date\.now\(\)-overviewAt<10000/);
+});
