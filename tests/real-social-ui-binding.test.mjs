@@ -40,3 +40,9 @@ test('social overview and list fetches cannot invalidate each other while authen
  assert.doesNotMatch(js,/loadId/);
  assert.match(js,/Date\.now\(\)-overviewAt<10000/);
 });
+
+test('approved profile follower counters open real social lists, not preview users',()=>{
+ assert(js.includes("'.me-statcard button'"));
+ assert(js.includes("['followers','friends','following'][idx]"));
+ assert(js.includes("if(kind)open(kind)"));
+});
