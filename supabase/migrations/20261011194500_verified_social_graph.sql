@@ -127,7 +127,9 @@ begin
  select coalesce(jsonb_agg(to_jsonb(t) order by t.created_at desc,t.user_id),'[]'::jsonb)
  into nodes from (
   select case when p_kind='followers' then f.follower_id else f.followed_id end user_id,
-    p.display_name,p.avatar_url,f.created_at
+    p.display_name,p.avatar_url,f.created_at,
+    exists(select 1 from public.social_follows mine
+      where mine.follower_id=me and mine.followed_id=p.id) as is_following
   from public.social_follows f
   join public.profiles p on p.id=(
     case when p_kind='followers' then f.follower_id else f.followed_id end)
@@ -156,7 +158,9 @@ begin
  end if;
  select coalesce(jsonb_agg(to_jsonb(t) order by t.display_name,t.user_id),'[]'::jsonb)
  into results from (
-  select p.id user_id,p.display_name,p.avatar_url
+  select p.id user_id,p.display_name,p.avatar_url,
+    exists(select 1 from public.social_follows mine
+      where mine.follower_id=me and mine.followed_id=p.id) as is_following
   from public.profiles p join auth.users u on u.id=p.id
   where p.id<>me and p.display_name ilike
      replace(replace(replace(prefix,'\\','\\\\'),'%','\\%'),'_','\\_')||'%'
