@@ -7,20 +7,18 @@ begin
  insert into public.rooms(id,owner_id,title) values(room,a,'Redemption SQL test');
  insert into public.room_members(room_id,user_id) values(room,a),(room,b);
  update public.wallets set coins=1000 where user_id=a;
- perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'session_id',sa,'aal','aal1')::text,true);
- perform public.phase3_send_gift(room,b,'g1',1,gen_random_uuid(),10);
- -- T65 onward: historic lucky-lot redemption must remain testable while
- -- NEW lucky purchases are forbidden. Only this isolated transaction
- -- temporarily suspends the new-purchase guard for a legacy fixture.
- -- BEGIN/ROLLBACK restores the trigger even if an assertion fails.
+ -- For a HISTORIC redemption fixture only, suspend the new-purchase guard
+ -- before any gift table write (Postgres forbids ALTER with pending events).
+ -- This entire script runs in a disposable database and ROLLBACK restores
+ -- the enabled production-safe trigger. T65 independently proves real lucky
+ -- purchases remain rejected by the server.
  if exists(select 1 from pg_trigger where tgrelid='public.gift_events'::regclass
    and tgname='tc_reject_unapproved_lucky_gifts') then
    execute 'alter table public.gift_events disable trigger tc_reject_unapproved_lucky_gifts';
-   perform public.phase3_send_gift(room,b,'g11',1,gen_random_uuid(),300);
-   execute 'alter table public.gift_events enable trigger tc_reject_unapproved_lucky_gifts';
- else
-   perform public.phase3_send_gift(room,b,'g11',1,gen_random_uuid(),300);
  end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'session_id',sa,'aal','aal1')::text,true);
+ perform public.phase3_send_gift(room,b,'g1',1,gen_random_uuid(),10);
+ perform public.phase3_send_gift(room,b,'g11',1,gen_random_uuid(),300);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',b,'session_id',sb,'aal','aal1')::text,true);
  quote:=public.phase4_preview_redemption(15);
  if quote->>'fixed'<>'10' or quote->>'lucky'<>'5' or quote->>'coins'<>'4' then raise exception 'Source-specific quote failed';end if;
