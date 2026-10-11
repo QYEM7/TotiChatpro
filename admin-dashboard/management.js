@@ -28,9 +28,9 @@ async function get(kind,offset=0,limit=30){
 function startPage(section){return current()===section;}
 async function team(){
  ensure();if(!chief())throw Error('صلاحية المالك والشريك الرئيسي مطلوبة');
- const token=++loadSerial,results=await Promise.all([get('staff'),get('audit',0,12)]);
+ const token=++loadSerial,results=await Promise.all([get('staff'),get('audit',0,12),owner()?api('phase5_support_staff_list',{p_offset:0,p_limit:50}):Promise.resolve(null)]);
  if(token!==loadSerial||!startPage('team'))return;
- const staff=results[0],audit=results[1],s=staff.rows;
+ const staff=results[0],audit=results[1],supportUsers=results[2],s=staff.rows;
  const roles=lines(s,[['الحساب',r=>r.user_id],['الرتبة',r=>r.role],['الصلاحيات',r=>(r.permissions||[]).join('، ')||'—'],['آخر تعديل',r=>date(r.updated_at)]]);
  const auditing=lines(audit.rows,[['المسؤول',r=>r.actor_id||'—'],['الإجراء',r=>r.action],['التاريخ',r=>date(r.created_at)]]);
  let controls='<div class="mgm-warning">عرض التقارير والإدارة الكاملة لوكالات المضيفين يقتصر على المالك والشريك الرئيسي المحدد في القاعدة. رتبة Super Admin إضافية لا تمنح هذه الصلاحية تلقائياً.</div>';
@@ -45,13 +45,19 @@ async function team(){
  }
  $('#page-body').innerHTML=box('الموظفون المسجلون',roles,'إجمالي '+nat(staff.total))+
  box('سجل الإجراءات الأمنية',auditing,'آخر '+nat(audit.rows.length)+' إجراء')+
- box('الضوابط والتعيين',controls);
+ box('الضوابط والتعيين',controls)+
+ (owner()?box('موظفو خدمة العملاء',(
+ Array.isArray(supportUsers?.rows)?lines(supportUsers.rows,[['الحساب',r=>r.user_id],['التفويض',r=>r.enabled?'مفعّل':'موقوف'],['التاريخ',r=>date(r.updated_at)]]):blank('لموظفي الدعم'))+
+ '<form id="mgm-support-staff" class="mgm-form"><h3>تفويض خدمة العملاء</h3>'+
+ input('user_id','UUID الحساب المؤكد','pattern="[0-9a-fA-F-]{36}" maxlength="36"')+
+ '<label>الإجراء<select name="decision"><option value="staff_grant">إتاحة الرد على التذاكر</option><option value="staff_revoke">إيقاف الصلاحية</option></select></label>'+
+ '<button class="btn btn-primary">حفظ التفويض</button></form>'):'');
 }
 async function agenciesPage(kind){
  ensure();if(!chief())throw Error('إدارة الوكالات للمالك والشريك الرئيسي فقط');
  const page=kind==='host'?'hosts':'recharge',type=kind==='host'?'host_agencies':'recharge_agencies';
  const token=++loadSerial;
- const [agency,registration]=await Promise.all([get(type),get('registrations')]);
+ const [agency,registration,transfers]=await Promise.all([get(type),get('registrations'),kind==='host'?get('agency_transfers'):Promise.resolve({rows:[],total:0})]);
  if(token!==loadSerial||!startPage(page))return;
  agencies=agency.rows;
  const arows=lines(agency.rows,[['الوكالة',x=>x.name],['المعرف',x=>x.id],['المالك',x=>x.owner_id],['النسبة',x=>x.commission_percent+'%'],['الحالة',x=>x.is_active?'نشطة':'متوقفة'],['الأعضاء',x=>nat(x.member_count)]]);
@@ -67,7 +73,14 @@ async function agenciesPage(kind){
  '<p class="mgm-warning">أدخل النسبة الحقيقية المتفق عليها فقط. أي تعديل يُحفظ في سجل الإجراءات.</p>'+
  '<button type="submit" class="btn btn-primary">تعديل إعدادات الوكالة</button></form>';
  $('#page-body').innerHTML=box('الوكالات المسجلة',arows,'إجمالي '+nat(agency.total))+
- box('طلبات فتح الوكالات',rows)+box('إدارة الوكالة',form+finance)+
+ box('طلبات فتح الوكالات',rows)+
+ (kind==='host'?box('طلبات انتقال المضيفين',transfers.rows.filter(x=>['pending_old','pending_new'].includes(x.status)).map(t=>
+ '<article class="mgm-ticket"><div><strong>طلب انتقال '+esc(t.user_id)+'</strong>'+
+ '<p>من '+esc(t.old_agency_id||'بدون وكالة')+' إلى '+esc(t.agency_id)+'</p>'+
+ '<p>الحالة: '+esc(t.status)+' · السبب: '+esc(t.reason)+'</p></div>'+
+ '<button class="btn btn-ghost" data-mgm="host-transfer" type="button" data-id="'+esc(t.id)+'">مراجعة استثنائية</button></article>').join('')||
+ blank('لانتقالات المضيفين التي تحتاج موافقة')):'')+
+ box('إدارة الوكالة',form+finance)+
  (kind==='host'?box('التسويات الشهرية', '<form id="mgm-host-month" class="mgm-form">'+
  '<label>الشهر المغلق (UTC)<input name="month" type="month" required></label>'+
  '<button class="btn btn-secondary">فحص أرباح الماس الشهرية</button></form><div id="mgm-month-result"></div>'):'');
@@ -140,6 +153,17 @@ document.addEventListener('click',e=>{
   if(!startPage('support'))return;
   ticket(id).catch(err=>notify(err.message,true));return;
  }
+ if(action==='host-transfer'){
+  if(!chief()||!uuid(id)||!startPage('hosts'))return;
+  const markup='<form id="mgm-host-exception" class="mgm-form"><h3>الموافقة الاستثنائية على نقل مضيف</h3>'+
+   '<p class="mgm-warning">الأصل موافقة الوكيل القديم. الاستثناء فقط بعد التحقيق في شكوى أو توقف الوكالة أو الرفض التعسفي.</p>'+
+   '<input type="hidden" name="id" value="'+esc(id)+'">'+
+   '<label class="mgm-check"><input type="checkbox" name="verified" required> أؤكد مراجعة الشكوى والتحقق من مبررات الاستثناء</label>'+
+   '<label>قرار التحقيق والأدلة (10 أحرف على الأقل)<textarea name="note" minlength="10" maxlength="500" required></textarea></label>'+
+   '<button class="btn btn-primary">تثبيت الاستثناء في قاعدة البيانات</button></form>';
+  const holder=document.createElement('section');holder.className='surface pad mgm-surface';holder.innerHTML=markup;
+  $('#page-body').append(holder);holder.scrollIntoView({block:'center',behavior:'smooth'});return;
+ }
  if(action==='approval'){
   const kind=btn.dataset.kind;
   if(!['host','recharge'].includes(kind)||!uuid(id)||!chief())return;
@@ -156,7 +180,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('submit',e=>{
  const form=e.target;
- const known=['mgm-role-form','mgm-agency-form','mgm-approval-form','mgm-reply','mgm-ticket-status','mgm-vip-check','mgm-vip-change','mgm-medal-change','mgm-host-month'];
+ const known=['mgm-role-form','mgm-support-staff','mgm-host-exception','mgm-agency-form','mgm-approval-form','mgm-reply','mgm-ticket-status','mgm-vip-check','mgm-vip-change','mgm-medal-change','mgm-host-month'];
  if(!form.id||!known.includes(form.id)||!api)return;
  e.preventDefault();
  if(!form.reportValidity()||busy)return;
@@ -171,6 +195,21 @@ document.addEventListener('submit',e=>{
    if(partner&&role!=='super_admin')throw Error('الشريك الرئيسي يجب أن يحمل رتبة Super Admin');
    await executeAction(()=>api('phase3_manage_access',{p_user_id:userId,p_role:role,p_permissions:perms,p_main_partner:partner}).then(team),
     'هل توافق بصفتك المالك على تعيين الصلاحيات المحددة؟ لن تتحول رتبة الموظف إلى Owner.');
+  }else if(id==='mgm-support-staff'){
+   if(!owner())throw Error('تفويض الدعم خاص بالمالك');
+   const target=formValue(form,'user_id'),action=formValue(form,'decision');
+   if(!uuid(target)||!['staff_grant','staff_revoke'].includes(action))throw Error('معرّف أو إجراء غير صالح');
+   await executeAction(()=>api('phase5_support_action',{p_action:action,
+    p_data:{user_id:target},p_request_id:crypto.randomUUID()}).then(team),
+    'تأكيد تغيير صلاحية فريق خدمة العملاء لهذا الحساب؟');
+  }else if(id==='mgm-host-exception'){
+   if(!chief())throw Error('استثناء انتقال المضيف للمالك والشريك الرئيسي فقط');
+   const requestId=formValue(form,'id'),note=formValue(form,'note');
+   if(!uuid(requestId)||!form.querySelector('[name=verified]')?.checked||note.length<10||note.length>500)
+    throw Error('مراجعة الشكوى ومبررات الاستثناء مطلوبة');
+   await executeAction(()=>api('phase4_agency_action',{p_action:'exception_transfer',
+    p_data:{id:requestId,note},p_request_id:crypto.randomUUID()}).then(()=>agenciesPage('host')),
+    'هل تؤكد استثناء موافقة الوكيل القديم بعد التحقيق في الشكوى؟');
   }else if(id==='mgm-agency-form'){
    if(!chief())throw Error('إدارة الوكالات محصورة بالمالك والشريك المعتمد');
    const target=formValue(form,'id'),name=formValue(form,'name'),commission=Number(formValue(form,'commission_percent'));
