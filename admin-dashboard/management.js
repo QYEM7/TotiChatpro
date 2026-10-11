@@ -146,7 +146,7 @@ document.addEventListener('click',e=>{
   const html='<form id="mgm-approval-form" class="mgm-form" data-kind="'+kind+'">'+
    '<h3>مراجعة طلب افتتاح وكالة</h3><p class="mgm-code">'+esc(id)+'</p>'+
    '<label>القرار<select name="decision"><option value="approve_registration">موافقة</option><option value="reject_registration">رفض</option></select></label>'+
-   input('commission','نسبة عمولة متفق عليها عند الموافقة','type="number" min="0" max="100" step="0.01" value="0"')+
+   input('commission','نسبة عمولة معتمدة عند الموافقة','type="number" min="0" max="100" step="0.01" placeholder="أدخل النسبة المتفق عليها"')+
    '<label>تعليل القرار<textarea name="note" minlength="3" maxlength="500" required></textarea></label>'+
    '<input type="hidden" name="id" value="'+esc(id)+'">'+
    '<button class="btn btn-primary">تأكيد القرار الإداري</button></form>';
@@ -179,9 +179,9 @@ document.addEventListener('submit',e=>{
     'سيُعتمد اسم الوكالة ونسبة العمولة المدخلة مباشرة في Staging. متأكد من الأرقام؟');
   }else if(id==='mgm-approval-form'){
    if(!chief())throw Error('الصلاحية غير متاحة');
-   const target=formValue(form,'id'),decision=formValue(form,'decision'),note=formValue(form,'note'),commission=Number(formValue(form,'commission'));
+   const target=formValue(form,'id'),decision=formValue(form,'decision'),note=formValue(form,'note'),rawRate=formValue(form,'commission'),commission=Number(rawRate);
    if(!uuid(target)||note.length<3||note.length>500||!['approve_registration','reject_registration'].includes(decision))throw Error('طلب المراجعة غير صحيح');
-   if(decision==='approve_registration'&&(!Number.isFinite(commission)||commission<0||commission>100))throw Error('نسبة العمولة غير صالحة');
+   if(decision==='approve_registration'&&(!rawRate||!Number.isFinite(commission)||commission<0||commission>100))throw Error('لا تعتمد الوكالة بدون النسبة المتفق عليها');
    const data={id:target,note,...(decision==='approve_registration'?{commission_percent:commission}:{})};
    await executeAction(()=>api('phase4_agency_action',{p_action:decision,p_data:data,p_request_id:crypto.randomUUID()}).then(()=>agenciesPage(form.dataset.kind)),
     'هل تؤكد القرار بعد مراجعة الطلب والعمولة يدوياً؟');
