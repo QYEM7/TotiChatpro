@@ -2,6 +2,7 @@
 -- wallet mutation, voice interruption or bet/payout path.
 create table public.room_game_matches(
  id uuid primary key default gen_random_uuid(),
+ match_order bigint generated always as identity unique,
  room_id uuid not null references public.rooms(id) on delete cascade,
  game_type text not null default 'tic_tac_toe'
   check(game_type='tic_tac_toe'),
@@ -49,7 +50,7 @@ begin
  end if;
  select * into game from public.room_game_matches
  where room_id=p_room_id
- order by (status in('waiting','active')) desc,created_at desc,id desc
+ order by (status in('waiting','active')) desc,match_order desc
  limit 1;
  if not found then
   return jsonb_build_object('hasGame',false,'roomId',p_room_id);
@@ -99,7 +100,7 @@ begin
  end if;
  select * into current_game from public.room_game_matches g
  where g.room_id=p_room_id and g.status in('waiting','active')
- order by g.created_at desc,id desc limit 1 for update;
+ order by g.match_order desc limit 1 for update;
  if p_action='start' then
   if found then raise exception 'A room game is already active';end if;
   insert into public.room_game_matches(room_id,player_x)
