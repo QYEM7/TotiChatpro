@@ -59,7 +59,18 @@ const reply=data=>({status:200,contentType:'application/json',headers:{'access-c
  await p.click('[data-catalog-action="gift-item"]');
  await p.waitForFunction(()=>document.querySelector('.sendrow')?.textContent.includes('تم تحديد'));
  assert.equal(await p.$eval('.sendrow button',e=>e.disabled),false);
- assert.equal(calls.some(c=>c.method!=='GET'&&c.method!=='OPTIONS'&&c.path.startsWith('/rest/v1/')&&c.path!=='/rest/v1/rpc/phase4_cp_state'&&c.path!=='/rest/v1/rpc/phase4_verified_session'),false,'Catalog selection cannot mutate backend');
+ const readOnly=new Set([
+  '/rest/v1/rpc/phase4_cp_state',
+  '/rest/v1/rpc/phase4_verified_session',
+  '/rest/v1/rpc/phase5_vip_status',
+  '/rest/v1/rpc/phase5_special_id_status',
+  '/rest/v1/rpc/phase5_social_overview',
+  '/rest/v1/rpc/phase3_admin_session',
+  '/rest/v1/rpc/phase5_notification_feed'
+ ]);
+ const writes=calls.filter(c=>c.method!=='GET'&&c.method!=='OPTIONS'&&
+  c.path.startsWith('/rest/v1/')&&!readOnly.has(c.path));
+ assert.deepEqual(writes,[],'Catalog selection cannot mutate backend; read-only POST RPCs are permitted');
  assert.deepEqual(errors,[]);
  console.log('PASS: live catalog pages, 40 store items, search focus, 6 packs, 10 tiers, CP, recipient/gift selection and XSS protection.');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();});
