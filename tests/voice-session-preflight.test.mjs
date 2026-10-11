@@ -5,7 +5,7 @@ const sql=readFileSync(new URL('../supabase/migrations/20261011183000_verified_v
 test('voice preflight is an invoker that checks a live verified Auth session',()=>{
  assert.match(sql,/to_regprocedure\('phase3\.phase2_voice_token_preflight\(uuid\)'\)/);
  assert.doesNotMatch(sql,/alter function public\.phase2_voice_token_preflight\(uuid\) set schema phase3/);
- assert.match(sql,/create function public\.phase2_voice_token_preflight/);
+ assert.match(sql,/create or replace function public\.phase2_voice_token_preflight/);
  assert.match(sql,/security invoker/);
  assert.match(sql,/perform phase3\.actor\(\)/);
  assert.match(sql,/return phase3\.phase2_voice_token_preflight\(p_room_id\)/);
