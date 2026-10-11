@@ -11,9 +11,24 @@ export function inspect(root=ROOT){
  const auth=read('app/phase2-auth.js');
  const voice=read('supabase/functions/phase2-voice-token/index.ts');
  const limit=read('supabase/functions/phase2-voice-token/rate-limit.mjs');
+ const voiceBudget=read('supabase/migrations/20261011000202_phase2_voice_token_preflight.sql');
+ const voiceWrappers=read('supabase/migrations/20261011000300_secure_social_rpc_wrappers.sql');
  const cap=read('capacitor.config.ts');
  const googleSource=auth.includes('code_challenge_method=s256')&&auth.includes('grant_type=pkce')&&auth.includes('appUrlOpen')&&auth.includes('com.totichat.beta://auth/callback');
- const voiceSource=voice.includes('rateVoiceRequest')&&voice.includes('ROOM_MEMBERSHIP_REQUIRED')&&voice.includes('LIVEKIT_API_SECRET')&&limit.includes('VOICE_RATE_LIMIT_UNCONFIGURED');
+ // Voice token issuance is now budgeted durably by the Staging PostgreSQL
+ // preflight, not exclusively by the older optional Upstash helper.
+ // Both supported architectures must fail closed when throttling is absent.
+ const legacyLimiter=voice.includes('rateVoiceRequest')&&limit.includes('VOICE_RATE_LIMIT_UNCONFIGURED');
+ const durableLimiter=voice.includes("'phase2_voice_token_preflight'")&&
+  voiceBudget.includes('voice_token_rate_limits')&&
+  voiceBudget.includes('VOICE_RATE_LIMITED')&&
+  voiceBudget.includes('old.hits>=20')&&
+  voiceWrappers.includes('phase2_voice_token_preflight')&&
+  voiceWrappers.includes('phase3.actor()');
+ const voiceSource=voice.includes('ROOM_MEMBERSHIP_REQUIRED')&&
+  voice.includes('LIVEKIT_API_SECRET')&&
+  voice.includes('LIVEKIT_NOT_CONFIGURED')&&
+  voice.includes('auth.getUser')&&Boolean(legacyLimiter||durableLimiter);
  const fbMatch=fb.client?.some(x=>x.client_info?.android_client_info?.package_name==='com.totichat.beta')&&cap.includes("appId: 'com.totichat.beta'");
  const pushPlugin=Boolean(pkg.dependencies?.['@capacitor/push-notifications']);
  return {
