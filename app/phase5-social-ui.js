@@ -64,9 +64,9 @@ function entry(){
  paintStats();
  void refreshOverview();
 }
-function open(){
+function open(kind='friends'){
  if(!current()||typeof showSheet!=='function')return;
- rows=[];cursor=null;more=false;openTab='friends';
+ rows=[];cursor=null;more=false;openTab=Object.hasOwn(types,kind)?kind:'friends';
  showSheet('<section id="tc-real-social" class="tc-real-social" dir="rtl" aria-label="العلاقات الحقيقية">'+
  '<header><h3>👥 المتابعون والأصدقاء</h3><button type="button" data-a="close" aria-label="إغلاق">✕</button></header>'+
  '<p id="tc-social-status" role="status"></p>'+
@@ -168,9 +168,15 @@ window.render=function(){
  const result=prev.apply(this,arguments);entry();return result;
 };
 document.addEventListener('click',event=>{
- const b=event.target?.closest?.('[data-tc-social-open],[data-tc-social-tab],[data-tc-social-more],[data-tc-social-follow]');
+ const b=event.target?.closest?.('[data-tc-social-open],[data-tc-social-tab],[data-tc-social-more],[data-tc-social-follow],.me-statcard button');
  if(!b||!auth.state().signedIn)return;
  event.preventDefault();event.stopImmediatePropagation();
+ if(b.matches?.('.me-statcard button')&&screen==='me'){
+  const idx=$('.me-statcard button').indexOf(b);
+  const kind=['followers','friends','following'][idx];
+  if(kind)open(kind);
+  return;
+ }
  if(b.hasAttribute('data-tc-social-open')){open();return}
  if(!show()||!current())return;
  if(b.hasAttribute('data-tc-social-tab')){
