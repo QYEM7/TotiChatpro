@@ -112,3 +112,21 @@ This is **not** 50% release confidence or the fraction of 41 screens functioning
 - Full 41 screen + 27 dialog true-data route/action audit, performance and accessibility soak, explicit customer sign-off.
 
 **No Staging test credentials, fabricated memberships, account IDs, wallets, diamonds or marketing events were inserted. Main and production remain unchanged; release_allowed=false.**
+
+## Further backend progress — verified medals and inbox notifications (2026-10-11)
+
+This continuation extends the **authenticated beta backend** without changing approved `app/index.html`, colors, VIP artwork or the 15 microphone seats. It does **not** imply full release readiness or automatically raise earlier directional scores.
+
+### New actually deployed Staging modules
+- Staging migration **59** `staging_verified_medal_entitlements`: `public.medal_catalog`, `public.medal_entitlements`, private `phase3.medal_action_requests`, and public **SECURITY INVOKER** wrappers `phase5_medal_owner_action`, `phase5_medal_user` and `phase5_medal_catalog`. A verified Owner can explicitly register, grant and revoke real medals with a mandatory reason and UUID idempotency; a normal account cannot modify or award these entitlements. No money/XP/VIP side effects and no default grants.
+- Staging migration **60** `staging_verified_medal_notifications`: extends authenticated, RLS-restricted `public.user_notifications` with actual `medal_granted` and `medal_revoked` audit events. A repeated approved request emits one notification, not duplicates. No announcement is created when the Owner merely registers a medal catalogue item.
+- Real `app/phase5-medals-ui.js` + scoped styles load via the pre-existing authenticated backend module loader, leaving the approved HTML byte-for-byte unchanged. The user's profile shows only actually granted medals, or a truthful empty state; no demo trophies. The Owner has an explicit confirm-and-reason register/grant/revoke sheet. Account switching closes the privileged sheet, invalidates pending responses and never shows the previous user's awards.
+- Post-deployment read-only verification: **60 total Staging migrations**; **0** medal catalogue rows, **0** medals granted, **0** source-created notifications, **0** financial operations and **0** wallet ledger entries. All 3 medal public RPCs are `SECURITY INVOKER`; anon cannot grant, authenticated users have no direct table DML/SELECT access. The only outstanding Supabase security-advisor WARN remains `auth_leaked_password_protection` (Auth service setting, not a SQL permission).
+- [Full-stack disposable DB and verified audit T61+T62 PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38148822703): clean local GoTrue/REST/PostgreSQL, idempotent Owner approval, grant, revoke and private notification checks; SQL fixtures explicitly `ROLLBACK`.
+- [216/216 comprehensive source tests PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38148984665), including a behavioral virtual-DOM profile test proving server-derived medals and absence of stale prior-account awards.
+- [Independent fresh canonical schema replay PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38148776523), including the new medal migrations.
+
+### Still not complete — do not certify beta yet
+VIP purchase, approved price-based rewards, level XP/thresholds, medals earned automatically under Owner-approved rules, cosmetics and frame activation, agency salary/commission/target settlement, luck gift odds and payouts, full solo/multiplayer games, signed Android and Google OAuth device checks, remote two-user financial/role testing, LiveKit/TURN physical audio, FCM background notifications, verified production backup + Storage byte restore, branch protection and deployed Cloudflare/Vercel acceptance remain open. The immutable, monetary end-of-month diamond liabilities/zeroing mechanism is **not** safe to activate without an approved business settlement model.
+
+**Directional progress remains Backend ~65%, full app ~50%.** Completed local/source checks improve confidence in a narrow feature but cannot certify broad external prerequisites. **Release is still NO-GO.**
