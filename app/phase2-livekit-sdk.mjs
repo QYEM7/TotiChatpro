@@ -26,7 +26,8 @@ export async function connect(serverUrl,token,callback){
  const room=new Room({adaptiveStream:true,dynacast:true});
  current=room;
  room.on(RoomEvent.TrackSubscribed,(track)=>{
-   if(track.kind!=='audio')return;
+   // Old rooms can deliver late WebRTC events after a disconnect/rejoin.
+   if(current!==room||track.kind!=='audio')return;
    const media=track.attach();
    media.setAttribute('playsinline','');
    media.autoplay=true;media.volume=speakerVolume;
@@ -35,14 +36,17 @@ export async function connect(serverUrl,token,callback){
    document.body.appendChild(media);
    audio.push(media);
    const p=media.play();
-   if(p&&typeof p.catch==='function')void p.catch(()=>signal({needsAudioGesture:true}));
+   if(p&&typeof p.catch==='function')void p.catch(()=>{
+     if(current===room)signal({needsAudioGesture:true});
+   });
  });
  room.on(RoomEvent.TrackUnsubscribed,track=>{
+   if(current!==room)return;
    track.detach().forEach(el=>{el.remove();audio=audio.filter(a=>a!==el)});
  });
- room.on(RoomEvent.Disconnected,()=>signal({connected:false}));
- room.on(RoomEvent.Reconnecting,()=>signal({connecting:true}));
- room.on(RoomEvent.Reconnected,()=>signal({connected:true}));
+ room.on(RoomEvent.Disconnected,()=>{if(current===room)signal({connected:false});});
+ room.on(RoomEvent.Reconnecting,()=>{if(current===room)signal({connecting:true});});
+ room.on(RoomEvent.Reconnected,()=>{if(current===room)signal({connected:true});});
  try{
    await room.connect(serverUrl,token,{autoSubscribe:true});
    if(current!==room){await room.disconnect();return;}
