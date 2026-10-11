@@ -104,6 +104,22 @@ async function muteToggle(){
  connecting=true;pendingRoom=info.id;controls();
  const updated=!mic.isMuted;
  try{
+  // Privacy first: on explicit mute, stop local media publication BEFORE any
+  // network request. A slow/failed RPC must never leave the microphone live.
+  if(updated){
+   const active=sdk;
+   try{
+    if(!active)throw new Error('Voice client missing');
+    await active.microphone(false);
+    if(!valid())return;
+    micPublished=false;
+   }catch(_){
+    if(!valid())return;
+    await tearDown();
+    notify('تعذر إيقاف المايك بأمان؛ تم فصل الاتصال الصوتي لحماية خصوصيتك.');
+    return;
+   }
+  }
   await auth.requestData('/rest/v1/rpc/phase2_room_set_muted',{
    method:'POST',body:{p_room_id:info.id,p_muted:updated}
   });
