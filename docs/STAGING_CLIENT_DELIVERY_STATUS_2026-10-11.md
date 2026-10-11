@@ -69,3 +69,17 @@ Date: 2026-10-11
 - Fixed real room wallpaper display in approved visual identity by writing the existing `--room-art` CSS variable; reset restores the original artwork and keeps all 15 seats.
 - Revalidated 7/7 original static critical-path checks after this fix; 2/2 new support and closed-month checks also passed (9/9 static contract checks total). These are NOT live user end-to-end tests.
 - Latest Staging migration count is 46; Supabase still reports the unresolved leaked-password protection warning, and external Vercel deployment access is forbidden (403).
+
+
+## Release-blocker repairs — follow-up
+- Changed the **develop/phase-2** approved Android/web source `app/config.js` to the explicitly registered, browser-safe **STAGING** project `rziaedugbdwefbefcxjt`, preventing accidental access to legacy backend `sqedsnyvjblvbjbizcay`. No production database changes. Production rollout requires separate explicit authorization and configuration.
+- Added `public.phase2_room_members_visual` with a membership-checked internal function so a joined user sees only **real persisted profile avatars**, never sample photographs. Preserves the original fifteen microphone seat DOM elements, CSS frames and background; old API remains unchanged.
+- Corrected `app/phase2-rooms.js` allowlist to permit the new, authenticated room-member API; otherwise the UI would have silently refused the new endpoint.
+- Aligned the legacy Android foundation test with the isolated Staging URL, rather than asserting an obsolete database reference.
+- Fixed Cloudflare preview deployment's inconsistent account-ID environment source (`vars.CLOUDFLARE_ACCOUNT_ID`).
+- Added `tests/staging-release-regression.test.mjs` (3 contract checks passed by source-level execution), updated GitHub CI to run these plus the existing Android packaging/foundation suite.
+- Verified all **33 linked browser JavaScript files** compile syntactically and exist in GitHub; all **19 referenced CSS files** exist.
+- Supabase Staging migration count: **47**, voice token Edge Function: `ACTIVE` with JWT verification. No active global fake gift events or synthetic direct messages were inserted.
+- Remaining constraints: authentic LiveKit credentials in staging secrets, browser/device E2E, Cloudflare deploy confirmation, formal monthly payroll business rules/settlement, Android signed install test, and enabling Supabase Auth leaked-password protection. CI build/deploy result from GitHub Actions is NOT confirmed.
+
+**Status: STAGING INTEGRATION / NOT CLIENT-RELEASE-READY.**
