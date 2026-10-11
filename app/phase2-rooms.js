@@ -114,7 +114,7 @@ function clearUnjoinedRoom(view){
   if(donor)donor.hidden=true;
   const count=$('.giftTicker .orb b',view);
   if(count)count.textContent='0';
-  for(const [index,button] of $('.seats .seat',view).entries()){
+  for(const [index,button] of $$('.seats .seat',view).entries()){
     button.disabled=true;
     button.classList.remove('occupied','locked');
     button.setAttribute('aria-label','المقعد '+(index+1)+' — انضم لغرفة أولاً');
@@ -138,7 +138,7 @@ function clearUnjoinedRoom(view){
     const level=$('.seatlv',button);
     if(level)level.textContent='بانتظار الغرفة';
   }
-  $('.chatMsg',view).forEach(node=>node.remove());
+  $$('.chatMsg',view).forEach(node=>node.remove());
   const area=$('.chatArea',view);
   if(area){
     const note=document.createElement('p');
