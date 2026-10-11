@@ -17,7 +17,9 @@ const labels=Object.freeze({
  room_muted:'تم كتم المايك إدارياً',
  room_mic_allowed:'تم رفع منع تشغيل المايك',
  room_seat_released:'تم تحرير مقعدك',
- support_staff_replied:'لديك رد جديد من خدمة العملاء'
+ support_staff_replied:'لديك رد جديد من خدمة العملاء',
+ medal_granted:'حصلت على ميدالية معتمدة',
+ medal_revoked:'تم سحب ميدالية من حسابك'
 });
 let owner='',epoch=0,loading=false,items=[],unread=0,before=null,end=false;
 function active(){
