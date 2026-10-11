@@ -11,6 +11,12 @@ const exe=process.env.CHROME_BIN||
  .find(p=>fs.existsSync(p));
 if(!exe)throw new Error('System Chromium unavailable');
 const web=process.env.UI_URL||'http://127.0.0.1:8765/app/';
+const stagingPublic=JSON.parse(fs.readFileSync('docs/preview-public-backend.json','utf8')).supabaseUrl;
+const backendOrigin=new URL(stagingPublic).origin;
+if(!/^https:\/\/[a-z0-9]{20}\.supabase\.co$/.test(backendOrigin)||
+   backendOrigin==='https://sqedsnyvjblvbjbizcay.supabase.co')
+ throw new Error('Browser mock refuses production or invalid Staging endpoint');
+
 const owner='94c0e8fb-126e-4149-ad30-6f25e3c99c33';
 const roomId='2ae6072b-d00c-46a9-8585-10ca1d6a10f2';
 const today=new Date().toISOString();
@@ -56,7 +62,11 @@ function json(data,status=200){
  await page.setRequestInterception(true);
  page.on('request',async req=>{
   const url=req.url(),method=req.method();
-  if(!url.startsWith('https://sqedsnyvjblvbjbizcay.supabase.co/')){
+  if(!url.startsWith(backendOrigin+'/')){
+   // No fake browser test may ever send passwords or room mutations to
+   // another Supabase installation when a staging URL is changed.
+   if(/^https:\/\/[a-z0-9]{20}\.supabase\.co\//.test(url))
+    return req.respond(json({message:'Unmocked Supabase backend blocked'},503));
    return req.continue();
   }
   if(method==='OPTIONS')return req.respond({
@@ -100,7 +110,13 @@ function json(data,status=200){
    assert.equal(actor,guest,'Invite should only be redeemed by guest');
    guestJoined=true;result=json(true);
   }
-  else if(route==='/rest/v1/rpc/phase2_room_members'){
+  else if(route==='/rest/v1/rpc/phase2_room_customize'){result=json(true);}
+  else if(route==='/rest/v1/gift_global_announcements'){result=json([]);}
+  else if(route==='/rest/v1/rpc/phase2_dm_inbox'){result=json([]);}
+  else if(route==='/rest/v1/rpc/phase3_admin_session'){
+   result=json({role:'user',permissions:[],isOwner:false,isMainPartner:false,canManageCatalogs:false,canReadReports:false});
+  }
+  else if(route==='/rest/v1/rpc/phase2_room_members_visual'||route==='/rest/v1/rpc/phase2_room_members'){
    result=json([...(joined?[{user_id:owner,display_name:profile.display_name,seat_no:seat,is_muted:true}]:[]),...(guestJoined?[{user_id:guest,display_name:'Guest Invited',seat_no:null,is_muted:true}]:[])]);
   }
   else if(route==='/rest/v1/rpc/phase2_room_take_seat'){
