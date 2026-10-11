@@ -5,3 +5,9 @@
 #tc-finance-integrity-message{min-height:28px;color:#936b33}
 #tc-finance-integrity-results{display:grid;gap:7px}
 .tc-finance-audit-line{margin:0;background:#f2f8ef;padding:9px 11px;border:1px solid #d3e8d7;border-radius:12px}
+
+.tc-finance-integrity label{display:grid;gap:5px;margin-top:8px;font-size:12px}
+.tc-finance-integrity select{border:1px solid #afd0b8;border-radius:10px;padding:9px;background:#fff;color:#24483b}
+#tc-finance-issue-results{display:grid;gap:8px;margin-top:10px}
+#tc-finance-issue-results article{display:grid;gap:5px;font-size:12px}
+#tc-finance-issue-results article p{margin:0}
