@@ -46,7 +46,21 @@ function protectIdentity(){
   if(!live())return;
   const state=auth.state(), profile=state.profile;
   if(screen==='me'){
-    $$('.me-agency').forEach(e=>e.remove()); // Old demo agency is not a real membership.
+    $('.me-agency').forEach(e=>e.remove()); // Old demo agency is not a real membership.
+    // Show the authenticated account rather than the design mock's name/ID,
+    // without changing the approved iconography and layout.
+    const accountName=$('.me-summary b');
+    if(accountName){
+      const realName=profile?.display_name||'مستخدم جديد';
+      const first=accountName.firstChild;
+      if(first?.nodeType===3)first.nodeValue=realName+' ';
+      else accountName.textContent=realName;
+    }
+    const accountId=$('.me-summary .muted-id');
+    if(accountId)accountId.textContent='حساب TotiChat · ID: '+state.user.id.slice(0,8).toUpperCase();
+    // No follower/visitor counts can be asserted until the social graph RPC
+    // is attached. Preserve the four statistic cards with nonfake placeholders.
+    $('.me-statcard b').forEach(node=>node.textContent='—');
     const badge=$('.me-vip-banner strong');
     if(badge)badge.textContent='👑 VIP · لم يُفعّل';
   }
