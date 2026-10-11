@@ -4,3 +4,7 @@
 .tc-gift-global-live b{font-size:14px;font-weight:900;line-height:1.7;overflow-wrap:anywhere}
 .tc-gift-global-live small{font-size:11px;color:#e3ffe4}
 @media(prefers-reduced-motion:reduce){.tc-gift-global-live{animation:none!important}}
+
+/* The sample donor portrait must never be shown as a verified donor. */
+#app .giftTicker .tc-gift-verified-ticker-icon{display:inline-flex;flex:0 0 auto;justify-content:center;align-items:center;min-width:32px;min-height:32px;font-size:24px;border-radius:12px;background:linear-gradient(140deg,#c7eddb,#f8ecc8);color:#3d5948;filter:drop-shadow(0 2px 3px #162d2140)}
+#app .giftTicker img[hidden]{display:none!important}
