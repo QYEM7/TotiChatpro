@@ -9,12 +9,18 @@ const rpc=get('supabase/migrations/20261010003152_phase2_actual_mic_mute.sql');
 const media=get('app/phase2-voice-ui.js');
 const realSdk=get('app/phase2-livekit-sdk.mjs');
 const manifest=get('scripts/configure-android-auth.mjs');
-test('voice token endpoint is authenticated and tied to actual member and seat',()=>{
- assert.match(edge,/db\.auth\.getUser\(\)/);
- assert.match(edge,/from\('room_members'\)/);
- assert.match(edge,/eq\('user_id',userId\)/);
- assert.match(edge,/seat_no!==null&&!memberResult\.data\.is_muted/);
- assert.match(edge,/if\(!livekitUrl\|\|!livekitKey\|\|!livekitSecret\)return json\(503/);
+test('voice token endpoint requires real Auth, server-side room/mic grants and durable budget',()=>{
+ const budget=get('supabase/migrations/20261011000202_phase2_voice_token_preflight.sql');
+ const wrapper=get('supabase/migrations/20261011000300_secure_social_rpc_wrappers.sql');
+ assert.match(edge,/supabase\.auth\.getUser\(authHeader\.slice\(7\)\)/);
+ assert.match(edge,/'phase2_voice_token_preflight'/);
+ assert(edge.indexOf("'phase2_voice_token_preflight'")<edge.indexOf('new AccessToken'));
+ assert.match(budget,/where m\.user_id=caller and m\.room_id=p_room_id/);
+ assert.match(budget,/s is not null and muted=false/);
+ assert.match(budget,/old\.hits>=20/);
+ assert.match(budget,/VOICE_RATE_LIMITED/);
+ assert.match(wrapper,/phase3\.actor\(\)/);
+ assert.match(edge,/LIVEKIT_NOT_CONFIGURED/);
  assert.match(edge,/new AccessToken/);
  assert.doesNotMatch(edge,/sb_secret_|sk_test_\w+|password\s*[:=]\s*["']/i);
 });
