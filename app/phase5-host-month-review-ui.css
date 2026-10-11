@@ -1,0 +1,11 @@
+.tc-host-month{direction:rtl;text-align:right;color:#24483b;padding:13px 15px 24px;max-height:80dvh;overflow:auto}
+.tc-host-month header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tc-host-month h3{font-size:19px;margin:6px 0}
+.tc-host-month p{font-size:12px;line-height:1.65}
+.tc-host-month label{display:grid;gap:6px;font-size:12px}
+.tc-host-month input{padding:11px;border-radius:10px;border:1px solid #bbd4bf;background:#fff;color:#293e32}
+.tc-host-month button{padding:10px 12px;border-radius:10px;background:#e6f5e7;border:1px solid #9ebba2;color:#22543b;font-weight:750;margin:7px 0}
+.tc-host-month-entry{display:grid;gap:5px;font-size:12px;background:#f1f8ee;border:1px solid #cde6d3;padding:10px 13px;margin:8px 0;border-radius:12px}
+.tc-host-month-entry strong{font-size:13px}
+.tc-host-month-empty{padding:18px;text-align:center;color:#728676}
+#tc-host-month-message{min-height:28px;color:#936b33}
