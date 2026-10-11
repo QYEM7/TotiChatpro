@@ -43,8 +43,26 @@ begin
  exception when insufficient_privilege then denied:=true;end;
  if not denied then raise exception 'Moderator illegally issued a ban';end if;
  perform public.phase2_room_moderate(rid,guest,'mute',gen_random_uuid());
- if not (select is_muted from public.room_members where user_id=guest)
- then raise exception 'Moderator failed to silence participant';end if;
+ if not (select is_muted and moderation_muted from public.room_members where user_id=guest)
+ then raise exception 'Moderator failed to enforce persistent mute';end if;
+ perform set_config('request.jwt.claims',
+   jsonb_build_object('sub',guest,'session_id',guest_sid,'aal','aal1')::text,true);
+ denied:=false;
+ begin perform public.phase2_room_set_muted(rid,false);
+ exception when insufficient_privilege then denied:=true;end;
+ if not denied then raise exception 'Muted member bypassed moderator with self-service unmute';end if;
+ perform set_config('request.jwt.claims',
+   jsonb_build_object('sub',mod_id,'session_id',mod_sid,'aal','aal1')::text,true);
+ perform public.phase2_room_moderate(rid,guest,'allow_mic',gen_random_uuid());
+ if (select moderation_muted from public.room_members where user_id=guest)
+ then raise exception 'Moderator unmute permission was not released';end if;
+ perform set_config('request.jwt.claims',
+   jsonb_build_object('sub',guest,'session_id',guest_sid,'aal','aal1')::text,true);
+ perform public.phase2_room_set_muted(rid,false);
+ if (select is_muted from public.room_members where user_id=guest)
+ then raise exception 'Member cannot unmute after moderator clears restriction';end if;
+ perform set_config('request.jwt.claims',
+   jsonb_build_object('sub',mod_id,'session_id',mod_sid,'aal','aal1')::text,true);
  perform public.phase2_room_moderate(rid,guest,'release_seat',gen_random_uuid());
  if exists(select 1 from public.room_members where user_id=guest and seat_no is not null)
  then raise exception 'Released seat still occupied';end if;
