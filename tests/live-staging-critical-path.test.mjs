@@ -40,7 +40,7 @@ test('new light room visual identity retains original seat layout',()=>{
 test('voice UI reports unavailable SFU and allows explicit playback resume',()=>{
  const voice=file('app/phase2-voice-ui.js');
  assert.match(voice,/LIVEKIT_NOT_CONFIGURED/);
- assert.match(voice,/data-real-voice="resume"/);
+ assert.match(voice,/dataset\.realVoice='resume'/);
  assert.match(voice,/resumeAudio/);
  assert.match(voice,/tc-real-voice-feedback/);
 });
