@@ -8,7 +8,7 @@ if(!auth)return;
 const queries=Object.freeze({
  gift_categories:'select=id,label,sort_order&order=sort_order.asc',
  cp_types:'select=id,label,is_primary,presentation,level_thresholds&order=id.asc',
- gift_catalog:'select=id,name,price,icon,category_id,relationship_type_id,description,preview_url,animation_type&order=price.asc',
+ gift_catalog:'select=id,name,price,icon,category_id,relationship_type_id,description,preview_url,animation_type,diamond_source_type,is_active&order=price.asc',
  store_catalog:'select=id,name,category,price,currency,icon,description,duration_days,vip_level,is_reward,relationship_type_id,presentation,preview_url&order=price.asc',
  recharge_packages:'select=id,price_usd,gold_amount&order=price_usd.asc',
  recharge_reward_tiers:'select=id,label,threshold_usd,rewards&order=threshold_usd.asc'
