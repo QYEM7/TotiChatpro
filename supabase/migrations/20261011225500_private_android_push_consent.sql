@@ -18,8 +18,7 @@ create table phase3.push_devices(
     char_length(token_value) between 32 and 4096 and
     token_value ~ '^[A-Za-z0-9_.:-]+$'
   ),
-  token_digest bytea generated always as
-    (sha256(convert_to(token_value,'UTF8'))) stored,
+  token_digest bytea not null check(octet_length(token_digest)=32),
   registered_at timestamptz not null default now(),
   refreshed_at timestamptz not null default now(),
   primary key(user_id,device_id),
@@ -79,10 +78,11 @@ begin
  -- when a shared phone signs in to a different verified account.
  perform pg_advisory_xact_lock(pg_catalog.hashtextextended(encode(token_hash,'hex'),0));
  delete from phase3.push_devices where token_digest=token_hash and user_id<>me;
- insert into phase3.push_devices(user_id,device_id,token_value)
- values(me,p_device_id,p_token)
+ insert into phase3.push_devices(user_id,device_id,token_value,token_digest)
+ values(me,p_device_id,p_token,token_hash)
  on conflict(user_id,device_id) do update
- set token_value=excluded.token_value,refreshed_at=now();
+ set token_value=excluded.token_value,token_digest=excluded.token_digest,
+ refreshed_at=now();
  return jsonb_build_object('userId',me,'deviceId',p_device_id,
   'registered',true,'deliveryConfigured',false);
 end $fn$;
