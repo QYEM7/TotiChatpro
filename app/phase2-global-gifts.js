@@ -15,10 +15,24 @@ function title(row){
  ' × '+Number(row.quantity)+' إلى '+String(row.recipient_name||'مستخدم').slice(0,55);
 }
 function decorateTicker(view){
- const node=view?.querySelector?.('.giftTicker .tickerBody');
- const count=view?.querySelector?.('.giftTicker .orb b');
+ const ticker=view?.querySelector?.('.giftTicker');
+ if(!ticker)return;
+ const node=ticker.querySelector('.tickerBody');
+ const count=ticker.querySelector('.orb b');
  const current=rows[0];
- if(node)node.textContent=current?title(current):'🎁 لا توجد إعلانات هدايا مؤكدة حالياً';
+ // The visual-review template contains an illustrative person's portrait:
+ // it must never be presented as the real sender of an audited gift.
+ const sample=ticker.querySelector('img');
+ if(sample)sample.hidden=true;
+ let icon=ticker.querySelector('[data-tc-verified-gift-icon]');
+ if(!icon){
+   icon=document.createElement('span');
+   icon.dataset.tcVerifiedGiftIcon='';
+   icon.className='tc-gift-verified-ticker-icon';
+   ticker.prepend(icon);
+ }
+ icon.textContent=current?String(current.gift_icon||'🎁').slice(0,4):'🎁';
+ if(node)node.textContent=current?title(current):'لا توجد إعلانات هدايا مؤكدة حالياً';
  if(count)count.textContent=current?String(current.quantity):'0';
 }
 function refreshTicker(){
