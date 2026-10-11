@@ -66,3 +66,38 @@ Historical prototype migrations `t36_host_month_preflight`, `t42_support_tickets
 **Verified progress:** Staging backend schema, user-account ownership, room Realtime, avatar Storage, music metadata, support privacy, agency/recharge request concurrency, clean disposable DB replay and full-stack test suite. **Release decision: NOT READY FOR COMPLETE CLIENT PRODUCTION**, because actual audio infrastructure, hosted two-user/device tests, payroll liability settlement, business approvals, external Auth settings and backups remain unverified.
 
 Never merge to `main`, change production, auto-mint coins or clear diamonds based on a green local test.
+
+## Continued execution: live room moderation and VIP authority (2026-10-11, subsequent round)
+
+### Isolated Staging ACTUALLY applied: 54 migrations total
+- **Room owner/moderator authority**, `staging_room_owner_moderation`: persistent room bans, room moderators, moderator mutes and idempotent actions. Room Owner alone may ban/unban and delegate/revoke moderators; moderators may mute, release seats and kick ordinary users but cannot demote the Owner, modify another moderator or override an Owner-imposed mute. `moderation_muted` plus per-room `room_mutes` enforce muted state across leaving/rejoining. A trigger rejects any banned user even when trying a previously issued one-time private-room invite. 15 existing seat positions untouched. Signed-in users have **no direct moderation table writes**. An audited Owner action is required.
+- **Moderation security follow-up**, `staging_room_moderation_invoker_security`: moved the privileged moderation roster from `public` into private `phase3` and installed an authenticated `SECURITY INVOKER` public wrapper. The introduced Supabase security warning `authenticated_security_definer_function_executable` was removed by actual advisor recheck.
+- **Real VIP1–VIP10 entitlement storage**, `staging_vip10_entitlements`: Owner-authenticated, audited and idempotent grant/revoke; 10 allowed active tiers; expiry checked at read time; no direct client DML; authenticated public status exposes only active tier and expiry. NO users were granted a default/example VIP and **VIP entitlement rows are 0**. Prices, purchase privileges, medals, animation frames and automatic earnings are NOT silently assumed or implemented.
+
+### Direct Staging verification
+- 54 applied migrations. `vip_entitlements` and `vip_action_requests` have RLS; two public VIP RPCs are invokers, no anonymous VIP grants and no direct authenticated entitlement writes.
+- Moderation: four private RLS-protected tables, one room-membership insert guard, two public moderation RPCs not accessible to anonymous callers, with Owner roster private behind a verified invoker wrapper.
+- Still zero real room bans/mutes/moderators, VIP grants, wallet-ledger mutations and financial operations added by this round.
+- Supabase security advisor: **one unresolved warning** `auth_leaked_password_protection`; additional `rls_enabled_no_policy` notices reflect deliberately closed internal tables, not automatically missing public access grants. Leaked password protection requires a separate authorized Auth setting adjustment.
+
+### Independently verified isolated CI
+- [Room moderation + full-stack T55, success](https://github.com/QYEM7/TotiChatpro/actions/runs/38143977169): four **real disposable GoTrue Auth JWT identities via PostgREST**, enforced server mute even after reconnect/rejoin, owner hierarchy, seat release, kick, ban/unban, idempotency and outsider IDOR denial. Additional T54 SQL assertions passed in disposable PostgreSQL, alongside finance, host-agency, Storage and support checks.
+- [VIP full-stack T56, success](https://github.com/QYEM7/TotiChatpro/actions/runs/38144280120): tested real database Owner-only VIP grants, rejection of level 11, invalid expiration, cross-account attempted privilege escalation, idempotent replay, conflicting request ID, revoke and expiry-aware read, RLS and no balance changes. Other disposable full-stack tests passed as well.
+- [Full repository 175/175 source tests, success](https://github.com/QYEM7/TotiChatpro/actions/runs/38144273136), 0 failed.
+- [Canonical disposable schema replay, success](https://github.com/QYEM7/TotiChatpro/actions/runs/38144249075) including VIP and both moderation migrations, independent of Staging and production.
+
+### New source files
+- `supabase/migrations/20261011163000_room_owner_moderation.sql`
+- `supabase/migrations/20261011164500_room_moderation_invoker.sql`
+- `supabase/migrations/20261011171000_vip10_entitlements.sql`
+- `supabase/tests/t54_room_moderation.sql`, `supabase/tests/t56_vip_entitlements.sql`
+- `scripts/t55-room-moderation-e2e.mjs`
+- `tests/room-moderation-contract.test.mjs`, `tests/room-moderation-invoker.test.mjs`, `tests/vip10-entitlement-contract.test.mjs`
+- CI integration updated in `.github/workflows/t03-full-stack.yml`.
+
+### Critical NOT-READY conditions stay enforced
+- Remote SFU / LiveKit credentials and a **two-device server-side mute/kick/ban enforcement** test are not complete. DB admission bans do not retroactively revoke an already established LiveKit transport or already-minted JWT; server-side participant revocation and actual phone tests are separate release work.
+- Host payroll/targets/commission rate snapshots, immutable month close, debt carry-forward and zeroing AFTER settlement are not approved or implemented. Current `phase5_host_month_preflight` remains non-mutating: `canZeroDiamonds=false`, `paysSalaries=false`.
+- VIP benefits, frames and payment rules, medals, level XP, full game-room state, verified gift end-to-end, push notification delivery and live client binding require further work; a real entitlement RPC does not complete an entire VIP subsystem.
+- Staging-hosted real-account end-to-end acceptance for business flows, password leak protection Auth setting, domain publishing, offsite production backup with restore rehearsal and Android phone acceptance remain outstanding.
+- **No production mutation, no GitHub main edits, no real money or diamonds minted/cleared, no claim of 100% release readiness.**
