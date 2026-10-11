@@ -109,6 +109,9 @@ function clearUnjoinedRoom(view){
   if(crowd)crowd.textContent='👥 0';
   const ticker=$('.giftTicker .tickerBody',view);
   if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا مؤكدة';
+  // The approved review template also ships a sample donor portrait.
+  const donor=$('.giftTicker img',view);
+  if(donor)donor.hidden=true;
   const count=$('.giftTicker .orb b',view);
   if(count)count.textContent='0';
   for(const [index,button] of $('.seats .seat',view).entries()){
