@@ -115,8 +115,17 @@ function roomContent(){
     const title=$('.roomidentity span b',view);
     if(title)title.textContent=active.title;
     const wallpaper=publishedImage(active.background_path,active.id,active.image_revision);
-    if(wallpaper)view.style.setProperty('--tc-room-wallpaper','url("'+wallpaper+'")');
-    else view.style.removeProperty('--tc-room-wallpaper');
+    // The approved room art actually reads --room-art, not the rejected theme's
+    // --tc-room-wallpaper variable. Preserve its original image for Reset.
+    if(!view.dataset.tcDefaultRoomArt)
+      view.dataset.tcDefaultRoomArt=view.style.getPropertyValue('--room-art')||'none';
+    if(wallpaper){
+      view.style.setProperty('--room-art','url("'+wallpaper+'")');
+      view.style.setProperty('--tc-room-wallpaper','url("'+wallpaper+'")');
+    }else{
+      view.style.setProperty('--room-art',view.dataset.tcDefaultRoomArt);
+      view.style.removeProperty('--tc-room-wallpaper');
+    }
     let welcome=$('[data-live-room-welcome]',view);
     if(active.welcome_message){
       if(!welcome){
