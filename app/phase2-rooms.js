@@ -93,13 +93,63 @@ function homeContent(){
       '<p class="tc-phase2-near-note">لا توجد غرف مفتوحة حالياً.</p>';
   }
 }
+function clearUnjoinedRoom(view){
+  // The approved HTML includes sample users/gifts for visual-review mode.
+  // Scrub ONLY illustrative people/data while waiting for a real room;
+  // keep all 15 approved seats, their frames, ornaments and layouts.
+  const name=$('.roomidentity span b',view);
+  if(name)name.textContent='اختر غرفة حقيقية من الرئيسية';
+  const id=$('.roomidentity span small',view);
+  if(id)id.textContent='لا توجد غرفة متصلة';
+  const cover=$('.roomidentity img',view);
+  if(cover)cover.hidden=true;
+  const activity=$('.roomevents > b',view);
+  if(activity)activity.textContent='● انتظار الانضمام';
+  const crowd=$('.roomevents .crowd',view);
+  if(crowd)crowd.textContent='👥 0';
+  const ticker=$('.giftTicker .tickerBody',view);
+  if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا مؤكدة';
+  const count=$('.giftTicker .orb b',view);
+  if(count)count.textContent='0';
+  for(const [index,button] of $('.seats .seat',view).entries()){
+    button.disabled=true;
+    button.classList.remove('occupied','locked');
+    button.setAttribute('aria-label','المقعد '+(index+1)+' — انضم لغرفة أولاً');
+    const face=$('.seatface',button);
+    if(face){
+      const photo=$('img',face);
+      if(photo)photo.style.setProperty('display','none','important');
+      const badge=$('.seatbadge',face);
+      if(badge)badge.style.setProperty('display','none','important');
+      let glyph=$('[data-real-seat-glyph]',face);
+      if(!glyph){
+        glyph=document.createElement('span');
+        glyph.dataset.realSeatGlyph='';
+        glyph.className='tc-real-seat-glyph';
+        face.appendChild(glyph);
+      }
+      glyph.hidden=false;glyph.textContent='＋';
+    }
+    const label=$('.seatname',button);
+    if(label)label.textContent='مقعد '+(index+1);
+    const level=$('.seatlv',button);
+    if(level)level.textContent='بانتظار الغرفة';
+  }
+  $('.chatMsg',view).forEach(node=>node.remove());
+  const area=$('.chatArea',view);
+  if(area){
+    const note=document.createElement('p');
+    note.className='chatMsg system';
+    note.textContent='💬 اختر غرفة حقيقية لمشاهدة الرسائل المحفوظة';
+    area.appendChild(note);
+  }
+}
 function roomContent(){
   if(!session().signedIn||screen!=='room')return;
   const view=$('.roomview.room-v2');
   if(!view)return;
   if(!active){
-    const name=$('.roomidentity span b',view);
-    if(name)name.textContent='اختر غرفة حقيقية من الرئيسية';
+    clearUnjoinedRoom(view);
   }else{
     if(active.is_private&&active.owner_id===session().user?.id){
       const header=$('.roomtop',view);
@@ -138,7 +188,10 @@ function roomContent(){
     }else welcome?.remove();
     const cover=publishedImage(active.cover_path,active.id,active.image_revision);
     const roomAvatar=$('.roomidentity img',view);
-    if(roomAvatar&&cover)roomAvatar.src=cover;
+    if(roomAvatar){
+      if(cover){roomAvatar.src=cover;roomAvatar.hidden=false;}
+      else{roomAvatar.hidden=true;roomAvatar.removeAttribute('src');}
+    }
     const id=$('.roomidentity span small',view);
     if(id)id.textContent='Room: '+active.id.slice(0,8).toUpperCase();
     const activity=$('.roomevents > b',view);
@@ -152,6 +205,7 @@ function roomContent(){
     window.TotiGlobalGiftFeed?.decorateTicker?.(view);
     const all=$$('.seats .seat',view);
     for(const [index,button] of all.entries()){
+      button.disabled=false;
       const slot=index+1;
       const p=members.find(x=>x.seat_no===slot);
       // Do not overwrite the approved VIP/decorative seat classes on every refresh.
