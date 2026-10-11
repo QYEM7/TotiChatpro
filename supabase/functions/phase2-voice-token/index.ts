@@ -1,92 +1,76 @@
-// TotiChat Phase 2 — authoritative LiveKit room credentials (REAL ONLY).
-// Adapted conceptually from the old project; its data/config are NOT reused.
+// TotiChat Staging LiveKit token authority (real sessions only).
+// Never imports production credentials or trusts client-supplied VIP/mic/room roles.
 import {createClient} from '@supabase/supabase-js';
 import {AccessToken,TrackSource} from 'livekit-server-sdk';
-import {rateVoiceRequest} from './rate-limit.mjs';
 
 const headers={
-  'access-control-allow-origin':'*',
-  'access-control-allow-headers':'authorization,apikey,content-type,x-client-info',
-  'access-control-allow-methods':'POST,OPTIONS',
-  'content-type':'application/json; charset=utf-8',
-  'cache-control':'no-store'
+ 'access-control-allow-origin':'*',
+ 'access-control-allow-headers':'authorization,apikey,content-type,x-client-info',
+ 'access-control-allow-methods':'POST,OPTIONS',
+ 'content-type':'application/json; charset=utf-8',
+ 'cache-control':'no-store'
 };
-const json=(status:number,body:Record<string,unknown>)=>new Response(JSON.stringify(body),{status,headers});
-const validUUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-function env(name:string){
-  return Deno.env.get(name)?.trim()||'';
+const json=(status:number,body:Record<string,unknown>)=>
+ new Response(JSON.stringify(body),{status,headers});
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const env=(key:string)=>Deno.env.get(key)?.trim()||'';
+function publicKey(){
+ const v=env('SUPABASE_PUBLISHABLE_KEYS');
+ if(v)try{return String(JSON.parse(v).default||'');}catch(_){}
+ return env('SUPABASE_ANON_KEY');
 }
-function browserKey(){
-  const v=env('SUPABASE_PUBLISHABLE_KEYS');
-  if(v){
-    try{const data=JSON.parse(v);if(data.default)return String(data.default);}catch(_){}
-  }
-  return env('SUPABASE_ANON_KEY');
-}
-Deno.serve(async(request:Request)=>{
-  if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
-  if(request.method!=='POST')return json(405,{error:'METHOD_NOT_ALLOWED'});
-  const bearer=request.headers.get('authorization')||'';
-  if(!bearer.startsWith('Bearer '))return json(401,{error:'UNAUTHORIZED'});
-  // Auth failures are counted too. Credentials required before Edge cutover.
-  const budget=await rateVoiceRequest(bearer,{
-    url:env('UPSTASH_REDIS_REST_URL'),token:env('UPSTASH_REDIS_REST_TOKEN'),
-    salt:env('VOICE_RATE_LIMIT_SALT')
+Deno.serve(async(req:Request)=>{
+ if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
+ if(req.method!=='POST')return json(405,{error:'METHOD_NOT_ALLOWED'});
+ const authHeader=req.headers.get('authorization')||'';
+ if(!authHeader.startsWith('Bearer '))return json(401,{error:'UNAUTHORIZED'});
+ let roomId='';
+ try{
+  const data=await req.json();
+  roomId=typeof data?.roomId==='string'?data.roomId.trim():'';
+  if(!uuid.test(roomId))return json(400,{error:'INVALID_ROOM_ID'});
+ }catch(_){return json(400,{error:'INVALID_JSON'});}
+ const url=env('SUPABASE_URL'),key=publicKey();
+ if(!url||!key)return json(503,{error:'BACKEND_NOT_CONFIGURED'});
+ try{
+  const supabase=createClient(url,key,{
+   global:{headers:{Authorization:authHeader}},
+   auth:{persistSession:false,autoRefreshToken:false}
   });
-  if(!budget.allowed)return json(budget.status,{error:budget.code});
-  let roomId:string;
+  const {data:userResult,error:userError}=await supabase.auth.getUser(authHeader.slice(7));
+  if(userError||!userResult.user)return json(401,{error:'INVALID_SESSION'});
+  const member=userResult.user;
+  if(!member.email_confirmed_at&&!member.phone_confirmed_at)
+   return json(403,{error:'ACCOUNT_NOT_VERIFIED'});
+  const lkUrl=env('LIVEKIT_URL'),lkKey=env('LIVEKIT_API_KEY'),lkSecret=env('LIVEKIT_API_SECRET');
+  if(!lkUrl||!lkKey||!lkSecret)return json(503,{error:'LIVEKIT_NOT_CONFIGURED'});
   try{
-    const body=await request.json();
-    roomId=typeof body?.roomId==='string'?body.roomId.trim():'';
-    if(!validUUID.test(roomId))return json(400,{error:'INVALID_ROOM_ID'});
-  }catch(_){return json(400,{error:'INVALID_JSON'});}
-  const supabaseUrl=env('SUPABASE_URL');
-  const anon=browserKey();
-  if(!supabaseUrl||!anon)return json(503,{error:'BACKEND_NOT_CONFIGURED'});
-  try{
-    const db=createClient(supabaseUrl,anon,{
-      global:{headers:{Authorization:bearer}},
-      auth:{persistSession:false,autoRefreshToken:false}
-    });
-    const {data:who,error:userError}=await db.auth.getUser();
-    if(userError||!who.user)return json(401,{error:'INVALID_SESSION'});
-    const userId=who.user.id;
-    const {data:verified,error:verificationError}=await db.rpc('phase4_verified_session');
-    if(verificationError||verified!==userId)return json(403,{error:'VERIFIED_SESSION_REQUIRED'});
-    const [roomResult,memberResult]=await Promise.all([
-      db.from('rooms').select('id,is_private').eq('id',roomId).maybeSingle(),
-      db.from('room_members').select('room_id,user_id,seat_no,is_muted')
-        .eq('room_id',roomId).eq('user_id',userId).maybeSingle()
-    ]);
-    if(roomResult.error||memberResult.error)return json(500,{error:'ROOM_LOOKUP_FAILED'});
-    if(!roomResult.data||!memberResult.data)return json(403,{error:'ROOM_MEMBERSHIP_REQUIRED'});
-    const livekitUrl=env('LIVEKIT_URL');
-    const livekitKey=env('LIVEKIT_API_KEY');
-    const livekitSecret=env('LIVEKIT_API_SECRET');
-    if(!livekitUrl||!livekitKey||!livekitSecret)return json(503,{error:'LIVEKIT_NOT_CONFIGURED'});
-    if(!/^wss:\/\/[^/]+/i.test(livekitUrl))return json(503,{error:'LIVEKIT_INVALID_URL'});
-    const canPublish=memberResult.data.seat_no!==null&&!memberResult.data.is_muted;
-    const token=new AccessToken(livekitKey,livekitSecret,{
-      identity:userId,ttl:'10m'
-    });
-    token.addGrant({
-      roomJoin:true,
-      room:roomId,
-      canSubscribe:true,
-      canPublish,
-      canPublishData:false,
-      canUpdateOwnMetadata:false,
-      canPublishSources:canPublish?[TrackSource.MICROPHONE]:[]
-    });
-    return json(200,{
-      url:livekitUrl,
-      token:await token.toJwt(),
-      roomId,
-      participant:userId,
-      canPublish
-    });
-  }catch(error){
-    console.error('TotiChat voice token error',error instanceof Error?error.message:'unknown');
-    return json(500,{error:'INTERNAL_ERROR'});
+   const parsed=new URL(lkUrl);
+   if(parsed.protocol!=='wss:'||!parsed.hostname||parsed.username||parsed.password)throw new Error('unsafe url');
+  }catch(_){return json(503,{error:'LIVEKIT_INVALID_URL'});}
+  // This database RPC checks membership, assigned seat, mute state, and 20/min budget.
+  const {data:permission,error:permissionError}=await supabase.rpc(
+   'phase2_voice_token_preflight',{p_room_id:roomId}
+  );
+  if(permissionError){
+   const msg=String(permissionError.message||'');
+   if(msg.includes('VOICE_RATE_LIMITED'))return json(429,{error:'VOICE_RATE_LIMITED'});
+   if(permissionError.code==='42501'||msg.includes('ROOM_MEMBERSHIP_REQUIRED'))
+    return json(403,{error:'ROOM_MEMBERSHIP_REQUIRED'});
+   return json(503,{error:'ROOM_AUTHORIZATION_FAILED'});
   }
+  if(permission?.roomId!==roomId)return json(403,{error:'ROOM_AUTHORIZATION_FAILED'});
+  const canPublish=permission?.canPublish===true;
+  const token=new AccessToken(lkKey,lkSecret,{identity:member.id,ttl:'5m'});
+  token.addGrant({
+   roomJoin:true,room:roomId,canSubscribe:true,canPublish,
+   canPublishData:false,canUpdateOwnMetadata:false,
+   canPublishSources:canPublish?[TrackSource.MICROPHONE]:[]
+  });
+  return json(200,{url:lkUrl,token:await token.toJwt(),roomId,
+   participant:member.id,canPublish});
+ }catch(error){
+  console.error('TotiChat voice authorization failed',error instanceof Error?error.name:'UNKNOWN');
+  return json(500,{error:'INTERNAL_ERROR'});
+ }
 });
