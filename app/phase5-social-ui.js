@@ -9,7 +9,7 @@ const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const validId=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s||'');
 const types=Object.freeze({followers:'المتابعون',following:'المتابَعون',friends:'الأصدقاء'});
-let owner='',generation=0,loadId=0,overview=null,openTab='friends',rows=[],cursor=null,more=false,busy=false;
+let owner='',generation=0,overviewSeq=0,listSeq=0,overview=null,overviewAt=0,openTab='friends',rows=[],cursor=null,more=false,busy=false;
 const current=()=>auth.state().signedIn===true&&auth.state().user?.id===owner;
 const rpc=(name,body)=>auth.requestData('/rest/v1/rpc/'+name,{method:'POST',body});
 const text=(tag,s,cls)=>{
@@ -20,8 +20,8 @@ function status(s){const n=$('#tc-social-status');if(n)n.textContent=String(s||'
 function syncOwner(){
  const id=auth.state().user?.id||'';
  if(id===owner)return;
- owner=id;generation++;loadId++;
- overview=null;openTab='friends';rows=[];cursor=null;more=false;busy=false;
+ owner=id;generation++;overviewSeq++;listSeq++;
+ overview=null;overviewAt=0;openTab='friends';rows=[];cursor=null;more=false;busy=false;
  if(show())closeSheet();
  paintStats();
 }
@@ -36,17 +36,18 @@ function paintStats(){
   }
  }
 }
-async function refreshOverview(){
- if(!current())return;
- const id=owner,token=generation,serial=++loadId;
+async function refreshOverview(force=false){
+ if(!current()||(!force&&Date.now()-overviewAt<10000))return;
+ const id=owner,token=generation,serial=++overviewSeq;
+ overviewAt=Date.now();
  try{
   const data=await rpc('phase5_social_overview',{p_target:id});
-  if(token!==generation||serial!==loadId||!current()||owner!==id)return;
+  if(token!==generation||serial!==overviewSeq||!current()||owner!==id)return;
   if(!data||data.userId!==id||!['followers','following','friends'].every(k=>
    Number.isSafeInteger(data[k])&&data[k]>=0))throw Error('البيانات غير مكتملة');
   overview=data;paintStats();
  }catch(e){
-  if(token!==generation||serial!==loadId||!current())return;
+  if(token!==generation||serial!==overviewSeq||!current())return;
   overview=null;paintStats();
   if(show())status('لم يتم تحميل أرقام المتابعين: '+String(e.message).slice(0,85));
  }
@@ -104,14 +105,14 @@ function paintList(){
 }
 async function loadList(reset=false){
  if(!show()||!current()||busy)return;
- busy=true;const id=owner,stamp=generation,token=++loadId;
+ busy=true;const id=owner,stamp=generation,token=++listSeq;
  const before=reset?null:cursor;
  status('جارٍ قراءة العلاقات من الخادم…');
  try{
   const result=await rpc('phase5_social_list',{
    p_kind:openTab,p_limit:25,p_before:before
   });
-  if(stamp!==generation||token!==loadId||!current()||!show())return;
+  if(stamp!==generation||token!==listSeq||!current()||!show())return;
   if(!result||!Array.isArray(result.items)||result.items.length>25)
    throw Error('استجابة علاقات غير صحيحة');
   // Lists are always for the logged-in account; known follow state derives
@@ -185,6 +186,6 @@ document.addEventListener('submit',event=>{
 },true);
 window.addEventListener('totichat-phase2-auth',()=>{syncOwner();if(current())void refreshOverview()});
 window.addEventListener('focus',()=>{if(current()&&screen==='me')void refreshOverview()});
-window.TotiSocial=Object.freeze({refresh:refreshOverview,isInstalled:()=>true});
+window.TotiSocial=Object.freeze({refresh:()=>refreshOverview(true),isInstalled:()=>true});
 queueMicrotask(entry);
 })();
