@@ -95,6 +95,50 @@ async function load(){
    message('تعذر الفحص: '+String(e.message||'خطأ اتصال').slice(0,140));
  }finally{if(stamp===epoch)loading=false}
 }
+const validAuditType=k=>['gift','redemption','wallet'].includes(k);
+async function details(){
+ if(!shown()||!signed()||!permitted()||loading)return;
+ const kind=$('#tc-finance-issue-kind')?.value||'';
+ if(!validAuditType(kind)){message('حدد نوع اختلاف صحيح');return;}
+ loading=true;const stamp=epoch,id=user,token=++serial;
+ message('جارٍ تحميل تفاصيل الاختلاف للمالك والشريك الرئيسي…');
+ try{
+  const data=await rpc('phase5_finance_integrity_issues',{
+   p_kind:kind,p_offset:0,p_limit:25
+  });
+  if(stamp!==epoch||token!==serial||!signed()||id!==user||!shown())return;
+  if(!data||data.kind!==kind||data.isReadOnly!==true||
+    data.canZeroDiamonds!==false||data.hasPayrollRates!==false||
+    !Array.isArray(data.items)||data.items.length>25)
+   throw Error('بيانات التدقيق غير صالحة');
+  const output=$('#tc-finance-issue-results');
+  if(!output)return;
+  output.replaceChildren();
+  if(!data.items.length)output.append(node('p','لا توجد اختلافات موثقة ضمن نطاق التدقيق.'));
+  for(const item of data.items){
+   if(!item||typeof item!=='object')continue;
+   const row=node('article','');row.className='tc-finance-audit-line';
+   const uuid=item.operation_id||item.user_id||'';
+   const safeId=/^[0-9a-f-]{36}$/i.test(uuid)?uuid:'معرّف غير متوفر';
+   const fields=kind==='gift'?
+    [['قيمة الهدية',item.expected_amount],['خصم الكوينز',item.sender_coins_delta],
+     ['إضافة الماس',item.recipient_diamonds_delta],['دفعة الماس',item.lot_amount]]:
+    kind==='redemption'?
+    [['الماس المتوقع',item.expected_diamonds],['الكوينز المتوقعة',item.expected_coins],
+     ['قيد الماس',item.ledger_diamond_delta],['قيد الكوينز',item.ledger_coin_delta],
+     ['تخصيص الدفعات',item.allocated_diamonds]]:
+    [['ماس المحفظة',item.wallet_diamonds],['الماس الموثّق بالدفعات',item.tracked_diamonds]];
+   row.append(node('strong','المعرّف: '+safeId));
+   for(const [name,value] of fields)
+    row.append(node('p',name+': '+String(value??'—').slice(0,45)));
+   output.append(row);
+  }
+  message('تفاصيل قرائية فقط. لا تُصلح الأرصدة تلقائياً ولا تنفّذ تسويات.');
+ }catch(e){
+  if(stamp===epoch&&signed()&&shown())
+   message('تعذر تحميل تفاصيل الاختلاف: '+String(e.message||'خطأ').slice(0,120));
+ }finally{if(stamp===epoch)loading=false;}
+}
 function open(){
  sync();
  if(!signed()||!permitted()||typeof showSheet!=='function')return;
@@ -103,6 +147,9 @@ function open(){
   '<p>صلاحية المالك وشريكه الرئيسي فقط. لا يمكن من هنا تحريك الأموال أو تصفير الماس أو صرف رواتب.</p>'+
   '<p id="tc-finance-integrity-message" role="status"></p>'+
   '<div id="tc-finance-integrity-results"></div>'+
+  '<label>نوع الاختلاف <select id="tc-finance-issue-kind"><option value="gift">الهدايا</option><option value="redemption">تحويل الماس</option><option value="wallet">المحافظ</option></select></label>'+
+  '<button type="button" data-finance-issues>تفاصيل العمليات المخالفة</button>'+
+  '<div id="tc-finance-issue-results"></div>'+
   '<button type="button" data-finance-refresh>إعادة الفحص</button>'+
   '<button type="button" data-a="close">إغلاق</button></section>',true);
  void load();
@@ -114,11 +161,13 @@ function mount(){
 const previous=window.render;
 window.render=function(){const result=previous.apply(this,arguments);mount();return result};
 document.addEventListener('click',event=>{
- const b=event.target?.closest?.('[data-finance-inspect],[data-finance-refresh]');
+ const b=event.target?.closest?.('[data-finance-inspect],[data-finance-refresh],[data-finance-issues]');
  if(!b)return;
  event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
  if(b.hasAttribute('data-finance-inspect'))open();
- else if(shown()&&signed()&&permitted())void load();
+ else if(shown()&&signed()&&permitted()){
+  if(b.hasAttribute('data-finance-issues'))void details();else void load();
+ }
 },true);
 window.addEventListener('totichat-phase2-auth',()=>{sync();if(signed())mount()});
 window.TotiFinanceIntegrity=Object.freeze({isInstalled:()=>true,open});
