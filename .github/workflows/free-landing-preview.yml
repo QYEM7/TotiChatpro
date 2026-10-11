@@ -17,6 +17,8 @@ permissions:
   contents: read
 jobs:
   build-static-landing-only:
+    # Owner froze every new preview/version build until a separate instruction.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
