@@ -26,7 +26,7 @@ revoke all on phase3.special_id_grant_requests from public,anon,authenticated;
 create function phase3.special_id_grant(p_target uuid,p_public_id text,
  p_reason text,p_request_id uuid)
 returns jsonb language plpgsql security definer set search_path='' as $fn$
-declare actor_id uuid:=phase3.actor();note text:=btrim(coalesce(p_reason,''));
+declare caller uuid:=phase3.actor();note text:=btrim(coalesce(p_reason,''));
  old phase3.special_id_grant_requests%rowtype;
  current_code text;result jsonb;
 begin
@@ -43,7 +43,7 @@ begin
    raise exception 'Verified account required' using errcode='42501';
  end if;
  select * into old from phase3.special_id_grant_requests r
- where r.actor_id=actor_id and r.request_id=p_request_id;
+ where r.actor_id=caller and r.request_id=p_request_id;
  if found then
   if old.target_id<>p_target or old.public_id<>p_public_id then
    raise exception 'Special ID idempotency conflict';
@@ -51,7 +51,7 @@ begin
   return old.result;
  end if;
  if (select count(*) from phase3.special_id_grant_requests r
-   where r.actor_id=actor_id and r.created_at>now()-interval '1 minute')>=20
+   where r.actor_id=caller and r.created_at>now()-interval '1 minute')>=20
  then raise exception 'Special ID rate limit exceeded';end if;
  select public_id into current_code from public.account_special_ids where user_id=p_target;
  if found then
@@ -61,11 +61,11 @@ begin
   raise exception 'Public ID already reserved' using errcode='23505';
  end if;
  insert into public.account_special_ids(user_id,public_id,granted_by,reason)
- values(p_target,p_public_id,actor_id,note);
+ values(p_target,p_public_id,caller,note);
  result:=jsonb_build_object('userId',p_target,'publicId',p_public_id,'success',true);
  insert into phase3.special_id_grant_requests(actor_id,request_id,target_id,public_id,result)
- values(actor_id,p_request_id,p_target,p_public_id,result);
- insert into public.security_audit(actor_id,action,details)values(actor_id,'special_public_id_grant',
+ values(caller,p_request_id,p_target,p_public_id,result);
+ insert into public.security_audit(actor_id,action,details)values(caller,'special_public_id_grant',
   jsonb_build_object('targetId',p_target,'publicId',p_public_id,'requestId',p_request_id));
  return result;
 end $fn$;
