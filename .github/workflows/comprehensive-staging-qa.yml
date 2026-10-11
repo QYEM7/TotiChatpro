@@ -46,6 +46,8 @@ jobs:
             xargs -0 -r -n 1 node --check
       - name: Run ALL offline repository test files sequentially
         run: node --test --test-concurrency=1 tests/*.test.cjs tests/*.test.mjs
+      - name: Verify prelaunch release remains correctly blocked until external evidence is approved
+        run: node scripts/check-backend-prelaunch.mjs --expect-blocked
       - name: Audit committed secrets (no remote database)
         run: node scripts/t03-secret-audit.mjs
       - name: Build approved app and registered STAGING-only browser preview
