@@ -103,7 +103,7 @@ test('admin controls are real, role-gated and never expose service-role secrets'
  assert.match(admin,/host_agency\.open/);
  assert.doesNotMatch(admin,/service_role|SUPABASE_SERVICE_ROLE_KEY|LIVEKIT_API_SECRET/);
  assert.match(sql,/isMainPartner/);
- assert.match(sql,/gift_global_config/);
+ assert.match(sql,/global_gift_config/);
  assert.match(staff,/p_action='approve_registration' and reg\.kind='host'/);
  assert.match(wrappers,/security invoker/);
 });
