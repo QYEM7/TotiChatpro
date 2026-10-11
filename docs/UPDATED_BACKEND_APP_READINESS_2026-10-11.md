@@ -85,3 +85,30 @@ This is **not** 50% release confidence or the fraction of 41 screens functioning
 - **Backend ~65% built. Entire app ~50% built.**
 - **Go/no-go: NO-GO.** The project cannot honestly be called prelaunch-ready or 100% complete, and missing items are absolutely **not limited to testing the sound**.
 - Next priority is approved finance settlement rules + staged two-real-user testing + Google/Android/Auth/recovery, followed by full social/VIP/games/music and external deployment. No fake percentages can replace a signed acceptance.
+
+## Implementation continuation: verified social graph and permanent public IDs
+
+**Additional implementation is real but the release verdict above remains NO-GO.** Percentages stated earlier remain directional until hosted financial/device gates are cleared; a larger number of unit tests does not automatically raise a release percentage.
+
+### New Staging deployment evidence
+- Staging migration **57**, `staging_verified_social_graph`: real private `social_follows` directed edges, mutual follow considered friendship, server-derived followers/following/friends counts, prefix-based verified account search, list APIs, bounded rate/idempotent follow/unfollow, removal of both follow directions upon an existing DM block. Public `phase5_social_*` endpoints are session-checked `SECURITY INVOKER` wrappers around private `phase3` functions. The direct table has **RLS and no client DML/SELECT grants**.
+- Staging migration **58**, `staging_owner_special_public_id`: one-time manual 4–10 digit non-zero-leading special ID chosen by the verified Owner, unique across customers, immutable after approval, server-audited with idempotent approval, separate from internal Auth UUID. Non-Owner users cannot grant IDs; public grant and read are `SECURITY INVOKER` wrappers with session verification. No automatic generation and no preassigned example IDs.
+- Associated new browser modules `app/phase5-social-ui.js`, `app/phase5-special-id-ui.js` and scoped styles load **only in authenticated live mode through the existing backend-controls loader**. Approved `app/index.html`, 15-seat layout and visual identity remain unchanged. Signed-in user profile first three statistic cards now open genuine followers/friends/following lists; the missing visitor graph is not faked. Customer self profile shows a granted special ID only when returned by the backend, otherwise a stable short UUID. Owner grant UI requires explicit confirmation; the server checks Owner authority again.
+- Latest direct Staging SQL after deployment: **58 migrations**, RLS on new private tables, **no anonymous follow or special-ID grant**, **no direct signed-in mutations**, 4 public social invoker RPCs and 2 public special-ID invoker RPCs. **0** persisted social follows, **0** special IDs, **0** special-ID requests and **0** recorded financial operations or wallet ledger entries added by testing. Supabase Auth warning `auth_leaked_password_protection` remains unresolved.
+
+### Test evidence (isolated from production)
+- [T59 real GoTrue + PostgREST social, 3 disposable accounts, PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38147086634): real mutual follow, server counts, case-sensitive ID equality, search, replay conflict, DM block severs both edges, direct edge table denied.
+- [T59 + T60 disposable complete Postgres/REST suite, PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38147392975): the Owner-only immutable ID, collision rejection, replay and auditing assertions passed in a `BEGIN`/`ROLLBACK` local transaction alongside actual social and financial tests.
+- [Independent fresh schema replay, PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38147392983), including the two new migrations.
+- [207/207 source/behavior tests, PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38147486877), including special-ID and social client wiring and unchanged approved Android root packaging.
+- [Royal Chromium and live catalog QA, PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38147473859); catalog browser mutation check now permits only named, read-only verified social/VIP/identity RPCs. Real store charges remain denied until explicit user action and server authorization.
+
+### Still not complete
+- Approved exact host salary/commission/target rates, immutable settlement and month-end liability preservation and clearing after settlement.
+- Real-money business flow and luck-gift approved payout probabilities/compliance, hosted two-account finance abuse tests and signed Owner/staff role negative tests.
+- Google OAuth/PKCE real Android callback and MFA recovery; Supabase leaked-password protection requires Auth settings; no unverified provider secrets invented.
+- LiveKit/TURN multi-phone listening, interruption/rejoin and SFU removal tests, hosted preview publish, signed Android AAB/APK acceptance and backup/restore of database + private Storage bytes.
+- Profile visitor analytics, level XP, medals, full VIP purchase/perks and CP social relationship flows, solo/multiplayer games, licensed synced music and background FCM delivery.
+- Full 41 screen + 27 dialog true-data route/action audit, performance and accessibility soak, explicit customer sign-off.
+
+**No Staging test credentials, fabricated memberships, account IDs, wallets, diamonds or marketing events were inserted. Main and production remain unchanged; release_allowed=false.**
