@@ -7,6 +7,8 @@ on:
       - "assets/**"
       - "tests/royal-browser.cjs"
       - "tests/phase2-browser.cjs"
+      - "tests/phase2-catalog-browser.cjs"
+      - "tests/phase3-admin-browser.cjs"
       - "tests/phase2-android-root-browser.cjs"
       - "tests/phase2-native-gate-browser.cjs"
       - "tests/official-auth-layout-browser.cjs"
