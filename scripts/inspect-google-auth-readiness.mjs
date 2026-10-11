@@ -13,6 +13,10 @@ export function readPublicBackend(configText){
  const parsed=new URL(u);
  if(parsed.protocol!=='https:'||!parsed.hostname.endsWith('.supabase.co')||parsed.username||parsed.password||parsed.port)
   throw Error('Refused non-Supabase endpoint');
+ // This inspector is part of the isolated beta: never contact legacy production
+ // even when someone accidentally pastes a valid production publishable key.
+ if(parsed.origin!=='https://rziaedugbdwefbefcxjt.supabase.co')
+  throw Error('Refused non-staging Supabase endpoint');
  return {url:parsed.origin,key:k};
 }
 export function summarizeFlags(data){
