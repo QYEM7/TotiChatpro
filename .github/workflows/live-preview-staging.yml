@@ -36,7 +36,7 @@ jobs:
           node-version: '22'
       - run: npm ci --no-audit --no-fund
       - name: Verify no production backend and no fake preview entry
-        run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs tests/registered-staging-preview.test.mjs tests/live-staging-critical-path.test.mjs tests/staging-release-regression.test.mjs
+        run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs tests/registered-staging-preview.test.mjs tests/live-staging-critical-path.test.mjs tests/staging-release-regression.test.mjs tests/live-dm-race.test.mjs
       - name: Syntax-check live room, auth, voice and event modules
         run: |
           node --check app/phase2-rooms.js
