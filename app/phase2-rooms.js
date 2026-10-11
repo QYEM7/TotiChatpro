@@ -156,7 +156,8 @@ function roomContent(){
       const p=members.find(x=>x.seat_no===slot);
       // Do not overwrite the approved VIP/decorative seat classes on every refresh.
       button.classList.toggle('occupied',!!p);
-      button.classList.toggle('locked',!p);
+      // An empty seat is available; the old preview class suggested a false lock.
+      button.classList.remove('locked');
       button.setAttribute('aria-label',p?'المقعد '+slot+': '+p.display_name:'المقعد '+slot+' متاح');
       const face=$('.seatface',button);
       if(face){
@@ -243,6 +244,16 @@ async function listRooms(){
   })();
   return loadingRooms;
 }
+function roomMembershipRevoked(roomId){
+  // Never keep a revoked room's voice/mic alive after the backend removes us.
+  if(active?.id!==roomId)return;
+  sequence++;active=null;members=[];messages=[];rooms=null;
+  void window.TotiRealVoice?.disconnect?.();
+  if(typeof closeSheet==='function')closeSheet();
+  if(screen==='room')go('home');
+  toast('انتهت عضويتك بالغرفة أو أُغلقت. تم فصل الصوت');
+  void listRooms();
+}
 async function refreshRoom(){
   if(!active||!session().signedIn||refreshing)return;
   const current=active.id,before=sequence;
@@ -256,13 +267,29 @@ async function refreshRoom(){
           '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1')
       ]);
       if(before!==sequence||active?.id!==current)return;
-      if(Array.isArray(roomMeta)&&roomMeta.length===1)active=roomMeta[0];
-      members=Array.isArray(roster)?roster:[];
-      messages=Array.isArray(history)?history.reverse():[];
+      if(!Array.isArray(roomMeta)||!Array.isArray(roster)||!Array.isArray(history))
+        throw new Error('Room snapshot malformed');
+      // An empty room record or a roster excluding our authenticated account
+      // means the membership/room has really been removed, not a demo logout.
+      if(roomMeta.length!==1||!roster.some(m=>m.user_id===session().user?.id)){
+        roomMembershipRevoked(current);return;
+      }
+      active=roomMeta[0];
+      members=roster;
+      messages=history.reverse();
       if(screen==='room')roomContent();
+      // Sync client-side microphone publication after moderator changes.
+      window.TotiRealVoice?.syncPermission?.();
       window.dispatchEvent(new CustomEvent('totichat-real-room-state',{detail:{roomId:current}}));
     }catch(err){
-      if(before===sequence)console.warn('TotiChat real room refresh:',failure(err));
+      if(before!==sequence||active?.id!==current)return;
+      // The RLS-checked room_members_visual RPC explicitly rejects former
+      // members. Ordinary timeouts, failed reads or 5xx errors are NOT kicks.
+      const message=String(err?.message||'');
+      if((err?.status===403||err?.status===401)&&/room membership required/i.test(message)){
+        roomMembershipRevoked(current);return;
+      }
+      console.warn('TotiChat real room refresh:',failure(err));
     }finally{refreshing=null;}
   })();
   return refreshing;
