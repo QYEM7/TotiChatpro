@@ -116,6 +116,7 @@ function open(){
   '<p id="tc-game-state" aria-live="polite"></p>'+
   '<div id="tc-game-board" class="tc-ttt-board" aria-label="لوحة إكس أو"></div>'+
   '<div id="tc-game-actions" class="tc-ttt-actions"></div>'+
+  '<button type="button" data-tc-solo-launch>اللعب الفردي ضد الكمبيوتر المحلي</button>'+
   '<button type="button" data-tc-game-refresh>تحديث الحالة</button>'+
   '</section>',true);
  void refresh();
