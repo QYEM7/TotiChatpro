@@ -160,21 +160,35 @@ function roomContent(){
       button.setAttribute('aria-label',p?'المقعد '+slot+': '+p.display_name:'المقعد '+slot+' متاح');
       const face=$('.seatface',button);
       if(face){
-        // Replace the sample face with a truthful local status once, then
-        // update only that status; keep CSS frames, effects and custom children.
+        // Preserve original seat frames, ornaments, CSS effects and children.
+        // Never expose a sample person's photo or sample VIP badge in REAL mode.
+        const image=$('img',face);
+        let realAvatar='';
+        if(p?.avatar_url&&imageServer){
+          try{
+            const url=new URL(p.avatar_url);
+            const host=new URL(imageServer);
+            if(url.origin===host.origin&&url.pathname.startsWith('/storage/v1/object/public/profile-avatars/'))
+              realAvatar=url.href;
+          }catch(_){}
+        }
+        if(image){
+          if(realAvatar){
+            if(image.src!==realAvatar)image.src=realAvatar;
+            image.style.removeProperty('display');
+          }else image.style.setProperty('display','none','important');
+        }
         let glyph=$('[data-real-seat-glyph]',face);
         if(!glyph){
-          face.replaceChildren();
           glyph=document.createElement('span');
-          glyph.dataset.realSeatGlyph='';face.appendChild(glyph);
+          glyph.dataset.realSeatGlyph='';
+          glyph.className='tc-real-seat-glyph';
+          face.appendChild(glyph);
         }
+        glyph.hidden=!!realAvatar;
         glyph.textContent=p?(p.user_id===session().user?.id?'🎙️':'🎤'):'＋';
-        const own=!!p&&p.user_id===session().user?.id;
-        let badge=$('.seatbadge',face);
-        if(own&&!badge){
-          badge=document.createElement('span');
-          badge.className='seatbadge';badge.textContent='✦';face.appendChild(badge);
-        }else if(!own&&badge)badge.remove();
+        const badge=$('.seatbadge',face);
+        if(badge)badge.style.setProperty('display','none','important');
       }
       const label=$('.seatname',button);if(label)label.textContent=p?.display_name||'مقعد '+slot;
       const level=$('.seatlv',button);
@@ -235,7 +249,7 @@ async function refreshRoom(){
   refreshing=(async()=>{
     try{
       const [roster,history,roomMeta]=await Promise.all([
-        rpc('phase2_room_members',{p_room_id:current}),
+        rpc('phase2_room_members_visual',{p_room_id:current}),
         query('/rest/v1/room_messages?room_id=eq.'+encodeURIComponent(current)+
           '&select=id,sender_id,body,created_at&order=created_at.desc&limit=80'),
         query('/rest/v1/rooms?id=eq.'+encodeURIComponent(current)+
