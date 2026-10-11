@@ -20,7 +20,7 @@ const nav=[
 ];
 const names=Object.fromEntries(nav.map(x=>[x[0],x[1]]));
 let session=null,rights=null,current='overview',loading=false,banners=[],bannerTotal=0,bannerOffset=0;
-let editingId=null,previewBlob=null,previewUrl=null,toastTimer=null,epoch=0,writeBusy=false,detailOffset=0;
+let editingId=null,previewBlob=null,previewUrl=null,toastTimer=null,epoch=0,writeBusy=false,detailOffset=0,directoryOffset=0,directoryQuery='';
 function setError(text){$('#login-error').textContent=String(text||'').slice(0,320);}
 function toast(msg,failed=false){
  const el=$('#toast');el.textContent=String(msg||'').slice(0,260);
@@ -40,7 +40,7 @@ async function refreshToken(){
  if(!session?.refresh_token)throw Error('انتهت الجلسة. يرجى تسجيل الدخول مجدداً.');
  const next=await publicFetch('/auth/v1/token?grant_type=refresh_token',{refresh_token:session.refresh_token});
  if(!next.access_token)throw Error('تعذر تجديد الجلسة');
- session=next;return next.access_token;
+ session=Object.assign({},session,next,{user:next.user||session.user,_obtainedAt:Date.now()});return session.access_token;
 }
 async function authed(path,opts={},retried=false){
  if(!session?.access_token)throw Error('الرجاء تسجيل الدخول.');
@@ -94,7 +94,10 @@ async function establish(s){
  $('#auth-screen').classList.add('hidden');$('#dashboard').classList.remove('hidden');
  $('#account-role').textContent=r.isOwner?'المالك الرئيسي':r.isMainPartner?'الشريك الرئيسي':r.role;
  $('#account-email').textContent=s.user?.email||$('#email').value||'حساب موثّق';
- buildNav();navigate(allowed(location.hash.slice(2))?location.hash.slice(2):'overview');
+ buildNav();const firstAllowed=nav.find(item=>allowed(item[0]))?.[0];
+ if(!firstAllowed){showGuest();throw Error('لا يوجد قسم مصرح به لهذا الحساب');}
+ const requested=location.hash.slice(2);
+ navigate(allowed(requested)?requested:firstAllowed);
 }
 async function signOut(){
  const access=session?.access_token;showGuest();setError('');
@@ -153,7 +156,7 @@ function navigate(route){
  current=route;history.replaceState({},'',location.pathname+'#/'+route);
  $('#dashboard').classList.remove('nav-open');
  document.querySelectorAll('.nav-link').forEach(b=>b.classList.toggle('active',b.dataset.route===route));
- $('#main').scrollTop=0;detailOffset=0;
+ $('#main').scrollTop=0;detailOffset=0;directoryOffset=0;directoryQuery='';
  const actions=route==='banners'?'<button class="btn btn-primary" data-action="new-banner">＋ إضافة بنر</button>':'';
  const subtitles={
  overview:'كل ما يهمك لإدارة TotiChat في مكان واحد — أرقام موثّقة فقط.',
@@ -450,8 +453,39 @@ function notConnected(name,needed){
   'لم نربط إجراء كتابة أو قراءة إدارية لهذا القسم بعد، ولن نستخدم بيانات وهمية أو نعطي صلاحيات غير موجودة.')+
   '<div class="admin-alert">المطلوب للربط: '+safe(needed)+'</div></div>';
 }
-async function usersPage(){notConnected('المستخدمين','RPC للبحث الآمن وإجراءات الحظر والتوثيق مع سجل تدقيق ومراجعة صلاحيات.');}
-async function roomsPage(){notConnected('الغرف','RPC لإحصائيات الغرف النشطة وإشراف المالك مع حماية المقاعد والصوت.');}
+async function directoryPage(kind){
+ const route=current,stamp=epoch;
+ if(!isChief())throw Error('مراجعة قائمة المستخدمين والغرف تتطلب المالك أو الشريك الرئيسي.');
+ const result=await rpc('phase6_admin_directory',{p_kind:kind,p_query:directoryQuery,
+  p_offset:directoryOffset,p_limit:30});
+ if(stamp!==epoch||route!==current)return;
+ if(result?.readOnly!==true||result.kind!==kind||!Array.isArray(result.rows)||
+   !Number.isSafeInteger(result.total))throw Error('استجابة الدليل غير صالحة');
+ let html='<section class="surface pad"><div class="surface-title"><h2>'+
+  (kind==='users'?'سجل الحسابات الفعلية':'دليل الغرف المسجلة')+'</h2>'+
+  '<p>'+fmt(result.total)+' سجل</p></div>'+
+  '<div class="control-strip"><form id="directory-search-form" class="admin-form-row">'+
+  '<label>البحث بالاسم<input id="directory-search" type="search" maxlength="60" value="'+safe(directoryQuery)+'" placeholder="ابحث في '+(kind==='users'?'المستخدمين':'الغرف')+'"></label>'+
+  '<button class="btn btn-primary" type="submit">بحث</button></form></div>';
+ if(kind==='users'){
+  html+=result.rows.length?table(['المستخدم','المعرّف','تاريخ الإنشاء'],
+    result.rows.map(x=>[x.display_name,x.id,new Date(x.created_at).toLocaleDateString('ar-IQ')])):
+   empty('لا يوجد حساب مطابق','قاعدة البيانات لم تُرجع مستخدمين لهذا البحث.');
+ }else{
+  html+=result.rows.length?table(['الغرفة','المالك','الخصوصية','سجلات العضوية','تاريخ الإنشاء'],
+   result.rows.map(x=>[x.title,x.owner_id,x.is_private?'خاصة':'عامة',
+    fmt(x.member_records),new Date(x.created_at).toLocaleDateString('ar-IQ')])):
+   empty('لا توجد غرف مطابقة','لا نعرض غرفاً أو مستخدمين وهميين.');
+ }
+ html+='<div class="control-strip" style="margin-top:16px"><div>'+
+  '<button class="btn btn-secondary" data-action="dir-prev" '+(directoryOffset===0?'disabled':'')+'>السابق</button> '+
+  '<button class="btn btn-secondary" data-action="dir-next" '+(directoryOffset+30>=result.total?'disabled':'')+'>التالي</button></div>'+
+  '<span class="muted">صفحة '+(1+Math.floor(directoryOffset/30))+'</span></div>'+
+  '<div class="admin-alert">هذه قائمة إدارية للقراءة فقط. إجراءات الحظر والطرد والتوثيق تُفعّل بعد تدقيق الصلاحيات والتسجيل الأمني.</div></section>';
+ $('#page-body').innerHTML=html;
+}
+async function usersPage(){await directoryPage('users');}
+async function roomsPage(){await directoryPage('rooms');}
 async function teamPage(){
  $('#page-body').innerHTML='<div class="section-grid"><div class="surface pad"><div class="surface-title"><h2>هويتك وصلاحياتك الحالية</h2></div>'+
  prettyData({role:rights.role,isOwner:rights.isOwner,isMainPartner:rights.isMainPartner,permissions:rights.permissions})+
@@ -479,6 +513,8 @@ document.addEventListener('click',async event=>{
   if(action==='report-next'){detailOffset+=50;await reportsPage();}
   if(action==='report-prev'){detailOffset=Math.max(0,detailOffset-50);await reportsPage();}
   if(action==='load-issues')await fetchIssues();
+  if(action==='dir-next'){directoryOffset+=30;await directoryPage(current==='users'?'users':'rooms');}
+  if(action==='dir-prev'){directoryOffset=Math.max(0,directoryOffset-30);await directoryPage(current==='users'?'users':'rooms');}
  }catch(e){toast(e.message,true);}
 });
 $('#login-form').addEventListener('submit',async e=>{
@@ -522,6 +558,10 @@ $('#page-body').addEventListener('input',e=>{
  }
 });
 $('#page-body').addEventListener('submit',async e=>{
+ if(e.target.id==='directory-search-form'){
+  e.preventDefault();directoryQuery=$('#directory-search').value.trim();directoryOffset=0;
+  void directoryPage(current==='users'?'users':'rooms').catch(err=>toast(err.message,true));return;
+ }
  if(e.target.id!=='vip-lookup')return;
  e.preventDefault();const id=$('#vip-user').value.trim(),out=$('#vip-result');
  if(!/^[0-9a-f-]{36}$/i.test(id)){out.textContent='معرّف UUID غير صالح';return;}
