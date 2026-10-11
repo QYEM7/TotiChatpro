@@ -14,10 +14,12 @@ on:
       - 'tests/t06-parallel-support-contract.test.cjs'
       - 'scripts/t16-rooms-e2e.mjs'
       - 'scripts/t55-room-moderation-e2e.mjs'
+      - 'scripts/t57-notification-e2e.mjs'
       - 'scripts/t14-avatar-e2e.mjs'
       - 'scripts/t17-realtime-e2e.mjs'
       - 'scripts/t16-rooms-e2e.mjs'
       - 'scripts/t55-room-moderation-e2e.mjs'
+      - 'scripts/t57-notification-e2e.mjs'
       - 'scripts/prepare-staging-schema-replay.mjs'
       - 'scripts/t03-secret-audit.mjs'
       - 'scripts/t49-disposable-restore-drill.sh'
@@ -68,6 +70,7 @@ jobs:
           node --test tests/t03-secret-audit.test.mjs
           node --check scripts/t06-parallel-support-e2e.mjs
           node --check scripts/t55-room-moderation-e2e.mjs
+          node --check scripts/t57-notification-e2e.mjs
           node --check scripts/t06-parallel-finance-e2e.mjs
           node --check scripts/t30-reseller-flow-e2e.mjs
           node --check scripts/t35-parallel-host-transfer-e2e.mjs
@@ -105,6 +108,8 @@ jobs:
           node scripts/t16-rooms-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           T55_DISPOSABLE_ONLY=YES SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
             node scripts/t55-room-moderation-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
+          T57_DISPOSABLE_ONLY=YES SUPABASE_ACCESS_TOKEN='' SUPABASE_DB_PASSWORD='' \
+            node scripts/t57-notification-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           node scripts/t14-avatar-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           node scripts/t17-realtime-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
           node scripts/t23-music-e2e.mjs "$RUNNER_TEMP/t03-local-status.json"
