@@ -67,6 +67,13 @@ function format(entry){
   row.append(text('p','VIP '+entry.context.tier));
  if(entry.event_type==='support_staff_replied')row.append(
   text('p','افتح خدمة العملاء للاطلاع على الرد داخل تذكرتك.'));
+ if(entry.event_type==='gift_received'&&
+    [1,7,17,77,777].includes(entry.context?.quantity)&&
+    typeof entry.context?.coinsAmount==='string'&&
+    /^(0|[1-9][0-9]{0,16})$/.test(entry.context.coinsAmount)){
+  const cost=BigInt(entry.context.coinsAmount).toLocaleString('ar-IQ');
+  row.append(text('p','🎁 '+entry.context.quantity+' هدية · قيمتها '+cost+' كوينز من الإرسال المؤكد'));
+ }
  if(entry.read_at===null){
   const mark=text('button','تعليم كمقروء');mark.type='button';
   mark.dataset.t57Mark=String(entry.id);mark.className='t57-mark';
