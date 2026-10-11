@@ -6,6 +6,11 @@ const executablePath=process.env.CHROME_BIN||[
  '/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'
 ].find(p=>fs.existsSync(p));
 if(!executablePath)throw Error('Chrome not found');
+const config=JSON.parse(fs.readFileSync('docs/preview-public-backend.json','utf8'));
+const stagingOrigin=new URL(config.supabaseUrl).origin;
+if(!/^https:\/\/[a-z0-9]{20}\.supabase\.co$/.test(stagingOrigin)||
+   stagingOrigin==='https://sqedsnyvjblvbjbizcay.supabase.co')
+ throw new Error('Voice browser fixture requires isolated Staging origin');
 const user='94c0e8fb-126e-4149-ad30-6f25e3c99c33';
 const roomid='2ae6072b-d00c-46a9-8585-10ca1d6a10f2';
 const token={access_token:'test-access',refresh_token:'test-refresh',expires_in:3600,
@@ -25,8 +30,11 @@ const result=(data,status=200)=>({status,contentType:'application/json',
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setRequestInterception(true);
   page.on('request',request=>{
-    const u=request.url();if(!u.startsWith('https://sqedsnyvjblvbjbizcay.supabase.co/'))
+    const u=request.url();if(!u.startsWith(stagingOrigin+'/')){
+      if(/^https:\/\/[a-z0-9]{20}\.supabase\.co\//.test(u))
+        return request.respond(result({error:'Unknown Supabase blocked'},503));
       return request.continue();
+    }
     const url=new URL(u),route=url.pathname;
     if(request.method()==='OPTIONS')return request.respond({status:204,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'POST,GET,OPTIONS','access-control-allow-headers':'authorization,apikey,content-type,prefer'}});
     const body=(()=>{try{return JSON.parse(request.postData()||'null')}catch{return null}})();
@@ -42,7 +50,9 @@ const result=(data,status=200)=>({status,contentType:'application/json',
       room={id:roomid,title:'غرفة صوت حقيقية',owner_id:user,is_private:false,created_at:'2026-10-10T00:00:00Z'};
       joined=true;out=result(roomid);
     }else if(route==='/rest/v1/rpc/phase2_room_join'){joined=true;out=result(true);}
-    else if(route==='/rest/v1/rpc/phase2_room_members'){
+    else if(route==='/rest/v1/rpc/phase2_room_customize'){out=result(true);}
+    else if(route==='/rest/v1/gift_global_announcements'){out=result([]);}
+    else if(route==='/rest/v1/rpc/phase2_room_members_visual'||route==='/rest/v1/rpc/phase2_room_members'){
       out=result(joined?[{user_id:user,display_name:profile.display_name,seat_no:seat,is_muted:true}]:[]);
     }else if(route==='/rest/v1/rpc/phase2_room_take_seat'){
       seat=body.p_seat;out=result(seat);
@@ -67,7 +77,7 @@ const result=(data,status=200)=>({status,contentType:'application/json',
   await page.waitForSelector('#tc-real-voice-controls [data-real-voice="connect"]');
   assert.equal(await page.$eval('[data-real-voice="mic"]',e=>e.hidden),true);
   await page.$eval('[data-real-voice="connect"]',e=>e.click());
-  await page.waitForFunction(()=>window.TotiRealVoice?.status()?.error?.includes('خدمة البث الصوتي'),{timeout:15000});
+  await page.waitForFunction(()=>window.TotiRealVoice?.status()?.error?.includes('خدمة الصوت'),{timeout:15000});
   assert.equal(voiceCalls,1);
   assert.equal(await page.evaluate(()=>window.TotiRealVoice?.status().connected),false,
    'No real audio connection if LiveKit secrets are missing');
