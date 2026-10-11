@@ -20,7 +20,7 @@ if(!auth||typeof window.render!=='function'){
 // The visual-review-20261009 identity is now authoritative; legacy paint overrides stay disabled.
 let explicitPreview=false;
 const authScreens=new Set(['loginPreview','signupPreview','verifyAccountPreview','passwordResetPreview']);
-const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview','musicPreview',...authScreens]);
+const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview','musicPreview','messages','chatPreview',...authScreens]);
 const $=(q,root=document)=>root.querySelector(q);
 const $$=(q,root=document)=>Array.from(root.querySelectorAll(q));
 let lastNotice='';
@@ -147,7 +147,11 @@ window.addEventListener('click',e=>{
       const members=window.TotiPhase2Rooms?.getMembers?.()||[];
       showSheet('<section class="tc-live-tools"><h3>أعضاء الغرفة الحقيقيون</h3><div id="tc-live-member-list"></div><button class="primary" data-a="close">إغلاق</button></section>',true);
       const node=document.getElementById('tc-live-member-list');
-      if(node){for(const m of members){const p=document.createElement('p');p.textContent=m.display_name||m.user_id.slice(0,8);node.appendChild(p);}}
+      if(node){for(const m of members){const p=document.createElement('p');p.textContent=m.display_name||m.user_id.slice(0,8);node.appendChild(p);
+        if(m.user_id!==auth.state().user?.id){
+          const b=document.createElement('button');b.type='button';b.dataset.tcDmRecipient=m.user_id;
+          b.dataset.tcDmName=m.display_name||'مستخدم';b.textContent='💬 رسالة خاصة';node.appendChild(b);
+        }}}
     }else if(what==='info'){closeSheet();showSheet('<section class="tc-live-tools"><h3>معلومات الغرفة</h3><p id="tc-current-room-title"></p><button class="primary" data-a="close">إغلاق</button></section>',true);const n=document.getElementById('tc-current-room-title');if(n){const room=window.TotiPhase2Rooms?.getRoomSummary?.();n.textContent=room?room.title+' · '+room.id:'';}}
     return;
   }
