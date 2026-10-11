@@ -7,7 +7,7 @@
 const auth=window.TotiPhase2Auth;
 const rooms=window.TotiPhase2Rooms;
 if(!window.TotiLiveMode?.enabled||!auth||!rooms)return;
-let sdk=null,connecting=false,voiceRoom='',connected=false,audioError='',needsGesture=false,attempt=0,pendingRoom='',voiceOwner='';
+let sdk=null,connecting=false,voiceRoom='',connected=false,audioError='',needsGesture=false,attempt=0,pendingRoom='',voiceOwner='',micPublished=false;
 const $=(sel,root=document)=>root.querySelector(sel);
 function error(e){
  const s=String(e?.message||'تعذر الاتصال الصوتي');
@@ -54,7 +54,7 @@ function controls(){
 }
 async function tearDown(){
  attempt++;pendingRoom='';voiceOwner='';
- const current=sdk;sdk=null;voiceRoom='';connected=false;needsGesture=false;
+ const current=sdk;sdk=null;voiceRoom='';connected=false;needsGesture=false;micPublished=false;
  if(current)await current.disconnect().catch(()=>{});
  controls();
 }
@@ -75,7 +75,7 @@ async function connect(){
   if(!grant?.token||grant.roomId!==info.id||!grant?.url)throw new Error('خادم الصوت لم يؤكد الاتصال');
   const module=await import('./phase2-livekit-sdk.bundle.js');
   if(!valid())return;
-  sdk=module;
+  sdk=module;micPublished=false;
   await module.connect(grant.url,grant.token,state=>{
     if(!valid())return;
     if(state.connected!==undefined)connected=state.connected;
@@ -85,7 +85,9 @@ async function connect(){
   if(!valid()){await module.disconnect();return;}
   voiceRoom=info.id;connected=true;
   const mic=ownMic();
-  if(grant.canPublish&&mic.seatNo!=null&&!mic.isMuted)await module.microphone(true);
+  if(grant.canPublish&&mic.seatNo!=null&&!mic.isMuted){
+    await module.microphone(true);micPublished=true;
+  }
   notify('تم الاتصال بالصوت الحقيقي للغرفة');
  }catch(e){
   if(valid()){audioError=error(e);await tearDown();notify(audioError);}
@@ -114,7 +116,7 @@ async function muteToggle(){
   if(!grant?.token||grant.roomId!==info.id)throw new Error('تعذر تحديث صلاحيات الصوت');
   const client=sdk||await import('./phase2-livekit-sdk.bundle.js');
   if(!valid())return;
-  sdk=client;
+  sdk=client;micPublished=false;
   await client.connect(grant.url,grant.token,state=>{
     if(!valid())return;
     if(state.connected!==undefined)connected=state.connected;
@@ -123,7 +125,7 @@ async function muteToggle(){
   if(!valid()){await client.disconnect();return;}
   connected=true;voiceRoom=info.id;
   if(!updated&&grant.canPublish){
-    await client.microphone(true);
+    await client.microphone(true);micPublished=true;
     notify('الميكروفون الحقيقي شغال');
   }else{notify('تم كتم الميكروفون الحقيقي');}
  }catch(e){
@@ -138,6 +140,18 @@ async function muteToggle(){
   }
   notify(audioError);
  }finally{connecting=false;pendingRoom='';controls();}
+}
+function syncPermission(){
+  // A remote moderation mute or seat revocation must immediately disable
+  // local publication at the next realtime/refresh snapshot.
+  // Only explicit user interaction can enable publication.
+  if(connecting||!connected||!micPublished||!sdk)return;
+  const mic=ownMic(),info=ownerRoom();
+  if(info?.id!==voiceRoom||mic.seatNo==null||mic.isMuted){
+    micPublished=false;
+    const client=sdk;
+    void client.microphone(false).catch(()=>{void tearDown();});
+  }
 }
 const before=render;
 render=function(){const result=before.apply(this,arguments);controls();return result;};
@@ -158,7 +172,8 @@ setInterval(()=>{
  else if(screen==='room')controls();
 },2500);
 window.TotiRealVoice=Object.freeze({
- status:()=>({connected,connecting,roomId:voiceRoom||null,error:audioError||null}),
- disconnect:tearDown
+ status:()=>({connected,connecting,roomId:voiceRoom||null,error:audioError||null,microphonePublished:micPublished}),
+ disconnect:tearDown,
+ syncPermission
 });
 })();
