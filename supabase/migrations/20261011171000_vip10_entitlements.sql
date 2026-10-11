@@ -109,16 +109,16 @@ grant execute on function public.phase5_vip_owner_action(text,uuid,integer,times
 
 create function phase3.vip_status(p_target uuid)
 returns jsonb language plpgsql security definer set search_path='' as $fn$
-declare actor_id uuid:=phase3.actor();record public.vip_entitlements%rowtype;
+declare actor_id uuid:=phase3.actor();current_entitlement public.vip_entitlements%rowtype;
 begin
  if p_target is null then raise exception 'User required';end if;
- select * into record from public.vip_entitlements where user_id=p_target;
- if not found or record.tier=0 or
-  (record.expires_at is not null and record.expires_at<=now()) then
+ select * into current_entitlement from public.vip_entitlements where user_id=p_target;
+ if not found or current_entitlement.tier=0 or
+  (current_entitlement.expires_at is not null and current_entitlement.expires_at<=now()) then
   return jsonb_build_object('userId',p_target,'tier',0,'active',false,'expiresAt',null);
  end if;
- return jsonb_build_object('userId',p_target,'tier',record.tier,
-  'active',true,'expiresAt',record.expires_at);
+ return jsonb_build_object('userId',p_target,'tier',current_entitlement.tier,
+  'active',true,'expiresAt',current_entitlement.expires_at);
 end $fn$;
 revoke all on function phase3.vip_status(uuid) from public,anon;
 grant execute on function phase3.vip_status(uuid) to authenticated;
