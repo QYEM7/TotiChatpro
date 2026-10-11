@@ -170,7 +170,11 @@ const soloGameStyle=document.createElement('link');
 soloGameStyle.rel='stylesheet';
 soloGameStyle.href=new URL('phase5-solo-games-ui.css',moduleBase).href;
 document.head.appendChild(soloGameStyle);
-for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js']){
+const giftHistoryStyle=document.createElement('link');
+giftHistoryStyle.rel='stylesheet';
+giftHistoryStyle.href=new URL('phase5-gift-history-ui.css',moduleBase).href;
+document.head.appendChild(giftHistoryStyle);
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js']){
  const script=document.createElement('script');
  script.async=false;
  script.src=new URL(name,moduleBase).href;
