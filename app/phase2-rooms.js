@@ -20,7 +20,7 @@ let realtime=null,realtimeUser='';
 function session(){return auth.state();}
 async function query(path,options){return auth.requestData(path,options);}
 async function rpc(name,args){
-  if(!/^phase2_room_(create|join|leave|take_seat|members|send_message|invite_create|invite_join)$/.test(name))
+  if(!/^phase2_room_(create|join|leave|take_seat|members|members_visual|send_message|invite_create|invite_join)$/.test(name))
     throw new Error('Invalid room operation');
   return query('/rest/v1/rpc/'+name,{method:'POST',body:args});
 }
