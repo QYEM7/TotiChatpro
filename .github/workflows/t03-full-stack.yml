@@ -47,6 +47,7 @@ on:
       - 'tests/t03-secret-audit.test.mjs'
       - '.github/workflows/t03-full-stack.yml'
       - 'supabase/migrations/**'
+      - 'supabase/tests/**'
   workflow_dispatch:
 permissions:
   contents: read
