@@ -46,7 +46,11 @@ const reply=data=>({status:200,contentType:'application/json',headers:{'access-c
  await p.waitForFunction(()=>window.TotiPhase2Auth.state().profile?.display_name==='Catalog Tester');
  await p.evaluate(()=>go('me'));
  await p.click('[data-phase2="account"]');
- await p.waitForSelector('[data-admin-open]');await p.click('[data-admin-open]');
+ // The profile now also has an authenticated admin entry underneath the
+ // account sheet. Click the VISIBLE security-sheet control, not the hidden
+ // same-name button covered by the modal backdrop.
+ await p.waitForSelector('[data-security-body] [data-admin-open]');
+ await p.click('[data-security-body] [data-admin-open]');
  try{await p.waitForSelector('[data-admin-table]',{timeout:13000});}
  catch(error){
   const debug=await p.evaluate(()=>({
