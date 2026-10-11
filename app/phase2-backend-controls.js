@@ -150,7 +150,11 @@ const notificationsStyle=document.createElement('link');
 notificationsStyle.rel='stylesheet';
 notificationsStyle.href=new URL('phase5-notifications-ui.css',moduleBase).href;
 document.head.appendChild(notificationsStyle);
-for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js']){
+const socialStyle=document.createElement('link');
+socialStyle.rel='stylesheet';
+socialStyle.href=new URL('phase5-social-ui.css',moduleBase).href;
+document.head.appendChild(socialStyle);
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js']){
  const script=document.createElement('script');
  script.async=false;
  script.src=new URL(name,moduleBase).href;
