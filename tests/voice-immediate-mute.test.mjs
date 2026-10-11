@@ -29,3 +29,12 @@ test('privacy: unmute is granted by server, and not republished after a remote m
  assert.match(voice,/function syncPermission\(\)/);
  assert.match(voice,/void client\.microphone\(false\)\.catch\(\(\)=>\{void tearDown\(\);\}\)/);
 });
+
+test('privacy: failed unmute revokes any partially published track before database rollback',()=>{
+ const failed=mute.slice(mute.indexOf(" }catch(e){\n  audioError=error(e);"));
+ assert.match(failed,/if\(!updated\)\s*\{[\s\S]*await sdk\.microphone\(false\)/);
+ const local=failed.indexOf('await sdk.microphone(false)');
+ const rollback=failed.indexOf("await auth.requestData('/rest/v1/rpc/phase2_room_set_muted'");
+ assert(local>=0&&rollback>local,'stop partially published audio before server rollback');
+ assert.match(failed,/await tearDown\(\)/,'disconnect if local microphone shutdown fails');
+});
