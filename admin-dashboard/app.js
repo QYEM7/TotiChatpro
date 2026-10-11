@@ -92,7 +92,7 @@ const signed=()=>!!session&&!!rights;
 const isChief=()=>rights?.isOwner===true||rights?.isMainPartner===true;
 const canReports=()=>isChief()||rights?.canReadReports===true;
 const canCatalogs=()=>isChief()||rights?.canManageCatalogs===true;
-window.TotiAdminManagement?.configure({rpc,rights:()=>rights,current:()=>current,toast});
+window.TotiAdminManagement?.configure({rpc,rights:()=>rights,current:()=>current,toast,revision:()=>epoch,identity:()=>session?.user?.id||''});
 function allowed(id){
  if(!rights)return false;
  if(id==='banners'||id==='treasury'||id==='team'||id==='settings'||id==='users'||id==='rooms')return isChief();
