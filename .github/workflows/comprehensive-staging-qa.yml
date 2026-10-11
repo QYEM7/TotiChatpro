@@ -46,15 +46,18 @@ jobs:
             xargs -0 -r -n 1 node --check
       - name: Run ALL offline repository test files sequentially
         run: node --test --test-concurrency=1 tests/*.test.cjs tests/*.test.mjs
-      - name: Verify prelaunch release remains correctly blocked until external evidence is approved
-        run: node scripts/check-backend-prelaunch.mjs --expect-blocked
+      - name: Verify Owner development-only policy (no releases/builds)
+        run: node scripts/check-development-only-mode.mjs
       - name: Audit committed secrets (no remote database)
         run: node scripts/t03-secret-audit.mjs
       - name: Build approved app and registered STAGING-only browser preview
+        # Disabled by Owner: no app version, even web preview artifacts.
+        if: ${{ false }}
         run: |
           npm run build
           node scripts/build-registered-staging-preview.mjs
       - name: Verify preview contains no Android APK or production backend
+        if: ${{ false }}
         shell: bash
         run: |
           set -euo pipefail
@@ -66,6 +69,7 @@ jobs:
           fi
           node -e "const fs=require('node:fs');const c=fs.readFileSync('dist-live-preview/app/config.js','utf8');const s=JSON.parse(fs.readFileSync('dist-live-preview/preview-status.json','utf8'));if(!c.includes('rziaedugbdwefbefcxjt')||c.includes('sqedsnyvjblvbjbizcay')||!s.backend_isolated||s.release_allowed!==false)process.exit(1)"
       - name: Preserve inspected STAGING web artifact for QA only
+        if: ${{ false }}
         uses: actions/upload-artifact@v4
         with:
           name: totichat-comprehensive-staging-web
