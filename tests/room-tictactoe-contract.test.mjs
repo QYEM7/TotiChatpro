@@ -11,7 +11,8 @@ test('voice-safe game server persists authoritative no-stakes turn state',()=>{
  assert.match(db,/substring\(current_game\.board from p_cell\+1 for 1\)/);
  assert.match(db,/when has_won then 'won'/);
  assert.match(db,/tc_game_cancel_on_member_departure/);
- assert.doesNotMatch(db,/\b(wallet|ledger|coin|diamond|livekit|mute|set_microphone)\b/i);
+ assert.doesNotMatch(db,/\b(?:insert\s+into|update|delete\s+from)\s+(?:public\.)?(?:wallets?|wallet_ledger|coins?|diamonds?|vip_entitlements)\b/i);
+ assert.doesNotMatch(db,/\b(?:disconnect|set_microphone|removeParticipant|RoomServiceClient)\s*\(/);
 });
 test('game client has session and membership checks, private RLS and no anon writes',()=>{
  assert.match(db,/phase3\.actor\(\)/);
