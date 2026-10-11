@@ -5,6 +5,7 @@ const load=path=>readFileSync(new URL(path,import.meta.url),'utf8');
 const html=load('../admin-dashboard/index.html');
 const css=load('../admin-dashboard/styles.css');
 const js=load('../admin-dashboard/app.js');
+const management=load('../admin-dashboard/management.js');
 const db=load('../supabase/migrations/20261012001500_admin_banner_images_stage.sql');
 const fix=load('../supabase/migrations/20261012002000_admin_banner_actor_fix.sql');
 test('isolated admin shell preserves consumer app and embeds the exact falcon',()=>{
@@ -23,7 +24,7 @@ test('admin authority is server-side; no secret or mocked finances are exposed',
  for(const endpoint of ['phase3_admin_session','phase4_admin_report',
  'phase6_admin_banner_list','phase6_admin_banner_action',
  'phase5_finance_integrity_preflight','phase5_medal_catalog']){
-  assert(js.includes(endpoint),endpoint);
+  assert((js+'\n'+management).includes(endpoint),endpoint);
  }
  assert.match(js,/grant_type=pkce/);
  assert.match(js,/grant_type=password/);
