@@ -35,12 +35,26 @@ test('T06 voice limiter rejects unauthenticated and Redis malformed responses',a
  const a=await rateVoiceRequest('Bearer x',{...credentials,fetcher:async()=>({ok:true,json:async()=>({result:null})})});
  assert.equal(a.status,503);
 });
-test('T06 source explicitly fails closed before issuing LiveKit tokens',async()=>{
+test('T06 Staging voice uses durable 20-per-minute DB token budget before LiveKit grants',async()=>{
  const {readFileSync}=await import('node:fs');
  const src=readFileSync(new URL('../supabase/functions/phase2-voice-token/index.ts',import.meta.url),'utf8');
- assert(src.indexOf('const budget=await rateVoiceRequest')>=0);
- assert(src.indexOf('const budget=await rateVoiceRequest')<src.indexOf('const token=new AccessToken'));
- assert(src.includes("if(!budget.allowed)return json(budget.status,{error:budget.code});"));
+ const budget=readFileSync(new URL('../supabase/migrations/20261011000202_phase2_voice_token_preflight.sql',import.meta.url),'utf8');
+ const wrappers=readFileSync(new URL('../supabase/migrations/20261011000300_secure_social_rpc_wrappers.sql',import.meta.url),'utf8');
+ const grantAt=src.indexOf('const token=new AccessToken');
+ const preflightAt=src.indexOf("'phase2_voice_token_preflight'");
+ assert(preflightAt>=0&&grantAt>preflightAt,'Database authorization must precede token generation');
+ assert(src.includes("if(msg.includes('VOICE_RATE_LIMITED'))return json(429"));
+ assert(src.includes("if(permission?.roomId!==roomId)return json(403"));
+ assert(src.includes("auth.getUser"));
+ assert(src.includes("LIVEKIT_NOT_CONFIGURED"));
+ assert(budget.includes('voice_token_rate_limits'));
+ assert(budget.includes('old.hits>=20'));
+ assert(budget.includes("interval '1 minute'"));
+ assert(budget.includes('VOICE_RATE_LIMITED'));
+ assert(budget.includes('ROOM_MEMBERSHIP_REQUIRED'));
+ assert(budget.includes('pg_advisory_xact_lock'));
+ assert(wrappers.includes('phase2_voice_token_preflight'));
+ assert(wrappers.includes('phase3.actor()'));
 });
 
 test('T06 runtime secret template requires Redis/HMAC salt as Edge-only config',async()=>{
