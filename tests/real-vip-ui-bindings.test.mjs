@@ -7,7 +7,9 @@ const html=readFileSync(new URL('../app/index.html',import.meta.url),'utf8');
 
 test('approved static HTML remains free of VIP backend additions while real module is loaded after Auth',()=>{
  assert(!html.includes('phase5-vip-status-ui.js'));
- assert(loader.includes("['phase5-notifications-ui.js','phase5-vip-status-ui.js']"));
+ assert(loader.includes("'phase5-notifications-ui.js'"));
+ assert(loader.includes("'phase5-vip-status-ui.js'"));
+ assert(loader.includes("'phase5-social-ui.js'"));
  assert(loader.includes("if(!auth||!window.TotiLiveMode?.enabled)return"));
  assert(js.includes("if(!auth||!window.TotiLiveMode?.enabled)return"));
 });
