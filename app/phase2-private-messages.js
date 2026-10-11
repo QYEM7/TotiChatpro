@@ -150,6 +150,11 @@ document.addEventListener('submit',event=>{
  event.preventDefault();event.stopImmediatePropagation();
  void sendMessage(event.target);
 },true);
+window.addEventListener('totichat-private-message-update',()=>{
+ if(!auth.state().signedIn)return;
+ if(overlay&&peer)void loadThread();
+ if(screen==='messages')void loadInbox();
+});
 window.addEventListener('totichat-phase2-auth',()=>{
  const id=getUser();
  if(id!==account){account=id;safeClose();previousInbox=null;}
