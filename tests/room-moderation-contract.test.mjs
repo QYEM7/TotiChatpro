@@ -19,6 +19,14 @@ test('moderation: ban enforcement at membership INSERT covers direct join and pr
  assert.match(sql,/raise exception 'ROOM_BANNED' using errcode='42501'/);
  assert.match(sql,/for update;/);
 });
+test('moderation: mute survives rejoin and cannot be bypassed by self-service',()=>{
+ assert.match(sql,/create table public\.room_mutes/);
+ assert.match(sql,/new\.moderation_muted:=true/);
+ assert.match(sql,/raise exception 'ROOM_MODERATOR_MUTED'/);
+ assert.match(sql,/update public\.room_members set is_muted=true,moderation_muted=true/);
+ assert.match(sql,/m\.muted_by=owner/);
+ assert.match(sql,/new\.is_muted:=true/);
+});
 test('moderation: independent audit, request key and no forced remote unmute',()=>{
  assert.match(sql,/phase3\.room_moderation_requests/);
  assert.match(sql,/Moderation idempotency key conflict/);
