@@ -49,7 +49,7 @@ test('private text inbox is authenticated and can be opened without leaving voic
  assert.match(html,/phase2-private-messages\.js/);
  assert.match(html,/phase2-private-messages\.css/);
  assert.match(gate,/'messages','chatPreview'/);
- assert.match(gate,/data\.tcDmRecipient/);
+ assert.match(gate,/dataset\.tcDmRecipient/);
  assert.match(dm,/rpc\('send'/);
  assert.match(dm,/rpc\('inbox'/);
  assert.match(dm,/rpc\('thread'/);
