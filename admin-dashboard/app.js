@@ -10,6 +10,27 @@ const $=q=>document.querySelector(q);
 const safe=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const fmt=n=>(Number.isSafeInteger(n)&&n>=0)?n.toLocaleString('ar-IQ'):'—';
 const icons={overview:'◫',banners:'▣',users:'♙',rooms:'◉',hosts:'⌂',recharge:'◇',treasury:'▤',vip:'♛',medals:'✿',catalog:'✧',support:'☏',reports:'▥',team:'♧',settings:'⚙'};
+function svgIcon(key){
+ const paths={
+  overview:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  banners:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  rooms:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 10v4m6-4v4M7 7h10M7 17h10"/>',
+  hosts:'<path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/>',
+  recharge:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+  treasury:'<path d="M3 7h18M5 7V4h14v3M5 7v12h14V7M9 12h6M9 16h6"/>',
+  vip:'<path d="m2 7 5 4 5-7 5 7 5-4-2 13H4L2 7Z"/>',
+  medals:'<circle cx="12" cy="17" r="4"/><path d="m6 2 3 9 3-3 3 3 3-9M12 15v4m-2-2h4"/>',
+  catalog:'<path d="M3 9h18v12H3zM3 9l3-6h12l3 6M9 9v12M15 9v12"/>',
+  support:'<path d="M3 12a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-2v-7h4M3 14h4v7H5a2 2 0 0 1-2-2z"/>',
+  reports:'<path d="M4 20V4m0 16h17M8 17v-6m5 6V7m5 10v-9"/>',
+  team:'<circle cx="12" cy="8" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2M18 4l2 2-2 2"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.93 4.93l2.12 2.12m9.9 9.9 2.12 2.12M2 12h3m14 0h3M4.93 19.07l2.12-2.12m9.9-9.9 2.12-2.12"/>'
+ };
+ return '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+ (paths[key]||paths.overview)+'</svg>';
+}
+
 const nav=[
  ['overview','الرئيسية','عام'],['banners','إدارة البنرات','محتوى'],['users','المستخدمون','إدارة التطبيق'],
  ['rooms','الغرف الصوتية','إدارة التطبيق'],['hosts','وكالات المضيفين','الوكالات والمالية'],
@@ -71,7 +92,7 @@ const canReports=()=>isChief()||rights?.canReadReports===true;
 const canCatalogs=()=>isChief()||rights?.canManageCatalogs===true;
 function allowed(id){
  if(!rights)return false;
- if(id==='banners'||id==='treasury'||id==='team'||id==='settings')return isChief();
+ if(id==='banners'||id==='treasury'||id==='team'||id==='settings'||id==='users'||id==='rooms')return isChief();
  if(id==='hosts')return rights.canManageHostAgencies===true;
  if(id==='recharge')return rights.canManageRechargeAgencies===true;
  if(id==='reports'||id==='overview')return canReports()||canCatalogs();
@@ -139,7 +160,7 @@ function buildNav(){
  nav.filter(item=>allowed(item[0])).forEach(item=>{
   if(item[2]!==group){group=item[2];const h=document.createElement('div');h.className='nav-heading';h.textContent=group;container.append(h);}
   const b=document.createElement('button');b.type='button';b.className='nav-link';b.dataset.route=item[0];
-  const ico=document.createElement('span');ico.className='nav-icon';ico.textContent=icons[item[0]];
+  const ico=document.createElement('span');ico.className='nav-icon';ico.innerHTML=svgIcon(item[0]);
   const name=document.createElement('span');name.textContent=item[1];
   b.append(ico,name);container.append(b);
  });
@@ -212,7 +233,7 @@ async function overview(){
  html+='<div class="section-grid"><section class="surface pad"><div class="surface-title"><h2>الوصول السريع</h2><p>الأقسام المتاحة حسب صلاحيتك</p></div><div class="quick-grid">'+
   [['banners','إدارة البنرات','الصور والجدولة'],['treasury','مطابقة السجلات','قيود المالية'],['hosts','وكالات المضيفين','التقارير الشهرية'],
    ['catalog','الكتالوجات','الهدايا والمتجر'],['reports','تقارير المعاملات','أرقام فعلية'],['team','الصلاحيات','توزيع المسؤوليات']]
- .filter(x=>allowed(x[0])).map(x=>'<button class="quick-link" data-route="'+x[0]+'"><span class="quick-ico">'+icons[x[0]]+'</span><span><strong>'+safe(x[1])+'</strong><small>'+safe(x[2])+'</small></span></button>').join('')+
+ .filter(x=>allowed(x[0])).map(x=>'<button class="quick-link" data-route="'+x[0]+'"><span class="quick-ico">'+svgIcon(x[0])+'</span><span><strong>'+safe(x[1])+'</strong><small>'+safe(x[2])+'</small></span></button>').join('')+
   '</div></section><section class="surface pad"><div class="surface-title"><h2>حالة بيئة الإدارة</h2><p>وضع التشغيل الحالي</p></div><dl class="detail-list">'+
   '<div class="detail-row"><dt>البيئة</dt><dd>Supabase Staging</dd></div>'+
   '<div class="detail-row"><dt>الحساب</dt><dd>'+safe(rights.isOwner?'المالك الرئيسي':rights.isMainPartner?'الشريك الرئيسي':rights.role)+'</dd></div>'+
