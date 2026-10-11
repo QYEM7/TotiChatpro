@@ -55,3 +55,26 @@
 7. The current release gate must remain `release_allowed=false`; do not merge into `main` or distribute as a fully working month-long beta without Owner-approved acceptance evidence.
 
 **Decision:** Staging source quality and media privacy improved and comprehensive CI is green; live services and client delivery are still gated by external credentials, business rules and device-based tests.
+
+## Continued execution — same day, room races and isolated LiveKit events
+
+### Changes committed to development branch
+- `app/phase2-rooms.js`: fixed the unjoined-room scrub to iterate **all fifteen seats** and every legacy chat bubble with querySelectorAll. Request coalescing now keys by `roomId` AND local account/session sequence; a slow previous-room response cannot block a fresh room or overwrite the current one. Explicit room joins and private invite joins guard against late authenticated responses after account switch, and increment the generation to supersede a stale restore.
+- `tests/room-state-race.test.mjs`: four behavioral tests simulate out-of-order asynchronous room membership replies, stale request lock cleanup, an account switch during a join, and cleanup of all 15 disabled seats plus stale messages.
+- `app/phase2-livekit-sdk.mjs`: stale disconnected `TrackSubscribed`, `TrackUnsubscribed`, `Disconnected`, `Reconnecting`, and `Reconnected` events cannot update the new room's UI or attach/remove its audio. A delayed `play()` rejection is scoped to the originating room.
+- `tests/livekit-stale-events.test.mjs`: two mocked asynchronous WebRTC event tests with actual deferred connect/disconnect reordering. No simulated audio is shown to real app users.
+
+### New verified CI and staging state
+- Verified **source commit**: `d158ea47067656452d860d1ed5bb8be9eb6a3af8`.
+- [Comprehensive staging QA run](https://github.com/QYEM7/TotiChatpro/actions/runs/38141936573): **160/160 Node offline tests passed**, zero failures; JS syntax checks, secret audit and the registered public Staging web build all succeeded.
+- Browser-only QA artifact `totichat-comprehensive-staging-web`, ID `11702734085`, created in this successful workflow. It is **not** a signed APK or a verified Cloudflare release.
+- Earlier [room-source run](https://github.com/QYEM7/TotiChatpro/actions/runs/38141810962) was green at **158/158** after fixing an observed selector regression detected by the new behavioral tests.
+- Fetched deployed `phase2-voice-token` Edge Function v1 from Staging and compared its `index.ts` against GitHub `develop/phase-2`: **exact textual match**, `ACTIVE`, `verify_jwt=true`. This does NOT establish configured LiveKit secrets or successful two-phone voice.
+- Read-only PostgreSQL permission audit of **45 sensitive phase2–phase5 public RPC functions** found **zero** executable by `anon`. The two privileged global-gift-related functions in this selection are not directly executable by `authenticated` or `anon`.
+- Existing **47 applied Staging migrations**, original release gate and financial hold remain unchanged; no SQL writes, balance mutations, diamond reset or payroll activation occurred.
+
+### Still blocked
+- Full real authenticated multi-account journeys and voice with two phones/networks, microphone permission, server credentials/TURN, and device background/foreground acceptance.
+- Cloudflare workflow `publish-preview` skipped without its Cloudflare account variable; browser site not confirmed updated to the source commit.
+- Monthly commission/salary terms and immutable liability-preserving settlement are **not implemented or authorized** for payout and zeroing. Keep `phase5_host_month_preflight` read-only.
+- Real hardware, security role-denial, SDK behavior, stress/load/performance and account recovery checks; manual Owner approval remains required for client release.
