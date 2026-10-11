@@ -107,3 +107,22 @@ test('admin controls are real, role-gated and never expose service-role secrets'
  assert.match(staff,/p_action='approve_registration' and reg\.kind='host'/);
  assert.match(wrappers,/security invoker/);
 });
+
+test('connected support ticket center uses verified server-side actions',()=>{
+ const html=file('app/index.html');
+ const ui=file('app/phase5-support-ui.js');
+ const controls=file('app/phase2-backend-controls.js');
+ const sql=file('supabase/migrations/20261011000400_phase5_support_tickets.sql');
+ assert.match(html,/phase5-support-ui/);
+ assert.match(ui,/phase5_support_/);
+ assert.match(controls,/supportOpen/);
+ assert.match(sql,/phase3\.actor/);
+ assert.match(sql,/phase3\.is_owner/);
+});
+test('agency historical preflight is read-only by contract',()=>{
+ const sql=file('supabase/migrations/20261011000401_phase5_host_month_preflight.sql');
+ const ui=file('app/phase4-agencies-ui.js');
+ assert.match(sql,/canZeroDiamonds/);
+ assert.match(sql,/paysSalaries/);
+ assert.match(ui,/phase5_host_month_preflight/);
+});
