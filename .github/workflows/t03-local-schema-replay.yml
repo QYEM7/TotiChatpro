@@ -4,6 +4,7 @@ on:
     branches: [develop/phase-2]
     paths:
       - 'supabase/migrations/**'
+      - 'scripts/prepare-staging-schema-replay.mjs'
       - '.github/workflows/t03-local-schema-replay.yml'
   push:
     branches: [develop/phase-2]
@@ -37,11 +38,11 @@ jobs:
           cd "$RUNNER_TEMP/t03-unlinked-replay"
           supabase init
           mkdir -p supabase/migrations
-          cp "$GITHUB_WORKSPACE"/supabase/migrations/*.sql ./supabase/migrations/
+          node "$GITHUB_WORKSPACE/scripts/prepare-staging-schema-replay.mjs" "$RUNNER_TEMP/t03-unlinked-replay"
           test "$(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)" -ge 32
           # Start isolated local containers. Never call "supabase link", "db push", or remote reset.
           supabase db start
           # Reset only the ephemeral Docker database. No production credentials are loaded.
           supabase db reset
           supabase migration list --local
-          echo "PASS: all 32 historical applied migrations plus any reviewed pending migrations replayed in disposable local Supabase database."
+          echo "PASS: canonical staging support and month schema replayed; superseded historical files kept intact in the repository."
