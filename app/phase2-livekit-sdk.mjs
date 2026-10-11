@@ -52,7 +52,13 @@ export async function connect(serverUrl,token,callback){
    if(current!==room){await room.disconnect();return;}
    try{await room.startAudio();}catch(_){}
    signal({connected:true});
- }catch(err){await disconnect();throw err;}
+ }catch(err){
+   // A rejected connect/start callback from OLD room A must not disconnect
+   // a newer room B that became current while A's connection was pending.
+   if(current===room)await disconnect();
+   else await room.disconnect().catch(()=>{});
+   throw err;
+ }
 }
 export async function microphone(enabled){
  if(!current||current.state!==ConnectionState.Connected)
