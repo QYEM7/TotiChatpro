@@ -9,6 +9,11 @@ const executablePath=process.env.CHROME_BIN||
  ['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser']
  .find(p=>fs.existsSync(p));
 if(!executablePath)throw Error('System chromium unavailable');
+const staging=JSON.parse(fs.readFileSync('docs/preview-public-backend.json','utf8'));
+const stagingOrigin=new URL(staging.supabaseUrl).origin;
+if(!/^https:\/\/[a-z0-9]{20}\.supabase\.co$/.test(stagingOrigin)||
+   stagingOrigin==='https://sqedsnyvjblvbjbizcay.supabase.co')
+ throw new Error('Native browser fixture refuses production/unknown Supabase');
 (async()=>{
  const browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox','--disable-setuid-sandbox']});
  try{
@@ -22,7 +27,13 @@ if(!executablePath)throw Error('System chromium unavailable');
   await page.setRequestInterception(true);
   page.on('request',r=>{
    const url=r.url(),method=r.method();
-   if(!url.startsWith('https://sqedsnyvjblvbjbizcay.supabase.co/'))return r.continue();
+   if(!url.startsWith(stagingOrigin+'/')){
+    if(/^https:\/\/[a-z0-9]{20}\.supabase\.co\//.test(url))
+     return r.respond({status:503,contentType:'application/json',
+       headers:{'access-control-allow-origin':'*'},
+       body:'{"message":"Unmocked Supabase target refused"}'});
+    return r.continue();
+   }
    const path=new URL(url).pathname;
    if(path==='/rest/v1/rooms'&&failFirstRoomFetch){
     failFirstRoomFetch=false;
