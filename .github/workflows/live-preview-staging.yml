@@ -9,6 +9,8 @@ on:
       - 'scripts/t03-staging-config.mjs'
       - 'tests/live-preview-build.test.mjs'
       - 'tests/registered-staging-preview.test.mjs'
+      - 'tests/live-staging-critical-path.test.mjs'
+      - 'supabase/migrations/20261011000100_phase2_room_identity_background.sql'
       - 'scripts/build-registered-staging-preview.mjs'
       - 'docs/preview-public-backend.json'
       - 'package.json'
@@ -28,7 +30,13 @@ jobs:
           node-version: '22'
       - run: npm ci --no-audit --no-fund
       - name: Verify no production backend and no fake preview entry
-        run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs tests/registered-staging-preview.test.mjs
+        run: node --test tests/live-preview-build.test.mjs tests/t03-staging-safety.test.mjs tests/registered-staging-preview.test.mjs tests/live-staging-critical-path.test.mjs
+      - name: Syntax-check live room, auth, voice and event modules
+        run: |
+          node --check app/phase2-rooms.js
+          node --check app/phase2-auth.js
+          node --check app/phase2-voice-ui.js
+          node --check app/phase2-live-mode.js
       - name: Assemble approved browser UI only (NEVER Gradle or APK)
         run: npm run build
       - name: Smoke-build full approved website with SYNTHETIC isolated public config (never deploy)
