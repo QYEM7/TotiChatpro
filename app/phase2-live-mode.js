@@ -212,6 +212,15 @@ window.addEventListener('click',e=>{
     return;
   }
 
+  // Reuse the approved room games icon: only the verified multiplayer
+  // backend is opened, NEVER the old visual-only game demo.
+  if(screen==='room'&&op==='sheet'&&route==='games'){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    if(window.TotiRoomGames?.isInstalled?.()===true)
+      window.TotiRoomGames.open();
+    else warn('الألعاب الحقيقية غير متاحة الآن. أعد تشغيل التطبيق.');
+    return;
+  }
   if((op==='go'&&!allowed.has(route))||
      (op==='go'&&route==='room'&&!window.TotiPhase2Rooms?.getStatus?.().activeRoomId)||
      (op==='sheet'&&/^(music|game|store|vip|recharge|lucky)/i.test(route))||
