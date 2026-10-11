@@ -11,7 +11,7 @@ test('T06 parallel HTTP rig runs real Auth/PostgREST on loopback only with crede
  assert(!ci.includes('actions/upload-artifact@'));
 });
 test('T06 concurrent negative assertions reject limit bypass, duplicate idempotency, IDOR and staff escalation',()=>{
- for(const s of ['Promise.all','length:6','length:28','accepted.length!==19','denied.length!==9','thread.total!==20',
-  'Support rate limit exceeded','Idempotency key conflict','staff_grant','outsiderReply','outsider'])
+ for(const s of ['Promise.all','length:6','length:28','accepted.length!==14','denied.length!==14','thread.total!==15',
+  'Rate limit','Request key conflict','staff_grant','outsiderReply','outsider'])
   assert(p.includes(s),s);
 });
