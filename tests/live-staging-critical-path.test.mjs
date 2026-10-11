@@ -22,6 +22,9 @@ test('room create keeps owner-only persisted image and welcome settings',()=>{
  assert.match(room,/phase2_room_customize/);
  assert.match(room,/openSettings/);
  assert.match(room,/roomMeta/);
+ assert.match(room,/image_revision/);
+ const revision=file('supabase/migrations/20261011000101_phase2_room_image_revision.sql');
+ assert.match(revision,/gen_random_uuid\(\)/);
  assert.match(auth,/uploadRoomImage/);
  assert.match(sql,/room owner required/i);
  assert.match(sql,/owner_id=\(select auth.uid\(\)\)/);
