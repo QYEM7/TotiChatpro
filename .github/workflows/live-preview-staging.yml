@@ -11,6 +11,7 @@ on:
       - 'tests/registered-staging-preview.test.mjs'
       - 'tests/live-staging-critical-path.test.mjs'
       - 'supabase/migrations/20261011000100_phase2_room_identity_background.sql'
+      - 'supabase/migrations/20261011000101_phase2_room_image_revision.sql'
       - 'scripts/build-registered-staging-preview.mjs'
       - 'docs/preview-public-backend.json'
       - 'package.json'
