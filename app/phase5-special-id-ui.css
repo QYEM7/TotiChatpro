@@ -1,0 +1,8 @@
+.tc-special-id-form{direction:rtl;text-align:right;color:#274237;max-height:78dvh;overflow:auto;padding:15px}
+.tc-special-id-form h3{margin:0 0 12px;font-size:20px}
+.tc-special-id-form p{font-size:12px;line-height:1.7}
+.tc-special-id-form form{display:grid;gap:12px}
+.tc-special-id-form label{display:grid;gap:5px;font-size:12px;font-weight:700}
+.tc-special-id-form input,.tc-special-id-form textarea{width:100%;padding:11px;border-radius:10px;border:1px solid #c8d9cd;color:#254034;background:#fff}
+.tc-special-id-form button{border:1px solid #98bba1;border-radius:11px;padding:10px 13px;background:#e7f5eb;color:#22553b;font-weight:700;margin-top:8px}
+#tc-special-id-status{min-height:22px;color:#47735c}
