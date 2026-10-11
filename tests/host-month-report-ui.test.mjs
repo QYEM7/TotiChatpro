@@ -14,9 +14,9 @@ test('host agency month preflight is access restricted to actual Owner or specia
  assert.match(ui,/data\.paysSalaries!==false/);
  assert.match(ui,/data\.hasPayrollRates!==false/);
  assert.match(ui,/e\.earned_diamonds!==e\.remaining_diamonds\+e\.converted_or_allocated_diamonds/);
- const calls=[...ui.matchAll(/rpc\\('([^']+)'/g)].map(x=>x[1]).sort();
+ const calls=[...ui.matchAll(/rpc\('([^']+)'/g)].map(x=>x[1]).sort();
  assert.deepEqual(calls,['phase3_admin_session','phase5_host_month_preflight'].sort());
- assert.doesNotMatch(ui,/\\b(?:sendGift|settlePayroll|clearDiamonds|creditCoins)\\s*\\(/);
+ assert.doesNotMatch(ui,/\b(?:sendGift|settlePayroll|clearDiamonds|creditCoins)\s*\(/);
 });
 test('month report cannot show fabricated rates or current monthly zeroing',()=>{
  assert(ui.includes('لا تسوية رواتب، لا تصفير'));
