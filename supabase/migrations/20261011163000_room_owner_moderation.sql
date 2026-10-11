@@ -46,6 +46,17 @@ create table public.room_bans(
 );
 create index tc_room_bans_user on public.room_bans(user_id);
 
+-- Persist moderator mute when a participant disconnects and rejoins the same room.
+-- A moderator may not lift a restriction set by the room Owner.
+create table public.room_mutes(
+ room_id uuid not null references public.rooms(id) on delete cascade,
+ user_id uuid not null references auth.users(id) on delete cascade,
+ muted_by uuid not null references auth.users(id),
+ created_at timestamptz not null default now(),
+ primary key(room_id,user_id)
+);
+create index tc_room_mutes_user on public.room_mutes(user_id);
+
 create table phase3.room_moderation_requests(
  actor_id uuid not null references auth.users(id),
  request_id uuid not null,
@@ -60,8 +71,9 @@ create index tc_room_moderation_requests_age
 
 alter table public.room_moderators enable row level security;
 alter table public.room_bans enable row level security;
+alter table public.room_mutes enable row level security;
 alter table phase3.room_moderation_requests enable row level security;
-revoke all on public.room_moderators,public.room_bans,phase3.room_moderation_requests
+revoke all on public.room_moderators,public.room_bans,public.room_mutes,phase3.room_moderation_requests
  from public,anon,authenticated;
 
 -- Covers BOTH public join and one-time private invite join atomically. Existing
@@ -72,6 +84,11 @@ begin
  if exists(select 1 from public.room_bans b
   where b.room_id=new.room_id and b.user_id=new.user_id) then
     raise exception 'ROOM_BANNED' using errcode='42501';
+ end if;
+ if exists(select 1 from public.room_mutes m
+   where m.room_id=new.room_id and m.user_id=new.user_id) then
+  new.moderation_muted:=true;
+  new.is_muted:=true;
  end if;
  return new;
 end $fn$;
@@ -133,7 +150,7 @@ begin
     where t.actor_id=caller and t.created_at>now()-interval '1 minute')>=30 then
   raise exception 'Moderation rate limit exceeded';
  end if;
- if p_action<>'unban' and not exists(select 1 from public.room_members m
+ if p_action not in ('unban','allow_mic') and not exists(select 1 from public.room_members m
    where m.room_id=p_room_id and m.user_id=p_target for update) then
   raise exception 'Target is not a room member';
  end if;
@@ -143,11 +160,20 @@ begin
  elsif p_action='revoke_moderator' then
   delete from public.room_moderators where room_id=p_room_id and user_id=p_target;
  elsif p_action='mute' then
-  -- Persist moderator mute across any self-service mute RPC or seat changes.
+  -- Persist the restriction even if the member voluntarily leaves and rejoins.
+  insert into public.room_mutes(room_id,user_id,muted_by)
+    values(p_room_id,p_target,caller)
+    on conflict(room_id,user_id) do update
+    set muted_by=excluded.muted_by,created_at=now();
   update public.room_members set is_muted=true,moderation_muted=true
   where room_id=p_room_id and user_id=p_target;
  elsif p_action='allow_mic' then
-  -- Revoke the moderation restriction; the member must still unmute themself.
+  if not owner_action and exists(select 1 from public.room_mutes m
+   where m.room_id=p_room_id and m.user_id=p_target and m.muted_by=owner) then
+    raise exception 'Owner mute may be released only by owner' using errcode='42501';
+  end if;
+  delete from public.room_mutes where room_id=p_room_id and user_id=p_target;
+  -- Never publish another person's microphone without their own action.
   update public.room_members set is_muted=true,moderation_muted=false
   where room_id=p_room_id and user_id=p_target;
  elsif p_action='release_seat' then
@@ -207,5 +233,7 @@ end $fn$;
 revoke all on function public.phase2_room_moderation_state(uuid) from public,anon;
 grant execute on function public.phase2_room_moderation_state(uuid) to authenticated;
 
+comment on table public.room_mutes is
+ 'Server-mandated microphone restriction persists across membership cycles until an authorized room moderation action clears it.';
 comment on table public.room_bans is
  'Owner-issued per-room bans enforced on public and private membership INSERT. LiveKit SFU session revocation remains a separate release prerequisite.';
