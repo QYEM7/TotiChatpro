@@ -9,8 +9,12 @@ test('inbox is wired after real Supabase Auth, live gate and backend screens',()
  const auth=html.indexOf('./phase2-auth.js'),live=html.indexOf('./phase2-live-mode.js');
  const back=html.indexOf('./phase2-backend-controls.js');
  const inbox=html.indexOf('./phase5-notifications-ui.js');
- assert(auth>=0&&live>auth&&back>live&&inbox>back);
- assert(html.includes('./phase5-notifications-ui.css'));
+ assert(auth>=0&&live>auth&&back>live);
+ assert.equal(inbox,-1,'approved HTML must remain byte-for-byte unchanged');
+ const loader=readFileSync(new URL('../app/phase2-backend-controls.js',import.meta.url),'utf8');
+ assert(loader.includes("phase5-notifications-ui.js"));
+ assert(loader.includes("phase5-notifications-ui.css"));
+ assert(loader.includes("phase5-vip-status-ui.js"));
  assert.match(js,/if\(!auth\|\|!window\.TotiLiveMode\?\.enabled\)return/);
  assert.match(js,/auth\.state\(\)\.signedIn===true/);
 });
