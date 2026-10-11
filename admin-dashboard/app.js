@@ -346,6 +346,11 @@ async function uploadBanner(blob){
  await authed('/storage/v1/object/'+BUCKET+'/'+path,{blob});
  return path;
 }
+async function cleanupUnusedImage(path){
+ if(!path||!/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.webp$/i.test(path))return false;
+ await authed('/storage/v1/object/'+BUCKET,{method:'DELETE',body:{prefixes:[path]}});
+ return true;
+}
 async function saveBanner(event){
  event.preventDefault();if(writeBusy)return;
  const form=$('#banner-form'),vals=new FormData(form);
@@ -371,10 +376,14 @@ async function saveBanner(event){
     p_id:b?b.id:null,p_data:payload,p_request_id:crypto.randomUUID()});
   if(!response?.id)throw Error('لم يؤكد الخادم حفظ البنر');
   $('#banner-dialog').close();previewReset();
-  toast('تم حفظ البنر بنجاح على Staging');
+  let oldCleanupError='';
+  if(newPath&&path&&path!==newPath){
+   try{await cleanupUnusedImage(path);}catch(error){oldCleanupError=error.message;}
+  }
+  toast(oldCleanupError?'تم حفظ البنر، لكن تنظيف صورته السابقة يحتاج مراجعة.':'تم حفظ البنر بنجاح على Staging',!!oldCleanupError);
   await bannersPage();
  }catch(e){$('#banner-form-message').textContent='تعذر الحفظ: '+e.message;
-  if(newPath)toast('راجع صورة مرفوعة غير مرتبطة: '+newPath.slice(0,20)+'…',true);
+  if(newPath){try{await cleanupUnusedImage(newPath);}catch(_){toast('قد توجد صورة جديدة غير مرتبطة تحتاج تنظيفاً إدارياً.',true);}}
  }finally{writeBusy=false;$('#save-banner').disabled=false;}
 }
 async function quickBanner(id,action){
@@ -391,7 +400,12 @@ async function quickBanner(id,action){
   const r=await rpc('phase6_admin_banner_action',{p_action:action==='delete'?'delete':'update',
    p_id:id,p_data:data,p_request_id:crypto.randomUUID()});
   if(!r?.id)throw Error('لم يؤكد الخادم العملية');
-  toast('تم تسجيل تغيير البنر');await bannersPage();
+  let cleanupFailure=false;
+  if(action==='delete'){
+   try{await cleanupUnusedImage(path);}catch(_){cleanupFailure=true;}
+  }
+  toast(cleanupFailure?'تم حذف البنر، لكن الصورة تحتاج تنظيفاً لاحقاً.':'تم تسجيل تغيير البنر',cleanupFailure);
+  await bannersPage();
  }catch(e){toast('تعذّر تغيير البنر: '+e.message,true);}finally{writeBusy=false;}
 }
 async function reportSection(){
