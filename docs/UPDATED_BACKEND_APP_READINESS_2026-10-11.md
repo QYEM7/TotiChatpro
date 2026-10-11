@@ -152,3 +152,17 @@ VIP purchase, approved price-based rewards, level XP/thresholds, medals earned a
 - See [detailed certified evidence](./VERIFIED_GIFTS_MONTH_REPORT_AND_FINANCIAL_SAFETY_2026-10-11.md).
 
 **No production-ready claim; estimated Backend ~65%, whole app ~50% remain cautious until financial/voice/device/hosted acceptance.** `release_allowed=false` is unchanged. In particular the approved chance percentages, owner-approved host payroll rates and verified month-end liabilities and recovery still do not exist.
+
+## Owner override — development without launch gates, no builds or deployment (2026-10-11)
+
+The Owner explicitly cancelled **prelaunch acceptance conditions as a blocker to programming**, and explicitly prohibited **launching the app or building a new version**. Implemented `docs/DEVELOPMENT_ONLY_NO_BUILDS_2026-10-11.md`, changed all 23 release-gate `required` properties to `false`, and enabled `development_allowed=true` while keeping `release_allowed=false`. GitHub Actions web-preview generation, preview deployment, Android APK/AAB assembly, distributable artifacts and landing builds are **disabled**; source-only security/unit/disposable DB tests remain enabled. [Development-mode tests and 245/245 source tests PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38157360549). [Web-preview job skipped](https://github.com/QYEM7/TotiChatpro/actions/runs/38157349399). No app version was produced.
+
+### Further safe backend implementation — push destination consent, not delivery
+
+- Added and safely deployed Staging migration **65** `staging_private_android_push_consent`: separate private `phase3.push_preferences` and `phase3.push_devices` tables (private RLS and no direct authenticated client access), registration-token fingerprints, explicit opt-in default OFF, opt-out removing all device destinations, Android-only registered installations, five-device account cap, account-change destination protection, and verified-session `phase3.actor()` enforcement.
+- Only three **SECURITY INVOKER** public RPC endpoints exist: `phase5_push_opt_in`, `phase5_push_device_action`, `phase5_push_status`. Public responses never contain the raw device token or token digest.
+- [Full local Auth/Postgres rollback acceptance PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38157349381), including opt-in, rejection before consent, token-private responses, opt-out cleanup and table/RPC permissions. [Clean canonical schema replay PASS](https://github.com/QYEM7/TotiChatpro/actions/runs/38157349419).
+- Direct post-deploy audit: **65 applied Staging migrations**, **0 push opt-ins**, **0 registered devices**, **0 money/ledger transactions**, **0 notifications created**, **3 safe public invoker RPCs**, no anonymous status access and no direct authenticated registration-token table access. Unchanged remaining Auth WARN: `auth_leaked_password_protection`.
+- **FCM delivery is NOT operational.** There is no sender, no verified Android OS permission/token enrollment, no real push on a device, and no compiled Android build. All server status responses explicitly say `deliveryConfigured:false`. Those steps remain implementation tasks and are not launch conditions for continuing code work.
+
+Previous percentages (Backend 65%, app 50%) are stale directional engineering snapshots and are **not** automatically raised by passing source tests. Source testing and Staging DDL do not equal release readiness. The Owner has prohibited builds and launches regardless of those percentages.
