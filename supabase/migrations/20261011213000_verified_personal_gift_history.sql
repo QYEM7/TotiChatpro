@@ -12,12 +12,17 @@ declare me uuid:=phase3.actor();sent_count bigint;received_count bigint;
  sent_coins numeric;received_coins numeric;received_lots numeric;
 begin
  select count(*),coalesce(sum(e.amount),0)
- into sent_count,sent_coins from public.gift_events e where e.sender_id=me;
+ into sent_count,sent_coins from public.gift_events e
+ join public.financial_operations fin on fin.id=e.id and fin.operation='gift' and fin.status='completed'
+ where e.sender_id=me;
  select count(*),coalesce(sum(e.amount),0)
- into received_count,received_coins from public.gift_events e where e.recipient_id=me;
+ into received_count,received_coins from public.gift_events e
+ join public.financial_operations fin on fin.id=e.id and fin.operation='gift' and fin.status='completed'
+ where e.recipient_id=me;
  select coalesce(sum(l.amount),0) into received_lots
  from public.diamond_lots l
  join public.gift_events e on e.id=l.gift_event_id
+ join public.financial_operations fin on fin.id=e.id and fin.operation='gift' and fin.status='completed'
  where l.user_id=me and e.recipient_id=me;
  return jsonb_build_object('userId',me,'sentCount',sent_count,
    'receivedCount',received_count,'sentGiftCoins',sent_coins::text,
@@ -50,6 +55,7 @@ begin
   p.display_name counterparty_name,
   l.amount::text delivered_diamonds
  from public.gift_events e
+ join public.financial_operations fin on fin.id=e.id and fin.operation='gift' and fin.status='completed'
  join public.gift_catalog c on c.id=e.gift_id
  left join public.profiles p on p.id=
     (case when e.sender_id=me then e.recipient_id else e.sender_id end)
@@ -66,6 +72,7 @@ begin
  select items,row_count into result,count_rows from summary;
  select e.created_at,e.id into next_at,next_id
  from public.gift_events e
+ join public.financial_operations fin on fin.id=e.id and fin.operation='gift' and fin.status='completed'
  where (p_direction='all' and (e.sender_id=me or e.recipient_id=me)
    or p_direction='sent' and e.sender_id=me
    or p_direction='received' and e.recipient_id=me)
