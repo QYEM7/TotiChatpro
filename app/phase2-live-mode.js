@@ -17,7 +17,7 @@ if(!auth||typeof window.render!=='function'){
   document.body.insertAdjacentHTML('afterbegin','<div role="alert" style="padding:20px;background:#431953;color:white">تعذّر بدء اتصال TotiChat الحقيقي. أعد تشغيل التطبيق بعد الاتصال بالإنترنت.</div>');
   return;
 }
-document.documentElement.classList.add('tc-live-visual-identity');
+// The visual-review-20261009 identity is now authoritative; legacy paint overrides stay disabled.
 let explicitPreview=false;
 const authScreens=new Set(['loginPreview','signupPreview','verifyAccountPreview','passwordResetPreview']);
 const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview','musicPreview',...authScreens]);
