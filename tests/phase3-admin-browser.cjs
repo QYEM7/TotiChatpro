@@ -47,7 +47,18 @@ const reply=data=>({status:200,contentType:'application/json',headers:{'access-c
  await p.evaluate(()=>go('me'));
  await p.click('[data-phase2="account"]');
  await p.waitForSelector('[data-admin-open]');await p.click('[data-admin-open]');
- await p.waitForSelector('[data-admin-table]');
+ try{await p.waitForSelector('[data-admin-table]',{timeout:13000});}
+ catch(error){
+  const debug=await p.evaluate(()=>({
+   page:document.querySelector('#app')?.dataset.route,
+   adminSheet:!!document.querySelector('[data-admin-sheet]'),
+   adminStatus:document.querySelector('[data-admin-status]')?.textContent,
+   signedIn:window.TotiPhase2Auth?.state()?.signedIn,
+   adminModule:!!window.TotiAdminCatalogs
+  })).catch(()=>({unavailable:true}));
+  console.error('Catalog browser diagnostics:',JSON.stringify({debug,calls:calls.slice(-12),errors}));
+  throw error;
+ }
  await p.select('[data-admin-table]','gift_categories');
  await p.waitForFunction(()=>document.querySelector('[data-admin-records]')?.textContent.includes('CP'));
  await p.click('[data-admin-action="edit"]');
