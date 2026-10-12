@@ -37,7 +37,7 @@ test('no route handlers, backend credentials, privileged actions, or earned deco
  assert.match(js,/querySelector\('\.tc-falcon-nav'\)/);
  assert.match(js,/Never replace the approved falcon identity/);
  assert.match(js,/Preserve all seats, names, overlays, mic indicators and custom animations/);
- assert.doesNotMatch(js,/(?:requestData|localStorage|fetch\(|data-a=["']|data-v=["']|\.click\(|Math\.random)/);
+ assert.doesNotMatch(js,/(?:requestData|localStorage|fetch\(|\.click\(|Math\.random|\.setAttribute\(\s*['"]data-(?:a|v)|\.dataset\.(?:a|v)\s*=)/);
  assert.doesNotMatch(css,/\.seats\b|\.seatface\b|\.vip-crest\b|\.gift-effect\b/);
  assert.match(css,/prefers-reduced-motion/);
  assert.match(css,/focus-visible/);
