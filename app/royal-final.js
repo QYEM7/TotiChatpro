@@ -141,11 +141,15 @@ function decorateRoom(){
  if(!room||room.dataset.rfDone==='yes')return;
  room.dataset.rfDone='yes';
  const top=$('.roomtop',room);
- const owner=document.createElement('span');
- owner.className='rf-room-owner';owner.textContent='♛ Owner';
- top?.appendChild(owner);
- const events=$('.roomevents',room);
- if(events)events.insertAdjacentHTML('beforeend','<span class="rf-room-live">● LIVE</span>');
+ const real=window.TotiLiveMode?.enabled===true;
+ const verified=real?window.TotiPhase2Rooms?.getRoomSummary?.():null;
+ if(!real||verified?.isOwner===true){
+  const owner=document.createElement('span');
+  owner.className='rf-room-owner';owner.textContent='♛ Owner';top?.appendChild(owner);
+ }
+ // A saved/open room does not prove a live audio transmission.
+ if(!real){const events=$('.roomevents',room);
+  if(events)events.insertAdjacentHTML('beforeend','<span class="rf-room-live">● LIVE</span>');}
  // The in-room promotional ribbon was removed by design; keep ticker and mic seats in place.
  const bottom=$('.roomBottom',room);
  if(bottom)bottom.setAttribute('aria-label','أدوات الغرفة: الدردشة، الهدايا، الرسائل، الألعاب والمزيد');
