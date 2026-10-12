@@ -141,6 +141,10 @@ window.addEventListener('totichat-phase2-auth',()=>{
 // Approved HTML must stay byte-for-byte untouched. Enhance ONLY authenticated
 // live-mode sessions with independently tested modules, never demo preview.
 const moduleBase=new URL('.',document.currentScript?.src||location.href);
+const premiumIconStyle=document.createElement('link');
+premiumIconStyle.rel='stylesheet';
+premiumIconStyle.href=new URL('phase6-premium-icons.css',moduleBase).href;
+document.head.appendChild(premiumIconStyle);
 const inAppAdminStyle=document.createElement('link');
 inAppAdminStyle.rel='stylesheet';
 inAppAdminStyle.href=new URL('phase6-inapp-admin.css',moduleBase).href;
@@ -181,7 +185,7 @@ const financeAuditStyle=document.createElement('link');
 financeAuditStyle.rel='stylesheet';
 financeAuditStyle.href=new URL('phase5-finance-integrity-ui.css',moduleBase).href;
 document.head.appendChild(financeAuditStyle);
-for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js','phase6-inapp-admin.js','phase6-admin-banners.js']){
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js','phase6-inapp-admin.js','phase6-admin-banners.js','phase6-premium-icons.js']){
  const script=document.createElement('script');
  script.async=false;
  script.src=new URL(name,moduleBase).href;
