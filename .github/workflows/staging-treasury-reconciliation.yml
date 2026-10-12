@@ -6,6 +6,9 @@ on:
     paths:
       - 'supabase/migrations/*staging_treasury_integrity_preflight_readonly_v1.sql'
       - 'tests/staging-treasury-integrity.test.mjs'
+      - 'tests/staging-host-evidence-integrity.test.mjs'
+      - 'supabase/migrations/*staging_host_month_evidence_integrity_v1.sql'
+      - 'supabase/migrations/*staging_host_month_snapshot_join_scope_fix_v2.sql'
       - '.github/workflows/staging-treasury-reconciliation.yml'
   pull_request:
     branches:
@@ -22,4 +25,4 @@ jobs:
         with:
           node-version: '22'
       - name: Verify no payout, credit issuance, privilege bypass, or fake movement
-        run: node --test tests/staging-treasury-integrity.test.mjs tests/finance-integrity-readonly.test.mjs tests/finance-integrity-details.test.mjs tests/host-accrual-conservation.test.mjs tests/host-month-immutable-accrual.test.mjs
+        run: node --test tests/staging-host-evidence-integrity.test.mjs tests/staging-treasury-integrity.test.mjs tests/finance-integrity-readonly.test.mjs tests/finance-integrity-details.test.mjs tests/host-accrual-conservation.test.mjs tests/host-month-immutable-accrual.test.mjs
