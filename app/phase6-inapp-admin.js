@@ -18,6 +18,7 @@ const nav=[
  ['overview','الرئيسية','▦','home'],
  ['users','المستخدمون','♙','chief'],
  ['rooms','الغرف الصوتية','◉','chief'],
+ ['room_moderation','إشراف الغرف والحظر','⊘','chief'],
  ['staff','الموظفون والصلاحيات','♧','chief'],
  ['host_agencies','وكالات المضيفين','⌂','chief'],
  ['recharge_agencies','وكالات الشحن','◇','owner'],
@@ -173,6 +174,7 @@ function draw(){
   void loadPage();
   return;
  }
+ if(view==='room_moderation'){c.innerHTML=roomModerationForm();status('حظر غرفة فقط، لا يوجد حظر شامل للحساب.');return;}
  if(view==='support'){void supportPage();return;}
  if(view==='vip'||view==='medals'){void entitlementScreen();return;}
  if(actionMap[view]){
@@ -344,6 +346,17 @@ async function supportTicket(ticketId){
   status('رسائل موثقة — تظهر آخر '+result.messages.length+' رسالة');
  }catch(e){if(opened&&uid()===id&&view==='support'){const n=qs('#tcac-ticket-detail');if(n)n.textContent='تعذر فتح التذكرة: '+String(e.message).slice(0,160)}}
 }
+
+function roomModerationForm(){
+ return '<section class="tcac-module"><h3>إشراف غرفة محددة</h3>'+
+ '<p class="tcac-notice">إجراءات حقيقية: حظر مشارك من غرفة واحدة أو رفع الحظر عنه. لا يمكن حظر المالك أو الشريك الرئيسي ولا حظر حساب شامل من هذه الشاشة.</p>'+
+ '<form id="tcac-room-moderation">'+
+ input('UUID الغرفة الفعلية','room','required maxlength="36" pattern="[0-9a-fA-F-]{36}"')+
+ input('UUID المستخدم','target','required maxlength="36" pattern="[0-9a-fA-F-]{36}"')+
+ '<label class="tcac-field">القرار<select name="action"><option value="ban">حظر من الغرفة</option><option value="unban">رفع حظر غرفة</option></select></label>'+
+ reasonInput()+'<button class="tcac-primary" type="submit">تنفيذ القرار الموثق</button></form></section>';
+}
+
 function staffForms(){
  return '<section class="tcac-module" id="tcac-staff-actions"><h3>صلاحيات الموظفين — Owner فقط</h3>'+
  '<form id="tcac-staff-grant">'+
@@ -375,6 +388,14 @@ async function adminFormAction(form){
   fn='phase5_support_action';
   params={p_action:act,p_data:{ticket_id:selectedTicket,...(act==='reply'?{message}:{status:next})}};
   confirmText='تأكيد '+(act==='reply'?'إرسال الرد الحقيقي':'تغيير حالة التذكرة')+'؟';
+ }else if(key==='tcac-room-moderation'){
+  if(view!=='room_moderation'||!chief(r))throw Error('الإشراف الإداري للمالك والشريك الرئيسي فقط');
+  const room=get('room'),target=get('target'),action=get('action'),reason=get('reason');
+  if(!strictUuid.test(room)||!strictUuid.test(target)||!['ban','unban'].includes(action)||
+    reason.length<10||reason.length>300)throw Error('أدخل غرفة ومستخدماً حقيقيين وسبباً موثقاً');
+  fn='phase6_admin_room_action';
+  params={p_room_id:room,p_target:target,p_action:action,p_reason:reason};
+  confirmText='تأكيد '+(action==='ban'?'حظر المستخدم داخل هذه الغرفة فقط':'رفع الحظر داخل هذه الغرفة فقط')+'؟';
  }else if(key==='tcac-staff-grant'){
   if(view!=='staff'||!owner(r))throw Error('المالك فقط يستطيع تعديل رتب الموظفين');
   const target=get('target'),role=get('role'),partner=data.has('partner');
@@ -400,6 +421,7 @@ async function adminFormAction(form){
  try{
   const result=await rpc(fn,fn==='phase3_manage_access'?params:{...params,p_request_id:requestId});
   if(fn==='phase5_support_action'&&!strictUuid.test(result?.id||''))throw Error('الخادم لم يؤكد القرار');
+  if(fn==='phase6_admin_room_action'&&result?.success!==true)throw Error('الخادم لم يؤكد الإشراف');
   pendingMutation=null;
   if(opened&&uid()===id){
    status('تم تسجيل القرار في Staging، مع الحفاظ على سجل التدقيق.');
@@ -430,7 +452,7 @@ async function loadPage(){
   }else{
    const fields={
     users:[['display_name','الاسم'],['id','معرّف المستخدم'],['created_at','تاريخ الإنشاء']],
-    rooms:[['title','الغرفة'],['owner_id','المالك'],['member_records','سجلات العضوية']],
+    rooms:[['title','الغرفة'],['id','معرّف الغرفة'],['owner_id','المالك'],['member_records','سجلات العضوية']],
     staff:[['user_id','الحساب'],['role','الرتبة'],['permissions','الصلاحيات']],
     host_agencies:[['name','الوكالة'],['owner_id','الوكيل'],['member_count','الأعضاء']],
     recharge_agencies:[['name','الوكالة'],['owner_id','الوكيل'],['is_active','مفعلة']],
@@ -493,7 +515,7 @@ document.addEventListener('click',e=>{
  if(action==='prev'||action==='next'){if(reading)return;offset=Math.max(0,offset+(action==='prev'?-20:20));void loadPage();}
 },true);
 document.addEventListener('submit',e=>{
- if(['tcac-support-reply','tcac-support-status','tcac-staff-grant','tcac-support-staff'].includes(e.target?.id)){
+ if(['tcac-support-reply','tcac-support-status','tcac-staff-grant','tcac-support-staff','tcac-room-moderation'].includes(e.target?.id)){
   e.preventDefault();e.stopImmediatePropagation();
   if(!e.target.reportValidity())return;
   void adminFormAction(e.target).catch(error=>status('تعذر حفظ العملية: '+String(error.message).slice(0,180)));
