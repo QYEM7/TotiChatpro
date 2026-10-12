@@ -220,5 +220,12 @@ window.addEventListener('click',event=>{
 },true);
 document.addEventListener('change',event=>{if(event.target?.matches?.('[data-catalog-quantity]'))giftQuantity=Number(event.target.value);});
 document.addEventListener('input',event=>{if(event.target?.matches?.('[data-catalog-search]'))void paint();});
+function refreshOpenLuckyGifts(){
+ if(live()&&document.querySelector('#tc-real-gift-drawer'))void paint();
+}
+window.addEventListener('totichat-lucky-policy-updated',refreshOpenLuckyGifts);
+window.addEventListener('totichat-admin-action-confirmed',refreshOpenLuckyGifts);
+window.addEventListener('focus',refreshOpenLuckyGifts);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshOpenLuckyGifts();});
 window.addEventListener('totichat-phase2-auth',()=>{if(!live()){viewVersion++;pendingGift=null;pendingPurchase=null;visibleStore=[];giftId='';recipientId='';storeFilter='';}else void paint();});
 })();
