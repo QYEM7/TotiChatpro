@@ -1,0 +1,48 @@
+name: Verify real-only TotiChat Staging manual preview
+on:
+  push:
+    branches:
+      - 'feature/in-app-admin-center-*'
+  pull_request:
+    branches:
+      - 'develop/phase-2'
+permissions:
+  contents: read
+jobs:
+  manual-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Validate live-only and admin permissions
+        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs
+      - name: Build authorized Android-compatible browser payload
+        run: npm run build
+      - name: Build isolated web test site and block demo mode
+        run: node scripts/build-registered-staging-preview.mjs
+      - name: Verify exact Staging mode and truthful empty content contract
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync,existsSync} from 'node:fs';
+          const root='dist-live-preview/';
+          const html=readFileSync(root+'index.html','utf8');
+          const status=JSON.parse(readFileSync(root+'preview-status.json','utf8'));
+          const js=readFileSync(root+'app/phase2-live-mode.js','utf8');
+          const config=readFileSync(root+'app/config.js','utf8');
+          if(status.mode!=='LIVE_STAGING_ONLY'||status.backend_ref!=='rziaedugbdwefbefcxjt')throw Error('Not Staging');
+          if(!html.includes('TotiLivePreviewOnly=true')||!js.includes("if(window.TotiLivePreviewOnly)"))throw Error('Demo entry not prohibited');
+          if(!config.includes('rziaedugbdwefbefcxjt.supabase.co')||config.includes('sqedsnyvjblvbjbizcay.supabase.co'))throw Error('Wrong backend');
+          if(!existsSync(root+'app/phase6-inapp-admin.js')||!existsSync(root+'app/phase6-inapp-admin.css'))throw Error('Admin center missing');
+          console.log('PASS real-only Staging manual preview with in-app admin');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: totichat-real-staging-manual-preview
+          path: dist-live-preview/
+          if-no-files-found: error
+          retention-days: 7
