@@ -242,3 +242,33 @@ test('Staging-only diagnostic probe is opt-in and exposes no account identity',(
  assert.match(builder,/tc-real-room-search-query/);
  assert.doesNotMatch(builder,/localStorage|password|access_token|refresh_token/);
 });
+
+
+test('Google OAuth waits for real verified profile before triggering background listeners',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const source=get('app/phase2-auth.js');
+ const start=source.indexOf('  function storeToken(data,generation,');
+ const end=source.indexOf('\n  function scheduleRefresh(){',start);
+ assert.ok(start>=0&&end>start,'token commit can be tested in isolation');
+ let announcements=0,saves=0,refreshSchedules=0;
+ const commit=runInNewContext('let session=null;let requestGeneration=0;\n'+source.slice(start,end)+'\nstoreToken',{
+  persist:()=>{saves++;},
+  scheduleRefresh:()=>{refreshSchedules++;},
+  notify:()=>{announcements++;}
+ });
+ const simulated={
+  access_token:'test-access-token-not-a-real-jwt',
+  refresh_token:'test-refresh-token-not-valid',
+  user:{id:'11111111-1111-4111-8111-111111111111',email:'example@example.test'},
+  expires_in:3600
+ };
+ assert.equal(commit(simulated,0,{deferInitialNotification:true}),true);
+ assert.equal(announcements,0,'room and Realtime requests cannot race the OAuth profile read');
+ assert.equal(saves,1);assert.equal(refreshSchedules,1);
+ assert.equal(commit(simulated,0),true);
+ assert.equal(announcements,1,'normal token refresh still notifies session listeners');
+ assert.match(source,/storeToken\(response,generation,\{deferInitialNotification:true\}\)/);
+ assert.match(source,/await readProfile\(\);\s*\}catch\(error\)\{\s*\/\/ Never silently leave the UI waiting if the profile request fails\.\s*notify\(\);throw error/);
+ assert.match(source,/if\(session&&!oauthCallbackPending\)\{void resume\(\);\}/);
+ assert.match(source,/else if\(!oauthCallbackPending\)queueMicrotask\(notify\)/);
+});
