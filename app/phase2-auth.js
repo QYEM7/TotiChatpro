@@ -219,6 +219,29 @@
     }
     return path;
   }
+  async function uploadAdminBannerImage(blob){
+    if(!(blob instanceof Blob)||blob.type!=='image/webp'||blob.size<1||blob.size>2097152)
+      throw Error('صورة البنر يجب أن تكون WebP بحجم لا يتجاوز 2 MB');
+    const actor=session?.user?.id,generation=requestGeneration;
+    if(!actor)throw Error('سجّل الدخول أولاً');
+    const r=await requestData('/rest/v1/rpc/phase3_admin_session',{method:'POST',body:{}});
+    if(!r||(r.isOwner!==true&&r.isMainPartner!==true))
+      throw Error('رفع البنرات محصور بالمالك والشريك الرئيسي فقط');
+    const token=await validToken();
+    if(generation!==requestGeneration||session?.user?.id!==actor)throw Error('تم تبديل الحساب');
+    const path=actor+'/'+crypto.randomUUID()+'.webp';
+    const response=await fetch(origin+'/storage/v1/object/totichat-admin-banners/'+path,{
+      method:'POST',headers:{apikey:apiKey,Authorization:'Bearer '+token,
+        'Content-Type':'image/webp','x-upsert':'false'},
+      body:blob,credentials:'omit',cache:'no-store'
+    });
+    if(generation!==requestGeneration||session?.user?.id!==actor)throw Error('تم تبديل الحساب أثناء الرفع');
+    if(!response.ok){
+      const data=await response.json().catch(()=>({message:'تعذر رفع صورة البنر'}));
+      throw apiError(data,response.status);
+    }
+    return path;
+  }
   function emailValid(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)&&s.length<=254;}
   async function signUp({email,password,displayName}){
     email=String(email||'').trim().toLowerCase();
@@ -655,7 +678,7 @@
   const api=Object.freeze({state:publicState,signUp,signIn,signOut,recover,
     verifySignup,readProfile,updateProfile,resume,refresh,requestData,voiceStorage,
     providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,uploadAvatar,uploadRoomImage,
-    securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider,watchRoomUpdates,watchSocialUpdates});
+    securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider,watchRoomUpdates,watchSocialUpdates,uploadAdminBannerImage});
   window.TotiPhase2Auth=api;
   if(typeof location!=='undefined'&&location.hostname==='localhost'){
     const app=window.Capacitor?.Plugins?.App;
