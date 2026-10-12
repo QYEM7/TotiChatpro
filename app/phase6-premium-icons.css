@@ -1,0 +1,131 @@
+/* Premium icon polish, isolated to authenticated live TotiChat.
+   Quiet monochrome outline system; no font-emoji dependencies or motion excess.
+   Does NOT alter mic-seat geometry, VIP art, frames, gifts animations, room imagery or app navigation. */
+html[data-tc-premium="1"]{
+ --tc-premium-ink:#57416a;--tc-premium-muted:#786b89;
+ --tc-premium-gold:#bb9358;--tc-premium-edge:rgba(109,74,126,.16);
+}
+html[data-tc-premium="1"] .tc-premium-svg{
+ display:block;width:24px;height:24px;min-width:0;min-height:0;
+ flex:none;fill:none!important;stroke:currentColor;stroke-width:1.8;
+ stroke-linecap:round;stroke-linejoin:round;filter:none!important;
+ text-shadow:none!important;overflow:visible;
+}
+html[data-tc-premium="1"] #app .tc-unified-nav .tc-premium-svg{
+ width:23px;height:23px;stroke-width:1.75;
+}
+html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav{
+ background:rgba(255,250,254,.98)!important;
+ border-color:#e9ddec!important;
+ box-shadow:0 -5px 17px rgba(50,34,71,.12)!important;
+}
+html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav button{
+ transition:color .16s ease,background .16s ease,border-color .16s ease;
+}
+html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav button.selected{
+ background:#f4edfa!important;border-color:#eadbee!important;
+ color:#70449a!important;box-shadow:none!important;
+}
+html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav .royal-create span{
+ width:55px!important;height:55px!important;border-radius:18px!important;
+ border:2px solid #fff9f5!important;
+ transform:none!important;
+ background:linear-gradient(145deg,#8c65b8,#b07aaf)!important;
+ box-shadow:0 4px 12px rgba(83,46,107,.24),0 0 0 1px rgba(166,124,175,.2)!important;
+ color:#fff!important;text-shadow:none!important;
+}
+html[data-tc-premium="1"] #app .tc-unified-nav .royal-create .tc-premium-svg{
+ width:27px;height:27px;stroke-width:2;
+}
+html[data-tc-premium="1"] #app .tc-unified-nav button:focus-visible,
+html[data-tc-premium="1"] #app .me-more button:focus-visible,
+html[data-tc-premium="1"] #app .me-links button:focus-visible,
+html[data-tc-premium="1"] #app .roomBottom button:focus-visible,
+html[data-tc-premium="1"] .tcac-root button:focus-visible{
+ outline:2px solid #a478c6!important;outline-offset:3px!important;
+}
+html[data-tc-premium="1"] #app .me-links .me-link .rich-icon .tc-premium-svg{
+ width:25px;height:25px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] #app .me-more .more-icon .tc-premium-svg{
+ width:22px;height:22px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] #app .me-statcard .tc-stat-glyph .tc-premium-svg{
+ width:16px;height:16px;stroke-width:1.7;
+}
+html[data-tc-premium="1"] #app .me-more > button:not([data-tcac-entry]){
+ box-shadow:0 3px 10px rgba(87,61,112,.09)!important;
+ border-color:#ebdfee!important;
+}
+html[data-tc-premium="1"] #app .me-links .me-link{
+ box-shadow:0 3px 11px rgba(88,58,113,.1),inset 0 1px rgba(255,255,255,.9)!important;
+}
+html[data-tc-premium="1"] #app .royal-top-actions button:not(.royal-vip-chip){
+ min-width:36px;min-height:36px;color:#f1dcea;
+ display:inline-grid;place-items:center;text-shadow:none!important;
+}
+html[data-tc-premium="1"] #app .royal-top-actions button .tc-premium-svg{
+ width:21px;height:21px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] #app .royal-top-actions button:disabled,
+html[data-tc-premium="1"] #app .royal-cat:disabled{opacity:.47;cursor:not-allowed}
+html[data-tc-premium="1"] #app .royal-cat .royal-cat-icon .tc-premium-svg{
+ width:23px;height:23px;color:#f3dfca;stroke-width:1.7;
+}
+html[data-tc-premium="1"] #app .royal-cat{
+ box-shadow:inset 0 1px rgba(255,255,255,.08),0 2px 7px rgba(15,5,24,.15);
+ border-color:rgba(202,155,215,.47);
+}
+html[data-tc-premium="1"] #app .royal-cat.active{
+ border-color:#e8c28d;box-shadow:0 0 0 1px rgba(236,196,143,.2);
+}
+html[data-tc-premium="1"] #app .roomBottom>button .tc-premium-svg{
+ width:23px;height:23px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] #app .roomBottom>button.gift .tc-premium-svg{
+ width:25px;height:25px;stroke-width:1.85;
+}
+/* Admin feels professional, yet visually belongs to the same product. */
+html[data-tc-premium="1"] #app .tcac-entry .tcac-entry-icon{
+ color:#fff7e7;background:#84664a;border-radius:12px;
+}
+html[data-tc-premium="1"] #app .tcac-entry .tcac-entry-icon .tc-premium-svg{
+ width:22px;height:22px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] .tcac-card{
+ box-shadow:0 2px 9px rgba(79,60,38,.07)!important;
+ transition:background .17s ease,border-color .17s ease,transform .17s ease;
+}
+html[data-tc-premium="1"] .tcac-card .tcac-icon .tc-premium-svg{
+ width:22px;height:22px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] .tcac-header button .tc-premium-svg{
+ width:21px;height:21px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] .tcac-bottom button{
+ display:flex;align-items:center;justify-content:center;gap:6px;
+}
+html[data-tc-premium="1"] .tcac-bottom button .tc-premium-svg{
+ width:17px;height:17px;stroke-width:1.8;
+}
+html[data-tc-premium="1"] .tcac-root button:disabled{
+ opacity:.5;cursor:not-allowed;box-shadow:none!important;
+}
+@media(hover:hover) and (pointer:fine){
+ html[data-tc-premium="1"] .tcac-card:hover{
+  transform:translateY(-1px);background:#fffdfa;border-color:#cfb78f;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-tc-premium="1"] .tcac-card,
+ html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav button{
+  transition:none!important;transform:none;
+ }
+ html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav .royal-create{transform:translateY(-9px)!important}
+}
+/* Tiny screen stability: icons may shrink visually, but controls remain tappable. */
+@media(max-width:355px){
+ html[data-tc-premium="1"] #app .royal-top-actions{gap:5px}
+ html[data-tc-premium="1"] #app .royal-top-actions button:not(.royal-vip-chip){min-width:31px}
+ html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav button small{font-size:9px}
+}
