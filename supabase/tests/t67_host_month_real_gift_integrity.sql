@@ -4,17 +4,17 @@ begin;
 do $t67$
 declare
  qa_owner uuid:=gen_random_uuid(); qa_host uuid:=gen_random_uuid();
- session_id uuid:=gen_random_uuid(); room_id uuid:=gen_random_uuid();
+ session_id uuid:=gen_random_uuid(); host_session uuid:=gen_random_uuid(); room_id uuid:=gen_random_uuid();
  qa_agency uuid:=gen_random_uuid(); closed_month date:=(date_trunc('month',now() at time zone 'UTC')::date-interval '1 month')::date;
  bad_month date:=(date_trunc('month',now() at time zone 'UTC')::date-interval '2 months')::date;
  gift1 jsonb; gift2 jsonb; gift3 jsonb;
- preview jsonb; captured jsonb; after_capture jsonb;
+ preview jsonb; captured jsonb; after_capture jsonb; monthly jsonb; quote jsonb; converted jsonb;
  failed boolean;
 begin
  insert into auth.users(id,email,email_confirmed_at,is_anonymous)
  values (qa_owner,qa_owner::text||'@test.invalid',now(),false),
         (qa_host,qa_host::text||'@test.invalid',now(),false);
- insert into auth.sessions(id,user_id) values(session_id,qa_owner);
+ insert into auth.sessions(id,user_id) values(session_id,qa_owner),(host_session,qa_host);
  update phase3.system_authority set owner_id=qa_owner,main_partner_id=null where singleton;
  insert into public.rooms(id,owner_id,title,is_private)
  values(room_id,qa_owner,'T67 disposable host evidence',false);
@@ -43,6 +43,43 @@ begin
     or preview->>'canPaySalaries'<>'false' or preview->>'canZeroDiamonds'<>'false' then
   raise exception 'T67 genuine gift preview unexpected: %',preview;
  end if;
+ monthly:=public.phase7_host_month_diamond_conservation(closed_month,0,30);
+ if monthly->>'giftCount'<>'1' or monthly->>'earnedDiamonds'<>'10'
+   or monthly->>'redeemedDiamondsToDate'<>'0' or monthly->>'unredeemedDiamondsNow'<>'10'
+   or monthly->>'hasDiscrepancies'<>'false' or monthly->>'canZeroDiamonds'<>'false'
+   or jsonb_array_length(monthly->'hosts')<>1 then
+  raise exception 'T67 pre-redemption monthly lot conservation failed: %',monthly;
+ end if;
+ -- Authenticated host cannot obtain the Owner's private month report.
+ perform set_config('request.jwt.claims',jsonb_build_object(
+   'sub',qa_host,'session_id',host_session,'aal','aal1','role','authenticated')::text,true);
+ failed:=false;
+ begin perform public.phase7_host_month_diamond_conservation(closed_month,0,30);
+ exception when insufficient_privilege then failed:=true; end;
+ if not failed then raise exception 'T67 non-Owner obtained private financial report'; end if;
+ -- Redeeming 10 real earned diamonds consumes this month's EXACT lot; the
+ -- 30% conversion is server-quoted, never guessed from a fabricated rate.
+ quote:=public.phase4_preview_redemption(10);
+ converted:=public.phase4_redeem_diamonds(10,(quote->>'coins')::bigint,gen_random_uuid());
+ if converted->>'status'<>'completed' or
+    (select diamonds from public.wallets where user_id=qa_host)<>0 then
+  raise exception 'T67 legitimate lot-based redemption failed: %',converted;
+ end if;
+ perform set_config('request.jwt.claims',jsonb_build_object(
+   'sub',qa_owner,'session_id',session_id,'aal','aal1','role','authenticated')::text,true);
+ monthly:=public.phase7_host_month_diamond_conservation(closed_month,0,30);
+ if monthly->>'earnedDiamonds'<>'10'
+   or monthly->>'redeemedDiamondsToDate'<>'10'
+   or monthly->>'unredeemedDiamondsNow'<>'0'
+   or monthly->>'hostLotDiscrepancies'<>'0'
+   or monthly->>'hostWalletBalanceDiscrepancies'<>'0'
+   or monthly->>'redemptionConservationDiscrepancies'<>'0'
+   or monthly->>'hasDiscrepancies'<>'false'
+   or (monthly->'hosts'->0->>'earnedDiamonds')<>'10'
+   or (monthly->'hosts'->0->>'redeemedDiamondsToDate')<>'10'
+   or (monthly->'hosts'->0->>'unredeemedDiamondsNow')<>'0' then
+  raise exception 'T67 monthly redemption did not preserve earned liability: %',monthly;
+ end if;
  captured:=public.phase5_host_month_snapshot_capture(closed_month,gen_random_uuid());
  if captured->>'captured'<>'true' or captured->>'alreadyCaptured'<>'false'
     or captured->>'isAccrualEvidenceOnly'<>'true' then
@@ -63,6 +100,10 @@ begin
    or preview->>'snapshotConsistent'<>'false' then
    raise exception 'T67 tampered gift evidence was silently accepted: %',preview;
  end if;
+ monthly:=public.phase7_host_month_diamond_conservation(closed_month,0,30);
+ if monthly->>'hasDiscrepancies'<>'true' or monthly->>'hostLotDiscrepancies'<>'1' then
+  raise exception 'T67 tampered gift was not caught by month conservation audit: %',monthly;
+ end if;
  update public.gift_events set amount=10 where id=(gift1->>'id')::uuid;
  -- A different closed month has TWO gifts: one valid and one with its lot
  -- deliberately deleted (disposable PostgreSQL only). Header insert must fail.
@@ -80,6 +121,11 @@ begin
  if exists(select 1 from phase3.host_month_accrual_headers where month_start=bad_month) then
   raise exception 'T67 failed capture left behind a partially committed header';
  end if;
+ monthly:=public.phase7_host_month_diamond_conservation(bad_month,0,30);
+ if monthly->>'hasDiscrepancies'<>'true' or monthly->>'hostLotDiscrepancies'<>'1' or
+    monthly->>'hostWalletBalanceDiscrepancies'<>'1' then
+  raise exception 'T67 missing lot did not produce complete discrepancy report: %',monthly;
+ end if;
  preview:=public.phase6_host_month_evidence_integrity(bad_month);
  if preview->>'hasEvidenceProblems'<>'true' or
     preview->>'hostGiftsMissingOrMismatchedLots'<>'1' then
@@ -90,4 +136,4 @@ begin
  end if;
 end $t67$;
 rollback;
-select 'PASS T67: real disposable gift, genuine month snapshot, tampering detected, incomplete second month blocked, 100% rollback, no payout/diamond reset' as result;
+select 'PASS T67: real disposable gift, real 30% diamond redemption traced to immutable month, owner-only conservation, missing lots and altered amounts blocked, rollback' as result;
