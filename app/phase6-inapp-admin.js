@@ -31,7 +31,7 @@ const nav=[
  ['support','صندوق خدمة العملاء','☏','support'],
  ['vip','VIP والامتيازات','♛','owner'],
  ['medals','الميداليات والشارات','✿','owner'],
- ['banners','البنرات','▤','chief_pending'],
+ ['banners','البنرات (قراءة)','▤','chief'],
  ['settlement','التسوية الشهرية','◈','chief_pending']
 ];
 const actionMap={catalog:'data-admin-open',reports:'data-reports-open',global_gift:'data-tc-global-gift-admin',
@@ -48,7 +48,7 @@ function can(key,r=rights){
  return false;
 }
 function permitted(){return nav.filter(item=>can(item[3]));}
-function readable(){return ['users','rooms','staff','host_agencies','recharge_agencies','registrations','agency_transfers','audit'].includes(view);}
+function readable(){return ['users','rooms','staff','host_agencies','recharge_agencies','registrations','agency_transfers','audit','banners'].includes(view);}
 function validIdentity(n=account){return !!n&&uid()===n;}
 function roleLabel(r){
  if(r?.isOwner)return 'المالك الرئيسي';
@@ -302,10 +302,11 @@ async function loadPage(){
  reading=true;
  try{
   const directory=kind==='users'||kind==='rooms';
-  const result=await rpc(directory?'phase6_admin_directory':'phase6_admin_management_page',
-    directory?{p_kind:kind,p_query:search,p_offset:p,p_limit:20}:{p_kind:kind,p_offset:p,p_limit:20});
+  const banner=kind==='banners';
+  const result=await rpc(banner?'phase6_admin_banner_list':directory?'phase6_admin_directory':'phase6_admin_management_page',
+    banner?{p_offset:p,p_limit:20}:directory?{p_kind:kind,p_query:search,p_offset:p,p_limit:20}:{p_kind:kind,p_offset:p,p_limit:20});
   if(!opened||start!==requestSerial||uid()!==id||view!==kind)return;
-  if(result?.readOnly!==true||result?.kind!==kind||!Array.isArray(result.rows)||
+  if((!banner&&(result?.readOnly!==true||result?.kind!==kind))||!Array.isArray(result.rows)||
      !Number.isSafeInteger(result.total)||result.total<0)throw Error('استجابة غير صالحة');
   if(!result.rows.length){
    node.innerHTML='<p class="tcac-empty">لا توجد سجلات موثّقة في هذا القسم.</p>';
@@ -318,7 +319,8 @@ async function loadPage(){
     recharge_agencies:[['name','الوكالة'],['owner_id','الوكيل'],['is_active','مفعلة']],
     registrations:[['name','الطلب'],['kind','النوع'],['status','الحالة']],
     agency_transfers:[['user_id','المضيف'],['agency_id','الوكالة المطلوبة'],['status','الحالة']],
-    audit:[['actor_id','المسؤول'],['action','الإجراء'],['created_at','التاريخ']]
+    audit:[['actor_id','المسؤول'],['action','الإجراء'],['created_at','التاريخ']],
+    banners:[['title','عنوان البنر'],['status','الحالة'],['sort_order','الترتيب'],['starts_at','بداية العرض'],['ends_at','نهاية العرض']]
    }[kind]||[];
    node.innerHTML=result.rows.map(row=>'<article class="tcac-record">'+fields.map(([key,label])=>
     '<div><span>'+esc(label)+'</span><strong>'+esc(Array.isArray(row[key])?row[key].join('، '):
@@ -329,7 +331,7 @@ async function loadPage(){
   const prev=qs('[data-tcac="prev"]'),next=qs('[data-tcac="next"]');
   if(prev)prev.disabled=p===0;
   if(next)next.disabled=p+result.rows.length>=result.total||!result.rows.length;
-  status('بيانات مقروءة فقط من Supabase Staging.');
+  status(banner?'بنرات فعلية، عرض فقط. رفع الصور والتحرير ما زالا قيد الدمج.':'بيانات مقروءة فقط من Supabase Staging.');
  }catch(e){
   if(opened&&start===requestSerial&&uid()===id){
    node.textContent='تعذر جلب البيانات: '+String(e.message).slice(0,180);
