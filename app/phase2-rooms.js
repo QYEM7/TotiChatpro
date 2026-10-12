@@ -108,8 +108,10 @@ function clearUnjoinedRoom(view){
   if(activity)activity.textContent='● انتظار الانضمام';
   const crowd=$('.roomevents .crowd',view);
   if(crowd)crowd.textContent='👥 0';
+  const giftTicker=$('.giftTicker',view);
+  if(giftTicker){giftTicker.hidden=true;giftTicker.style.display='none';}
   const ticker=$('.giftTicker .tickerBody',view);
-  if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا مؤكدة';
+  if(ticker)ticker.textContent='';
   // The approved review template also ships a sample donor portrait.
   const donor=$('.giftTicker img',view);
   if(donor)donor.hidden=true;
@@ -206,8 +208,10 @@ function roomContent(){
     if(activity)activity.textContent='● غرفة حقيقية';
     const crowd=$('.roomevents .crowd',view);
     if(crowd)crowd.textContent='👥 '+members.length;
+    const giftTicker=$('.giftTicker',view);
+    if(giftTicker){giftTicker.hidden=true;giftTicker.style.display='none';}
     const ticker=$('.giftTicker .tickerBody',view);
-    if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا حقيقية الآن';
+    if(ticker)ticker.textContent='';
     const count=$('.giftTicker .orb b',view);
     if(count)count.textContent='0';
     window.TotiGlobalGiftFeed?.decorateTicker?.(view);
