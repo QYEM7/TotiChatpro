@@ -24,10 +24,12 @@ export function injectPreviewEntry(html){
 export function restrictDemoChoice(js){
  const anchor="if(screen==='loginPreview'){";
  const click="if(action.dataset.liveEntry==='preview'){";
- if(!js.includes(anchor)||!js.includes(click))
+ if(!js.includes(click))
   throw Error('BLOCKED preview: cannot restrict synthetic mode safely');
- return js.replace(anchor,"if(screen==='loginPreview'&&!window.TotiLivePreviewOnly){")
-  .replace(click,"if(action.dataset.liveEntry==='preview'){"+
+ // Recent live mode does not create a demo-choice banner at all. Support both
+ // historical approved layouts and the new clean-auth variant without adding it.
+ const restricted=js.includes(anchor)?js.replace(anchor,"if(screen==='loginPreview'&&!window.TotiLivePreviewOnly){"):js;
+ return restricted.replace(click,"if(action.dataset.liveEntry==='preview'){"+
    "if(window.TotiLivePreviewOnly){warn('المعاينة الحقيقية لا تسمح بالحسابات الوهمية.');return;}");
 }
 export async function buildLivePreview(env=process.env,{
