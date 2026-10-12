@@ -610,6 +610,42 @@ async function createRoom(){
  }catch(err){toast(failure(err));}
  finally{entering=false;}
 }
+// Search only RLS-authorized room records already retrieved from Staging.
+// Never manufacture rooms, counts or a fake popular-ranking result.
+function displayRealRoomSearch(){
+ if(!session().signedIn){go('loginPreview');return;}
+ if(typeof showSheet!=='function')return;
+ showSheet('<section class="tc-room-search" dir="rtl">'+
+   '<header class="sheethead"><h3>⌕ البحث عن غرفة حقيقية</h3><button type="button" class="xbtn" data-a="close" aria-label="إغلاق">✕</button></header>'+
+   '<label>اسم الغرفة<input id="tc-real-room-search-query" type="search" maxlength="70" autocomplete="off" placeholder="ابحث في الغرف المحمّلة من الخادم"></label>'+
+   '<p class="tc-room-search-note">النتائج من أحدث 40 غرفة مرئية لحسابك، وليست غرفاً تجريبية.</p>'+
+   '<div id="tc-real-room-search-results" aria-live="polite"></div></section>',true);
+ paintRealRoomSearch();
+}
+function paintRealRoomSearch(){
+ const list=$('#tc-real-room-search-results');
+ if(!list)return;
+ const q=String($('#tc-real-room-search-query')?.value||'').trim().toLocaleLowerCase();
+ list.replaceChildren();
+ if(!Array.isArray(rooms)){
+   list.textContent='جارٍ تحميل الغرف من الخادم، افتح البحث مجدداً بعد التحديث.';
+   return;
+ }
+ const visible=rooms.filter(item=>UUID.test(String(item.id))&&
+   (!q||String(item.title||'').toLocaleLowerCase().includes(q)));
+ if(!visible.length){list.textContent='لا توجد غرف حقيقية مطابقة.';return;}
+ for(const room of visible){
+   const btn=document.createElement('button');btn.type='button';
+   btn.className='tc-real-search-room';btn.dataset.phase2='open-room';
+   btn.dataset.room=room.id;
+   const label=document.createElement('b');label.textContent=room.title;
+   const status=document.createElement('small');status.textContent=room.is_private?'غرفة خاصة':'غرفة عامة';
+   btn.append(label,status);list.appendChild(btn);
+ }
+}
+document.addEventListener('input',event=>{
+ if(event.target?.id==='tc-real-room-search-query')paintRealRoomSearch();
+},true);
 function showCreate(){
  if(!session().signedIn){go('loginPreview');return;}
  if(active){toast('اخرج من الغرفة الحالية قبل إنشاء غرفة جديدة');return;}
@@ -703,15 +739,16 @@ document.addEventListener('click',event=>{
   const b=event.target.closest('[data-phase2],[data-royal="create-room"],[data-royal="hero"],[data-a="leaveRoom"],[data-a="seat"],[data-a="sendPreview"]');
   if(!b)return;
   const kind=b.dataset.phase2||b.dataset.royal||b.dataset.a;
-  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy','retry-rooms','room-settings-save'].includes(kind))return;
+  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy','retry-rooms','search-rooms','room-settings-save'].includes(kind))return;
   if((kind==='seat'||kind==='seat-action'||kind==='leaveRoom'||kind==='sendPreview')&&!active)return;
   event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
   if(kind==='retry-rooms')void listRooms();
+  else if(kind==='search-rooms'){displayRealRoomSearch();}
   else if(kind==='create-room')showCreate();
   else if(kind==='hero')toast('اختر غرفة حقيقية من قائمة الغرف');
   else if(kind==='create-room-submit'){void createRoom();}
   else if(kind==='room-settings-save'){void saveRoomSettings();}
-  else if(kind==='open-room')void enterRoom(b.dataset.room||'');
+  else if(kind==='open-room'){if($('#tc-real-room-search-results'))closeSheet();void enterRoom(b.dataset.room||'');}
   else if(kind==='seat'||kind==='seat-action')void setSeat(Number(b.dataset.seat||Number(b.dataset.v)+1));
   else if(kind==='leaveRoom')void leaveRoom();
   else if(kind==='sendPreview')void sendMessage();
