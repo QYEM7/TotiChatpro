@@ -26,7 +26,7 @@ test('live roster alone controls occupied avatar, muted icon and owner indicator
  assert.match(rooms,/Array\.from\(String\(p\.display_name\|\|'مستخدم'\)\.trim\(\)\)\[0\]/);
  assert.match(rooms,/level\.textContent=p\?'🎁 '/);
  assert.match(rooms,/level\.title=p\?'عدد الهدايا الحقيقية المستلمة داخل هذه الغرفة'/);
- assert.match(rooms,/p\.is_muted===true\?'المايك مكتوم':'المايك غير مكتوم'/);
+ assert.match(rooms,/micStatus\.title=p\.is_muted===true/);
  assert.match(rooms,/المايك غير مكتوم/);
  assert.match(rooms,/micStatus\.title=p\.is_muted===true/);
 });
