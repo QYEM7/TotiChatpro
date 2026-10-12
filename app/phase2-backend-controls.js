@@ -141,6 +141,10 @@ window.addEventListener('totichat-phase2-auth',()=>{
 // Approved HTML must stay byte-for-byte untouched. Enhance ONLY authenticated
 // live-mode sessions with independently tested modules, never demo preview.
 const moduleBase=new URL('.',document.currentScript?.src||location.href);
+const giftTrayStyle=document.createElement('link');
+giftTrayStyle.rel='stylesheet';
+giftTrayStyle.href=new URL('phase6-gift-tray.css',moduleBase).href;
+document.head.appendChild(giftTrayStyle);
 const micPresenceStyle=document.createElement('link');
 micPresenceStyle.rel='stylesheet';
 micPresenceStyle.href=new URL('phase6-mic-presence.css',moduleBase).href;
