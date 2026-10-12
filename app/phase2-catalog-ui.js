@@ -223,6 +223,7 @@ document.addEventListener('input',event=>{if(event.target?.matches?.('[data-cata
 function refreshOpenLuckyGifts(){
  if(live()&&document.querySelector('#tc-real-gift-drawer'))void paint();
 }
+window.TotiLuckyGiftUI=Object.freeze({refreshOpen:refreshOpenLuckyGifts});
 window.addEventListener('totichat-lucky-policy-updated',refreshOpenLuckyGifts);
 window.addEventListener('totichat-admin-action-confirmed',refreshOpenLuckyGifts);
 window.addEventListener('focus',refreshOpenLuckyGifts);
