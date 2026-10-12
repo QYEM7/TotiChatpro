@@ -28,7 +28,9 @@ showGifts=function(){
  void paint();
 };
 function button(label,action,value,selected=false){
- return '<button type="button" data-catalog-action="'+action+'" data-catalog-value="'+esc(value)+'"'+(selected?' class="'+(action==='recipient'?'selected':'active')+'"':'')+'>'+esc(label)+'</button>';
+ return '<button type="button" data-catalog-action="'+action+'" data-catalog-value="'+esc(value)+'"'+
+ (action==='gift-category'?' role="tab" aria-selected="'+String(selected)+'"':'')+
+ (selected?' class="'+(action==='recipient'?'selected':'active')+'"':'')+'>'+esc(label)+'</button>';
 }
 function itemDetails(item){
  showSheet(head(item.name)+'<div class="cardwhite"><p>'+esc(item.description||'لا يوجد وصف إضافي')+'</p><p>'+esc(num(item.price))+' '+esc(item.currency==='silver'?'عملة فضية':item.currency==='gold'?'عملة ذهبية':'عملة')+'</p>'+
@@ -99,8 +101,8 @@ async function paint(){
    markup='<div class="recipient tc-gift-recipients" aria-label="اختيار المستلم">'+recipients.map(r=>button(r.display_name||'مستخدم','recipient',r.user_id,recipientId===r.user_id)).join('')+'</div>'+
     (!recipients.length?'<p>لا يوجد أعضاء في غرفة حقيقية مفتوحة.</p>':'')+
     '<div class="giftTabs tc-gift-tabs" role="tablist" aria-label="أنواع الهدايا">'+cats.map(c=>button(c.label,'gift-category',c.id,giftCategory===c.id)).join('')+'</div>'+
-    '<div class="giftgrid tc-gift-scroll" role="region" aria-label="الهدايا المتاحة" tabindex="0">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||g.diamond_source_type==='LUCKY_GIFT'?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>⏳ الاحتمالات قيد الاعتماد</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+'</div>'+
-    (!rows.length?'<p>لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+
+    '<div class="giftgrid tc-gift-scroll" role="region" aria-label="الهدايا المتاحة" tabindex="0">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||g.diamond_source_type==='LUCKY_GIFT'?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>⏳ الاحتمالات قيد الاعتماد</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+(!rows.length?'<p class="tc-gift-empty">لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+'</div>'+
+    
     '<div class="sendrow tc-gift-sendbar"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><label>العدد <select data-catalog-quantity aria-label="عدد الهدايا">'+[1,7,17,77,777].map(q=>'<option value="'+q+'" '+(giftQuantity===q?'selected':'')+'>'+q+'</option>').join('')+'</select></label><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
   }
   if(version!==viewVersion||owner!==auth.state().user?.id||!root.isConnected)return;
