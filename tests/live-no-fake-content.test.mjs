@@ -24,7 +24,7 @@ test('live home never renders reference rooms or invented nearby counts',()=>{
 test('no empty advertising placeholders or fabricated activity ribbon in real mode',()=>{
  assert.match(banner,/if\(window\.TotiLiveMode\?\.enabled===true\)return ''/);
  assert.match(banner,/!state\.items\.length\)return window\.TotiLiveMode\?\.enabled===true\?'':/);
- assert.match(royal,/if\(strip&&!window\.TotiLiveMode\?\.enabled\)/);
+ assert.match(royal,/if\(window\.TotiLiveMode\?\.enabled\)\{/);
  assert.match(global,/ticker\.style\.display=current\?'':'none'/);
  assert.match(global,/gift_global_announcements/);
  assert.match(live,/if\(state\.signedIn\)\{protectIdentity\(\);\}/);
