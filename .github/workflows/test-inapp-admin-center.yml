@@ -9,6 +9,9 @@ on:
       - 'app/phase2-backend-controls.js'
       - 'tests/inapp-admin-center.test.mjs'
       - 'tests/live-no-fake-content.test.mjs'
+      - 'tests/real-admin-banners-and-demo-guard.test.mjs'
+      - 'app/phase6-admin-banners.js'
+      - 'app/phase2-auth.js'
       - 'app/royal-visuals.js'
       - 'app/home-banners.js'
       - 'app/phase2-global-gifts.js'
@@ -43,4 +46,4 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax, user role and protected Profile integration
-        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs
+        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs
