@@ -15,6 +15,7 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let currentUser='',rooms=null,active=null,members=[],messages=[],loadingRooms=null,refreshing=null,entering=false;
 let realSpeakerRoom='',realSpeakingIds=new Set();
+let verifiedMicDecorations=new Map();
 let roomListError='';
 let sequence=0,sending=false;
 let realtime=null,realtimeUser='';
@@ -224,6 +225,12 @@ function roomContent(){
       // badges/classes from the standalone visual review into real users.
       // The roster returns no verified VIP tier, so a rank is never invented.
       button.classList.remove('vip1','vip5','vip8');
+      const verified=p?verifiedMicDecorations.get(p.user_id):null;
+      const vip=Number.isInteger(verified?.vipTier)&&verified.vipTier>=1&&verified.vipTier<=10?verified.vipTier:0;
+      const frame=verified?.frame&&typeof verified.frame.name==='string'&&verified.frame.name.length<=100?verified.frame:null;
+      button.classList.toggle('tc-mic-vip',vip>0);
+      button.classList.toggle('tc-mic-equipped-frame',!!frame);
+      button.dataset.tcVipTier=vip?String(vip):'';
       button.classList.toggle('occupied',!!p);
       button.classList.toggle('tc-mic-member',!!p);
       button.classList.toggle('tc-mic-muted',!!p&&p.is_muted===true);
@@ -302,6 +309,18 @@ function roomContent(){
         }else ownerMark?.remove();
         const badge=$('.seatbadge',face);
         if(badge)badge.style.setProperty('display','none','important');
+        // Decorations are shown only when server records prove ownership.
+        let vipLabel=$('.tc-seat-vip-tier',face);
+        if(p&&vip){
+          if(!vipLabel){vipLabel=document.createElement('span');vipLabel.className='tc-seat-vip-tier';face.appendChild(vipLabel);}
+          vipLabel.textContent='VIP '+vip;vipLabel.hidden=false;
+        }else vipLabel?.remove();
+        let frameMark=$('.tc-seat-equipped-mark',face);
+        if(p&&frame){
+          if(!frameMark){frameMark=document.createElement('span');frameMark.className='tc-seat-equipped-mark';face.appendChild(frameMark);}
+          frameMark.textContent=String(frame.icon||'✦').slice(0,4);
+          frameMark.title=frame.name;frameMark.hidden=false;
+        }else frameMark?.remove();
       }
       const label=$('.seatname',button);
       if(label){
@@ -310,7 +329,13 @@ function roomContent(){
         label.classList.remove('vipGold');
       }
       const level=$('.seatlv',button);
-      if(level)level.textContent=p?(p.is_muted===true?'المايك مكتوم':'غير مكتوم'):'انضم للمايك';
+      if(level){
+        const count=verified?.receivedGifts;
+        const verifiedCount=Number.isSafeInteger(count)&&count>=0?count:null;
+        level.textContent=p?'🎁 '+(verifiedCount===null?'—':verifiedCount.toLocaleString('en-US')):'انضم للمايك';
+        level.title=p?'عدد الهدايا الحقيقية المستلمة داخل هذه الغرفة':'';
+        level.classList.toggle('tc-seat-gift-counter',!!p);
+      }
       button.dataset.phase2='seat-action';
       button.dataset.seat=String(slot);
     }
@@ -364,7 +389,7 @@ async function listRooms(){
 function roomMembershipRevoked(roomId){
   // Never keep a revoked room's voice/mic alive after the backend removes us.
   if(active?.id!==roomId)return;
-  sequence++;active=null;members=[];messages=[];rooms=null;
+  sequence++;active=null;members=[];messages=[];verifiedMicDecorations.clear();rooms=null;
   void window.TotiRealVoice?.disconnect?.();
   if(typeof closeSheet==='function')closeSheet();
   if(screen==='room')go('home');
@@ -382,12 +407,15 @@ async function refreshRoom(){
   refreshing=request;
   request.promise=(async()=>{
     try{
-      const [roster,history,roomMeta]=await Promise.all([
+      const [roster,history,roomMeta,cosmetics]=await Promise.all([
         rpc('phase2_room_members_visual',{p_room_id:current}),
         query('/rest/v1/room_messages?room_id=eq.'+encodeURIComponent(current)+
           '&select=id,sender_id,body,created_at&order=created_at.desc&limit=80'),
         query('/rest/v1/rooms?id=eq.'+encodeURIComponent(current)+
-          '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1')
+          '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1'),
+        query('/rest/v1/rpc/phase6_room_mic_decorations',{
+          method:'POST',body:{p_room_id:current}
+        }).catch(()=>null)
       ]);
       if(before!==sequence||active?.id!==current)return;
       if(!Array.isArray(roomMeta)||!Array.isArray(roster)||!Array.isArray(history))
@@ -399,6 +427,20 @@ async function refreshRoom(){
       }
       active=roomMeta[0];
       members=roster;
+      verifiedMicDecorations=new Map();
+      if(Array.isArray(cosmetics)){
+        const permitted=new Set(roster.filter(m=>Number.isInteger(m.seat_no)&&m.seat_no>0).map(m=>m.user_id));
+        for(const item of cosmetics){
+          if(!item||!UUID.test(String(item.userId))||!permitted.has(item.userId))continue;
+          const giftCount=Number(item.receivedGifts);
+          verifiedMicDecorations.set(item.userId,{
+            vipTier:Number.isInteger(item.vipTier)&&item.vipTier>=1&&item.vipTier<=10?item.vipTier:0,
+            frame:item.frame&&typeof item.frame.name==='string'&&item.frame.name.length<=100&&
+              typeof item.frame.icon==='string'&&item.frame.icon.length<=16?item.frame:null,
+            receivedGifts:Number.isSafeInteger(giftCount)&&giftCount>=0?giftCount:null
+          });
+        }
+      }
       messages=history.reverse();
       if(screen==='room')roomContent();
       // Sync client-side microphone publication after moderator changes.
@@ -426,7 +468,7 @@ async function resume(){
     const result=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(own[0].room_id)+
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(before!==sequence||!result?.length)return;
-    active=result[0];members=[];messages=[];
+    active=result[0];members=[];messages=[];verifiedMicDecorations.clear();
     if(screen==='room')roomContent();
     await refreshRoom();
   }catch(err){console.warn('Room restore pending:',failure(err));}
@@ -446,7 +488,7 @@ async function enterRoom(id){
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     if(!rows?.length)throw new Error('لم نعثر على الغرفة بعد الدخول');
-    sequence++;active=rows[0];members=[];messages=[];
+    sequence++;active=rows[0];members=[];messages=[];verifiedMicDecorations.clear();
     go('room');await refreshRoom();
   }catch(err){toast(failure(err));}
   finally{entering=false;}
@@ -495,7 +537,7 @@ async function redeemInvite(){
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     if(!rows?.length)throw new Error('الغرفة ليست متاحة');
-    sequence++;active=rows[0];members=[];messages=[];
+    sequence++;active=rows[0];members=[];messages=[];verifiedMicDecorations.clear();
     if(typeof closeSheet==='function')closeSheet();
     go('room');await refreshRoom();
   }catch(err){toast(failure(err));}
@@ -614,7 +656,7 @@ async function leaveRoom(){
   try{
     await window.TotiRealVoice?.disconnect?.();
     await rpc('phase2_room_leave',{p_room_id:room.id});
-    active=null;members=[];messages=[];sequence++;loadingRooms=null;roomListError='';
+    active=null;members=[];messages=[];verifiedMicDecorations.clear();sequence++;loadingRooms=null;roomListError='';
     if(typeof closeSheet==='function')closeSheet();
     minimizedRoom=false;rooms=null;
     go('home');void listRooms();
@@ -683,13 +725,14 @@ function resumeRealRoomReads(){
   if(screen==='room'&&active)void refreshRoom();
   if(screen==='home')void listRooms();
 }
+window.addEventListener('totichat-gift-completed',()=>{if(active&&session().signedIn)void refreshRoom();});
 window.addEventListener('online',resumeRealRoomReads);
 window.addEventListener('focus',resumeRealRoomReads);
 document.addEventListener('visibilitychange',resumeRealRoomReads);
 window.addEventListener('totichat-phase2-auth',()=>{
   const id=session().user?.id||'';
   if(id!==currentUser){
-    currentUser=id;sequence++;rooms=null;roomListError='';loadingRooms=null;active=null;members=[];messages=[];
+    currentUser=id;sequence++;rooms=null;roomListError='';loadingRooms=null;active=null;members=[];messages=[];verifiedMicDecorations.clear();
     if(id){void listRooms();void resume();}
   }
   // User switches/revocations dispose the old socket, so no stale events
