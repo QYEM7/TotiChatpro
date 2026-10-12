@@ -181,7 +181,7 @@ const financeAuditStyle=document.createElement('link');
 financeAuditStyle.rel='stylesheet';
 financeAuditStyle.href=new URL('phase5-finance-integrity-ui.css',moduleBase).href;
 document.head.appendChild(financeAuditStyle);
-for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js','phase6-inapp-admin.js']){
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js','phase6-inapp-admin.js','phase6-admin-banners.js']){
  const script=document.createElement('script');
  script.async=false;
  script.src=new URL(name,moduleBase).href;
