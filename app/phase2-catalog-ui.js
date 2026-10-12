@@ -20,7 +20,11 @@ cp=function(){return live()?shell('رفقاء الروح · CP','cp'):prevCP.app
 showGifts=function(){
  if(!live())return prevGifts.apply(this,arguments);
  giftId='';recipientId='';giftQuantity=1;
- showSheet(head('صندوق الهدايا')+'<section data-live-catalog="gift"><p class="vip-noteonly">إرسال الهدايا يخصم السعر الحقيقي ويضيف الماس للمستلم بعد تأكيد الخادم.</p><div class="tc-catalog-content" role="status">جارٍ تحميل الهدايا…</div></section>');
+ showSheet(head('صندوق الهدايا')+
+  '<section id="tc-real-gift-drawer" class="tc-real-gift-drawer" data-live-catalog="gift" aria-label="صندوق الهدايا">'+
+  '<p class="tc-gift-authenticity">الهدايا من الخادم الحقيقي، والإرسال يتطلب تأكيدك. لا خصم بدون تأكيد الخادم.</p>'+
+  '<div class="tc-catalog-content" role="status">جارٍ تحميل الهدايا…</div></section>');
+ document.getElementById('sheet')?.classList.add('tc-gift-sheet');
  void paint();
 };
 function button(label,action,value,selected=false){
@@ -92,12 +96,12 @@ async function paint(){
    if(!recipients.some(r=>r.user_id===recipientId))recipientId='';
    const rows=gifts.filter(g=>g.category_id===giftCategory);
    if(!rows.some(g=>g.id===giftId&&g.is_active===true&&g.diamond_source_type!=='LUCKY_GIFT'))giftId='';
-   markup='<div class="recipient">'+recipients.map(r=>button(r.display_name||'مستخدم','recipient',r.user_id,recipientId===r.user_id)).join('')+'</div>'+
+   markup='<div class="recipient tc-gift-recipients" aria-label="اختيار المستلم">'+recipients.map(r=>button(r.display_name||'مستخدم','recipient',r.user_id,recipientId===r.user_id)).join('')+'</div>'+
     (!recipients.length?'<p>لا يوجد أعضاء في غرفة حقيقية مفتوحة.</p>':'')+
-    '<div class="giftTabs">'+cats.map(c=>button(c.label,'gift-category',c.id,giftCategory===c.id)).join('')+'</div>'+
-    '<div class="giftgrid">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||g.diamond_source_type==='LUCKY_GIFT'?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>⏳ الاحتمالات قيد الاعتماد</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+'</div>'+
+    '<div class="giftTabs tc-gift-tabs" role="tablist" aria-label="أنواع الهدايا">'+cats.map(c=>button(c.label,'gift-category',c.id,giftCategory===c.id)).join('')+'</div>'+
+    '<div class="giftgrid tc-gift-scroll" role="region" aria-label="الهدايا المتاحة" tabindex="0">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||g.diamond_source_type==='LUCKY_GIFT'?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>⏳ الاحتمالات قيد الاعتماد</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+'</div>'+
     (!rows.length?'<p>لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+
-    '<div class="sendrow"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><label>العدد <select data-catalog-quantity aria-label="عدد الهدايا">'+[1,7,17,77,777].map(q=>'<option value="'+q+'" '+(giftQuantity===q?'selected':'')+'>'+q+'</option>').join('')+'</select></label><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
+    '<div class="sendrow tc-gift-sendbar"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><label>العدد <select data-catalog-quantity aria-label="عدد الهدايا">'+[1,7,17,77,777].map(q=>'<option value="'+q+'" '+(giftQuantity===q?'selected':'')+'>'+q+'</option>').join('')+'</select></label><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
   }
   if(version!==viewVersion||owner!==auth.state().user?.id||!root.isConnected)return;
   const focused=root.querySelector('[data-catalog-search]');
