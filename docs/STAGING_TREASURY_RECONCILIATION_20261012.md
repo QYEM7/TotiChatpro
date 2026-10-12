@@ -40,3 +40,16 @@
 **GO for read-only financial reconciliation in Staging. NO-GO for production cash, salary payout, diamond clearing, production role adjustments or auto-financial close.**
 
 PR for the isolated Backend branch stays **DRAFT** until legitimate authenticated E2E and independent finance review.
+
+## Backend additions — host accrual, immutable evidence and external cash receipts
+
+**Applied to staging on 12 Oct 2026** and committed with the exact Supabase migration history identifiers:
+
+- `20261012095808_staging_host_month_evidence_integrity_v1`: Owner/designated-partner-only read-only audit for one closed UTC month. Compares gift events and immutable issued diamond lots with captured monthly headers/lines. Reports missing or mismatched lots, late/changed historical gift totals, per-host/agency group discrepancies and gifts with **no recorded agency** requiring manual investigation. Does not attribute those gifts to a host by assumption.
+- Its `BEFORE INSERT` constraint trigger on the immutable host-month accrual header **blocks** capturing a permanently incomplete snapshot when any host gift is missing a corresponding matching diamond lot. No payout or reset is added.
+- `20261012095924_staging_host_month_snapshot_join_scope_fix_v2`: restricts archived snapshot rows to the requested month **before** full outer comparison, so historical snapshots from other months cannot be treated as current-month mismatches.
+- `20261012100127_staging_recharge_receipt_replay_guard_v1`: unique completed cash receipt per recharge agency using `lower(btrim(cash_reference))`. Requires a nonblank 3–120 character cash reference when a request is completed. This closes case/whitespace variants that bypass exact-text comparison, including competing concurrent approvals. Existing cash receipts and balances were not rewritten.
+
+**Additional checks:** private `phase3.host_month_evidence_integrity` is SECURITY DEFINER with explicit authenticated principal and named Owner/partner gate; public wrapper is SECURITY INVOKER. Anonymous EXECUTE denied. Capture-guard trigger is not invocable by anonymous or ordinary authenticated API roles. No records were fabricated.
+
+**Still blocked:** No host agencies, gifts or diamond lots exist yet in Staging, so actual multi-host month-end payout, transfer dispute, user money movement, and server role denial via signed-in account have not been end-to-end proven. Monthly salary rates/commissions beyond existing fields must be agreed and installed before settlement. Nothing in these migrations permits salary payment or clears operational diamonds.
