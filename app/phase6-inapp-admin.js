@@ -33,12 +33,13 @@ const nav=[
  ['support','صندوق خدمة العملاء','☏','support'],
  ['vip','VIP والامتيازات','♛','owner'],
  ['medals','الميداليات والشارات','✿','owner'],
+ ['special_id','المعرّف المميز','▧','owner'],
  ['banners','البنرات (قراءة)','▤','chief'],
  ['settlement','التسوية الشهرية','◈','chief_pending']
 ];
 const actionMap={catalog:'data-admin-open',reports:'data-reports-open',global_gift:'data-tc-global-gift-admin',
  open_agency:'data-tc-host-approval',support:'data-support-open',
- finance_integrity:'data-finance-inspect',host_month:'data-tc-host-month'};
+ finance_integrity:'data-finance-inspect',host_month:'data-tc-host-month',special_id:'data-tc-special-id-open'};
 function can(key,r=rights){
  if(!authorized(r))return false;
  if(key==='home')return true;
@@ -60,7 +61,7 @@ function roleLabel(r){
 }
 function concealLegacyEntries(){
  // Earlier modules may mount before this module on a Profile already open.
- for(const n of document.querySelectorAll('[data-finance-inspect],[data-tc-host-month],[data-tc-medal-owner],[data-admin-open],[data-reports-open],[data-tc-global-gift-admin],[data-tc-host-approval]'))n.remove();
+ for(const n of document.querySelectorAll('[data-finance-inspect],[data-tc-host-month],[data-tc-medal-owner],[data-tc-special-id-open],[data-admin-open],[data-reports-open],[data-tc-global-gift-admin],[data-tc-host-approval]'))n.remove();
 }
 function removeEntry(){qs('[data-tcac-entry]')?.remove();}
 function exit(){
