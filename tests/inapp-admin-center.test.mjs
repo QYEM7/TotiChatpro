@@ -47,6 +47,7 @@ function harness(admin,support){
  const doc={currentScript:null,hidden:false,documentElement:{classList:{remove(){},add(){}}},
   body:{appendChild(){}},createElement:newElement,
   querySelector(q){return q==='#app .me-more'?panel:q==='[data-tcac-entry]'?panel.querySelector(q):null;},
+  querySelectorAll(){return [];},
   addEventListener(k,fn){listeners[k]=fn;}};
  const state={signedIn:true,user:{id:'test-id'}};
  const auth={state:()=>state,requestData:async(path)=>{
