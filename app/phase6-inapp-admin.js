@@ -24,6 +24,8 @@ const nav=[
  ['registrations','طلبات الوكالات','▣','chief'],
  ['agency_transfers','طلبات النقل','⇄','chief'],
  ['audit','سجل الإجراءات','☷','chief'],
+ ['finance_integrity','مطابقة سجلات المالية','▥','chief'],
+ ['host_month','مراجعة الماس الشهرية','◈','chief'],
  ['catalog','الهدايا والمتجر','✧','catalog'],
  ['reports','التقارير','▥','reports'],
  ['global_gift','إعلانات الهدايا','★','chief'],
@@ -35,7 +37,8 @@ const nav=[
  ['settlement','التسوية الشهرية','◈','chief_pending']
 ];
 const actionMap={catalog:'data-admin-open',reports:'data-reports-open',global_gift:'data-tc-global-gift-admin',
- open_agency:'data-tc-host-approval',support:'data-support-open'};
+ open_agency:'data-tc-host-approval',support:'data-support-open',
+ finance_integrity:'data-finance-inspect',host_month:'data-tc-host-month'};
 function can(key,r=rights){
  if(!authorized(r))return false;
  if(key==='home')return true;
@@ -54,6 +57,10 @@ function roleLabel(r){
  if(r?.isOwner)return 'المالك الرئيسي';
  if(r?.isMainPartner)return 'الشريك الرئيسي';
  return ({super_admin:'Super Admin',admin:'Admin',db:'DB',user:'موظف خدمة العملاء'})[r?.role]||'موظف إدارة';
+}
+function concealLegacyEntries(){
+ // Earlier modules may mount before this module on a Profile already open.
+ for(const n of document.querySelectorAll('[data-finance-inspect],[data-tc-host-month],[data-tc-medal-owner],[data-admin-open],[data-reports-open],[data-tc-global-gift-admin],[data-tc-host-approval]'))n.remove();
 }
 function removeEntry(){qs('[data-tcac-entry]')?.remove();}
 function exit(){
@@ -94,6 +101,7 @@ function row(){
  return b;
 }
 async function onProfile(){
+ concealLegacyEntries();
  if(!uid()){clear();return;}
  const id=uid(),s=serial;
  // Called by the existing Profile render hook; avoid adding an admin entry on Home.
@@ -404,5 +412,6 @@ window.addEventListener('totichat-phase2-auth',()=>{
 },true);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&opened)void verify();});
 window.TotiInAppAdmin=Object.freeze({onProfile,exit});
+concealLegacyEntries();
 if(uid()&&typeof screen==='string'&&screen==='me')void onProfile();
 })();
