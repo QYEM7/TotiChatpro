@@ -36,6 +36,7 @@ async function refresh(force=false){
  }finally{if(stamp===epoch)loading=false}
 }
 function adminButton(){
+ if(window.TotiInAppAdmin)return; // Centralized Owner controls in Admin Center.
  if(!signed()||screen!=='me'||!isOwner)return;
  const panel=$('#app .me-more');if(!panel||panel.querySelector('[data-tc-special-id-open]'))return;
  const b=document.createElement('button');b.type='button';b.dataset.tcSpecialIdOpen='';
