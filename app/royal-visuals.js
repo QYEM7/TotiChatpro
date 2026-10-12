@@ -68,7 +68,7 @@ function decorate(){
  title.insertAdjacentHTML('afterend','<div class="royal-feature-title"><span class="royal-feature-emblem">'+({share:'➤',settings:'♛',games:'🎮'}[mode])+'</span><div><h2>'+english+'</h2><p>'+lead+'</p></div></div>');
  }
  const card=f.querySelector('.tc-room-card');
- if(card){
+ if(card&&!window.TotiLiveMode?.enabled){
    card.classList.add('royal-profile-card');
    card.insertAdjacentHTML('beforeend','<span class="royal-room-status">'+(mode==='settings'?'👑 Owner':'🔴 Live Voice Room')+'</span>');
  }
@@ -82,16 +82,21 @@ function decorate(){
      }
    }
  }
- if(mode==='share'){
+ if(mode==='share'&&!window.TotiLiveMode?.enabled){
    const friends=f.querySelector('.tc-subtitle');
    if(friends){friends.innerHTML='🟢 Online Friends <small>الأصدقاء المتصلون</small>';}
    const chosen=f.querySelector('.tc-sticky span');
    if(chosen)chosen.insertAdjacentHTML('beforeend',' <span class="royal-selected-faces"><img src="'+esc(imgs('female'))+'" alt=""><img src="'+esc(imgs('male'))+'" alt=""></span>');
  }
  if(mode==='games'){
-   f.querySelector('.tc-room-strip')?.classList.add('royal-live-strip');
    const strip=f.querySelector('.tc-room-strip');
-   if(strip&&!window.TotiLiveMode?.enabled)strip.insertAdjacentHTML('beforebegin','<div class="royal-games-ticker">🔥 ✨ ملكة الليل sent Royal Castle to سارة　👑 x1</div>');
+   if(window.TotiLiveMode?.enabled){
+    // This design-only ribbon is not a verified support event.
+    if(strip){strip.hidden=true;strip.style.display='none';}
+   }else{
+    strip?.classList.add('royal-live-strip');
+    if(strip)strip.insertAdjacentHTML('beforebegin','<div class="royal-games-ticker">🔥 ✨ ملكة الليل sent Royal Castle to سارة　👑 x1</div>');
+   }
  }
 }
 const originalRender=render;
