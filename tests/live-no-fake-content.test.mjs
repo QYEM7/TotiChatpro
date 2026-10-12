@@ -27,7 +27,7 @@ test('no empty advertising placeholders or fabricated activity ribbon in real mo
  assert.match(royal,/if\(window\.TotiLiveMode\?\.enabled\)\{/);
  assert.match(global,/ticker\.style\.display=current\?'':'none'/);
  assert.match(global,/gift_global_announcements/);
- assert.match(live,/if\(state\.signedIn\)\{protectIdentity\(\);\}/);
+ assert.match(live,/if\(state\.signedIn\)\{\s*protectIdentity\(\);/);
  assert.doesNotMatch(live,/tc-phase2-online-state/);
 });
 test('manual web preview is real-only, using public Staging and no production credentials',()=>{
