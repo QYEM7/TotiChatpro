@@ -148,3 +148,20 @@
   animation:none!important;transition:none!important;
  }
 }
+
+/* The halo becomes subtly animated ONLY after LiveKit confirms speech.
+ * A merely reserved/unmuted seat does not trigger this state. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-speaking.tc-mic-unmuted .seatface::after{
+ opacity:.95!important;
+ border-color:#fce0bd!important;
+ animation:tc-real-mic-speaking 1.65s ease-in-out infinite;
+}
+@keyframes tc-real-mic-speaking{
+ 0%,100%{box-shadow:0 0 5px rgba(233,195,151,.38);transform:scale(1)}
+ 50%{box-shadow:0 0 12px rgba(239,199,149,.66);transform:scale(1.045)}
+}
+@media(prefers-reduced-motion:reduce){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-speaking.tc-mic-unmuted .seatface::after{
+  animation:none!important;box-shadow:0 0 8px rgba(233,195,151,.5)!important;
+ }
+}
