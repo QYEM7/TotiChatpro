@@ -11,6 +11,7 @@ on:
       - 'tests/staging-owner-issuance-receipt-guard.test.mjs'
       - 'tests/staging-monthly-diamond-conservation.test.mjs'
       - 'supabase/migrations/*staging_host_month_diamond_conservation_readonly_v1.sql'
+      - 'supabase/migrations/*staging_host_month_diamond_conservation_qualified_columns_v2.sql'
       - 'supabase/tests/t67_host_month_real_gift_integrity.sql'
       - 'supabase/migrations/*staging_owner_coin_issue_cash_reference_unique_v1.sql'
       - 'scripts/t30-reseller-flow-e2e.mjs'
