@@ -5,7 +5,7 @@ do $t67$
 declare
  qa_owner uuid:=gen_random_uuid(); qa_host uuid:=gen_random_uuid();
  session_id uuid:=gen_random_uuid(); room_id uuid:=gen_random_uuid();
- agency_id uuid:=gen_random_uuid(); closed_month date:=(date_trunc('month',now() at time zone 'UTC')::date-interval '1 month')::date;
+ qa_agency uuid:=gen_random_uuid(); closed_month date:=(date_trunc('month',now() at time zone 'UTC')::date-interval '1 month')::date;
  bad_month date:=(date_trunc('month',now() at time zone 'UTC')::date-interval '2 months')::date;
  gift1 jsonb; gift2 jsonb; gift3 jsonb;
  preview jsonb; captured jsonb; after_capture jsonb;
@@ -21,9 +21,9 @@ begin
  insert into public.room_members(room_id,user_id)
  values(room_id,qa_owner),(room_id,qa_host);
  insert into public.agencies(id,owner_id,kind,name,commission_percent,created_by)
- values(agency_id,qa_owner,'host','T67 disposable host agency',0,qa_owner);
+ values(qa_agency,qa_owner,'host','T67 disposable host agency',0,qa_owner);
  insert into public.agency_members(user_id,agency_id)
- values(qa_host,agency_id);
+ values(qa_host,qa_agency);
  update public.wallets set coins=100 where user_id=qa_owner;
  perform set_config('request.jwt.claims',jsonb_build_object(
    'sub',qa_owner,'session_id',session_id,'aal','aal1','role','authenticated')::text,true);
@@ -31,7 +31,7 @@ begin
  gift1:=public.phase3_send_gift(room_id,qa_host,'g1',1,gen_random_uuid(),10);
  if (gift1->>'id') is null then raise exception 'T67 no original gift event';end if;
  if not exists(select 1 from public.gift_events g where g.id=(gift1->>'id')::uuid
-   and g.agency_id=agency_id and g.recipient_id=qa_host) then
+   and g.agency_id=qa_agency and g.recipient_id=qa_host) then
   raise exception 'T67 gift did not preserve historical host agency identity';
  end if;
  -- Backdating happens in the disposable test only; data is never committed.
