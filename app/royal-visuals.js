@@ -165,11 +165,14 @@ function handle(e){
 // Some mobile sessions retain an old search glyph or visual-only Discover tile
 // during auth transition; all of them must open the same server-backed directory.
 function routeRealSearchFirst(event){
+ // All legacy Discovery routes must converge on the RLS-backed room
+ // directory in authenticated live mode. Restrict to explicit navigation
+ // actions, not arbitrary text/visuals or disabled category controls.
  const target=event.target?.closest?.(
-  '.royal-top-actions [data-phase2="search-rooms"],'+
-  '.royal-nav [data-phase2="search-rooms"],'+
-  '.royal-top-actions [data-royal="search"],'+
-  '.royal-nav [data-a="go"][data-v="discoverPreview"]'
+  'button[data-phase2="search-rooms"],'+
+  'button[data-royal="search"],'+
+  'button[data-a="go"][data-v="discoverPreview"],'+
+  'button[data-a="tab"][data-v="اكتشف"]'
  );
  if(!target||window.TotiLiveMode?.enabled!==true||
     window.TotiPhase2Auth?.state?.()?.signedIn!==true)return;
