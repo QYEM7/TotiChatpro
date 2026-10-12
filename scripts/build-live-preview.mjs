@@ -21,8 +21,15 @@ export function injectPreviewEntry(html){
  // navigation attributes and current UI state, never account IDs or tokens.
  // Runs before legacy app scripts and is absent unless ?qa=discover.
  const qaProbe=`<script>(function(){
- if(new URLSearchParams(location.search).get('qa')!=='discover')return;
- var marker='DISCOVER-QA-05',box;
+ var fromUrl=new URLSearchParams(location.search).get('qa')==='discover';
+ // OAuth safely returns to ?mode=live after provider login; persist ONLY
+ // the opt-in diagnostic flag within this tab (not OAuth credentials).
+ // Never alter the real redirect URL or the production application.
+ try{
+   if(fromUrl)sessionStorage.setItem('totichat.preview.qa-discover','1');
+   else if(sessionStorage.getItem('totichat.preview.qa-discover')!=='1')return;
+ }catch(_){if(!fromUrl)return;}
+ var marker='DISCOVER-QA-06',box;
  function badge(){
    if(box||!document.body)return;
    box=document.createElement('output');
