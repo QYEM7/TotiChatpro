@@ -38,6 +38,32 @@ const nav=[
  ['banners','البنرات (قراءة)','▤','chief'],
  ['settlement','التسوية الشهرية','◈','chief_pending']
 ];
+// One crisp outline icon family for all administrative actions.
+const iconPaths=Object.freeze({
+ overview:'<rect x="3" y="3" width="7" height="7" rx="1.3"/><rect x="14" y="3" width="7" height="7" rx="1.3"/><rect x="3" y="14" width="7" height="7" rx="1.3"/><rect x="14" y="14" width="7" height="7" rx="1.3"/>',
+ users:'<circle cx="9" cy="8" r="3.1"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20M17 5a3 3 0 0 1 0 6M21 20v-1.5a5 5 0 0 0-4-5"/>',
+ rooms:'<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4m-4 0h8"/>',
+ room_moderation:'<circle cx="12" cy="12" r="9"/><path d="M5.7 5.7 18.3 18.3"/>',
+ staff:'<path d="M16 20v-2a5 5 0 0 0-10 0v2M11 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M19 8v7m-3.5-3.5h7"/>',
+ host_agencies:'<rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 21v-5h6v5M8 8h1M15 8h1M8 12h1M15 12h1"/>',
+ recharge_agencies:'<path d="M4 6h16v13H4zM4 10h16M8 15h3"/>',
+ registrations:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3M8 11h8M8 15h5"/>',
+ agency_transfers:'<path d="M4 7h16l-4-4m4 4-4 4M20 17H4l4-4m-4 4 4 4"/>',
+ audit:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+ finance_integrity:'<path d="M4 21V4h16v17M3 21h18M8 11l3 3 5-6M8 17h8"/>',
+ host_month:'<path d="M4 5h16v16H4zM4 9h16M8 3v4M16 3v4M8 14h3M13 14h3M8 18h3"/>',
+ catalog:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M12 7v14M3 12h18M12 7c-7-2-7-8-3-8 2 0 3 3 3 8 0-5 1-8 3-8 4 0 4 6-3 8"/>',
+ reports:'<path d="M5 21V4h14v17M3 21h18M8 17v-5M12 17V8M16 17v-7"/>',
+ global_gift:'<path d="m12 3 3 6 6.5 1-4.7 4.7 1.2 6.3-6-3.1-6 3.1 1.2-6.3L2.5 10 9 9z"/>',
+ open_agency:'<path d="M4 4h16v17H4zM9 21v-6h6v6M8 9h8M12 7v6"/>',
+ support:'<path d="M4 13v-2a8 8 0 0 1 16 0v2M4 13H2v6h5v-6H4ZM20 13h2v6h-5v-6h3ZM17 21c-1 1-3 1-5 1"/>',
+ vip:'<path d="m2.5 7 5.4 4.5L12 4l4.1 7.5L21.5 7l-1.8 12H4.3z"/><path d="M5 16.5h14"/>',
+ medals:'<circle cx="12" cy="8" r="5"/><path d="m8 12-2 9 6-3 6 3-2-9"/>',
+ special_id:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5 16c1-2 5-2 6 0M13 10h5M13 14h5"/>',
+ banners:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 18 6-6 4 4 3-3 4 4"/>',
+ settlement:'<path d="M4 4h16v17H4zM4 9h16M8 14h8M8 17h5"/>'
+});
+const adminIcon=id=>'<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">'+(iconPaths[id]||iconPaths.overview)+'</svg>';
 const actionMap={catalog:'data-admin-open',reports:'data-reports-open',global_gift:'data-tc-global-gift-admin',
  open_agency:'data-tc-host-approval',
  finance_integrity:'data-finance-inspect',host_month:'data-tc-host-month',special_id:'data-tc-special-id-open'};
@@ -94,7 +120,7 @@ function row(){
  const b=document.createElement('button');b.type='button';b.className='tcac-entry';
  b.setAttribute('data-tcac-entry','');
  b.setAttribute('aria-label','الدخول إلى مركز الإدارة');
- const badge=document.createElement('span');badge.className='tcac-entry-icon';badge.textContent='◆';
+ const badge=document.createElement('span');badge.className='tcac-entry-icon';badge.innerHTML=adminIcon('overview');
  const label=document.createElement('span');label.className='tcac-entry-text';
  const title=document.createElement('b');title.textContent='مركز الإدارة';
  const desc=document.createElement('small');desc.textContent='لوحة التحكم الخاصة بالصلاحيات الممنوحة';
@@ -145,7 +171,7 @@ function shell(){
 }
 function card(item){
  return '<button class="tcac-card" type="button" data-tcac-view="'+esc(item[0])+'">'+
- '<span class="tcac-icon" aria-hidden="true">'+esc(item[2])+'</span><b>'+esc(item[1])+'</b>'+
+ '<span class="tcac-icon" aria-hidden="true">'+adminIcon(item[0])+'</span><b>'+esc(item[1])+'</b'+
  '<small>'+(item[3].endsWith('pending')?'قيد استكمال الربط':'حسب صلاحيتك')+'</small></button>';
 }
 function draw(){
