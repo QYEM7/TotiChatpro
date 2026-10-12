@@ -7,31 +7,26 @@ begin
  insert into public.rooms(id,owner_id,title) values(room,a,'Redemption SQL test');
  insert into public.room_members(room_id,user_id) values(room,a),(room,b);
  update public.wallets set coins=1000 where user_id=a;
- -- For a HISTORIC redemption fixture only, suspend the new-purchase guard
- -- before any gift table write (Postgres forbids ALTER with pending events).
- -- This entire script runs in a disposable database and ROLLBACK restores
- -- the enabled production-safe trigger. T65 independently proves real lucky
- -- purchases remain rejected by the server.
- if exists(select 1 from pg_trigger where tgrelid='public.gift_events'::regclass
-   and tgname='tc_reject_unapproved_lucky_gifts') then
-   execute 'alter table public.gift_events disable trigger tc_reject_unapproved_lucky_gifts';
- end if;
+ -- Disposable-local fixture only; paid Lucky is disabled on all fresh installs.
+ -- Enable the isolated test draw inside this rolled-back transaction, without
+ -- bypassing any real gift triggers or changing Staging/production settings.
+ update phase3.lucky_settings set enabled=true,version=version+1 where singleton;
  perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'session_id',sa,'aal','aal1')::text,true);
  perform public.phase3_send_gift(room,b,'g1',1,gen_random_uuid(),10);
  perform public.phase3_send_gift(room,b,'g11',1,gen_random_uuid(),300);
  perform set_config('request.jwt.claims',jsonb_build_object('sub',b,'session_id',sb,'aal','aal1')::text,true);
  quote:=public.phase4_preview_redemption(15);
- if quote->>'fixed'<>'10' or quote->>'lucky'<>'5' or quote->>'coins'<>'4' then raise exception 'Source-specific quote failed';end if;
- rejected:=false;begin perform public.phase4_redeem_diamonds(15,5,gen_random_uuid());exception when others then rejected:=true;end;if not rejected then raise exception 'Changed quote accepted';end if;
- result:=public.phase4_redeem_diamonds(15,4,key);repeat_result:=public.phase4_redeem_diamonds(15,4,key);
- if result<>repeat_result or (select diamonds from public.wallets where user_id=b)<>295 or (select coins from public.wallets where user_id=b)<>4 then raise exception 'Redemption balances or idempotency';end if;
+ if quote->>'fixed'<>'10' or quote->>'lucky'<>'5' or quote->>'coins'<>'3' then raise exception 'Source-specific quote failed';end if;
+ rejected:=false;begin perform public.phase4_redeem_diamonds(15,4,gen_random_uuid());exception when others then rejected:=true;end;if not rejected then raise exception 'Changed quote accepted';end if;
+ result:=public.phase4_redeem_diamonds(15,3,key);repeat_result:=public.phase4_redeem_diamonds(15,3,key);
+ if result<>repeat_result or (select diamonds from public.wallets where user_id=b)<>295 or (select coins from public.wallets where user_id=b)<>3 then raise exception 'Redemption balances or idempotency';end if;
  if (select sum(amount) from public.diamond_redemption_allocations where redemption_id=(result->>'id')::uuid)<>15 or (select sum(remaining) from public.diamond_lots where user_id=b)<>295 then raise exception 'Diamond source conservation';end if;
  if (select count(*) from public.wallet_ledger where transaction_id=(result->>'id')::uuid)<>2 then raise exception 'Redemption ledger missing';end if;
- rejected:=false;begin perform public.phase4_redeem_diamonds(16,4,key);exception when others then rejected:=true;end;if not rejected then raise exception 'Conflicting redemption key accepted';end if;
+ rejected:=false;begin perform public.phase4_redeem_diamonds(16,3,key);exception when others then rejected:=true;end;if not rejected then raise exception 'Conflicting redemption key accepted';end if;
  update public.wallets set diamonds=diamonds+100 where user_id=b;
  rejected:=false;begin perform public.phase4_redeem_diamonds(300,90,gen_random_uuid());exception when others then rejected:=true;end;
  if not rejected or (select diamonds from public.wallets where user_id=b)<>395 then raise exception 'Untracked diamonds redeemed';end if;
  rejected:=false;begin perform public.phase4_preview_redemption(3);exception when others then rejected:=true;end;if not rejected then raise exception 'Zero-value redemption accepted';end if;
 end $$;
 rollback;
-select 'PASS: actual gift-issued lots, 30% per source, quote confirmation, allocations/conservation, ledger, idempotency/conflict, untracked refusal; fixtures rolled back' as result;
+select 'PASS: actual gift-issued lots, fixed 30%, Lucky 10%, quote confirmation, allocations/conservation, ledger, idempotency/conflict, untracked refusal; fixtures rolled back' as result;
