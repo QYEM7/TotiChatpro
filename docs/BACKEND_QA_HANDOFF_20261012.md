@@ -15,10 +15,10 @@ NEVER merge to production or main until signed acceptance.
 - Staging actual SQL introspection after deployment showed: two finance audit RPCs with anon EXECUTE denied; private Owner/partner role gates; recorded month snapshot trigger exists; receipts have case/trim normalized unique completed index and nonblank check.
 - Staging current business data: 0 host month snapshots, 0 settled salaries, 0 recharge operations, 0 issued coins, 0 wallet coins, 0 public gift events. This is legitimate absence of real transactions, not fake or seeded activity.
 
-## New high-confidence monthly evidence test — latest CI status pending
+## Verified monthly evidence test on real disposable gifts
 - `supabase/tests/t67_host_month_real_gift_integrity.sql` uses *ONLY* rollback-only disposable local fixtures.
 - Tests a real server gift + corresponding issued diamond lot + historical agency, closes an actual monthly evidence snapshot, detects an intentionally tampered gift, refuses a second incomplete snapshot with a missing lot, and asserts no cross-month contamination.
-- Latest GitHub full-stack run must be checked before calling T67 passed. Do not claim it is successful until the job outcome and PASS T67 log appear.
+- **PASS:** GitHub T03 full-stack run 38241430879 executed T67 SQL, returned DO + ROLLBACK and completed successfully. Confirms historical gift snapshot, altered gift detection and rejection of a missing diamond-lot capture with no committed fixtures.
 
 ## Operational NO-GO
 - Financial business rules needed: exact agency targets, host salary tiers, commission percentages, consent and dispute exceptions, reconciliation of earned-vs-redeemed diamonds, months and close handling, payout recipient validation, automatic reset only after immutable obligations exist. No source edits to settle or reset hosted funds have been made.
@@ -34,3 +34,8 @@ NEVER merge to production or main until signed acceptance.
 - Live voice on two physical phones with microphone on/off, listening, 15-seat transitions, network loss and rejoin.
 - Repeat restore drill for backups and Storage on independent authorized isolated environment.
 - Keep PR #29 as DRAFT until signed financial and security QA. No APK and no production data changes.
+
+## Owner cash receipt issuance guard — applied after above success
+- Staging migration `20261012111646_staging_owner_coin_issue_cash_reference_unique_v1`: unique indexed normalized `lower(btrim(payload #>> '{data,cash_reference}'))` across Owner-issued financial operations. This prevents minting multiple coin credits from the same external cash receipt solely by changing case or surrounding spaces; no balances modified.
+- SQL introspection confirmed that the unique index exists in hosted Staging. Earlier Owner issuance replay test was exact-text only; the new T30 disposable local E2E now explicitly attempts a different case/spaced receipt and checks transaction rejection.
+- Source/contract QA of this index on GitHub: PASS. **Newest** local full-stack result must be confirmed before the case/space issuance test is called PASS.
