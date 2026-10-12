@@ -20,7 +20,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Validate live-only and admin permissions
-        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs tests/premium-icon-visual-contract.test.mjs
+        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs tests/premium-icon-visual-contract.test.mjs tests/mic-occupant-visual-contract.test.mjs
       - name: Build authorized Android-compatible browser payload
         run: npm run build
       - name: Build isolated web test site and block demo mode
@@ -37,7 +37,7 @@ jobs:
           if(status.mode!=='LIVE_STAGING_ONLY'||status.backend_ref!=='rziaedugbdwefbefcxjt')throw Error('Not Staging');
           if(!html.includes('TotiLivePreviewOnly=true')||!js.includes("if(window.TotiLivePreviewOnly)"))throw Error('Demo entry not prohibited');
           if(!config.includes('rziaedugbdwefbefcxjt.supabase.co')||config.includes('sqedsnyvjblvbjbizcay.supabase.co'))throw Error('Wrong backend');
-          if(!existsSync(root+'app/phase6-inapp-admin.js')||!existsSync(root+'app/phase6-inapp-admin.css')||!existsSync(root+'app/phase6-admin-banners.js')||!existsSync(root+'app/phase6-premium-icons.js')||!existsSync(root+'app/phase6-premium-icons.css'))throw Error('Admin center missing');
+          if(!existsSync(root+'app/phase6-inapp-admin.js')||!existsSync(root+'app/phase6-inapp-admin.css')||!existsSync(root+'app/phase6-admin-banners.js')||!existsSync(root+'app/phase6-premium-icons.js')||!existsSync(root+'app/phase6-premium-icons.css')||!existsSync(root+'app/phase6-mic-presence.css'))throw Error('Admin center missing');
           console.log('PASS real-only Staging manual preview with in-app admin');
           NODE
       - uses: actions/upload-artifact@v4
