@@ -99,3 +99,16 @@ test('admin center stays inside My/Profile, role-verified, with one consistent S
  assert.match(admin,/adminIcon\(item\[0\]\)/);
  assert.doesNotMatch(admin,/window\.location\.href=.*admin/);
 });
+
+
+test('live Home VIP and search controls open real pages and never synthetic room cards',()=>{
+ const home=get('app/royal-visuals.js');
+ assert.match(home,/data-phase2="search-rooms"/);
+ assert.match(home,/data-v="me" aria-label="عرض حالة VIP في ملفي"/);
+ assert.match(room,/function displayRealRoomSearch\(\)/);
+ assert.match(room,/function paintRealRoomSearch\(\)/);
+ assert.match(room,/rooms\.filter\(item=>UUID\.test\(String\(item\.id\)\)/);
+ assert.match(room,/btn\.dataset\.phase2='open-room'/);
+ assert.match(room,/else if\(kind==='search-rooms'\)/);
+ assert.doesNotMatch(room,/Math\.random/);
+});
