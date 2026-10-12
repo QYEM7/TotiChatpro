@@ -104,6 +104,12 @@ function decorate(){
   });
  }
  const admin=document.getElementById('tcac-root');
+ if(admin!==observedAdmin){
+  observedAdmin=admin;
+  adminObserver.disconnect();
+  adminObserver.observe(document.body,{childList:true});
+  if(admin)adminObserver.observe(admin,{childList:true,subtree:true});
+ }
  if(admin){
   const entry=document.querySelector('#app [data-tcac-entry] .tcac-entry-icon');
   paint(entry,'shield');
@@ -130,7 +136,8 @@ function schedule(){
 const app=document.getElementById('app');
 if(app)new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
 const adminObserver=new MutationObserver(schedule);
-adminObserver.observe(document.body,{childList:true}); // shell is mounted as direct body child
+let observedAdmin=null;
+adminObserver.observe(document.body,{childList:true}); // Admin overlay shell is a direct body child
 window.addEventListener('totichat-phase2-auth',schedule);
 schedule();
 window.TotiPremiumIcons=Object.freeze({version:'1.0',styles:'premium-outline-quiet',refresh:schedule});
