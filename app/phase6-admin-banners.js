@@ -113,7 +113,9 @@ async function save(form){
   pending=null;
   if(id!==auth.state().user?.id||!qs('#tcac-banner-form'))return;
   form.reset();form.elements.id.value='';
-  notice('تم حفظ الإعلان الحقيقي، يمكنك تحديث القائمة لرؤيته.');
+  notice(status==='published'?'تم نشر البنر الحقيقي بعد تأكيد الخادم.':'تم حفظ البنر في قاعدة البيانات.');
+  // Live home must react to an approved real banner immediately, never show a dummy ad.
+  void window.TotiBannerData?.refresh?.();
   document.querySelector('#tcac-root [data-tcac="refresh"]')?.click();
  }finally{locked=false;if(button?.isConnected)button.disabled=false;}
 }
