@@ -4,6 +4,14 @@
 */
 (function () {
 'use strict';
+// LOCAL VISUAL-REVIEW MODULE ONLY. Never mount invented agency accounts,
+// test currency, or sample VIP 11-15 in authenticated Staging/Android mode.
+const liveSource=new URLSearchParams(location.search).get('mode')==='live'||
+ !!window.TotiLivePreviewOnly||
+ (location.protocol==='https:'&&location.hostname==='localhost')||
+ !!window.Capacitor?.isNativePlatform?.();
+if(liveSource)return;
+
 const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tiers=[
  ['الوعل الملكي','✦','أول شارة ملكية','شارة VIP مميزة بجانب الاسم','deer','#daaa81'],
