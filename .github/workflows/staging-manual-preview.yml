@@ -20,7 +20,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Validate live-only and admin permissions
-        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/verified-support-strip-contract.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs tests/premium-icon-visual-contract.test.mjs tests/mic-occupant-visual-contract.test.mjs
+        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/verified-support-strip-contract.test.mjs tests/beta-ux-prelaunch-contract.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs tests/premium-icon-visual-contract.test.mjs tests/mic-occupant-visual-contract.test.mjs
       - name: Build authorized Android-compatible browser payload
         run: npm run build
       - name: Build isolated web test site and block demo mode
