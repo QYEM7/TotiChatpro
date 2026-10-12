@@ -60,8 +60,9 @@ function roleLabel(r){
  return ({super_admin:'Super Admin',admin:'Admin',db:'DB',user:'موظف خدمة العملاء'})[r?.role]||'موظف إدارة';
 }
 function concealLegacyEntries(){
- // Earlier modules may mount before this module on a Profile already open.
- for(const n of document.querySelectorAll('[data-finance-inspect],[data-tc-host-month],[data-tc-medal-owner],[data-tc-special-id-open],[data-admin-open],[data-reports-open],[data-tc-global-gift-admin],[data-tc-host-approval]'))n.remove();
+ // Scope consolidation ONLY to Profile rows; leave active modal controls intact.
+ const panel=qs('#app .me-more');if(!panel)return;
+ for(const n of panel.querySelectorAll('[data-finance-inspect],[data-tc-host-month],[data-tc-medal-owner],[data-tc-special-id-open],[data-admin-open],[data-reports-open],[data-tc-global-gift-admin],[data-tc-host-approval]'))n.remove();
 }
 function removeEntry(){qs('[data-tcac-entry]')?.remove();}
 function exit(){
