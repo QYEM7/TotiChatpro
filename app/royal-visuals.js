@@ -113,6 +113,16 @@ function handle(e){
  if(window.TotiLiveMode?.enabled&&window.TotiPhase2Auth?.state()?.signedIn){
   if(a==='create-room'||a==='hero'||a==='close')return;
   e.preventDefault();e.stopImmediatePropagation();
+  // The design-era search button may remain on an already-open tab after
+  // sign-in. Route it to the actual RLS-authorized room search, not the
+  // historical "feature not connected" toast or demo search sheet.
+  if(a==='search'){
+   if(typeof window.TotiPhase2Rooms?.openSearch==='function')
+    window.TotiPhase2Rooms.openSearch();
+   else if(typeof showToast==='function')
+    showToast('بحث الغرف الحقيقية غير متاح الآن. أعد فتح التطبيق.');
+   return;
+  }
   if(a==='view-all'||(a==='category'&&['all','popular'].includes(el.dataset.cat))){
    document.querySelectorAll('.royal-room-gallery .royal-room-tile').forEach(b=>b.hidden=false);
    if(a==='category')document.querySelectorAll('.royal-cat').forEach(b=>b.classList.toggle('active',b===el));
