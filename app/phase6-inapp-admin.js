@@ -13,7 +13,7 @@ const chief=r=>r?.isOwner===true||r?.isMainPartner===true;
 const owner=r=>r?.isOwner===true;
 const authorized=r=>!!r&&(chief(r)||['admin','super_admin','db'].includes(r.role)||
   r.canManageCatalogs===true||r.canReadReports===true||r.canSupport===true);
-let rights=null,account='',serial=0,requestSerial=0,opened=false,view='overview',offset=0,search='',reading=false,mutation=false,pendingMutation=null;
+let rights=null,account='',serial=0,requestSerial=0,opened=false,view='overview',offset=0,search='',reading=false,mutation=false,pendingMutation=null,selectedTicket=null;
 const nav=[
  ['overview','الرئيسية','▦','home'],
  ['users','المستخدمون','♙','chief'],
@@ -38,7 +38,7 @@ const nav=[
  ['settlement','التسوية الشهرية','◈','chief_pending']
 ];
 const actionMap={catalog:'data-admin-open',reports:'data-reports-open',global_gift:'data-tc-global-gift-admin',
- open_agency:'data-tc-host-approval',support:'data-support-open',
+ open_agency:'data-tc-host-approval',
  finance_integrity:'data-finance-inspect',host_month:'data-tc-host-month',special_id:'data-tc-special-id-open'};
 function can(key,r=rights){
  if(!authorized(r))return false;
@@ -172,6 +172,7 @@ function draw(){
   void loadPage();
   return;
  }
+ if(view==='support'){void supportPage();return;}
  if(view==='vip'||view==='medals'){void entitlementScreen();return;}
  if(actionMap[view]){
   c.innerHTML='<div class="tcac-module"><h3>'+esc(item[1])+'</h3>'+
@@ -302,6 +303,111 @@ async function entitlementSubmit(form){
  }
 }
 
+
+const strictUuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+async function supportPage(){
+ if(!opened||!rights?.canSupport||view!=='support')return;
+ const id=uid(),stamp=++requestSerial;
+ const node=qs('#tcac-content');
+ node.innerHTML='<div class="tcac-module"><h3>صندوق التذاكر الحقيقي</h3><p>يظهر فقط لموظف الخدمة المصرّح له. لا توجد طلبات أو رسائل تجريبية.</p><div id="tcac-support-list" role="region">جارٍ تحميل التذاكر…</div><div id="tcac-ticket-detail"></div></div>';
+ try{
+  const result=await rpc('phase5_support_list',{p_scope:'all',p_offset:0,p_limit:30});
+  if(!opened||view!=='support'||uid()!==id||stamp!==requestSerial)return;
+  if(result?.canHandle!==true||!Array.isArray(result.rows)||!Number.isSafeInteger(result.total))throw Error('الصلاحية أو الاستجابة غير صالحة');
+  const box=qs('#tcac-support-list');
+  if(box)box.innerHTML=result.rows.length?result.rows.map(t=>
+    '<article class="tcac-record"><strong>'+esc(t.subject)+'</strong><p>'+esc(t.category)+' · '+esc(t.status)+'</p>'+
+    '<button type="button" class="tcac-primary" data-tcac-ticket="'+esc(t.id)+'">فتح التذكرة</button></article>').join(''):
+    '<p class="tcac-empty">لا توجد تذاكر فعلية واردة حتى الآن.</p>';
+  status('التذاكر من حسابات TotiChat الحقيقية · '+result.total+' إجمالاً؛ أول 30 تذكرة');
+ }catch(e){if(opened&&uid()===id&&view==='support'){const n=qs('#tcac-support-list');if(n)n.textContent='تعذر تحميل صندوق الخدمة: '+String(e.message).slice(0,160)}}
+}
+async function supportTicket(ticketId){
+ if(!opened||view!=='support'||!rights?.canSupport||!strictUuid.test(ticketId))return;
+ const id=uid(),stamp=++requestSerial;
+ selectedTicket=ticketId;
+ const node=qs('#tcac-ticket-detail');if(node)node.textContent='جارٍ تحميل رسائل التذكرة…';
+ try{
+  const result=await rpc('phase5_support_thread_page',{p_ticket_id:ticketId,p_offset:0,p_limit:30});
+  if(!opened||uid()!==id||stamp!==requestSerial||view!=='support'||selectedTicket!==ticketId)return;
+  if(result?.canHandle!==true||!result.ticket||!Array.isArray(result.messages))throw Error('التذكرة غير متاحة');
+  const t=result.ticket,closed=t.status==='closed';
+  if(node)node.innerHTML='<h3>تفاصيل التذكرة: '+esc(t.subject)+'</h3>'+
+   '<p>الحالة: '+esc(t.status)+' · الرسائل: '+esc(result.total)+'</p>'+
+   result.messages.map(m=>'<article class="tcac-record"><strong>'+esc(m.author_id)+'</strong><p>'+esc(m.body)+'</p></article>').join('')+
+   (closed?'<p class="tcac-empty">التذكرة مغلقة ولا يمكن الرد عليها.</p>':
+    '<form id="tcac-support-reply"><label class="tcac-field">الرد للعميل<textarea name="message" minlength="2" maxlength="2500" required></textarea></label><button class="tcac-primary" type="submit">إرسال الرد الحقيقي</button></form>')+
+   '<form id="tcac-support-status"><label class="tcac-field">حالة التذكرة<select name="status">'+
+   ['open','in_progress','resolved','closed'].map(x=>'<option value="'+x+'"'+(x===t.status?' selected':'')+'>'+esc(({open:'مفتوحة',in_progress:'قيد المعالجة',resolved:'تم الحل',closed:'مغلقة'})[x])+'</option>').join('')+
+   '</select></label><button class="tcac-primary" type="submit">اعتماد الحالة</button></form>';
+  status('رسائل موثقة — تظهر آخر '+result.messages.length+' رسالة');
+ }catch(e){if(opened&&uid()===id&&view==='support'){const n=qs('#tcac-ticket-detail');if(n)n.textContent='تعذر فتح التذكرة: '+String(e.message).slice(0,160)}}
+}
+function staffForms(){
+ return '<section class="tcac-module" id="tcac-staff-actions"><h3>صلاحيات الموظفين — Owner فقط</h3>'+
+ '<form id="tcac-staff-grant">'+
+ input('UUID حساب موجود ومؤكد','target','required maxlength="36" pattern="[0-9a-fA-F-]{36}"')+
+ '<label class="tcac-field">الرتبة<select name="role"><option value="admin">Admin</option><option value="super_admin">Super Admin</option><option value="db">DB</option></select></label>'+
+ '<label><input type="checkbox" name="catalog"> إدارة الكتالوج</label>'+
+ '<label><input type="checkbox" name="reports"> التقارير</label>'+
+ '<label><input type="checkbox" name="users"> إدارة المستخدمين</label>'+
+ '<label><input type="checkbox" name="host"> فتح وكالة مضيفين فقط (ليس وكالة شحن)</label>'+
+ '<label><input type="checkbox" name="partner"> تعيين الشريك الرئيسي صراحةً (Super Admin فقط)</label>'+
+ '<button class="tcac-primary" type="submit">حفظ الصلاحيات المصرّح بها</button></form>'+
+ '<form id="tcac-support-staff"><h3>تفويض خدمة العملاء</h3>'+
+ input('UUID حساب موظف موجود','target','required maxlength="36" pattern="[0-9a-fA-F-]{36}"')+
+ '<label class="tcac-field">القرار<select name="action"><option value="staff_grant">تفويض</option><option value="staff_revoke">سحب التفويض</option></select></label>'+
+ '<button class="tcac-primary" type="submit">اعتماد صلاحية الدعم</button></form></section>';
+}
+async function adminFormAction(form){
+ if(mutation)return;
+ const id=uid(),r=await verify();
+ if(!opened||!r||uid()!==id)return;
+ const data=new FormData(form),get=k=>String(data.get(k)||'').trim();
+ const key=form.id;let fn,params,confirmText;
+ if(key==='tcac-support-reply'||key==='tcac-support-status'){
+  if(view!=='support'||r.canSupport!==true||!strictUuid.test(selectedTicket))throw Error('لا توجد صلاحية خدمة عملاء');
+  const act=key==='tcac-support-reply'?'reply':'status';
+  const message=get('message'),next=get('status');
+  if(act==='reply'&&(message.length<2||message.length>2500))throw Error('رد غير صالح');
+  if(act==='status'&&!['open','in_progress','resolved','closed'].includes(next))throw Error('حالة غير صالحة');
+  fn='phase5_support_action';
+  params={p_action:act,p_data:{ticket_id:selectedTicket,...(act==='reply'?{message}:{status:next})}};
+  confirmText='تأكيد '+(act==='reply'?'إرسال الرد الحقيقي':'تغيير حالة التذكرة')+'؟';
+ }else if(key==='tcac-staff-grant'){
+  if(view!=='staff'||!owner(r))throw Error('المالك فقط يستطيع تعديل رتب الموظفين');
+  const target=get('target'),role=get('role'),partner=data.has('partner');
+  if(!strictUuid.test(target)||target===id||!['admin','super_admin','db'].includes(role)||partner&&role!=='super_admin')
+   throw Error('معرّف أو رتبة أو تعيين شريك غير صالح');
+  const permissions=[];
+  for(const [inputName,scope] of [['catalog','catalog.manage'],['reports','reports.read'],['users','users.manage'],['host','host_agency.open']])
+   if(data.has(inputName))permissions.push(scope);
+  fn='phase3_manage_access';
+  params={p_user_id:target,p_role:role,p_permissions:permissions,p_main_partner:partner};
+  confirmText='تأكيد تعديل صلاحيات هذا المستخدم الحقيقي؟ لا يمكن تعيين Owner من هنا.';
+ }else if(key==='tcac-support-staff'){
+  if(view!=='staff'||!owner(r))throw Error('المالك فقط يفوض فريق خدمة العملاء');
+  const target=get('target'),act=get('action');
+  if(!strictUuid.test(target)||target===id||!['staff_grant','staff_revoke'].includes(act))throw Error('قرار أو حساب غير صالح');
+  fn='phase5_support_action';params={p_action:act,p_data:{user_id:target}};
+  confirmText='هل تؤكد '+(act==='staff_grant'?'منح':'سحب')+' صلاحية خدمة العملاء؟';
+ }else return;
+ if(!window.confirm(confirmText))return;
+ const signature=JSON.stringify([id,fn,params]),requestId=pendingMutation?.signature===signature?pendingMutation.id:crypto.randomUUID();
+ pendingMutation={id:requestId,signature};
+ const button=form.querySelector('button[type="submit"]');mutation=true;if(button)button.disabled=true;
+ try{
+  const result=await rpc(fn,fn==='phase3_manage_access'?params:{...params,p_request_id:requestId});
+  if(fn==='phase5_support_action'&&!strictUuid.test(result?.id||''))throw Error('الخادم لم يؤكد القرار');
+  pendingMutation=null;
+  if(opened&&uid()===id){
+   status('تم تسجيل القرار في Staging، مع الحفاظ على سجل التدقيق.');
+   if(view==='support'&&selectedTicket)void supportTicket(selectedTicket);
+   if(view==='staff')void loadPage();
+  }
+ }finally{mutation=false;if(button?.isConnected)button.disabled=false}
+}
+
 async function loadPage(){
  if(!opened||!readable()||reading)return;
  const r=rights,item=nav.find(x=>x[0]===view);
@@ -341,6 +447,7 @@ async function loadPage(){
   const prev=qs('[data-tcac="prev"]'),next=qs('[data-tcac="next"]');
   if(prev)prev.disabled=p===0;
   if(next)next.disabled=p+result.rows.length>=result.total||!result.rows.length;
+  if(kind==='staff'&&owner(rights)&&!qs('#tcac-staff-actions'))node.insertAdjacentHTML('afterend',staffForms());
   status(banner?'بنرات فعلية، عرض فقط. رفع الصور والتحرير ما زالا قيد الدمج.':'بيانات مقروءة فقط من Supabase Staging.');
  }catch(e){
   if(opened&&start===requestSerial&&uid()===id){
@@ -355,7 +462,7 @@ async function visit(next){
  if(!opened||!check)return;
  const item=nav.find(x=>x[0]===next);
  if(!item||!can(item[3])){status('لا تملك صلاحية فتح هذا القسم.');return;}
- ++requestSerial;reading=false;view=next;offset=0;search='';draw();
+ ++requestSerial;reading=false;view=next;offset=0;search='';selectedTicket=null;draw();
 }
 async function run(key){
  if(!opened)return;
@@ -370,9 +477,10 @@ async function run(key){
 document.addEventListener('click',e=>{
  const entry=e.target.closest('[data-tcac-entry]');
  if(entry){e.preventDefault();void (async()=>{const ok=await verify();if(!ok)return;shell();})().catch(()=>clear());return;}
- const btn=e.target.closest('#tcac-root [data-tcac],#tcac-root [data-tcac-view],#tcac-root [data-tcac-run]');
+ const btn=e.target.closest('#tcac-root [data-tcac],#tcac-root [data-tcac-view],#tcac-root [data-tcac-run],#tcac-root [data-tcac-ticket]');
  if(!btn)return;
  e.preventDefault();e.stopPropagation();
+ if(btn.hasAttribute('data-tcac-ticket')){void supportTicket(btn.dataset.tcacTicket);return;}
  if(btn.hasAttribute('data-tcac-view')){void visit(btn.dataset.tcacView);return;}
  if(btn.hasAttribute('data-tcac-run')){void run(btn.dataset.tcacRun);return;}
  const action=btn.dataset.tcac;
@@ -382,6 +490,12 @@ document.addEventListener('click',e=>{
  if(action==='prev'||action==='next'){if(reading)return;offset=Math.max(0,offset+(action==='prev'?-20:20));void loadPage();}
 },true);
 document.addEventListener('submit',e=>{
+ if(['tcac-support-reply','tcac-support-status','tcac-staff-grant','tcac-support-staff'].includes(e.target?.id)){
+  e.preventDefault();e.stopImmediatePropagation();
+  if(!e.target.reportValidity())return;
+  void adminFormAction(e.target).catch(error=>status('تعذر حفظ العملية: '+String(error.message).slice(0,180)));
+  return;
+ }
  if(['tcac-vip-check','tcac-vip-write','tcac-medal-write'].includes(e.target?.id)){
   e.preventDefault();e.stopImmediatePropagation();
   if(!e.target.reportValidity())return;
