@@ -1,0 +1,32 @@
+name: Test in-app administration center
+on:
+  push:
+    branches:
+      - 'feature/in-app-admin-center-*'
+    paths:
+      - 'app/phase6-inapp-admin.js'
+      - 'app/phase6-inapp-admin.css'
+      - 'app/phase2-backend-controls.js'
+      - 'tests/inapp-admin-center.test.mjs'
+      - '.github/workflows/test-inapp-admin-center.yml'
+  pull_request:
+    branches:
+      - 'develop/phase-2'
+    paths:
+      - 'app/phase6-inapp-admin.js'
+      - 'app/phase6-inapp-admin.css'
+      - 'app/phase2-backend-controls.js'
+      - 'tests/inapp-admin-center.test.mjs'
+permissions:
+  contents: read
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax, user role and protected Profile integration
+        run: node --test tests/inapp-admin-center.test.mjs
