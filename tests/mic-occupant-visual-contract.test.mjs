@@ -106,3 +106,9 @@ test('real LiveKit speaker event updates each seat without iterating a single el
  dispatch([]);
  assert.deepEqual(seats.map(s=>s.isSpeaking()),[false,false,false,false]);
 });
+
+
+test('unjoined room cleanup iterates every seat, not a single DOM element',()=>{
+ assert.match(rooms,/for\\(const \\[index,button\\] of \\$\\$\\('\\.seats \\.seat',view\\)\\.entries\\(\\)\\)/);
+ assert.doesNotMatch(rooms,/for\\(const \\[index,button\\] of \\$\\('\\.seats \\.seat',view\\)/);
+});
