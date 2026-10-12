@@ -9,6 +9,9 @@ on:
       - 'tests/staging-host-evidence-integrity.test.mjs'
       - 'tests/staging-recharge-receipt-guard.test.mjs'
       - 'tests/staging-owner-issuance-receipt-guard.test.mjs'
+      - 'tests/staging-monthly-diamond-conservation.test.mjs'
+      - 'supabase/migrations/*staging_host_month_diamond_conservation_readonly_v1.sql'
+      - 'supabase/tests/t67_host_month_real_gift_integrity.sql'
       - 'supabase/migrations/*staging_owner_coin_issue_cash_reference_unique_v1.sql'
       - 'scripts/t30-reseller-flow-e2e.mjs'
       - 'tests/t30-reseller-flow-contract.test.cjs'
@@ -35,4 +38,4 @@ jobs:
           node --check scripts/t30-reseller-flow-e2e.mjs
           node --test tests/t30-reseller-flow-contract.test.cjs
       - name: Verify no payout, credit issuance, privilege bypass, or fake movement
-        run: node --test tests/staging-owner-issuance-receipt-guard.test.mjs tests/staging-recharge-receipt-guard.test.mjs tests/staging-host-evidence-integrity.test.mjs tests/staging-treasury-integrity.test.mjs tests/finance-integrity-readonly.test.mjs tests/finance-integrity-details.test.mjs tests/host-accrual-conservation.test.mjs tests/host-month-immutable-accrual.test.mjs
+        run: node --test tests/staging-monthly-diamond-conservation.test.mjs tests/staging-owner-issuance-receipt-guard.test.mjs tests/staging-recharge-receipt-guard.test.mjs tests/staging-host-evidence-integrity.test.mjs tests/staging-treasury-integrity.test.mjs tests/finance-integrity-readonly.test.mjs tests/finance-integrity-details.test.mjs tests/host-accrual-conservation.test.mjs tests/host-month-immutable-accrual.test.mjs
