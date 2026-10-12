@@ -13,7 +13,7 @@ const chief=r=>r?.isOwner===true||r?.isMainPartner===true;
 const owner=r=>r?.isOwner===true;
 const authorized=r=>!!r&&(chief(r)||['admin','super_admin','db'].includes(r.role)||
   r.canManageCatalogs===true||r.canReadReports===true||r.canSupport===true);
-let rights=null,account='',serial=0,requestSerial=0,opened=false,view='overview',offset=0,search='',reading=false;
+let rights=null,account='',serial=0,requestSerial=0,opened=false,view='overview',offset=0,search='',reading=false,mutation=false,pendingMutation=null;
 const nav=[
  ['overview','الرئيسية','▦','home'],
  ['users','المستخدمون','♙','chief'],
@@ -29,8 +29,8 @@ const nav=[
  ['global_gift','إعلانات الهدايا','★','chief'],
  ['open_agency','فتح وكالة مضيفين','＋','db_open'],
  ['support','صندوق خدمة العملاء','☏','support'],
- ['vip','VIP والامتيازات','♛','owner_pending'],
- ['medals','الميداليات والشارات','✿','owner_pending'],
+ ['vip','VIP والامتيازات','♛','owner'],
+ ['medals','الميداليات والشارات','✿','owner'],
  ['banners','البنرات','▤','chief_pending'],
  ['settlement','التسوية الشهرية','◈','chief_pending']
 ];
@@ -62,7 +62,7 @@ function exit(){
  document.documentElement.classList.remove('tcac-open');
 }
 function clear(){
- serial++;account='';rights=null;removeEntry();exit();
+ serial++;account='';rights=null;mutation=false;pendingMutation=null;removeEntry();exit();
 }
 async function verify(){
  const id=uid(),stamp=++serial;
@@ -162,6 +162,7 @@ function draw(){
   void loadPage();
   return;
  }
+ if(view==='vip'||view==='medals'){void entitlementScreen();return;}
  if(actionMap[view]){
   c.innerHTML='<div class="tcac-module"><h3>'+esc(item[1])+'</h3>'+
     '<p>يفتح هذا القسم الوظيفة الحقيقية الموجودة مسبقاً داخل TotiChat، باستخدام نفس جلسة تسجيل الدخول وصلاحيات الخادم.</p>'+
@@ -178,6 +179,119 @@ function draw(){
  '<p class="tcac-notice">لا توجد أزرار وهمية أو صلاحيات مفترضة.</p></div>';
  status('لا يمكن تنفيذ هذا القسم قبل استكمال الربط واختباره.');
 }
+
+function input(label,name,attributes=''){
+ return '<label class="tcac-field">'+label+'<input name="'+name+'" '+attributes+'></label>';
+}
+function reasonInput(){
+ return '<label class="tcac-field">سبب إداري موثّق<textarea name="reason" minlength="10" maxlength="300" required></textarea></label>';
+}
+function entitlementForm(){
+ if(view==='vip'){
+  return '<div class="tcac-module"><h3>التحقق من استحقاق VIP</h3>'+
+   '<form id="tcac-vip-check">'+input('معرّف الحساب','target','required pattern="[0-9a-fA-F-]{36}" maxlength="36"')+
+   '<button class="tcac-primary" type="submit">عرض الحالة الفعلية</button></form>'+
+   '<div id="tcac-vip-state" role="status"></div>'+
+   '<h3>إجراء المالك الرئيسي</h3><form id="tcac-vip-write">'+
+   input('معرّف المستفيد','target','required pattern="[0-9a-fA-F-]{36}" maxlength="36"')+
+   '<label class="tcac-field">الإجراء<select name="action"><option value="grant">منح VIP</option><option value="revoke">سحب VIP</option></select></label>'+
+   input('مستوى VIP من 1 إلى 10','tier','type="number" min="1" max="10" value="1" required')+
+   input('تاريخ انتهاء المنح (اختياري)','expires','type="datetime-local"')+
+   reasonInput()+'<button class="tcac-primary" type="submit">تأكيد الإجراء</button></form>'+
+   '<p class="tcac-notice">التعديلات موثقة في الخادم، ولا تمثل بيع VIP أو تحصيل أموال.</p></div>';
+ }
+ return '<div class="tcac-module"><h3>المداليات المسجلة</h3>'+
+ '<div id="tcac-medal-catalog" role="status">جارٍ تحميل البيانات الفعلية…</div>'+
+ '<h3>إدارة الميداليات — المالك فقط</h3><form id="tcac-medal-write">'+
+ '<label class="tcac-field">الإجراء<select name="action"><option value="grant">منح مدالية</option><option value="revoke">سحب مدالية</option><option value="register">تسجيل مدالية جديدة</option></select></label>'+
+ input('مفتاح المدالية','key','required pattern="[a-z][a-z0-9_-]{2,39}" maxlength="40"')+
+ input('UUID المستفيد (عند المنح والسحب)','target','pattern="[0-9a-fA-F-]{36}" maxlength="36"')+
+ input('اسم المدالية الجديدة (عند التسجيل)','label','maxlength="60"')+
+ input('الوصف (اختياري)','description','maxlength="180"')+
+ reasonInput()+'<button class="tcac-primary" type="submit">حفظ القرار الموثق</button></form></div>';
+}
+async function entitlementScreen(){
+ if(!opened||!owner(rights)||!['vip','medals'].includes(view))return;
+ const current=view,id=uid(),stamp=++requestSerial;
+ const place=qs('#tcac-content');
+ if(!place)return;
+ place.innerHTML=entitlementForm();
+ if(current==='vip'){status('عرض البيانات الحقيقية وإجراء المالك فقط.');return;}
+ try{
+  const result=await rpc('phase5_medal_catalog');
+  if(!opened||uid()!==id||view!==current||stamp!==requestSerial)return;
+  const rows=Array.isArray(result)?result:Array.isArray(result?.medals)?result.medals:Array.isArray(result?.rows)?result.rows:null;
+  if(!rows)throw Error('استجابة غير صالحة');
+  const target=qs('#tcac-medal-catalog');
+  if(target)target.innerHTML=rows.length?rows.map(m=>
+   '<article class="tcac-record"><b>'+esc(m.display_name||m.label||m.medal_key||m.key)+'</b>'+
+   '<p>'+esc(m.medal_key||m.key||'')+'</p></article>').join(''):
+   '<p class="tcac-empty">لا توجد ميداليات موثقة بعد.</p>';
+  status('سجلات المداليات من قاعدة Staging.');
+ }catch(e){
+  if(opened&&uid()===id&&view===current){const target=qs('#tcac-medal-catalog');if(target)target.textContent='خطأ قراءة: '+String(e.message).slice(0,180);}
+ }
+}
+async function entitlementSubmit(form){
+ if(mutation)return;
+ const id=uid(),current=view,authz=await verify();
+ if(!opened||!authz||!owner(authz)||uid()!==id||!['vip','medals'].includes(current))return;
+ const data=new FormData(form),get=k=>String(data.get(k)||'').trim();
+ const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+ const reason=get('reason'),key=get('key'),action=get('action');
+ if(reason.length<10||reason.length>300)throw Error('السبب يجب أن يحتوي 10–300 حرف');
+ let fn,params,signature,confirmation;
+ if(form.id==='tcac-vip-check'){
+  const user=get('target');if(!uuid.test(user))throw Error('UUID غير صالح');
+  const result=await rpc('phase5_vip_status',{p_target:user});
+  if(opened&&uid()===id&&view===current){
+   const n=qs('#tcac-vip-state');if(n)n.textContent=result?.active?'VIP'+result.tier+' فعّال — ينتهي: '+(result.expiresAt||'غير محدد'):'لا يوجد VIP فعّال';
+  }
+  return;
+ }
+ if(form.id==='tcac-vip-write'){
+  const user=get('target'),tier=Number(get('tier')),expires=get('expires');
+  if(!uuid.test(user)||!['grant','revoke'].includes(action))throw Error('مدخلات VIP غير صالحة');
+  if(action==='grant'&&(!Number.isInteger(tier)||tier<1||tier>10))throw Error('حدد مستوى VIP بين 1 و10');
+  let expiration=null;
+  if(action==='grant'&&expires){
+   const dt=new Date(expires);if(!Number.isFinite(dt.getTime())||dt.getTime()<=Date.now())throw Error('انتهاء المنح يجب أن يكون في المستقبل');
+   expiration=dt.toISOString();
+  }
+  fn='phase5_vip_owner_action';
+  params={p_action:action,p_target:user,p_tier:action==='revoke'?0:tier,
+   p_expires_at:expiration,p_reason:reason};
+  confirmation='تأكيد '+(action==='grant'?'منح':'سحب')+' VIP لهذا الحساب؟';
+ }else if(form.id==='tcac-medal-write'){
+  if(!/^[a-z][a-z0-9_-]{2,39}$/.test(key)||!['grant','revoke','register'].includes(action))throw Error('مفتاح أو إجراء غير صالح');
+  const target=get('target'),label=get('label');
+  if(action!=='register'&&!uuid.test(target))throw Error('UUID المستفيد غير صالح');
+  if(action==='register'&&(label.length<3||label.length>60))throw Error('اسم المدالية يجب أن يحتوي 3–60 حرف');
+  fn='phase5_medal_owner_action';
+  params={p_action:action,p_medal_key:key,p_target:action==='register'?null:target,
+   p_label:action==='register'?label:null,p_description:action==='register'?get('description'):null,p_reason:reason};
+  confirmation='تأكيد قرار المدالية وحفظه في سجل الأمان؟';
+ }else return;
+ signature=JSON.stringify([id,fn,params]);
+ if(!pendingMutation||pendingMutation.signature!==signature)
+  pendingMutation={signature,id:crypto.randomUUID()};
+ if(!window.confirm(confirmation))return;
+ const button=form.querySelector('button[type="submit"]');
+ mutation=true;if(button)button.disabled=true;
+ try{
+  const result=await rpc(fn,{...params,p_request_id:pendingMutation.id});
+  if(!result||typeof result!=='object')throw Error('الخادم لم يؤكد العملية');
+  pendingMutation=null;
+  if(opened&&uid()===id&&view===current){
+   status('تم حفظ القرار الحقيقي في Supabase Staging.');
+   if(current==='medals')void entitlementScreen();
+  }
+ }finally{
+  mutation=false;
+  if(button?.isConnected)button.disabled=false;
+ }
+}
+
 async function loadPage(){
  if(!opened||!readable()||reading)return;
  const r=rights,item=nav.find(x=>x[0]===view);
@@ -256,6 +370,12 @@ document.addEventListener('click',e=>{
  if(action==='prev'||action==='next'){if(reading)return;offset=Math.max(0,offset+(action==='prev'?-20:20));void loadPage();}
 },true);
 document.addEventListener('submit',e=>{
+ if(['tcac-vip-check','tcac-vip-write','tcac-medal-write'].includes(e.target?.id)){
+  e.preventDefault();e.stopImmediatePropagation();
+  if(!e.target.reportValidity())return;
+  void entitlementSubmit(e.target).catch(error=>status('تعذر تنفيذ العملية: '+String(error.message).slice(0,180)));
+  return;
+ }
  if(e.target?.id!=='tcac-search')return;
  e.preventDefault();e.stopImmediatePropagation();
  search=(new FormData(e.target).get('query')||'').toString().trim().slice(0,60);
