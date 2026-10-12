@@ -21,6 +21,7 @@ async function refresh(force=false){
    window.TotiNotifications?.refresh?.(),
    window.TotiSocial?.refresh?.(),
    window.TotiGlobalGiftFeed?.refresh?.(),
+   window.TotiLuckyGiftUI?.refreshOpen?.(),
    window.TotiInAppAdmin?.recheck?.()
   ];
   if(window.TotiPhase2Rooms?.getStatus?.()?.activeRoomId)
