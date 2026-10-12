@@ -128,3 +128,9 @@ S01 global search/filter/sort; S02 detail sheet; S03 create/edit form; S04 opera
 
 ## Acceptance definition
 Every real visible button must be wired to authorized server action or truthfully disabled with reason; every query paginated and scoped; no fake stats; no duplicate ledger writes; full audit for sensitive operations; leaving admin returns to My/Profile without logout or breaking room audio; no unapproved changes to approved TotiChat visuals; QA evidence recorded per role and per module.
+
+
+## Migration risk discovered in the current in-app Profile
+app/phase2-backend-controls.js currently injects SEPARATE privileged profile rows for catalog admin, reports, global-gift settings, and DB host-agency opening based on phase3_admin_session. This conflicts with the newly approved single entry rule. The future migration MUST relocate these existing working entry points INTO the unified Admin Center, leaving ONE Admin Center card in "ملفي" for actual authorized staff; do not delete their behavior or accidentally expose staff actions to ordinary users. The ordinary customer-support entry is a consumer help function and must not be conflated with staff Admin Center access.
+app/phase2-live-mode.js maintains an explicit client route whitelist and render lifecycle. The new admin destination must be recognized as an authorized, isolated app view and must not permit query-string bypass, stale authority, or sudden room transport termination. A cosmetic link alone is not sufficient.
+Do not change the active app under develop/phase-2 during design review. This document does not modify existing Profile UI or authentication.
