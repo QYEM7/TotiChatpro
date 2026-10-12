@@ -14,6 +14,7 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
 }[c]));
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let currentUser='',rooms=null,active=null,members=[],messages=[],loadingRooms=null,refreshing=null,entering=false;
+let realSpeakerRoom='',realSpeakingIds=new Set();
 let roomListError='';
 let sequence=0,sending=false;
 let realtime=null,realtimeUser='';
@@ -114,9 +115,11 @@ function clearUnjoinedRoom(view){
   if(donor)donor.hidden=true;
   const count=$('.giftTicker .orb b',view);
   if(count)count.textContent='0';
-  for(const [index,button] of $$('.seats .seat',view).entries()){
+  realSpeakerRoom='';realSpeakingIds.clear();
+  for(const [index,button] of $('.seats .seat',view).entries()){
     button.disabled=true;
-    button.classList.remove('occupied','locked','tc-mic-member','tc-mic-muted','tc-mic-unmuted','tc-mic-owner','tc-mic-self','vip1','vip5','vip8');
+    button.classList.remove('occupied','locked','tc-mic-member','tc-mic-muted','tc-mic-unmuted','tc-mic-owner','tc-mic-self','tc-mic-speaking','vip1','vip5','vip8');
+    button.dataset.tcMicOccupant='';
     button.setAttribute('aria-label','المقعد '+(index+1)+' — انضم لغرفة أولاً');
     const face=$('.seatface',button);
     if(face){
@@ -223,13 +226,20 @@ function roomContent(){
       button.classList.toggle('tc-mic-unmuted',!!p&&p.is_muted===false);
       button.classList.toggle('tc-mic-owner',!!p&&p.user_id===active.owner_id);
       button.classList.toggle('tc-mic-self',!!p&&p.user_id===session().user?.id);
+      // Speech animation is tied to the genuinely connected LiveKit event, and
+      // must clear if the occupant changes or the server mutes this seat.
+      button.dataset.tcMicOccupant=p?.user_id||'';
+      button.classList.toggle('tc-mic-speaking',!!p&&p.is_muted===false&&
+        realSpeakerRoom===active.id&&realSpeakingIds.has(p.user_id));
       // An empty seat is available; the old preview class suggested a false lock.
       button.classList.remove('locked');
-      button.setAttribute('aria-label',p
+      const baseAria=p
         ?'المقعد '+slot+': '+p.display_name+
           (p.user_id===active.owner_id?'، مالك الغرفة':'')+
           (p.is_muted===true?'، المايك مكتوم':'، المايك غير مكتوم')
-        :'المقعد '+slot+' متاح');
+        :'المقعد '+slot+' متاح';
+      button.dataset.tcMicAriaBase=baseAria;
+      button.setAttribute('aria-label',baseAria+(button.classList.contains('tc-mic-speaking')?'، يتحدث الآن':''));
       const face=$('.seatface',button);
       if(face){
         // Preserve original seat frames, ornaments, CSS effects and children.
@@ -708,6 +718,23 @@ setInterval(()=>{
   if(screen==='room'&&active)void refreshRoom();
   if(screen==='home'&&!loadingRooms)void listRooms();
 },7500);
+// Only render real speaking accents if the current LiveKit room confirms
+// the speaker identities. UUIDs correspond to the signed token's participant identity.
+window.addEventListener('totichat-live-active-speakers',event=>{
+ const detail=event.detail;
+ if(!session().signedIn||!active||!detail||detail.roomId!==active.id)return;
+ realSpeakerRoom=active.id;
+ realSpeakingIds=new Set(Array.isArray(detail.userIds)
+  ?detail.userIds.filter(id=>typeof id==='string'&&UUID.test(id)):[]);
+ if(screen!=='room')return;
+ for(const button of $('.roomview.room-v2 .seats > .seat')){
+  const userId=button.dataset.tcMicOccupant||'';
+  const talking=!!userId&&button.classList.contains('tc-mic-unmuted')&&realSpeakingIds.has(userId);
+  button.classList.toggle('tc-mic-speaking',talking);
+  const base=button.dataset.tcMicAriaBase;
+  if(base)button.setAttribute('aria-label',base+(talking?'، يتحدث الآن':''));
+ }
+});
 window.TotiPhase2Rooms=Object.freeze({
   // Deliberately do not expose raw tokens, owner-level mutations or balance writes.
   getStatus:()=>({signedIn:session().signedIn,activeRoomId:active?.id||null,roomCount:rooms?.length??null}),
