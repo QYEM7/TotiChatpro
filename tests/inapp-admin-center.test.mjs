@@ -40,6 +40,7 @@ test('permissions and supported read paths are explicitly gated by the server',(
 function harness(admin,support){
  const listeners={};
  const panel={children:[],querySelector(q){return q==='[data-tcac-entry]'?this.children.find(x=>x.attr?.['data-tcac-entry']!==undefined)||null:null;},
+  querySelectorAll(){return [];},
   appendChild(node){this.children.push(node);}};
  const newElement=name=>({tag:name,attr:{},children:[],className:'',textContent:'',
   setAttribute(k,v){this.attr[k]=v;},append(...n){this.children.push(...n);},
