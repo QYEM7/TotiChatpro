@@ -37,12 +37,12 @@ function input(id,type,label,placeholder,icon,autocomplete,extra=''){
 }
 function social(){
  const names={google:'Google',apple:'Apple',facebook:'Facebook'};
- return '<div class="tc-login-divider"><span>أو سجّل الدخول بواسطة</span></div>'+
+ return '<section class="tc-social-section" hidden aria-label="طرق تسجيل الدخول المتاحة"><div class="tc-login-divider"><span>أو سجّل الدخول بواسطة</span></div>'+
    '<div class="tc-social-buttons">'+Object.entries(names).map(([id,n])=>
     '<button type="button" data-auth-social="'+id+'" class="tc-social-button" disabled aria-label="تسجيل الدخول بواسطة '+n+'" title="يتم التحقق من توفر الخدمة">'+
     '<span class="tc-social-icon '+id+'">'+(id==='google'?'G':id==='apple'?'●':'f')+'</span>'+
     '<span>'+n+'</span></button>').join('')+'</div>'+
-   '<p class="tc-social-explain" id="tc-social-state" role="status">يجري التحقق من خيارات الدخول المتاحة…</p>';
+   '<p class="tc-social-explain" id="tc-social-state" role="status"></p></section>';
 }
 function create(){
  const config=routes[screen];if(!config)return;
@@ -68,14 +68,15 @@ function create(){
  root.classList.add('tc-auth-root');
  root.innerHTML='<main class="tc-login-layout" dir="rtl">'+
   '<section class="tc-login-panel"><div class="tc-login-panel-inner">'+
-  '<div class="tc-login-brand"><img src="'+falcon+'" alt="شعار الصقر الرسمي لتطبيق TotiChat" width="68" height="68"><span>TotiChat</span></div>'+
-  '<header class="tc-login-intro"><h1>'+config.title+'</h1><p>'+config.subtitle+'</p></header>'+
+  '<div class="tc-login-brand"><span class="tc-login-brand-icon"><img src="'+falcon+'" alt="شعار الصقر الرسمي لتطبيق TotiChat" width="68" height="68"></span><span class="tc-login-brand-title">TotiChat<small>VOICE COMMUNITY</small></span></div>'+
+  '<div class="tc-login-eyebrow"><span class="tc-auth-sparkle">✦</span> غرف صوتية حقيقية، مجتمعك الخاص</div>'+
+   '<header class="tc-login-intro"><h1>'+config.title+'</h1><p>'+config.subtitle+'</p></header>'+
   formHtml+(login?social():'')+
   '<div class="tc-login-footer">'+footer+'</div>'+
   '<p class="tc-login-safety">حسابك محمي عبر خدمة المصادقة الحقيقية. لن تُعرض بيانات تجريبية أو أرصدة وهمية.</p>'+
   '</div></section><aside class="tc-login-art" aria-hidden="true">'+
   '<div class="tc-login-art-glow"></div><img src="'+falcon+'" alt="">'+
-  '<span>TOTICHAT</span><strong>مكانك بين الأصدقاء</strong><p>أصوات حقيقية · غرف حقيقية · مجتمع واحد</p>'+
+  '<span class="tc-auth-art-brand">✦ TOTICHAT ✦</span><strong>صوتك يجمعنا</strong><p>ادخل غرفك الصوتية، تعرّف على أصدقاء جدد، واحتفظ بهويتك الخاصة.</p><div class="tc-auth-art-features"><i>🎙 غرف صوتية</i><i>✧ هدايا مميزة</i><i>♛ هوية VIP</i></div>'+
   '</aside></main>';
  document.body.classList.add('tc-auth-body');
  document.body.style.background='#fcf9fe';
@@ -93,18 +94,20 @@ function create(){
 async function refreshProviders(root){
  const buttons=Array.from(root.querySelectorAll('[data-auth-social]'));
  const message=root.querySelector('#tc-social-state');
+  const section=root.querySelector('.tc-social-section');
  try{
    const state=await auth.providers();
    if(!message?.isConnected)return;
    const enabled=buttons.filter(b=>{
      const available=state[b.dataset.authSocial]===true;
-     b.disabled=!available;b.title=available?'الدخول بواسطة '+b.dataset.authSocial:'هذه الخدمة تحتاج تفعيلها في Supabase أولاً';
+     b.disabled=!available;b.hidden=!available;b.title=available?'الدخول بواسطة '+b.dataset.authSocial:'هذه الخدمة غير مفعّلة';
      return available;
    }).length;
-   message.textContent=enabled?'طرق الدخول المتاحة مربوطة بخادم المصادقة.':
-     'طرق الدخول الاجتماعي غير مفعّلة في قاعدة TotiChat الجديدة حالياً؛ استخدم البريد الإلكتروني.';
+   if(section)section.hidden=enabled===0;
+   message.textContent=enabled?'اختر إحدى طرق الدخول المفعّلة فقط.':'';
  }catch(_){
-   if(message?.isConnected)message.textContent='تعذر التحقق من طرق الدخول الاجتماعي؛ استخدم البريد وكلمة المرور.';
+   if(section)section.hidden=true;
+   if(message?.isConnected)message.textContent='';
  }
 }
 const prev=render;
