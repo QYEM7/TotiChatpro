@@ -84,7 +84,7 @@
     if(!response.ok)throw apiError(data,response.status);
     return data;
   }
-  function storeToken(data,generation){
+  function storeToken(data,generation,{deferInitialNotification=false}={}){
     if(generation!==requestGeneration)return false;
     if(!data||typeof data.access_token!=='string'||typeof data.refresh_token!=='string'||!data.user?.id)
       return false;
@@ -95,7 +95,12 @@
       expires_at:expiresAt,
       user:{id:data.user.id,email:data.user.email||''}
     };
-    persist();scheduleRefresh();notify();return true;
+    persist();scheduleRefresh();
+    // On OAuth return, let the verified profile finish loading before
+    // emitting the session event. Otherwise rooms/realtime/admin listeners
+    // compete with the profile fetch on slow mobile connections.
+    if(!deferInitialNotification)notify();
+    return true;
   }
   function scheduleRefresh(){
     clearTimeout(clock);
@@ -436,11 +441,21 @@
     });
     if(pending.expectedUser&&response?.user?.id!==pending.expectedUser)throw new Error('رفض الخادم ربط الهوية بالحساب الحالي');
     recoveryRequired=pending.kind==='recovery';
-    if(!storeToken(response,generation))throw new Error('تعذر إكمال الجلسة');
-    await readProfile();
+    if(!storeToken(response,generation,{deferInitialNotification:true}))
+      throw new Error('تعذر إكمال الجلسة');
+    try{
+      // readProfile emits the first authenticated state after the RLS-checked
+      // profile request completes, so secondary app queries start afterwards.
+      await readProfile();
+    }catch(error){
+      // Never silently leave the UI waiting if the profile request fails.
+      notify();throw error;
+    }
     return publicState();
   }
-  if(typeof location!=='undefined'&&location.search.includes('code=')){
+  const oauthCallbackPending=typeof location!=='undefined'&&
+    new URLSearchParams(location.search).has('code');
+  if(oauthCallbackPending){
     void handleOAuthCallback(location.href).then(()=>{
       const clean=new URL(location.href);clean.searchParams.delete('code');
       history.replaceState(null,'',clean.href);
@@ -696,6 +711,8 @@
       if(app.getLaunchUrl)void app.getLaunchUrl().then(callback).catch(error=>console.warn(String(error.message)));
     }
   }
-  if(session){void resume();}
-  else queueMicrotask(notify);
+  // A stored session and a fresh OAuth code must not trigger concurrent
+  // /auth/v1/user and /rest/v1/profiles requests for two different sessions.
+  if(session&&!oauthCallbackPending){void resume();}
+  else if(!oauthCallbackPending)queueMicrotask(notify);
 })();
