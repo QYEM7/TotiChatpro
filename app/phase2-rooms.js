@@ -116,7 +116,7 @@ function clearUnjoinedRoom(view){
   const count=$('.giftTicker .orb b',view);
   if(count)count.textContent='0';
   realSpeakerRoom='';realSpeakingIds.clear();
-  for(const [index,button] of $('.seats .seat',view).entries()){
+  for(const [index,button] of $$('.seats .seat',view).entries()){
     button.disabled=true;
     button.classList.remove('occupied','locked','tc-mic-member','tc-mic-muted','tc-mic-unmuted','tc-mic-owner','tc-mic-self','tc-mic-speaking','vip1','vip5','vip8');
     button.dataset.tcMicOccupant='';
