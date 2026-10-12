@@ -10,6 +10,8 @@ const escapeMarkup=value=>String(value==null?'':value).replace(/[&<>"']/g,functi
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
 });
 function navigationMarkup(){
+  const signedLive=window.TotiLiveMode?.enabled===true&&
+    window.TotiPhase2Auth?.state?.()?.signedIn===true;
   const items=[
     ['home','⌂','الرئيسية'],
     ['discoverPreview','◎','اكتشف'],
@@ -20,6 +22,8 @@ function navigationMarkup(){
   return '<nav class="royal-nav tc-unified-nav" aria-label="التنقل الرئيسي">'+items.map(function(item){
     const create=item[0]==='CREATE';
     const props=create?'class="royal-create" data-royal="create-room" aria-label="إنشاء غرفة"':
+      signedLive&&item[0]==='discoverPreview'?
+      'data-phase2="search-rooms" aria-label="استكشاف الغرف الحقيقية"':
       'data-a="go" data-v="'+item[0]+'"'+(screen===item[0]?' class="selected" aria-current="page"':'');
     return '<button type="button" '+props+'><span>'+item[1]+'</span><small>'+item[2]+'</small></button>';
   }).join('')+'</nav>';
