@@ -209,7 +209,13 @@ document.addEventListener('click',action,true);
 document.addEventListener('change',e=>{if(e.target.id==='rf-music-file')addSongs([...e.target.files])});
 songs();
 render();
-if(new URLSearchParams(location.search).get('review')==='1'){
+// Screen-review shortcuts belong to the independent mock-design environment only.
+const params=new URLSearchParams(location.search);
+const authenticatedApp=params.get('mode')==='live'||!!window.TotiLivePreviewOnly||
+ (location.protocol==='https:'&&location.hostname==='localhost')||
+ !!window.Capacitor?.isNativePlatform?.()||
+ window.TotiLiveMode?.enabled===true;
+if(!authenticatedApp&&params.get('review')==='1'){
  const fab=document.createElement('button');
  fab.className='rf-review-fab';fab.dataset.rf='review-list';
  fab.textContent='♛ مراجعة الشاشات';fab.setAttribute('aria-label','فتح خريطة مراجعة الشاشات');
