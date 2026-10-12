@@ -50,3 +50,15 @@ test('historical month comparison avoids unrelated saved lines and cannot settle
  assert.match(fix,/'isAccrualEvidenceOnly',true/);
  assert.doesNotMatch(fix,/\b(?:update|delete|truncate)\s+(?:public|phase3)\./i);
 });
+
+test('every reconstructed pg_get_functiondef block is a standalone terminated SQL statement',()=>{
+ for(const [name,script,expected] of [
+  ['host_month_evidence_v1',v1,3],
+  ['snapshot_join_scope_v2',fix,1]
+ ]){
+  const endings=[...script.matchAll(/end \$function\$;\s*/gi)];
+  assert.equal(endings.length,expected,name+' must delimit each PostgreSQL function body with a semicolon');
+  const unterminated=[...script.matchAll(/end \$function\$(?!;)/gi)];
+  assert.equal(unterminated.length,0,name+' contains invalid unterminated function definition');
+ }
+});
