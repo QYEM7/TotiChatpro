@@ -245,4 +245,6 @@ as $f$ select phase3.lucky_admin_configure(p_enabled,p_rules,p_request_id) $f$;
 revoke all on function public.phase6_lucky_gift_configure(boolean,jsonb,uuid) from public,anon;
 grant execute on function public.phase6_lucky_gift_configure(boolean,jsonb,uuid) to authenticated;
 -- Live Staging pilot only: nonredeemable lucky points, published odds, no extra wallet payouts.
-update phase3.lucky_settings set enabled=true,version=version+1,updated_at=now() where singleton;
+-- IMPORTANT: Leave inactive by default in every fresh environment, especially production.
+-- Only the isolated Staging project was explicitly enabled for pilot verification.
+-- Admin Owner/main partner must approve real policy via phase6_lucky_gift_configure before production activation.
