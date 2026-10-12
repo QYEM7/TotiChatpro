@@ -146,3 +146,28 @@
  display:block;grid-column:1/-1;align-self:start;text-align:center;
  padding:18px 8px;color:#e7d6ed;font-size:12px;line-height:1.6;
 }
+
+
+/* Verified Lucky Gift disclosure stays inside the fixed-height sheet. */
+#sheet.tc-gift-sheet .tc-lucky-disclosure{
+ flex:none;display:block;max-height:87px;overflow-y:auto;
+ margin:2px 0 4px;padding:6px 9px;border:1px solid #e4bd8b69;
+ border-radius:10px;background:linear-gradient(140deg,#62445aab,#2d243fb0);
+ color:#f7e9ce;font-size:10px;line-height:1.5;
+}
+#sheet.tc-gift-sheet .tc-lucky-disclosure b{color:#ffe3a6}
+#sheet.tc-gift-sheet .tc-lucky-disclosure small{display:block;color:#efdaec;font-size:9px}
+#sheet.tc-gift-sheet .tc-lucky-disclosure button{
+ border:1px solid #e2b980a6;border-radius:8px;
+ background:#ffffff18;color:#ffe4b4;
+ font:inherit;padding:3px 10px;min-height:27px;margin-top:5px;
+}
+#sheet .tc-lucky-history{max-height:60dvh;overflow-y:auto;display:grid;gap:11px}
+#sheet .tc-lucky-history-item{
+ display:grid;gap:5px;padding:11px 13px;border:1px solid #d8c4e1;
+ border-radius:13px;background:#fff;color:#372645;
+}
+#sheet .tc-lucky-history-item small{font-size:11px;color:#74637a;overflow-wrap:anywhere}
+@media(max-height:590px){
+ #sheet.tc-gift-sheet .tc-lucky-disclosure{max-height:43px}
+}
