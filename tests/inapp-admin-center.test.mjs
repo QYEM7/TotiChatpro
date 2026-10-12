@@ -125,3 +125,12 @@ test('support staff inbox and owner grants are real server-authorized in-app for
  assert.match(center,/partner&&role!=='super_admin'/);
  assert(!center.includes("support:'data-support-open'"),'support must not be a customer help shortcut');
 });
+
+test('Owner and named partner only can execute server-audited room-scoped moderation',()=>{
+ assert.match(center,/room_moderation','إشراف الغرف والحظر/);
+ assert.match(center,/tcac-room-moderation/);
+ assert.match(center,/phase6_admin_room_action/);
+ assert.match(center,/if\(view!=='room_moderation'\|\|!chief\(r\)\)/);
+ assert.match(center,/result\?\.success!==true/);
+ assert.match(center,/p_room_id:room,p_target:target,p_action:action,p_reason:reason/);
+});
