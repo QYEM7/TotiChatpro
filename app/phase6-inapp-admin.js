@@ -72,7 +72,7 @@ function exit(){
  document.documentElement.classList.remove('tcac-open');
 }
 function clear(){
- serial++;account='';rights=null;mutation=false;pendingMutation=null;removeEntry();exit();
+ serial++;account='';rights=null;mutation=false;pendingMutation=null;selectedTicket=null;removeEntry();exit();
 }
 async function verify(){
  const id=uid(),stamp=++serial;
@@ -539,7 +539,7 @@ document.addEventListener('keydown',e=>{
  // Trap focus inside administration; don't expose underlying TotiChat controls.
  if(e.key==='Tab'){
   const root=qs('#tcac-root');
-  const nodes=[...root.querySelectorAll('button:not(:disabled),input:not(:disabled)')];
+  const nodes=[...root.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]')].filter(el=>el.getClientRects().length>0);
   if(!nodes.length)return;
   const first=nodes[0],last=nodes[nodes.length-1];
   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
