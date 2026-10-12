@@ -53,8 +53,13 @@ function controls(){
  if(audioError)area.setAttribute('aria-label',audioError);else area.removeAttribute('aria-label');
 }
 async function tearDown(){
+ const previousRoom=voiceRoom||pendingRoom;
  attempt++;pendingRoom='';voiceOwner='';
  const current=sdk;sdk=null;voiceRoom='';connected=false;needsGesture=false;micPublished=false;
+ // Always clear verified speaking highlights after a mic transport disconnection.
+ if(previousRoom)window.dispatchEvent(new CustomEvent('totichat-live-active-speakers',{
+  detail:{roomId:previousRoom,userIds:[]}
+ }));
  if(current)await current.disconnect().catch(()=>{});
  controls();
 }
@@ -80,6 +85,11 @@ async function connect(){
     if(!valid())return;
     if(state.connected!==undefined)connected=state.connected;
     if(state.needsAudioGesture)needsGesture=true;
+    if(Array.isArray(state.activeSpeakerIds)){
+      window.dispatchEvent(new CustomEvent('totichat-live-active-speakers',{
+        detail:{roomId:info.id,userIds:state.activeSpeakerIds}
+      }));
+    }
     if(!state.connecting)controls();
   });
   if(!valid()){await module.disconnect();return;}
