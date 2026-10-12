@@ -24,7 +24,9 @@ test('live roster alone controls occupied avatar, muted icon and owner indicator
  assert.match(rooms,/button\.classList\.toggle\('tc-mic-unmuted',!!p&&p\.is_muted===false\)/);
  assert.match(rooms,/button\.classList\.toggle\('tc-mic-owner',!!p&&p\.user_id===active\.owner_id\)/);
  assert.match(rooms,/Array\.from\(String\(p\.display_name\|\|'مستخدم'\)\.trim\(\)\)\[0\]/);
- assert.match(rooms,/p\.is_muted===true\?'المايك مكتوم':'غير مكتوم'/);
+ assert.match(rooms,/level\.textContent=p\?'🎁 '/);
+ assert.match(rooms,/level\.title=p\?'عدد الهدايا الحقيقية المستلمة داخل هذه الغرفة'/);
+ assert.match(rooms,/p\.is_muted===true\?'المايك مكتوم':'المايك غير مكتوم'/);
  assert.match(rooms,/المايك غير مكتوم/);
  assert.match(rooms,/micStatus\.title=p\.is_muted===true/);
 });
