@@ -135,3 +135,28 @@ html[data-tc-premium="1"] #app .pr-top-actions button .tc-premium-svg{
  width:20px;height:20px;stroke-width:1.8;
  margin:auto;
 }
+
+/* Narrow-phone overflow prevention without hiding any approved buttons. */
+html[data-tc-premium="1"] #app .royal-cat small{
+ max-width:100%;white-space:normal!important;overflow-wrap:anywhere;
+ text-align:center;line-height:1.18;
+}
+html[data-tc-premium="1"] #app .me-links .me-link>span:last-child{
+ max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:center;
+}
+@media(max-width:380px){
+ html[data-tc-premium="1"] #app .royal-topbar{padding-inline:8px;gap:4px}
+ html[data-tc-premium="1"] #app .royal-brand{font-size:19px;gap:2px;letter-spacing:-.4px}
+ html[data-tc-premium="1"] #app .royal-brand strong{font-size:19px}
+ html[data-tc-premium="1"] #app .royal-top-actions{gap:4px}
+ html[data-tc-premium="1"] #app .royal-top-actions .royal-vip-chip{
+  min-width:62px;padding-inline:5px;font-size:11px;
+ }
+ html[data-tc-premium="1"] #app .royal-top-actions button:not(.royal-vip-chip){
+  min-width:28px;min-height:32px;
+ }
+ html[data-tc-premium="1"] #app .royal-top-actions button .tc-premium-svg{
+  width:19px;height:19px;
+ }
+ html[data-tc-premium="1"] #app .royal-cat small{font-size:8px}
+}
