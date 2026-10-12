@@ -205,3 +205,39 @@ test('shared bottom navigation Discover is real on Profile and other authenticat
  assert.match(visual,/data-v="discoverPreview"/);
  assert.equal((real.match(/<button /g)||[]).length,5,'all five navigation controls stay present');
 });
+
+
+test('live Discover also intercepts legacy page routes and old Home tabs',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const home=get('app/royal-visuals.js');
+ const start=home.indexOf('function routeRealSearchFirst(event){');
+ const end=home.indexOf("\nwindow.addEventListener('click',routeRealSearchFirst,true);",start);
+ assert.ok(start>=0&&end>start);
+ let count=0;
+ const capture=runInNewContext(home.slice(start,end)+'\nrouteRealSearchFirst',{
+  window:{TotiLiveMode:{enabled:true},TotiPhase2Auth:{state:()=>({signedIn:true})},
+    TotiPhase2Rooms:{openSearch:()=>{count++;}}}
+ });
+ const labels=[
+  'button[data-phase2="search-rooms"]',
+  'button[data-royal="search"]',
+  'button[data-a="go"][data-v="discoverPreview"]',
+  'button[data-a="tab"][data-v="اكتشف"]'
+ ];
+ for(const label of labels){
+  let stopped=false;
+  capture({
+   target:{closest:selector=>{assert.ok(selector.includes(label));return {};}},
+   preventDefault:()=>{},stopPropagation:()=>{},stopImmediatePropagation:()=>{stopped=true;}
+  });
+  assert.ok(stopped,'legacy action must not fall through');
+ }
+ assert.equal(count,4);
+});
+test('Staging-only diagnostic probe is opt-in and exposes no account identity',()=>{
+ const builder=get('scripts/build-live-preview.mjs');
+ assert.match(builder,/DISCOVER-QA-05/);
+ assert.match(builder,/get\('qa'\)!=='discover'/);
+ assert.match(builder,/tc-real-room-search-query/);
+ assert.doesNotMatch(builder,/localStorage|sessionStorage|service_role|password|access_token|refresh_token/);
+});
