@@ -29,7 +29,7 @@ function royalHome(){
  return '<div class="royal-home" dir="rtl"><div class="royal-home-haze"></div>'+
  '<header class="royal-topbar"><div class="royal-brand">✦ <strong>TotiChat</strong></div>'+
  '<div class="royal-top-actions">'+
- (real?'<button disabled aria-label="مزايا VIP تجدها في حسابك" class="royal-vip-chip">👑 VIP</button><button disabled title="بحث الغرف قيد التفعيل" aria-label="بحث الغرف قيد التفعيل">⌕</button><button data-tc-social-open aria-label="الأصدقاء الحقيقيون">♟</button><button data-t57-open aria-label="الإشعارات الحقيقية">♧</button>':
+ (real?'<button data-a="go" data-v="me" aria-label="عرض حالة VIP في ملفي" class="royal-vip-chip">👑 VIP</button><button type="button" data-phase2="search-rooms" aria-label="بحث الغرف الحقيقية">⌕</button><button data-tc-social-open aria-label="الأصدقاء الحقيقيون">♟</button><button data-t57-open aria-label="الإشعارات الحقيقية">♧</button>':
  '<button data-a="go" data-v="vip" aria-label="VIP" class="royal-vip-chip">👑 VIP</button><button data-royal="search" aria-label="بحث">⌕</button><button data-royal="friends" aria-label="الأصدقاء">♟</button><button data-royal="notify" aria-label="الإشعارات">♧<i></i></button>')+'</div></header>'+
  '<main class="royal-home-main">'+
   (real?verifiedBanner:'<button class="royal-hero" data-royal="hero" aria-label="تفاصيل الغرفة المميزة"><img src="'+esc(imgs('room5'))+'" alt="ليلة ساحرة في TotiChat">'+
