@@ -136,7 +136,7 @@ function clearUnjoinedRoom(view){
       $('.tc-mic-owner-mark',face)?.remove();
     }
     const label=$('.seatname',button);
-    if(label)label.textContent='مقعد '+(index+1);
+    if(label){label.textContent='مقعد '+(index+1);label.classList.remove('vipGold');}
     const level=$('.seatlv',button);
     if(level)level.textContent='بانتظار الغرفة';
   }
