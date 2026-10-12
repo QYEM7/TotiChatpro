@@ -24,7 +24,7 @@ test('only one administrative Profile entry; legacy actions move inside center',
  assert.match(block,/window\.TotiInAppAdmin\?\.onProfile\(\)/);
  for(const legacy of ['data-admin-open','data-reports-open','data-tc-global-gift-admin','data-tc-host-approval'])
   assert(!block.includes(legacy),'Profile must not expose separate '+legacy);
- for(const existing of ['data-admin-open','data-reports-open','data-tc-global-gift-admin','data-tc-host-approval','data-support-open'])
+ for(const existing of ['data-admin-open','data-reports-open','data-tc-global-gift-admin','data-tc-host-approval'])
   assert(center.includes(existing),'integrated working shortcut '+existing);
 });
 test('permissions and supported read paths are explicitly gated by the server',()=>{
@@ -112,4 +112,16 @@ test('Owner special ID entry is centralized without removing existing approved f
  assert.match(center,/special_id:'data-tc-special-id-open'/);
  assert.match(center,/data-tc-special-id-open/);
  assert.match(existing,/phase5_special_id_grant/);
+});
+
+test('support staff inbox and owner grants are real server-authorized in-app forms',()=>{
+ for(const rpc of ['phase5_support_list','phase5_support_thread_page','phase5_support_action','phase3_manage_access'])
+  assert(center.includes(rpc),'real operation missing '+rpc);
+ for(const form of ['tcac-support-reply','tcac-support-status','tcac-staff-grant','tcac-support-staff'])
+  assert(center.includes(form),'in-app form absent '+form);
+ assert.match(center,/if\(view!=='staff'\|\|!owner\(r\)\)/);
+ assert.match(center,/if\(view!=='support'\|\|r\.canSupport!==true/);
+ assert.match(center,/p_request_id:requestId/);
+ assert.match(center,/partner&&role!=='super_admin'/);
+ assert(!center.includes("support:'data-support-open'"),'support must not be a customer help shortcut');
 });
