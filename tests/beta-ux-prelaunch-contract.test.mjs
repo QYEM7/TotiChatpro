@@ -127,7 +127,7 @@ test('legacy search icon performs a real authenticated search rather than the un
  const {runInNewContext}=await import('node:vm');
  const home=get('app/royal-visuals.js');
  const start=home.indexOf('function handle(e){');
- const end=home.indexOf("\nwindow.addEventListener('click',handle,true);",start);
+ const end=home.indexOf('\n// Staging live navigation:',start);
  assert.ok(start>=0&&end>start,'live click handler is present');
  let opened=0;
  const notices=[];
