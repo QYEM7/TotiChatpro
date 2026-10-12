@@ -127,7 +127,7 @@ begin
   'canApprovePayroll',false,'hasPayrollRates',false,
   'canPaySalaries',false,'canZeroDiamonds',false,
   'isAccrualEvidenceOnly',true);
-end $function$
+end $function$;
 
 revoke all on function phase3.host_month_evidence_integrity(date) from public,anon,authenticated;
 grant execute on function phase3.host_month_evidence_integrity(date) to authenticated;
@@ -139,7 +139,7 @@ AS $function$
 begin
  perform phase3.actor();
  return phase3.host_month_evidence_integrity(p_month);
-end $function$
+end $function$;
 
 revoke all on function public.phase6_host_month_evidence_integrity(date) from public,anon,authenticated;
 grant execute on function public.phase6_host_month_evidence_integrity(date) to authenticated;
@@ -164,7 +164,7 @@ begin
     using errcode='23514';
  end if;
  return new;
-end $function$
+end $function$;
 
 revoke all on function phase3.reject_incomplete_host_month_capture() from public,anon,authenticated;
 create trigger tc_host_month_no_missing_lots
