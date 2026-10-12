@@ -9,6 +9,7 @@ const bridge=load('app/phase6-verified-state-sync.js');
 const loader=load('app/phase2-backend-controls.js');
 const odds=load('supabase/migrations/20261012133310_staging_lucky_gifts_nonredeemable_points_server_draw_v1.sql');
 const readiness=load('supabase/migrations/20261012133744_staging_lucky_readiness_real_nonfinancial_draw_v1.sql');
+const redemption=load('supabase/migrations/20261012134018_staging_distinct_fixed_30_lucky_10_redemption_v1.sql');
 test('Lucky code and trusted admin sync all parse',()=>{
  for(const p of ['app/phase2-catalog-ui.js','app/phase6-inapp-admin.js','app/phase6-verified-state-sync.js'])
   execFileSync(process.execPath,['--check',new URL('../'+p,import.meta.url).pathname]);
@@ -69,4 +70,13 @@ test('Administrative actions refresh real backend state; never fake role, VIP or
  assert.match(bridge,/TotiPhase2Rooms\.refreshRoom\(\)/);
  assert.match(bridge,/Promise\.allSettled/);
  assert.doesNotMatch(bridge,/Math\.random|mock|fakeBalance/i);
+});
+
+test('Lucky diamonds redeem at 10 percent, fixed diamonds at 30 percent, points never convert',()=>{
+ assert.match(redemption,/f::numeric\*rate\.redemption_numerator\/rate\.redemption_denominator/);
+ assert.match(redemption,/floor\(l::numeric\/10\)/);
+ assert.match(redemption,/luckyConversionRate','10_PERCENT'/);
+ assert.match(redemption,/luckyPointsRedeemable',false/);
+ assert.equal(Math.floor(100000*3/10)+Math.floor(100000/10),40000);
+ assert.equal(Math.floor(0*3/10)+Math.floor(100000/10),10000);
 });
