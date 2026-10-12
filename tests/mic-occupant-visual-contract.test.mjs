@@ -1,4 +1,5 @@
 import test from 'node:test';
+import vmModule from 'node:vm';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -65,3 +66,44 @@ test('speaking highlight must come only from true room LiveKit ActiveSpeakersCha
  assert.match(rooms,/button\.classList\.toggle\('tc-mic-speaking',!!p&&p\.is_muted===false/);
  assert.doesNotMatch(rooms,/setInterval\([^;]*classList\.add\('tc-mic-speaking'/);
 });
+
+
+test('real LiveKit speaker event updates each seat without iterating a single element',()=>{
+ const vm=requireVm();
+ const start=rooms.indexOf("window.addEventListener('totichat-live-active-speakers',event=>{");
+ assert.notEqual(start,-1,'speaking event handler exists');
+ const end=rooms.indexOf("\n});",start);
+ assert.ok(end>start);
+ const handler=rooms.slice(start,end+4);
+ const roomId='11111111-1111-4111-8111-111111111111';
+ const speaker='22222222-2222-4222-8222-222222222222';
+ const silent='33333333-3333-4333-8333-333333333333';
+ const muted='44444444-4444-4444-8444-444444444444';
+ const seat=(id,isMuted=false)=>{
+  const flags=new Set(isMuted?[]:['tc-mic-unmuted']);
+  return {
+   dataset:{tcMicOccupant:id,tcMicAriaBase:'Real seat'},
+   classList:{
+    contains:name=>flags.has(name),
+    toggle:(name,enabled)=>{if(enabled)flags.add(name);else flags.delete(name)}
+   },
+   setAttribute:(name,value)=>{if(name==='aria-label')this.lastLabel=value},
+   isSpeaking:()=>flags.has('tc-mic-speaking')
+  };
+ };
+ const seats=[seat(speaker),seat(silent),seat(muted,true),seat('')];
+ const listeners={};
+ const window={addEventListener:(name,fn)=>{listeners[name]=fn}};
+ vm.runInNewContext("let realSpeakerRoom='';let realSpeakingIds=new Set();\n"+handler,{
+  window,session:()=>({signedIn:true}),active:{id:roomId},screen:'room',
+  UUID:/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  $$:selector=>{assert.match(selector,/\\.seats/);return seats;},
+  $:()=>{throw Error('single-element selector cannot supply all 15 seats')}
+ });
+ const dispatch=userIds=>listeners['totichat-live-active-speakers']({detail:{roomId,userIds}});
+ dispatch([speaker,muted]);
+ assert.deepEqual(seats.map(s=>s.isSpeaking()),[true,false,false,false]);
+ dispatch([]);
+ assert.deepEqual(seats.map(s=>s.isSpeaking()),[false,false,false,false]);
+});
+function requireVm(){return vmModule;}
