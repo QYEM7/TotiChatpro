@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax and authentic mic roster checks
-        run: node --test tests/mic-occupant-visual-contract.test.mjs
+        run: node --test tests/mic-occupant-visual-contract.test.mjs tests/lucky-gifts-real-admin-sync.test.mjs
       - name: Install headless browser control
         run: npm install --no-save --no-package-lock --ignore-scripts puppeteer-core@24
       - name: Check seated people in 5x3 geometry across mobile widths
