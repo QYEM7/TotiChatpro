@@ -8,6 +8,8 @@ on:
       - 'tests/staging-treasury-integrity.test.mjs'
       - 'tests/staging-host-evidence-integrity.test.mjs'
       - 'tests/staging-recharge-receipt-guard.test.mjs'
+      - 'scripts/t30-reseller-flow-e2e.mjs'
+      - 'tests/t30-reseller-flow-contract.test.cjs'
       - 'supabase/migrations/*staging_recharge_receipt_replay_guard_v1.sql'
       - 'supabase/migrations/*staging_host_month_evidence_integrity_v1.sql'
       - 'supabase/migrations/*staging_host_month_snapshot_join_scope_fix_v2.sql'
@@ -26,5 +28,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify locally isolated reseller integration cannot reach production
+        run: |
+          node --check scripts/t30-reseller-flow-e2e.mjs
+          node --test tests/t30-reseller-flow-contract.test.cjs
       - name: Verify no payout, credit issuance, privilege bypass, or fake movement
         run: node --test tests/staging-recharge-receipt-guard.test.mjs tests/staging-host-evidence-integrity.test.mjs tests/staging-treasury-integrity.test.mjs tests/finance-integrity-readonly.test.mjs tests/finance-integrity-details.test.mjs tests/host-accrual-conservation.test.mjs tests/host-month-immutable-accrual.test.mjs
