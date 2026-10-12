@@ -46,7 +46,7 @@ function royalHome(){
  '</main>'+
  (minimizedRoom?'<button class="mini-room-pill tc-mini-room royal-mini-room" data-a="restoreRoom" aria-label="العودة إلى الغرفة المصغرة">🎙️ الغرفة المصغرة</button>':'')+
  '<nav class="royal-nav"><button data-a="go" data-v="home" class="selected"><span>⌂</span><small>الرئيسية</small></button>'+
- '<button data-a="go" data-v="discoverPreview"><span>◎</span><small>اكتشف</small></button>'+
+ '<button '+(real?'type="button" data-phase2="search-rooms" aria-label="استكشاف الغرف الحقيقية"':'data-a="go" data-v="discoverPreview"')+'><span>◎</span><small>اكتشف</small></button>'+
  '<button class="royal-create" data-royal="create-room" aria-label="إنشاء غرفة"><span>＋</span><small>إنشاء غرفة</small></button>'+
  '<button data-a="go" data-v="messages"><span>☏</span><small>الرسائل</small></button>'+
  '<button data-a="go" data-v="me"><span>♙</span><small>حسابي</small></button></nav></div>';
