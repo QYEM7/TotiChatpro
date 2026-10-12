@@ -621,14 +621,28 @@ function displayRealRoomSearch(){
    '<p class="tc-room-search-note">النتائج من أحدث 40 غرفة مرئية لحسابك، وليست غرفاً تجريبية.</p>'+
    '<div id="tc-real-room-search-results" aria-live="polite"></div></section>',true);
  paintRealRoomSearch();
+ // Always verify the current authenticated room directory when search opens.
+ // Repaint the still-open dialog after the real server request completes;
+ // never require the user to close/reopen it or show fabricated matches.
+ const account=session().user?.id;
+ void listRooms().then(()=>{
+   if(session().user?.id===account&&$('#tc-real-room-search-results'))
+     paintRealRoomSearch();
+ });
 }
 function paintRealRoomSearch(){
  const list=$('#tc-real-room-search-results');
  if(!list)return;
  const q=String($('#tc-real-room-search-query')?.value||'').trim().toLocaleLowerCase();
  list.replaceChildren();
+ if(roomListError){
+   const error=document.createElement('p');
+   error.setAttribute('role','alert');
+   error.textContent='تعذّر تحديث الغرف: '+roomListError;
+   list.appendChild(error);
+ }
  if(!Array.isArray(rooms)){
-   list.textContent='جارٍ تحميل الغرف من الخادم، افتح البحث مجدداً بعد التحديث.';
+   if(!roomListError)list.textContent='جارٍ تحميل الغرف الحقيقية من الخادم…';
    return;
  }
  const visible=rooms.filter(item=>UUID.test(String(item.id))&&
@@ -825,6 +839,6 @@ window.TotiPhase2Rooms=Object.freeze({
   getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id,welcomeMessage:active.welcome_message||''}):null,
   getMyMicState:()=>{const m=members.find(x=>x.user_id===session().user?.id);return Object.freeze({seatNo:m?.seat_no??null,isMuted:m?.is_muted??true});},
   getMembers:()=>members.map(m=>Object.freeze({user_id:m.user_id,display_name:m.display_name})),
-  refreshRoom,openSettings
+  refreshRoom,openSettings,openSearch:displayRealRoomSearch
 });
 })();
