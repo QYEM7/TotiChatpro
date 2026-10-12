@@ -95,35 +95,15 @@ function protectIdentity(){
   }
 }
 function decorate(){
-  const state=auth.state();
-  if(!state.signedIn&&!explicitPreview&&authScreens.has(screen)){
-    const page=$('.fc-page')||$('#app .main')||$('#app');
-    banner(page,'tc-phase2-login-banner',
-      '🔐 هذه نسخة متصلة بقاعدة TotiChat الجديدة. لا توجد حسابات قديمة منقولة. سجّل حساباً جديداً حتى تظهر بياناتك الحقيقية.',
-      screen==='loginPreview'?'signup':'login',screen==='loginPreview'?'إنشاء حساب جديد':'تسجيل الدخول');
-    if(screen==='loginPreview'){
-      banner(page,'tc-phase2-demo-choice',
-        'تريد تشوف التصميم فقط؟ تستطيع فتح المعاينة، لكن كل الأرقام والمستخدمين فيها غير حقيقيين.',
-        'preview','عرض التصميم التجريبي');
-    }
-    return;
-  }
-  if(explicitPreview&&!state.signedIn){
-    banner($('#app .main')||$('#app'),'tc-phase2-demo-indicator',
-      '⚠️ وضع المعاينة: جميع الحسابات والأرصدة والغرف المعروضة غير حقيقية.',
-      'login','الدخول الحقيقي');
-    return;
-  }
-  if(state.signedIn){
-    protectIdentity();
-    const parent=screen==='home' ? $('.royal-home-main'):
-                 screen==='me' ? $('.me-royal'):
-                 screen==='room' ? $('.roomview.room-v2'):
-                 screen==='profilePreview' ? $('.profile-royal'):
-                 null;
-    if(parent)banner(parent,'tc-phase2-online-state',
-      '✓ الحساب حقيقي · الغرف والدردشة متصلة · الهدايا بأسعار الخادم · الصوت يحتاج خدمة بث مفعّلة');
-  }
+ const state=auth.state();
+ // Manual testing uses actual backend state. Do not add demo/online ribbons,
+ // promotional strips, misleading activity indicators or stale sample counts.
+ if(state.signedIn){protectIdentity();}
+ else if(explicitPreview){
+   // Standalone visual preview is explicitly labelled, never confused with live accounts.
+   const page=$('#app .main')||$('#app');
+   banner(page,'tc-phase2-demo-indicator','⚠️ معاينة التصميم فقط: المعلومات غير حقيقية.','login','الدخول الحقيقي');
+ }
 }
 const originalRender=render;
 render=function(){
