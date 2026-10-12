@@ -4,14 +4,14 @@
 begin;
 do $test$
 declare sender uuid:=gen_random_uuid(); recipient uuid:=gen_random_uuid();
- sid uuid:=gen_random_uuid(); rid uuid:=gen_random_uuid(); req uuid:=gen_random_uuid();
+ sid uuid:=gen_random_uuid(); recipient_sid uuid:=gen_random_uuid(); rid uuid:=gen_random_uuid(); req uuid:=gen_random_uuid();
  result jsonb; again jsonb; quote jsonb; policy jsonb; awarded record; denied boolean:=false;
  initial_diamonds bigint;
 begin
  insert into auth.users(id,email,email_confirmed_at,is_anonymous)
  values(sender,sender::text||'@test.invalid',now(),false),
  (recipient,recipient::text||'@test.invalid',now(),false);
- insert into auth.sessions(id,user_id) values(sid,sender);
+ insert into auth.sessions(id,user_id) values(sid,sender),(recipient_sid,recipient);
  insert into public.rooms(id,owner_id,title,is_private)
  values(rid,sender,'T67 rollback-only lucky gift test',false);
  insert into public.room_members(room_id,user_id) values(rid,sender),(rid,recipient);
@@ -43,10 +43,14 @@ begin
   awarded.event_id::text<>result->'luckyResult'->>'eventId' or
   awarded.sender_id<>sender or awarded.recipient_id<>recipient or awarded.room_id<>rid then
   raise exception 'T67 immutable Lucky-only point award mismatch';end if;
+ perform set_config('request.jwt.claims',
+  jsonb_build_object('sub',recipient,'session_id',recipient_sid,'aal','aal1')::text,true);
  quote:=phase3.preview_redemption(300);
  if (quote->>'lucky')::bigint<>300 or (quote->>'fixed')::bigint<>0 or
     (quote->>'coins')::bigint<>30 or quote->>'luckyConversionRate'<>'10_PERCENT' then
   raise exception 'T67 incorrect 10 percent Lucky redemption quote: %',quote;end if;
+ perform set_config('request.jwt.claims',
+  jsonb_build_object('sub',sender,'session_id',sid,'aal','aal1')::text,true);
  again:=public.phase3_send_gift(rid,recipient,'g11',1,req,300);
  if again<>result or (select coins from public.wallets where user_id=sender)<>8700 or
   (select count(*) from public.financial_operations where actor_id=sender and request_id=req)<>1 or
