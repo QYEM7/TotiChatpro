@@ -1,0 +1,40 @@
+name: Premium real microphone seat visual QA
+on:
+  push:
+    branches:
+      - 'feature/in-app-admin-center-*'
+    paths:
+      - 'app/phase2-rooms.js'
+      - 'app/phase6-mic-presence.css'
+      - 'app/phase2-backend-controls.js'
+      - 'tests/mic-occupant-visual-contract.test.mjs'
+      - 'tests/mic-occupant-responsive-browser.cjs'
+      - '.github/workflows/mic-occupant-visual-qa.yml'
+  pull_request:
+    branches:
+      - 'develop/phase-2'
+permissions:
+  contents: read
+jobs:
+  mic-visual-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and authentic mic roster checks
+        run: node --test tests/mic-occupant-visual-contract.test.mjs
+      - name: Install headless browser control
+        run: npm install --no-save --no-package-lock --ignore-scripts puppeteer-core@24
+      - name: Check seated people in 5x3 geometry across mobile widths
+        run: node tests/mic-occupant-responsive-browser.cjs
+      - name: Save isolated layout captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-real-mic-seat-visual-qa
+          path: mic-occupant-screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
