@@ -183,7 +183,6 @@ async function sendGift(target){
   const result=await auth.requestData('/rest/v1/rpc/phase3_send_gift',{method:'POST',body:{...payload,p_request_id:pendingGift.requestId}});
   if(auth.state().user?.id!==owner)return;
   if(result?.status!=='completed')throw Error('لم يؤكد الخادم إتمام المعاملة');
-  pendingGift=null;
   const lucky=result?.luckyResult;
   if(gift.diamond_source_type==='LUCKY_GIFT'){
    if(!lucky||typeof lucky.eventId!=='string'||lucky.currency!=='LUCKY_POINTS_NON_REDEEMABLE'||
@@ -191,6 +190,7 @@ async function sendGift(target){
      throw Error('لم نستلم إثبات نتيجة السحب. راجع سجل الهدايا قبل إعادة الإرسال.');
    showToast('حظ حقيقي ×'+lucky.multiplier+' · نقاط المكافأة '+num(lucky.bonusPoints)+' · رقم الحدث '+lucky.eventId.slice(0,8));
   }else showToast('تم إرسال '+gift.name);
+  pendingGift=null;
   void window.TotiPhase2Wallet?.refresh?.();
   window.dispatchEvent(new CustomEvent('totichat-gift-completed',{detail:result}));
   const animation=document.createElement('div');animation.textContent=gift.icon||'🎁';
