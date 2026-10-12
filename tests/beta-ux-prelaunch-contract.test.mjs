@@ -112,3 +112,12 @@ test('live Home VIP and search controls open real pages and never synthetic room
  assert.match(room,/else if\(kind==='search-rooms'\)/);
  assert.doesNotMatch(room,/Math\.random/);
 });
+
+test('signed-in Discover bottom button searches real room records instead of reopening a visual fixture',()=>{
+ const home=get('app/royal-visuals.js'),icons=get('app/phase6-premium-icons.js');
+ assert.match(home,/real\?'type="button" data-phase2="search-rooms" aria-label="استكشاف الغرف الحقيقية"/);
+ assert.match(home,/data-a="go" data-v="discoverPreview"/);
+ assert.match(room,/else if\(kind==='search-rooms'\)\{displayRealRoomSearch\(\);\}/);
+ assert.match(icons,/b\.dataset\.phase2==='search-rooms'\?'compass'/);
+ assert.match(icons,/lucky_gifts:'gift'/);
+});
