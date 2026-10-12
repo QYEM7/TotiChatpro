@@ -66,7 +66,7 @@ test('real gift box is a stable partial-height bottom sheet, independent of cate
  assert.match(gift,/data\.list\('gift_categories'\)/);
  assert.match(gift,/data\.list\('gift_catalog'\)/);
  assert.match(gift,/diamond_source_type==='LUCKY_GIFT'/);
- assert.match(gift,/data-catalog-action="gift-category"/);
+ assert.match(gift,/button\(c\.label,'gift-category',c\.id/);
 });
 test('sign-in is real, visually coherent and inert providers are not offered',()=>{
  assert.match(auth,/TotiPhase2Auth/);
