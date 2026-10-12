@@ -9,7 +9,7 @@ const live=()=>auth.state().signedIn;
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=x=>Number.isSafeInteger(Number(x))?Number(x).toLocaleString('en-US'):String(x);
 const categories={frames:'الإطارات',cars:'المركبات',bubbles:'الفقاعات',badges:'الأوسمة',vip:'VIP',entrances:'الدخول',cards:'CP'};
-let storeFilter='',giftCategory='',giftId='',recipientId='',giftQuantity=1,viewVersion=0,giftBusy=false,pendingGift=null;
+let storeFilter='',giftCategory='',giftId='',recipientId='',giftQuantity=1,viewVersion=0,giftBusy=false,pendingGift=null,luckyPolicy=null;
 function shell(title,type){
  return page(title,'<section class="visual-dark" data-live-catalog="'+type+'"><p class="visual-warn">الخيارات والأسعار من قاعدة TotiChat الجديدة. الاختيار لا يخصم رصيداً؛ الشراء والإرسال يتطلبان تأكيدك وتأكيد الخادم.</p><div class="tc-catalog-content" role="status">جارٍ جلب الخيارات من الخادم…</div></section>');
 }
@@ -92,17 +92,28 @@ async function paint(){
    markup+='<p data-cp-status role="status"></p><h3>علاقاتي وطلباتي</h3>'+state.relations.map(r=>'<article class="cardwhite"><b>'+esc(r.partner.display_name)+' · '+esc(r.type_label)+'</b><p>'+(r.accepted_at?'علاقة مؤكدة · المستوى '+esc(r.level)+' · هدايا بقيمة '+esc(num(r.gift_gold)):'بانتظار قبول '+esc(r.requested_by===owner?r.partner.display_name:'طلبك'))+'</p>'+
     (!r.accepted_at&&r.requested_by!==owner?'<button class="primary" data-cp-action="accept" data-partner="'+esc(r.partner.id)+'" data-type="'+esc(r.type_id)+'">قبول</button><button class="primary" data-cp-action="reject" data-partner="'+esc(r.partner.id)+'" data-type="'+esc(r.type_id)+'">رفض</button>':'<button class="primary" data-cp-action="end" data-partner="'+esc(r.partner.id)+'" data-type="'+esc(r.type_id)+'">'+(r.accepted_at?'إنهاء العلاقة':'إلغاء الطلب')+'</button>')+'</article>').join('')+(!state.relations.length?'<p>لا توجد علاقات أو طلبات.</p>':'')+button('تحديث العلاقات','retry','');
   }else if(type==='gift'){
-   const [cats,gifts]=await Promise.all([data.list('gift_categories'),data.list('gift_catalog')]);
+   const [cats,gifts,policy]=await Promise.all([data.list('gift_categories'),data.list('gift_catalog'),
+    auth.requestData('/rest/v1/rpc/phase6_lucky_gift_policy',{method:'POST',body:{}}).catch(()=>null)]);
+    // Fail closed if server policy isn't available: no fake lucky winners or charges.
+    luckyPolicy=policy&&policy.enabled===true&&policy.currency==='LUCKY_POINTS_NON_REDEEMABLE'&&
+      Array.isArray(policy.tiers)&&policy.tiers.reduce((n,t)=>n+Number(t.weight||0),0)===10000
+      ?policy:null;
    if(!cats.some(c=>c.id===giftCategory))giftCategory=cats.find(c=>c.id==='gift')?.id||cats.find(c=>gifts.some(g=>g.category_id===c.id))?.id||cats[0]?.id||'';
    const recipients=(window.TotiPhase2Rooms?.getMembers?.()||[]).filter(r=>r.user_id!==owner);
    if(!recipients.some(r=>r.user_id===recipientId))recipientId='';
    const rows=gifts.filter(g=>g.category_id===giftCategory);
-   if(!rows.some(g=>g.id===giftId&&g.is_active===true&&g.diamond_source_type!=='LUCKY_GIFT'))giftId='';
+   if(!rows.some(g=>g.id===giftId&&g.is_active===true&&(g.diamond_source_type!=='LUCKY_GIFT'||luckyPolicy)))giftId='';
    markup='<div class="recipient tc-gift-recipients" aria-label="اختيار المستلم">'+recipients.map(r=>button(r.display_name||'مستخدم','recipient',r.user_id,recipientId===r.user_id)).join('')+'</div>'+
     (!recipients.length?'<p>لا يوجد أعضاء في غرفة حقيقية مفتوحة.</p>':'')+
     '<div class="giftTabs tc-gift-tabs" role="tablist" aria-label="أنواع الهدايا">'+cats.map(c=>button(c.label,'gift-category',c.id,giftCategory===c.id)).join('')+'</div>'+
-    '<div class="giftgrid tc-gift-scroll" role="region" aria-label="الهدايا المتاحة" tabindex="0">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||g.diamond_source_type==='LUCKY_GIFT'?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>⏳ الاحتمالات قيد الاعتماد</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+(!rows.length?'<p class="tc-gift-empty">لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+'</div>'+
+    '<div class="giftgrid tc-gift-scroll" role="region" aria-label="الهدايا المتاحة" tabindex="0">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||(g.diamond_source_type==='LUCKY_GIFT'&&!luckyPolicy)?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>'+(luckyPolicy?'✦ سحب خادمي حقيقي':'غير مفعّل في الخادم')+'</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+(!rows.length?'<p class="tc-gift-empty">لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+'</div>'+
     
+    (giftCategory==='luck'&&luckyPolicy?
+       '<aside class="tc-lucky-disclosure"><b>✧ احتمالات الحظ الفعلية:</b> '+
+       luckyPolicy.tiers.map(t=>esc(t.label)+' ×'+esc(t.multiplier)+' ('+esc((t.weight/100).toFixed(2))+'%)').join(' · ')+
+       '<small>المضاعف لنقاط حظ غير نقدية فقط؛ الماس والتارجت على قيمة الهدية الأساسية. هدايا الحظ تُفك وفق قواعدها المالية الأساسية بلا مضاعفة.</small>'+
+       button('السجل الحقيقي','lucky-history','')+'</aside>':giftCategory==='luck'?
+       '<p class="tc-lucky-disclosure">تعذّر توثيق احتمالات الحظ؛ الإرسال متوقف لحماية رصيدك.</p>':'')+
     '<div class="sendrow tc-gift-sendbar"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><label>العدد <select data-catalog-quantity aria-label="عدد الهدايا">'+[1,7,17,77,777].map(q=>'<option value="'+q+'" '+(giftQuantity===q?'selected':'')+'>'+q+'</option>').join('')+'</select></label><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
   }
   if(version!==viewVersion||owner!==auth.state().user?.id||!root.isConnected)return;
@@ -118,6 +129,32 @@ async function paint(){
   retry.dataset.catalogAction='retry';retry.textContent='إعادة المحاولة';content.appendChild(retry);
  }
 }
+async function showLuckyHistory(){
+ const owner=auth.state().user?.id;if(!owner)return;
+ showSheet(head('سجل هدايا الحظ الحقيقي')+
+   '<section class="tc-lucky-history" dir="rtl"><p>النتائج المحفوظة بالخادم فقط، ونقاط الحظ غير قابلة للتحويل إلى كوينز أو ماس.</p>'+
+   '<div data-lucky-history-list role="status">جارٍ جلب السجل…</div>'+
+   '<button type="button" class="primary" data-a="close">إغلاق</button></section>',true);
+ const node=document.querySelector('[data-lucky-history-list]');
+ try{
+  const rows=await auth.requestData('/rest/v1/rpc/phase6_lucky_gift_history',{method:'POST',body:{p_limit:25}});
+  if(owner!==auth.state().user?.id||!node?.isConnected)return;
+  if(!Array.isArray(rows))throw Error('سجل غير صالح');
+  node.replaceChildren();
+  if(!rows.length){node.textContent='ما عندك عمليات هدايا حظ مؤكدة بعد.';return;}
+  for(const record of rows){
+   const item=document.createElement('article');item.className='tc-lucky-history-item';
+   const header=document.createElement('b');
+   header.textContent='حظ ×'+record.multiplier+' · '+num(record.bonusPoints)+' نقطة غير نقدية';
+   const details=document.createElement('small');
+   details.textContent='هدية '+record.giftId+' ×'+record.quantity+' · أساس '+num(record.baseCoins)+
+     ' كوينز · '+new Date(record.createdAt).toLocaleString('ar-IQ')+' · عملية '+String(record.eventId).slice(0,8);
+   item.append(header,details);node.appendChild(item);
+  }
+ }catch(error){
+  if(node?.isConnected)node.textContent='تعذّر قراءة السجل: '+String(error.message).slice(0,100);
+ }
+}
 async function sendGift(target){
  if(giftBusy)return;
  const room=window.TotiPhase2Rooms?.getRoomSummary?.(),owner=auth.state().user?.id;
@@ -127,9 +164,8 @@ async function sendGift(target){
  if(giftBusy||auth.state().user?.id!==owner||room.id!==window.TotiPhase2Rooms?.getRoomSummary?.()?.id)return;
  const gift=gifts.find(g=>g.id===chosenGift);
  if(!gift){showToast('الهدية غير متاحة');return;}
- if(gift.diamond_source_type==='LUCKY_GIFT'){
-  pendingGift=null;
-  showToast('هدايا الحظ متوقفة حتى اعتماد الاحتمالات وسحب الجوائز الحقيقي. لم يتم خصم أي كوينز.');
+ if(gift.diamond_source_type==='LUCKY_GIFT'&&!luckyPolicy){
+  pendingGift=null;showToast('هدايا الحظ غير مفعلة أو الاحتمالات غير متاحة من الخادم. لم يتم الخصم.');
   return;
  }
  if(gift.is_active!==true){pendingGift=null;showToast('الهدية غير مفعّلة حالياً');return;}
@@ -147,7 +183,15 @@ async function sendGift(target){
   const result=await auth.requestData('/rest/v1/rpc/phase3_send_gift',{method:'POST',body:{...payload,p_request_id:pendingGift.requestId}});
   if(auth.state().user?.id!==owner)return;
   if(result?.status!=='completed')throw Error('لم يؤكد الخادم إتمام المعاملة');
-  pendingGift=null;showToast('تم إرسال '+gift.name);void window.TotiPhase2Wallet?.refresh?.();
+  pendingGift=null;
+  const lucky=result?.luckyResult;
+  if(gift.diamond_source_type==='LUCKY_GIFT'){
+   if(!lucky||typeof lucky.eventId!=='string'||lucky.currency!=='LUCKY_POINTS_NON_REDEEMABLE'||
+     !Number.isSafeInteger(Number(lucky.bonusPoints))||Number(lucky.multiplier)<1)
+     throw Error('لم نستلم إثبات نتيجة السحب. راجع سجل الهدايا قبل إعادة الإرسال.');
+   showToast('حظ حقيقي ×'+lucky.multiplier+' · نقاط المكافأة '+num(lucky.bonusPoints)+' · رقم الحدث '+lucky.eventId.slice(0,8));
+  }else showToast('تم إرسال '+gift.name);
+  void window.TotiPhase2Wallet?.refresh?.();
   window.dispatchEvent(new CustomEvent('totichat-gift-completed',{detail:result}));
   const animation=document.createElement('div');animation.textContent=gift.icon||'🎁';
   animation.setAttribute('aria-label',gift.name);Object.assign(animation.style,{position:'fixed',inset:'30% 0 auto',textAlign:'center',fontSize:'96px',zIndex:'99999',pointerEvents:'none'});
@@ -168,6 +212,7 @@ window.addEventListener('click',event=>{
  else if(action==='store-equip'){target.disabled=true;void auth.requestData('/rest/v1/rpc/phase3_equip_store',{method:'POST',body:{p_item_id:value,p_equipped:target.dataset.equipped==='true'}}).then(()=>{showToast('تم تحديث التجهيز');const item=visibleStore.find(r=>r.id===value);if(item)itemDetails(item);}).catch(e=>showToast(String(e.message))).finally(()=>{target.disabled=false;});return;}
  else if(action==='package'){showToast('الباقة من إعدادات الخادم. الشحن عبر الوكيل غير مفعّل بعد؛ لم يتغير رصيدك.');return;}
  else if(action==='gift-send'){void sendGift(target);return;}
+ else if(action==='lucky-history'){void showLuckyHistory();return;}
  else if(action==='gift-category'){giftCategory=value;giftId='';}
  else if(action==='gift-item')giftId=value;
  else if(action==='recipient')recipientId=value;
