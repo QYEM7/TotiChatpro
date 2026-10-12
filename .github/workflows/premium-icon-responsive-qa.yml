@@ -1,0 +1,38 @@
+name: Premium icon mobile visual QA
+on:
+  push:
+    branches:
+      - 'feature/in-app-admin-center-*'
+    paths:
+      - 'app/phase6-premium-icons.js'
+      - 'app/phase6-premium-icons.css'
+      - 'app/phase6-inapp-admin.css'
+      - 'app/toti-nav-banner-refine.css'
+      - 'tests/premium-icon-responsive-browser.cjs'
+      - '.github/workflows/premium-icon-responsive-qa.yml'
+  pull_request:
+    branches:
+      - 'develop/phase-2'
+permissions:
+  contents: read
+jobs:
+  mobile-visual-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser control
+        run: npm install --no-save --no-package-lock --ignore-scripts puppeteer-core@24
+      - name: Check phone widths and preserve existing routes
+        run: node tests/premium-icon-responsive-browser.cjs
+      - name: Keep PNG comparison captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-premium-icon-phone-qa
+          path: premium-icon-screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
