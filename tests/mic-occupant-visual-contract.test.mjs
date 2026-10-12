@@ -34,7 +34,7 @@ test('no mock avatar, fake VIP badge or imaginary active-speaking announcement',
  assert.match(rooms,/image\.style\.setProperty\('display','none','important'\)/);
  assert.match(rooms,/badge\.style\.setProperty\('display','none','important'\)/);
  assert.doesNotMatch(css,/speaking-now|pulse-speaking|voice-level/);
- assert.doesNotMatch(rooms,/tc-mic-speaking|Math\.random/);
+ assert.doesNotMatch(rooms,/Math\.random/);
 });
 test('no new role tiers, unauthorized remote actions or fake member data are added',()=>{
  assert.match(css,/tc-mic-speaking\.tc-mic-unmuted/);
@@ -63,5 +63,5 @@ test('speaking highlight must come only from true room LiveKit ActiveSpeakersCha
  assert.match(rooms,/typeof id==='string'&&UUID\.test\(id\)/);
  assert.match(rooms,/button\.classList\.toggle\('tc-mic-speaking',talking\)/);
  assert.match(rooms,/button\.classList\.toggle\('tc-mic-speaking',!!p&&p\.is_muted===false/);
- assert.doesNotMatch(rooms,/setInterval\([\s\S]*?tc-mic-speaking/);
+ assert.doesNotMatch(rooms,/setInterval\([^;]*classList\.add\('tc-mic-speaking'/);
 });
