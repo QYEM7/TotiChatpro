@@ -28,13 +28,16 @@ function royalHome(){
    ?window.TotiBannerData.renderBanner():'';
  return '<div class="royal-home" dir="rtl"><div class="royal-home-haze"></div>'+
  '<header class="royal-topbar"><div class="royal-brand">✦ <strong>TotiChat</strong></div>'+
- '<div class="royal-top-actions"><button data-a="go" data-v="vip" aria-label="VIP" class="royal-vip-chip">👑 VIP</button><button data-royal="search" aria-label="بحث">⌕</button><button data-royal="friends" aria-label="الأصدقاء">♟</button><button data-royal="notify" aria-label="الإشعارات">♧<i></i></button></div></header>'+
+ '<div class="royal-top-actions">'+
+ (real?'<button disabled aria-label="مزايا VIP تجدها في حسابك" class="royal-vip-chip">👑 VIP</button><button disabled title="بحث الغرف قيد التفعيل" aria-label="بحث الغرف قيد التفعيل">⌕</button><button data-tc-social-open aria-label="الأصدقاء الحقيقيون">♟</button><button data-t57-open aria-label="الإشعارات الحقيقية">♧</button>':
+ '<button data-a="go" data-v="vip" aria-label="VIP" class="royal-vip-chip">👑 VIP</button><button data-royal="search" aria-label="بحث">⌕</button><button data-royal="friends" aria-label="الأصدقاء">♟</button><button data-royal="notify" aria-label="الإشعارات">♧<i></i></button>')+'</div></header>'+
  '<main class="royal-home-main">'+
   (real?verifiedBanner:'<button class="royal-hero" data-royal="hero" aria-label="تفاصيل الغرفة المميزة"><img src="'+esc(imgs('room5'))+'" alt="ليلة ساحرة في TotiChat">'+
  '<span class="royal-hero-shine"></span><span class="royal-hero-text"><b>هنا يجتمع<br>الصوت الجميل</b><small>⋆ كوّن صداقات حول العالم ⋆</small></span>'+
  '<span class="royal-hero-pips"><i></i><i></i><i></i><i></i></span></button>')+
- '<nav class="royal-category-row" aria-label="تصنيفات TotiChat">'+cat.map(x=>'<button data-royal="category" data-cat="'+x[2]+'" class="royal-cat"><span class="royal-cat-icon">'+x[0]+'</span><small>'+x[1]+'</small></button>').join('')+'</nav>'+
- '<button class="royal-vip-promo" data-a="go" data-v="vip"><span class="royal-vip-emblem">👑<b>VIP</b></span><span class="royal-vip-promo-copy"><b>أصبح عضو VIP</b><small>مزايا حصرية وتجربة أكثر تميزاً</small></span><span class="royal-gold-cta">اكتشف الآن ❮</span></button>'+
+ '<nav class="royal-category-row" aria-label="تصنيفات TotiChat">'+cat.map(x=>'<button '+(real&&x[2]!=='all'?'disabled title="التصنيفات تحتاج تصنيفاً موثقاً من الخادم" ':'')+'data-royal="category" data-cat="'+x[2]+'" class="royal-cat"><span class="royal-cat-icon">'+x[0]+'</span><small>'+x[1]+'</small></button>').join('')+'</nav>'+
+ (real?'<div class="royal-vip-promo" role="note" aria-label="حالة VIP الفعلية تظهر في ملفي"><span class="royal-vip-emblem">👑<b>VIP</b></span><span class="royal-vip-promo-copy"><b>امتيازات VIP</b><small>حالتك الفعلية وشاراتك تظهر داخل ملفي</small></span></div>':
+ '<button class="royal-vip-promo" data-a="go" data-v="vip"><span class="royal-vip-emblem">👑<b>VIP</b></span><span class="royal-vip-promo-copy"><b>أصبح عضو VIP</b><small>مزايا حصرية وتجربة أكثر تميزاً</small></span><span class="royal-gold-cta">اكتشف الآن ❮</span></button>')+
  '<div class="royal-section-label"><h2>🔥 الغرف المميزة</h2><button data-royal="view-all">عرض الكل ❮</button></div>'+
  '<div class="royal-room-gallery">'+(real?'':roomItems.map(roomCard).join(''))+'</div>'+
  '<div class="royal-section-label"><h2>👑 غرف قريبة منك</h2><button data-royal="view-all">عرض الكل ❮</button></div>'+
