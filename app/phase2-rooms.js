@@ -727,7 +727,7 @@ window.addEventListener('totichat-live-active-speakers',event=>{
  realSpeakingIds=new Set(Array.isArray(detail.userIds)
   ?detail.userIds.filter(id=>typeof id==='string'&&UUID.test(id)):[]);
  if(screen!=='room')return;
- for(const button of $('.roomview.room-v2 .seats > .seat')){
+ for(const button of $$('.roomview.room-v2 .seats > .seat')){
   const userId=button.dataset.tcMicOccupant||'';
   const talking=!!userId&&button.classList.contains('tc-mic-unmuted')&&realSpeakingIds.has(userId);
   button.classList.toggle('tc-mic-speaking',talking);
