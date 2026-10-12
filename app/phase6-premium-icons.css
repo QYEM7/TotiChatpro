@@ -129,3 +129,9 @@ html[data-tc-premium="1"] .tcac-root button:disabled{
  html[data-tc-premium="1"] #app .royal-top-actions button:not(.royal-vip-chip){min-width:31px}
  html[data-tc-premium="1"] #app .tc-unified-nav.royal-nav button small{font-size:9px}
 }
+
+html[data-tc-premium="1"] #app .me-pencil .tc-premium-svg,
+html[data-tc-premium="1"] #app .pr-top-actions button .tc-premium-svg{
+ width:20px;height:20px;stroke-width:1.8;
+ margin:auto;
+}
