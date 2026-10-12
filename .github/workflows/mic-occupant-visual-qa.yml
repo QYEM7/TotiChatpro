@@ -7,7 +7,7 @@ on:
       - 'app/phase2-rooms.js'
       - 'app/phase6-mic-presence.css'
       - 'app/phase2-backend-controls.js'
-      - 'tests/mic-occupant-visual-contract.test.mjs'
+      - 'tests/mic-occupant-visual-contract.test.mjs tests/beta-ux-prelaunch-contract.test.mjs'
       - 'tests/mic-occupant-responsive-browser.cjs'
       - '.github/workflows/mic-occupant-visual-qa.yml'
   pull_request:
