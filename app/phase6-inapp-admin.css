@@ -46,3 +46,9 @@
 .tcac-root button:focus-visible,.tcac-entry:focus-visible{outline:3px solid #a8751b;outline-offset:2px}
 @media(min-width:620px){.tcac-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tcac-content{padding:26px}}
 @media(prefers-reduced-motion:reduce){.tcac-root *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+.tcac-field{display:flex;flex-direction:column;gap:7px;margin:14px 0;color:#544831;font-size:13px;font-weight:700}
+.tcac-field input,.tcac-field select,.tcac-field textarea{min-width:0;max-width:100%;box-sizing:border-box;font:inherit;font-weight:400;font-size:14px;color:#2a2a28;background:#fff;border:1px solid #d9ccb6;border-radius:10px;padding:11px}
+.tcac-field textarea{min-height:86px;resize:vertical}
+.tcac-module form{border-top:1px solid #eee5d8;padding-top:8px;margin-top:14px}
+.tcac-module form button:disabled{opacity:.6}
+#tcac-vip-state{padding:9px 0;font-size:13px;overflow-wrap:anywhere}
