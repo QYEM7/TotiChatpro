@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const migration=read('supabase/migrations/20261012120127_staging_host_month_diamond_conservation_readonly_v1.sql');
 const integration=read('supabase/tests/t67_host_month_real_gift_integrity.sql');
+const qualified=read('supabase/migrations/20261012120559_staging_host_month_diamond_conservation_qualified_columns_v2.sql');
 test('read-only monthly diamond conservation is Owner/partner-only and never processes financial writes',()=>{
  assert.match(migration,/phase3\.actor\(\)/);
  assert.match(migration,/a\.owner_id=caller or a\.main_partner_id=caller/);
@@ -43,4 +44,12 @@ test('real disposable test exercises redemption at server quote, owner-only audi
  'T67 missing lot did not produce complete discrepancy'
  ])assert(integration.includes(k),'Missing integration assertion '+k);
  assert.match(integration,/begin;[\s\S]*rollback;/i);
+});
+
+test('runtime SQL column names cannot conflict with PL/pgSQL gift_count variable',()=>{
+ assert.match(qualified,/grouped\.gift_count/);
+ assert.match(qualified,/page\.gift_count/);
+ assert.match(qualified,/page\.earned::text/);
+ assert.match(qualified,/create or replace function phase3\.host_month_diamond_conservation/);
+ assert.match(qualified,/from grouped order by grouped\.agency_id,grouped\.recipient_id offset p_offset limit p_limit/);
 });
