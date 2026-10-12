@@ -185,3 +185,23 @@ test('mobile live Discover/Search wins before all legacy click handlers',async()
  auth.signedIn=false;fire();
  assert.equal(opened,3,'signed-out users must never open real room directory');
 });
+
+
+test('shared bottom navigation Discover is real on Profile and other authenticated screens',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const nav=get('app/toti-nav-banner-refine.js');
+ const start=nav.indexOf('function navigationMarkup(){');
+ const end=nav.indexOf('\nfunction enhanceNavigation(){',start);
+ assert.ok(start>=0&&end>start);
+ const code=nav.slice(start,end)+'\nnavigationMarkup';
+ const screen='me';
+ const make=(signed)=>runInNewContext(code,{
+  window:{TotiLiveMode:{enabled:true},TotiPhase2Auth:{state:()=>({signedIn:signed})}},
+  screen,falconSource:'/assets/falcon.png'
+ })();
+ const real=make(true),visual=make(false);
+ assert.match(real,/data-phase2="search-rooms" aria-label="استكشاف الغرف الحقيقية"/);
+ assert.doesNotMatch(real,/data-v="discoverPreview"/);
+ assert.match(visual,/data-v="discoverPreview"/);
+ assert.equal((real.match(/<button /g)||[]).length,5,'all five navigation controls stay present');
+});
