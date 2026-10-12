@@ -13,7 +13,7 @@ const admin=load('app/phase2-backend-controls.js');
 const migration=load('supabase/migrations/20261012124921_verified_support_strips_min_7000.sql');
 
 function checker(){
-  const begin=global.indexOf('const valid=row=>{');
+  const begin=global.indexOf('const MIN_REAL_SUPPORT_COINS=');
   const end=global.indexOf('\nfunction title',begin);
   assert.ok(begin>0&&end>begin,'explicit verified-gift validation function is present');
   return vm.runInNewContext(
