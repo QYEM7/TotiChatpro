@@ -8,7 +8,7 @@ on:
       - 'app/phase6-inapp-admin.css'
       - 'app/phase2-backend-controls.js'
       - 'tests/inapp-admin-center.test.mjs'
-      - 'tests/live-no-fake-content.test.mjs'
+      - 'tests/live-no-fake-content.test.mjs tests/verified-support-strip-contract.test.mjs'
       - 'tests/real-admin-banners-and-demo-guard.test.mjs'
       - 'tests/premium-icon-visual-contract.test.mjs'
       - 'app/phase6-premium-icons.js'
