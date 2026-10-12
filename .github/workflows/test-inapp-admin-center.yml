@@ -8,6 +8,13 @@ on:
       - 'app/phase6-inapp-admin.css'
       - 'app/phase2-backend-controls.js'
       - 'tests/inapp-admin-center.test.mjs'
+      - 'tests/live-no-fake-content.test.mjs'
+      - 'app/royal-visuals.js'
+      - 'app/home-banners.js'
+      - 'app/phase2-global-gifts.js'
+      - 'app/phase2-rooms.js'
+      - 'app/phase2-live-mode.js'
+      - 'scripts/build-live-preview.mjs'
       - '.github/workflows/test-inapp-admin-center.yml'
   pull_request:
     branches:
@@ -17,6 +24,13 @@ on:
       - 'app/phase6-inapp-admin.css'
       - 'app/phase2-backend-controls.js'
       - 'tests/inapp-admin-center.test.mjs'
+      - 'tests/live-no-fake-content.test.mjs'
+      - 'app/royal-visuals.js'
+      - 'app/home-banners.js'
+      - 'app/phase2-global-gifts.js'
+      - 'app/phase2-rooms.js'
+      - 'app/phase2-live-mode.js'
+      - 'scripts/build-live-preview.mjs'
 permissions:
   contents: read
 jobs:
@@ -29,4 +43,4 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax, user role and protected Profile integration
-        run: node --test tests/inapp-admin-center.test.mjs
+        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs
