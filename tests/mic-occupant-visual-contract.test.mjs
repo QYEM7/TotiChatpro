@@ -97,7 +97,7 @@ test('real LiveKit speaker event updates each seat without iterating a single el
  vm.runInNewContext("let realSpeakerRoom='';let realSpeakingIds=new Set();\n"+handler,{
   window,session:()=>({signedIn:true}),active:{id:roomId},screen:'room',
   UUID:/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-  $:selector=>{assert.ok(selector.includes('.seats'));return seats;},
+  $$:selector=>{assert.ok(selector.includes('.seats'));return seats;},
   $:()=>{throw Error('single-element selector cannot supply all 15 seats')}
  });
  const dispatch=userIds=>listeners['totichat-live-active-speakers']({detail:{roomId,userIds}});
