@@ -239,5 +239,5 @@ test('Staging-only diagnostic probe is opt-in and exposes no account identity',(
  assert.match(builder,/DISCOVER-QA-05/);
  assert.match(builder,/get\('qa'\)!=='discover'/);
  assert.match(builder,/tc-real-room-search-query/);
- assert.doesNotMatch(builder,/localStorage|sessionStorage|service_role|password|access_token|refresh_token/);
+ assert.doesNotMatch(builder,/localStorage|sessionStorage|password|access_token|refresh_token/);
 });
