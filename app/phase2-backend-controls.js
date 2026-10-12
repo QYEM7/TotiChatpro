@@ -30,15 +30,10 @@ function inject(){
   const label=settings.querySelectorAll('span')[1];if(label)label.textContent='أمان الحساب';
  }
  if(!panel.querySelector('[data-support-open]'))panel.appendChild(row('🛟','خدمة العملاء والتذاكر الحقيقية','supportOpen'));
- if(authority?.canManageCatalogs&&!panel.querySelector('[data-admin-open]'))
-  panel.appendChild(row('⚙️','لوحة الكتالوجات الحقيقية','adminOpen'));
- if(authority?.canReadReports&&!panel.querySelector('[data-reports-open]'))
-  panel.appendChild(row('📊','تقارير المعاملات الحقيقية','reportsOpen'));
- if((authority?.isOwner||authority?.isMainPartner)&&!panel.querySelector('[data-tc-global-gift-admin]'))
-  panel.appendChild(row('🎁','إعدادات إعلانات الهدايا','tcGlobalGiftAdmin'));
- if(authority?.role==='db'&&Array.isArray(authority.permissions)&&
-    authority.permissions.includes('host_agency.open')&&!panel.querySelector('[data-tc-host-approval]'))
-  panel.appendChild(row('🏢','فتح وكالة مضيفين بتفويض','tcHostApproval'));
+ // Consolidated administration: only the role-verified center entry is shown in Profile.
+ // Existing catalog, reports, gifts and DB opening handlers remain available inside it.
+ window.TotiInAppAdmin?.onProfile();
+
 }
 async function loadAuthority(){
  const id=auth.state().user?.id||'';
@@ -146,6 +141,10 @@ window.addEventListener('totichat-phase2-auth',()=>{
 // Approved HTML must stay byte-for-byte untouched. Enhance ONLY authenticated
 // live-mode sessions with independently tested modules, never demo preview.
 const moduleBase=new URL('.',document.currentScript?.src||location.href);
+const inAppAdminStyle=document.createElement('link');
+inAppAdminStyle.rel='stylesheet';
+inAppAdminStyle.href=new URL('phase6-inapp-admin.css',moduleBase).href;
+document.head.appendChild(inAppAdminStyle);
 const notificationsStyle=document.createElement('link');
 notificationsStyle.rel='stylesheet';
 notificationsStyle.href=new URL('phase5-notifications-ui.css',moduleBase).href;
@@ -182,7 +181,7 @@ const financeAuditStyle=document.createElement('link');
 financeAuditStyle.rel='stylesheet';
 financeAuditStyle.href=new URL('phase5-finance-integrity-ui.css',moduleBase).href;
 document.head.appendChild(financeAuditStyle);
-for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js']){
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js','phase6-inapp-admin.js']){
  const script=document.createElement('script');
  script.async=false;
  script.src=new URL(name,moduleBase).href;
