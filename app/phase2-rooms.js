@@ -116,7 +116,7 @@ function clearUnjoinedRoom(view){
   if(count)count.textContent='0';
   for(const [index,button] of $$('.seats .seat',view).entries()){
     button.disabled=true;
-    button.classList.remove('occupied','locked');
+    button.classList.remove('occupied','locked','tc-mic-member','tc-mic-muted','tc-mic-unmuted','tc-mic-owner','tc-mic-self','vip1','vip5','vip8');
     button.setAttribute('aria-label','المقعد '+(index+1)+' — انضم لغرفة أولاً');
     const face=$('.seatface',button);
     if(face){
@@ -131,7 +131,9 @@ function clearUnjoinedRoom(view){
         glyph.className='tc-real-seat-glyph';
         face.appendChild(glyph);
       }
-      glyph.hidden=false;glyph.textContent='＋';
+      glyph.hidden=false;glyph.textContent='＋';glyph.classList.remove('tc-mic-monogram');
+      $('.tc-mic-indicator',face)?.remove();
+      $('.tc-mic-owner-mark',face)?.remove();
     }
     const label=$('.seatname',button);
     if(label)label.textContent='مقعد '+(index+1);
@@ -211,11 +213,23 @@ function roomContent(){
       button.disabled=false;
       const slot=index+1;
       const p=members.find(x=>x.seat_no===slot);
-      // Do not overwrite the approved VIP/decorative seat classes on every refresh.
+      // Verified room membership is authoritative. Never carry sample VIP
+      // badges/classes from the standalone visual review into real users.
+      // The roster returns no verified VIP tier, so a rank is never invented.
+      button.classList.remove('vip1','vip5','vip8');
       button.classList.toggle('occupied',!!p);
+      button.classList.toggle('tc-mic-member',!!p);
+      button.classList.toggle('tc-mic-muted',!!p&&p.is_muted===true);
+      button.classList.toggle('tc-mic-unmuted',!!p&&p.is_muted===false);
+      button.classList.toggle('tc-mic-owner',!!p&&p.user_id===active.owner_id);
+      button.classList.toggle('tc-mic-self',!!p&&p.user_id===session().user?.id);
       // An empty seat is available; the old preview class suggested a false lock.
       button.classList.remove('locked');
-      button.setAttribute('aria-label',p?'المقعد '+slot+': '+p.display_name:'المقعد '+slot+' متاح');
+      button.setAttribute('aria-label',p
+        ?'المقعد '+slot+': '+p.display_name+
+          (p.user_id===active.owner_id?'، مالك الغرفة':'')+
+          (p.is_muted===true?'، المايك مكتوم':'، المايك غير مكتوم')
+        :'المقعد '+slot+' متاح');
       const face=$('.seatface',button);
       if(face){
         // Preserve original seat frames, ornaments, CSS effects and children.
@@ -244,13 +258,45 @@ function roomContent(){
           face.appendChild(glyph);
         }
         glyph.hidden=!!realAvatar;
-        glyph.textContent=p?(p.user_id===session().user?.id?'🎙️':'🎤'):'＋';
+        glyph.classList.toggle('tc-mic-monogram',!!p&&!realAvatar);
+        // Use the actual user's initial when no verified photo exists.
+        // Do not impersonate a profile using the preview-person images.
+        glyph.textContent=p?(Array.from(String(p.display_name||'مستخدم').trim())[0]||'م'):'＋';
+        let micStatus=$('.tc-mic-indicator',face);
+        if(p){
+          if(!micStatus){
+            micStatus=document.createElement('span');
+            micStatus.className='tc-mic-indicator';
+            micStatus.setAttribute('aria-hidden','true');
+            face.appendChild(micStatus);
+          }
+          micStatus.innerHTML=p.is_muted===true
+            ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9v3a3 3 0 0 0 5.1 2.1M15 9V6a3 3 0 0 0-5.6-1.5"/><path d="M5 11a7 7 0 0 0 12 4.5M19 11a7 7 0 0 1-.4 2.3M12 18v4m-4 0h8M3 3l18 18"/></svg>'
+            :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4m-4 0h8"/></svg>';
+          micStatus.title=p.is_muted===true?'المايك مكتوم':'المايك غير مكتوم';
+        }else micStatus?.remove();
+        let ownerMark=$('.tc-mic-owner-mark',face);
+        if(p&&p.user_id===active.owner_id){
+          if(!ownerMark){
+            ownerMark=document.createElement('span');
+            ownerMark.className='tc-mic-owner-mark';
+            ownerMark.setAttribute('aria-hidden','true');
+            ownerMark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 7 5.4 4.5L12 4l4.1 7.5L21.5 7l-1.8 12H4.3z"/><path d="M5 16.5h14"/></svg>';
+            face.appendChild(ownerMark);
+          }
+          ownerMark.title='مالك الغرفة';
+        }else ownerMark?.remove();
         const badge=$('.seatbadge',face);
         if(badge)badge.style.setProperty('display','none','important');
       }
-      const label=$('.seatname',button);if(label)label.textContent=p?.display_name||'مقعد '+slot;
+      const label=$('.seatname',button);
+      if(label){
+        label.textContent=p?.display_name||'مقعد '+slot;
+        // The visual-only template hardcodes VIP Gold for unrelated people.
+        label.classList.remove('vipGold');
+      }
       const level=$('.seatlv',button);
-      if(level)level.textContent=p?(p.is_muted?'🔇 محجوز · صامت':'🎙️ محجوز'):'انضم للمايك';
+      if(level)level.textContent=p?(p.is_muted===true?'المايك مكتوم':'غير مكتوم'):'انضم للمايك';
       button.dataset.phase2='seat-action';
       button.dataset.seat=String(slot);
     }
