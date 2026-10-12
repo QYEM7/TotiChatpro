@@ -21,7 +21,7 @@ test('Lucky prizes are server drawn after real financial transfer, never multipl
  assert.match(odds,/reward_tier text/);
  assert.match(odds,/unique default gen_random_uuid/);
  assert.match(odds,/points:=new\.amount\*\(choice\.multiplier-1\)/);
- assert.match(odds,/op\.operation='gift'/i===true?/x/:/phase3\.send_gift\(p_room_id,p_recipient_id,p_gift_id,p_quantity,p_request_id\)/);
+ assert.match(odds,/phase3\.send_gift\(p_room_id,p_recipient_id,p_gift_id,p_quantity,p_request_id\)/);
  assert.doesNotMatch(odds,/update public\.wallets\s+set\s+diamonds\s*=\s*diamonds\s*\+\s*points/i);
  assert.match(odds,/LUCKY_POINTS_NON_REDEEMABLE/);
  assert.match(odds,/phase3\.reject_unapproved_lucky_gift/);
@@ -39,7 +39,7 @@ test('Lucky replay response cannot produce a second transfer or additional award
 test('Lucky sender receives published probabilities and audited real Lucky History',()=>{
  assert.match(gift,/phase6_lucky_gift_policy/);
  assert.match(gift,/policy\.enabled===true/);
- assert.match(gift,/luckyPolicy:null/);
+ assert.match(gift,/\?policy:null/);
  assert.match(gift,/phase6_lucky_gift_history/);
  assert.match(gift,/bonusPoints/);
  assert.match(gift,/gift\.diamond_source_type==='LUCKY_GIFT'&&!luckyPolicy/);
