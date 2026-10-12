@@ -15,6 +15,8 @@ const icons=Object.freeze({
  users:'<path d="M16 20v-1.7a4.3 4.3 0 0 0-4.3-4.3H6.3A4.3 4.3 0 0 0 2 18.3V20"/><circle cx="9" cy="7" r="3.2"/><path d="M17 4.1a3.2 3.2 0 0 1 0 6.3M22 20v-1.7a4.3 4.3 0 0 0-3.2-4.1"/>',
  user:'<circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
  search:'<circle cx="10.7" cy="10.7" r="6.7"/><path d="m16 16 5 5"/>',
+ edit:'<path d="m15.5 4.5 4 4-11 11-5 1 1-5z"/><path d="m13.5 6.5 4 4"/>',
+ close:'<path d="M5 5 19 19M19 5 5 19"/>',
  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>',
  crown:'<path d="m2.5 7 5.4 4.5L12 4l4.1 7.5L21.5 7l-1.8 12H4.3z"/><path d="M5 16.5h14"/>',
  flame:'<path d="M12 22c-4.2 0-7-3-7-7 0-3.3 2.6-5.8 3.5-8 .2 2 1.5 3.4 2.5 4 .4-3.1 1.8-5.9 4.5-8 0 3.1 3.5 5.9 3.5 11.7C19 19.1 16.1 22 12 22Z"/><path d="M12 21c-2 0-3-1.5-3-3 0-1.2.8-2.4 2-3.4.1 1.1.6 1.8 1.2 2.1.4-1.1 1-1.9 1.9-2.7.4 1.4 1.3 2.1 1.3 4 0 1.7-1.1 3-3.4 3Z"/>',
@@ -85,6 +87,18 @@ function decorate(){
    if(b.matches('[data-tc-social-open]'))paint(b,'users');
    else if(b.matches('[data-t57-open]'))paint(b,'bell');
    else if(b.getAttribute('aria-label')?.includes('بحث'))paint(b,'search');
+  });
+  root.querySelectorAll('.me-pencil,[data-a="go"][data-v="profileEdit"][aria-label]').forEach(b=>{
+   if(b.dataset.tcPremiumIcon==='edit')return;
+   if(b.matches('.me-pencil')||b.closest('.pr-top-actions')){
+    b.innerHTML=svg('edit');
+    b.dataset.tcPremiumIcon='edit';
+   }
+  });
+  root.querySelectorAll('.pr-top-actions button[aria-label="رجوع"]').forEach(b=>{
+   if(b.dataset.tcPremiumIcon==='arrow')return;
+   b.innerHTML=svg('arrow');
+   b.dataset.tcPremiumIcon='arrow';
   });
   root.querySelectorAll('.me-links .me-link').forEach(b=>
    paint(b.querySelector('.rich-icon'),routeIcons[b.dataset.v]));
