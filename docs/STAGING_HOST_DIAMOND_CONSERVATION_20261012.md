@@ -21,12 +21,17 @@
 - No funds are credited, debited, paid, converted or reset by this API.
 - Staging currently has zero actual gift events, diamond lots, redemptions, agency payroll or monthly snapshots. Do not show fabricated stats in an app dashboard.
 
-## QA plan / observed before latest CI outcome
+## Verified QA evidence
 - SQL function compiled inside a transaction and was rolled back before its versioned migration was deployed. Migration and GitHub copy match.
 - Anonymous Execute is denied on the private and public functions, authenticated role has invocation privilege but private function applies Owner/partner identity verification.
 - Added `tests/staging-monthly-diamond-conservation.test.mjs` to the existing CI suite.
-- Extended rolled-back `supabase/tests/t67_host_month_real_gift_integrity.sql` to create a real local gift + monthly snapshot, invoke an authentic 30% server-quoted diamond redemption, ensure original earned diamonds remain 10 while redeemed becomes 10 and current remaining 0; deny host access to finance audit; deliberately tamper gift amount and delete a lot in another month to require discrepancy detection. **Treat as pending until the latest T03 full-stack job succeeds.**
+- Extended rolled-back `supabase/tests/t67_host_month_real_gift_integrity.sql` to create a real local gift + monthly snapshot, invoke an authentic 30% server-quoted diamond redemption, ensure original earned diamonds remain 10 while redeemed becomes 10 and current remaining 0; deny host access to finance audit; deliberately tamper gift amount and delete a lot in another month to require discrepancy detection. **PASS:** GitHub Actions run 38246961697 executed T67 successfully (DO + ROLLBACK) against disposable real PostgreSQL/GoTrue, including genuine server-quoted redemption, immutable month earned totals, wrong-actor denial, tampering and missing-lot checks. Full schema replay run 38246961927 also passed.
 
 ## Production blockers
 - Staging Owner/partner and customer denied-access checks using **legitimately signed in hosted sessions**, actual funded Staging recharge test cases, complete salary and commission formulas approved and versioned, immutable payroll obligations and payout settlement before monthly diamond reset, genuine independent backup restore and two-device LiveKit voice.
 - This phase is intentionally only authenticated **read-only reconciliation**. Zeroing active diamond balances from monthly accounting must not start until obligations and all cross-month and redeemed allocations reconcile.
+
+## Runtime SQL fix and migration history
+- The new report originally failed in real local tests due to the PL/pgSQL variable `gift_count` colliding with the grouped SQL column. The original applied migration stays intact as historical evidence.
+- Staging migration `20261012120559_staging_host_month_diamond_conservation_qualified_columns_v2` fixes this by explicitly qualifying both `grouped.gift_count` and `page.gift_count`. The exact new function definition was read back from Staging and checked. SQL migration replay and integration run are both green.
+- The staged schema currently contains 84 migrations. No synthetic gifts, monthly snapshots, host agencies, payments or redemptions were inserted into hosted Staging.
