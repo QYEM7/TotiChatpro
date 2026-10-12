@@ -138,3 +138,11 @@
 @media(prefers-reduced-motion:reduce){
  #sheet.tc-gift-sheet *{scroll-behavior:auto!important;transition:none!important}
 }
+
+
+/* Keep the voice-room seats visible above the gift tray. */
+#overlay:has(#tc-real-gift-drawer){background:rgba(12,6,22,.29)!important}
+#sheet.tc-gift-sheet .tc-gift-empty{
+ display:block;grid-column:1/-1;align-self:start;text-align:center;
+ padding:18px 8px;color:#e7d6ed;font-size:12px;line-height:1.6;
+}
