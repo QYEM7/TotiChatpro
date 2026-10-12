@@ -121,3 +121,32 @@ test('signed-in Discover bottom button searches real room records instead of reo
  assert.match(icons,/b\.dataset\.phase2==='search-rooms'\?'compass'/);
  assert.match(icons,/lucky_gifts:'gift'/);
 });
+
+
+test('legacy search icon performs a real authenticated search rather than the unsupported toast',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const home=get('app/royal-visuals.js');
+ const start=home.indexOf('function handle(e){');
+ const end=home.indexOf("\nwindow.addEventListener('click',handle,true);",start);
+ assert.ok(start>=0&&end>start,'live click handler is present');
+ let opened=0;
+ const notices=[];
+ const handler=runInNewContext(home.slice(start,end)+'\nhandle',{
+  window:{
+   TotiLiveMode:{enabled:true},
+   TotiPhase2Auth:{state:()=>({signedIn:true})},
+   TotiPhase2Rooms:{openSearch:()=>{opened++;}}
+  },
+  showToast:msg=>notices.push(msg)
+ });
+ let stopped=0;
+ handler({target:{closest:()=>({dataset:{royal:'search'}})},
+  preventDefault:()=>{},stopImmediatePropagation:()=>{stopped++;}});
+ assert.equal(opened,1,'the legacy Search icon must open the genuine room search');
+ assert.equal(stopped,1);
+ assert.deepEqual(notices,[],'no misleading missing-backend warning');
+ assert.match(room,/openSearch:displayRealRoomSearch/);
+ assert.match(room,/void listRooms\(\)\.then\(\(\)=>\{/);
+ assert.match(room,/if\(session\(\)\.user\?\.id===account&&\$\('#tc-real-room-search-results'\)\)/);
+ assert.match(room,/if\(roomListError\)\{/);
+});
