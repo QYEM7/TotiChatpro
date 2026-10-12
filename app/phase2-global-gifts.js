@@ -20,6 +20,8 @@ function decorateTicker(view){
  const node=ticker.querySelector('.tickerBody');
  const count=ticker.querySelector('.orb b');
  const current=rows[0];
+ // No confirmed event means NO public activity strip, not a mock donor or '0' animation.
+ ticker.style.display=current?'':'none';
  // The visual-review template contains an illustrative person's portrait:
  // it must never be presented as the real sender of an audited gift.
  const sample=ticker.querySelector('img');
