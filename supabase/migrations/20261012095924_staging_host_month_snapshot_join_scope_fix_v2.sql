@@ -127,5 +127,5 @@ begin
   'canApprovePayroll',false,'hasPayrollRates',false,
   'canPaySalaries',false,'canZeroDiamonds',false,
   'isAccrualEvidenceOnly',true);
-end $function$
+end $function$;
 
