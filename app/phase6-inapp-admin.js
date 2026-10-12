@@ -167,7 +167,8 @@ function draw(){
    '<button type="submit">بحث / تحديث</button></form>'+
    '<div id="tcac-data" role="region" aria-live="polite"></div>'+
    '<div class="tcac-pager"><button data-tcac="prev" type="button">السابق</button>'+
-   '<span id="tcac-page">—</span><button type="button" data-tcac="next">التالي</button></div>';
+   '<span id="tcac-page">—</span><button type="button" data-tcac="next">التالي</button></div>'+
+   (view==='banners'?(window.TotiAdminBanners?.formMarkup?.()||'<p>وحدة البنرات غير متاحة؛ إعادة تشغيل التطبيق مطلوبة.</p>'):'');
   const inp=qs('#tcac-query');if(inp&&view!=='users'&&view!=='rooms'){inp.disabled=true;inp.placeholder='التصفية غير متاحة لهذا القسم';}
   void loadPage();
   return;
@@ -436,19 +437,21 @@ async function loadPage(){
     registrations:[['name','الطلب'],['kind','النوع'],['status','الحالة']],
     agency_transfers:[['user_id','المضيف'],['agency_id','الوكالة المطلوبة'],['status','الحالة']],
     audit:[['actor_id','المسؤول'],['action','الإجراء'],['created_at','التاريخ']],
-    banners:[['title','عنوان البنر'],['status','الحالة'],['sort_order','الترتيب'],['starts_at','بداية العرض'],['ends_at','نهاية العرض']]
+    banners:[['title','عنوان البنر'],['id','معرّف الإعلان'],['status','الحالة'],['sort_order','الترتيب'],['starts_at','بداية العرض'],['ends_at','نهاية العرض']]
    }[kind]||[];
    node.innerHTML=result.rows.map(row=>'<article class="tcac-record">'+fields.map(([key,label])=>
     '<div><span>'+esc(label)+'</span><strong>'+esc(Array.isArray(row[key])?row[key].join('، '):
      typeof row[key]==='boolean'?(row[key]?'نعم':'لا'):row[key]??'—')+'</strong></div>').join('')+
+    (kind==='banners'?'<button type="button" class="tcac-primary" data-tcac-banner-edit="'+esc(row.id)+'">تعديل الإعلان</button>':'')+
     '</article>').join('');
   }
   qs('#tcac-page').textContent='النتائج '+(result.total?String(p+1)+'–'+String(p+result.rows.length):'0')+' من '+result.total;
   const prev=qs('[data-tcac="prev"]'),next=qs('[data-tcac="next"]');
   if(prev)prev.disabled=p===0;
   if(next)next.disabled=p+result.rows.length>=result.total||!result.rows.length;
+  if(kind==='banners')window.TotiAdminBanners?.setRows(result.rows);
   if(kind==='staff'&&owner(rights)&&!qs('#tcac-staff-actions'))node.insertAdjacentHTML('afterend',staffForms());
-  status(banner?'بنرات فعلية، عرض فقط. رفع الصور والتحرير ما زالا قيد الدمج.':'بيانات مقروءة فقط من Supabase Staging.');
+  status(banner?'بنرات موثقة من Supabase. النشر والتعديل محميان بصلاحيات الخادم.':'بيانات مقروءة فقط من Supabase Staging.');
  }catch(e){
   if(opened&&start===requestSerial&&uid()===id){
    node.textContent='تعذر جلب البيانات: '+String(e.message).slice(0,180);
