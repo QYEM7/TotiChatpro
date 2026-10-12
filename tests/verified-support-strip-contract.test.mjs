@@ -76,3 +76,18 @@ test('authenticated rooms do not announce fabricated LIVE/Owner or show preview 
  assert.match(live,/#app > \.status,#app > \.previewflag/);
  assert.match(live,/const sampleDonor=\$\('\.pr-event img'\)/);
 });
+
+test('legacy demo room/mic/friend interactions are never mounted on live or Android',()=>{
+ const module=load('app/room-ui-enhancements.js');
+ const artwork=load('app/royal-final.js');
+ const agency=load('app/agency-hub.js');
+ const vip=load('app/royal-vip15.js');
+ assert.match(module,/if\(liveSource\)return/);
+ assert.match(module,/location\.search\)\.get\('mode'\)==='live'/);
+ assert.match(module,/TotiLivePreviewOnly/);
+ assert.match(artwork,/if\(!authenticatedApp&&params\.get\('review'\)==='1'\)/);
+ assert.match(agency,/if\(liveSource\)return/);
+ assert.match(vip,/if\(liveSource\)return/);
+ assert.match(live,/المعاينة التجريبية غير متاحة داخل التطبيق الحقيقي/);
+ assert.doesNotMatch(live,/explicitPreview=true;go\('home'\)/);
+});
