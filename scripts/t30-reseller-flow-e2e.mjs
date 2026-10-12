@@ -62,6 +62,14 @@ const ag=reviewed.agency_id;
 const agentMint=await cash(agent,'issue',{coins:50,note:'Not an owner request',cash_reference:'T30-FAIL-'+nonce});
 if(agentMint.code>=200&&agentMint.code<300)fail('non-Owner issued coins');
 ok(await cash(owner,'issue',{coins:500,note:'Simulated receipt: no external cash paid',cash_reference:'T30-ISSUE-'+nonce}),'Owner issue');
+const duplicateMint=await cash(owner,'issue',{
+ coins:1,note:'Reject same bank receipt with different letter case and padding',
+ cash_reference:'  t30-issue-'+nonce.toLowerCase()+'  '
+});
+if(duplicateMint.code>=200&&duplicateMint.code<300||
+ !error(duplicateMint).includes('tc_owner_coin_issue_cash_reference_normalized_unique'))
+ fail('Owner duplicate cash receipt minted a second coin with different case/spacing');
+
 ok(await cash(owner,'allocate',{coins:500,note:'Local only agent allocation',agency_id:ag}),'Owner allocation');
 const state=ok(await call('/rest/v1/rpc/phase4_recharge_state',agent),'agent state after allocation');
 if(BigInt(state.treasury)!==500n)fail('agent did not receive 500 coins');
@@ -160,3 +168,5 @@ console.log('PASS T30: repeat approval with different idempotency key refused; n
 console.log('PASS T30: Owner finance preflight verified actual local ledger, normal customer access denied.');
 console.log('PASS T30: normalized completed cash receipt index denied case/space replay across distinct requests with zero balance drift.');
 console.log('PASS T30: monthly host evidence audit returned honest empty state, no payroll/reset authority; outsider denied.');
+
+console.log('PASS T30: normalized Owner cash receipt unique index rejected a second issuance despite changed case/whitespace.');
