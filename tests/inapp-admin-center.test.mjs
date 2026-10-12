@@ -103,3 +103,11 @@ test('finance, host-month and medals no longer create duplicate visible Profile 
  assert.match(center,/finance_integrity:'data-finance-inspect'/);
  assert.match(center,/host_month:'data-tc-host-month'/);
 });
+
+test('Owner special ID entry is centralized without removing existing approved flow',()=>{
+ const existing=load('../app/phase5-special-id-ui.js');
+ assert.match(existing,/if\(window\.TotiInAppAdmin\)return/);
+ assert.match(center,/special_id:'data-tc-special-id-open'/);
+ assert.match(center,/data-tc-special-id-open/);
+ assert.match(existing,/phase5_special_id_grant/);
+});
