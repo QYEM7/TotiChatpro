@@ -109,9 +109,9 @@ async function paint(){
     '<div class="giftgrid tc-gift-scroll" role="region" aria-label="الهدايا المتاحة" tabindex="0">'+rows.map(g=>'<button type="button" class="giftitem '+(giftId===g.id?'selected':'')+'" data-catalog-action="gift-item" data-catalog-value="'+esc(g.id)+'"'+(g.is_active!==true||(g.diamond_source_type==='LUCKY_GIFT'&&!luckyPolicy)?' disabled aria-disabled="true"':'')+'><span class="gicon">'+esc(g.icon)+'</span><b>'+esc(g.name)+'</b><small>🪙 '+esc(num(g.price))+'</small>'+(g.diamond_source_type==='LUCKY_GIFT'?'<small>'+(luckyPolicy?'✦ سحب خادمي حقيقي':'غير مفعّل في الخادم')+'</small>':g.is_active!==true?'<small>غير متاح حالياً</small>':'')+'</button>').join('')+(!rows.length?'<p class="tc-gift-empty">لا توجد هدايا منشورة في هذا التصنيف.</p>':'')+'</div>'+
     
     (giftCategory==='luck'&&luckyPolicy?
-       '<aside class="tc-lucky-disclosure"><b>✧ احتمالات الحظ الفعلية:</b> '+
+       '<aside class="tc-lucky-disclosure"><b>✧ نسب السحب الأساسية قبل الحدود اليومية:</b> '+
        luckyPolicy.tiers.map(t=>esc(t.label)+' ×'+esc(t.multiplier)+' ('+esc((t.weight/100).toFixed(2))+'%)').join(' · ')+
-       '<small>المضاعف لنقاط حظ غير نقدية فقط؛ الماس والتارجت على قيمة الهدية الأساسية. هدايا الحظ تُفك وفق قواعدها المالية الأساسية بلا مضاعفة.</small>'+
+       '<small>المضاعف لنقاط غير نقدية فقط؛ لا يزيد الماس أو التارجت أو الرواتب. قد تتغير فرصة كل جائزة إذا وصل المستلم لحدها اليومي، فتُعاد موازنة الأوزان بين الجوائز المتاحة. فك ماس الحظ 10% مقابل 30% للماس العادي.</small>'+
        button('السجل الحقيقي','lucky-history','')+'</aside>':giftCategory==='luck'?
        '<p class="tc-lucky-disclosure">تعذّر توثيق احتمالات الحظ؛ الإرسال متوقف لحماية رصيدك.</p>':'')+
     '<div class="sendrow tc-gift-sendbar"><span>'+esc(giftId&&recipientId?'تم تحديد المستلم والهدية':'حدد المستلم والهدية')+'</span><label>العدد <select data-catalog-quantity aria-label="عدد الهدايا">'+[1,7,17,77,777].map(q=>'<option value="'+q+'" '+(giftQuantity===q?'selected':'')+'>'+q+'</option>').join('')+'</select></label><button type="button" class="primary" data-catalog-action="gift-send">إرسال هدية</button></div>';
