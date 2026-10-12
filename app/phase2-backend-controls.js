@@ -70,7 +70,7 @@ async function refreshGlobal(){
   if(!Array.isArray(state.gifts))throw Error('بيانات إعدادات غير متوقعة');
   config=state;
   n.innerHTML='<form data-global-config><label><input type="checkbox" name="enabled" '+(state.enabled?'checked':'')+'> تشغيل الإعلانات العالمية</label>'+
-   '<label>أقل سعر للوحدة بالكوينز<input type="number" name="minPrice" min="1" max="9007199254740991" step="1" required value="'+esc(state.minPrice||'')+'"></label>'+
+   '<label>الحد الأدنى للدعم المؤكد (إجمالي الكوينز في العملية)<input type="number" name="minPrice" min="7000" max="9007199254740991" step="1" required value="'+esc(Math.max(7000,Number(state.minPrice)||7000))+'"></label>'+
    '<button class="primary">حفظ الحد والإتاحة</button></form>'+
    '<h4>الهدايا المؤهلة للإعلان</h4>'+
    state.gifts.map(g=>'<article class="tc-global-gift-row"><span>'+esc(g.name)+' · '+esc(g.price)+' كوين</span>'+
@@ -83,7 +83,7 @@ async function saveConfig(form){
  const enabled=form.elements.enabled.checked;
  const value=String(form.elements.minPrice.value||'').trim();
  const price=Number(value);
- if(!Number.isSafeInteger(price)||price<1){explain('أدخل سعراً صحيحاً وآمناً');return;}
+ if(!Number.isSafeInteger(price)||price<7000){explain('الحد الأدنى لشريط الدعم هو 7,000 كوينز من عملية حقيقية مؤكدة');return;}
  await rpc('phase3_global_gift_admin',{p_action:'configure',p_enabled:enabled,p_min_price:price});
  await refreshGlobal();explain('تم حفظ إعداد الإعلان على الخادم');
 }
