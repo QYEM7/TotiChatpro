@@ -20,12 +20,12 @@ begin
  if response->>'enabled'<>'false'
  or response->>'purchasesAllowed'<>'false'
  or response->>'serverDrawAvailable'<>'false'
- or response->>'code'<>'LUCKY_GIFT_PENDING_RULEBOOK' then
-   raise exception 'Backend claims lucky gift odds are approved without proof';end if;
+ or response->>'code'<>'LUCKY_GIFT_DISABLED_BY_OWNER' then
+   raise exception 'Fresh environments must keep unapproved Lucky Gifts disabled';end if;
  begin
   perform public.phase3_send_gift(rid,receiver,'g11',1,gen_random_uuid(),300);
  exception when others then
-  if SQLERRM like '%LUCKY_GIFT_PENDING_RULEBOOK%' then denied:=true;else raise;end if;
+  if SQLERRM like '%LUCKY_GIFT_DISABLED_BY_OWNER%' then denied:=true;else raise;end if;
  end;
  if not denied then raise exception 'Fixed fake lucky gift result was sold';end if;
  if (select coins from public.wallets where user_id=sender)<>1000
