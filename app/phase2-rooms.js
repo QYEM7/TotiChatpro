@@ -43,7 +43,7 @@ function publishedImage(path,id,revision){
  return imageServer+'/storage/v1/object/public/totichat-room-images/'+path.split('/').map(encodeURIComponent).join('/')+(UUID.test(String(revision))?'?v='+encodeURIComponent(revision):'');
 }
 function roomImage(room,index){
- return publishedImage(room.cover_path,room.id,room.image_revision)||A+assets[['room1','room2','room3','room4'][index%4]];
+ return publishedImage(room.cover_path,room.id,room.image_revision)||A+assets.falcon;
 }
 function homeContent(){
   if(!session().signedIn||screen!=='home')return;
