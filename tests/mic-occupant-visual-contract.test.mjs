@@ -37,10 +37,31 @@ test('no mock avatar, fake VIP badge or imaginary active-speaking announcement',
  assert.doesNotMatch(rooms,/tc-mic-speaking|Math\.random/);
 });
 test('no new role tiers, unauthorized remote actions or fake member data are added',()=>{
- assert.doesNotMatch(css,/(?:@keyframes|animation\s*:.*infinite)/);
+ assert.match(css,/tc-mic-speaking\.tc-mic-unmuted/);
+ assert.match(css,/@keyframes tc-real-mic-speaking/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
  assert.doesNotMatch(css,/(?:position\s*:\s*fixed|height\s*:\s*100dvh)/);
  assert.match(css,/max-width:355px/);
  assert.match(css,/max-height:590px/);
  assert.match(css,/tc-mic-owner-mark/);
  assert.match(css,/tc-mic-indicator/);
+});
+
+test('speaking highlight must come only from true room LiveKit ActiveSpeakersChanged event',()=>{
+ const sdk=read('app/phase2-livekit-sdk.mjs');
+ const voice=read('app/phase2-voice-ui.js');
+ execFileSync(process.execPath,['--check',new URL('../app/phase2-livekit-sdk.mjs',import.meta.url).pathname]);
+ execFileSync(process.execPath,['--check',new URL('../app/phase2-voice-ui.js',import.meta.url).pathname]);
+ assert.match(sdk,/RoomEvent\.ActiveSpeakersChanged/);
+ assert.match(sdk,/signal\(\{activeSpeakerIds:/);
+ assert.match(sdk,/activeSpeakerIds:\[\]/);
+ assert.match(voice,/totichat-live-active-speakers/);
+ assert.match(voice,/Array\.isArray\(state\.activeSpeakerIds\)/);
+ assert.match(rooms,/window\.addEventListener\('totichat-live-active-speakers'/);
+ assert.match(rooms,/realSpeakingIds\.has\(p\.user_id\)/);
+ assert.match(rooms,/detail\.roomId!==active\.id/);
+ assert.match(rooms,/typeof id==='string'&&UUID\.test\(id\)/);
+ assert.match(rooms,/button\.classList\.toggle\('tc-mic-speaking',talking\)/);
+ assert.match(rooms,/button\.classList\.toggle\('tc-mic-speaking',!!p&&p\.is_muted===false/);
+ assert.doesNotMatch(rooms,/setInterval\([\s\S]*?tc-mic-speaking/);
 });
