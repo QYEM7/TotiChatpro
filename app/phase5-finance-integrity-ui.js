@@ -22,6 +22,7 @@ function node(tag,value){
  const el=document.createElement(tag);el.textContent=String(value??'');return el;
 }
 function entry(){
+ if(window.TotiInAppAdmin)return; // New unified center owns the Profile entry.
  if(!signed()||!permitted()||screen!=='me')return;
  const panel=$('#app .me-more');
  if(!panel||panel.querySelector('[data-finance-inspect]'))return;

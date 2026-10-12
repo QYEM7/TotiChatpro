@@ -1,0 +1,267 @@
+/* TotiChat: verified real user on the microphone — premium quiet presentation.
+ * Only occupied, server-confirmed mic seats are changed. The 5×3 seat grid,
+ * seat buttons, VIP artwork, room ornaments, gift overlays and transport remain intact.
+ * This deliberately does not show a VIP tier or "speaking now" without proof.
+ */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member{
+ --tc-seat-metal:#d8b9d5;
+ --tc-seat-glow:rgba(160,103,176,.33);
+ --tc-seat-ink:#f5e7f7;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-owner{
+ --tc-seat-metal:#f0d6a1;
+ --tc-seat-glow:rgba(222,178,104,.32);
+ --tc-seat-ink:#ffe9bb;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-unmuted:not(.tc-mic-owner){
+ --tc-seat-metal:#dcaddf;
+ --tc-seat-glow:rgba(180,123,200,.4);
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatface{
+ position:relative!important;
+ display:grid!important;place-items:center!important;
+ border:2px solid var(--tc-seat-metal)!important;
+ border-radius:50%!important;
+ background:radial-gradient(circle at 35% 24%,#64456f,#23132f 75%)!important;
+ box-shadow:inset 0 1px 3px #ffffff36,0 2px 9px #10071bb0,0 0 10px var(--tc-seat-glow)!important;
+ isolation:isolate;
+ overflow:visible!important;
+}
+/* The double metal ring belongs around the photograph, never a square card. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatface::after{
+ content:""!important;
+ position:absolute!important;inset:-4px!important;
+ border:1px solid var(--tc-seat-metal)!important;
+ border-radius:50%!important;
+ opacity:.66!important;
+ box-shadow:0 0 7px var(--tc-seat-glow)!important;
+ pointer-events:none!important;
+ z-index:-1;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatface > img{
+ display:block;position:relative;z-index:0;
+ width:100%;height:100%;border-radius:50%;
+ object-fit:cover;object-position:center 35%;
+ background:#2e1d38;
+}
+/* If the user hasn't uploaded a legitimate avatar, show their own initial
+ * instead of the preview's decorative male/female photographs or microphone emoji. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatface .tc-real-seat-glyph.tc-mic-monogram{
+ position:absolute;inset:0;z-index:1;
+ display:grid;place-items:center;
+ border-radius:50%;
+ font-size:clamp(17px,5.2vw,24px);
+ line-height:1;font-weight:800;
+ color:#fcead7;
+ text-shadow:0 1px 2px #090613bd;
+ background:radial-gradient(circle at 25% 18%,#b485a35a,transparent 62%);
+ user-select:none;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatface .tc-real-seat-glyph[hidden]{display:none!important}
+/* Actual database mute flag is the only source. Not a fake speaking animation. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .tc-mic-indicator{
+ position:absolute;inset-block-end:-3px;inset-inline-start:-4px;z-index:5;
+ width:18px;height:18px;display:grid;place-items:center;
+ border-radius:50%;
+ border:1.5px solid #fff2da;
+ background:#58426b;color:#fff8e7;
+ box-shadow:0 2px 6px rgba(5,3,11,.6);
+ pointer-events:none;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-unmuted .tc-mic-indicator{
+ background:#397a68;color:#effff6;border-color:#d5eddc;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-muted .tc-mic-indicator{
+ background:#4e3856;color:#d8c7e0;border-color:#9b8aa5;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .tc-mic-indicator svg{
+ width:11px;height:11px;display:block;
+}
+/* Room owner is verified by room.owner_id; this is not a VIP/rank claim. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-owner .tc-mic-owner-mark{
+ position:absolute;inset-block-start:-10px;inset-inline-end:-5px;z-index:6;
+ display:grid;place-items:center;
+ width:19px;height:17px;
+ color:#ffdf9c;
+ border-radius:8px 8px 5px 5px;
+ background:linear-gradient(160deg,#644525,#372038);
+ border:1px solid #dcbb7c;
+ box-shadow:0 2px 5px #0d06199c;
+ pointer-events:none;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .tc-mic-owner-mark svg{
+ display:block;width:13px;height:13px;
+}
+/* Name + status: readable even when the display name is long/Arabic. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{
+ color:var(--tc-seat-ink)!important;
+ width:auto;max-width:calc(100% - 2px)!important;
+ font-size:clamp(9px,2.65vw,10.5px)!important;
+ font-weight:800!important;
+ letter-spacing:0!important;
+ line-height:1.35!important;
+ margin-top:5px!important;
+ padding-inline:3px!important;
+ white-space:nowrap!important;
+ overflow:hidden!important;
+ text-overflow:ellipsis!important;
+ text-shadow:0 1px 4px #0d0715!important;
+ unicode-bidi:plaintext;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatlv{
+ display:flex!important;align-items:center;justify-content:center!important;
+ width:fit-content;max-width:100%!important;
+ min-height:15px;
+ padding:2px 5px!important;
+ margin:2px auto 0!important;
+ border-radius:9px!important;
+ border:1px solid #b98fc15e!important;
+ color:#eae0ee!important;
+ background:#24152dc9!important;
+ box-shadow:none!important;
+ line-height:1.2!important;
+ font-size:clamp(7px,1.95vw,8.5px)!important;
+ font-weight:700!important;
+ white-space:nowrap!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-unmuted .seatlv{
+ color:#e7fff1!important;border-color:#88c0aa71!important;
+ background:#15392fcd!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-owner .seatname{
+ color:#ffe7b3!important;
+}
+/* No new rectangular panel behind the seats; existing geometry stays 5 columns × 3 rows. */
+@media(max-width:355px){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .tc-mic-indicator{width:16px;height:16px}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .tc-mic-indicator svg{width:10px;height:10px}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-owner .tc-mic-owner-mark{width:17px;height:15px;inset-block-start:-8px}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatlv{font-size:7px!important;padding-inline:3px!important}
+}
+@media(max-height:590px){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{margin-top:2px!important}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatlv{min-height:12px;margin-top:0!important;padding-block:1px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatface,
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatface::after{
+  animation:none!important;transition:none!important;
+ }
+}
+
+/* The halo becomes subtly animated ONLY after LiveKit confirms speech.
+ * A merely reserved/unmuted seat does not trigger this state. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-speaking.tc-mic-unmuted .seatface::after{
+ opacity:.95!important;
+ border-color:#fce0bd!important;
+ animation:tc-real-mic-speaking 1.65s ease-in-out infinite;
+}
+@keyframes tc-real-mic-speaking{
+ 0%,100%{box-shadow:0 0 5px rgba(233,195,151,.38);transform:scale(1)}
+ 50%{box-shadow:0 0 12px rgba(239,199,149,.66);transform:scale(1.045)}
+}
+@media(prefers-reduced-motion:reduce){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-speaking.tc-mic-unmuted .seatface::after{
+  animation:none!important;box-shadow:0 0 8px rgba(233,195,151,.5)!important;
+ }
+}
+
+
+/* Beta refinement: actual seated user + VIP entitlement + equipped frame only.
+   Keep the five-column/three-row seat geometry, original ornaments and buttons. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip{
+ --tc-seat-metal:#d5c2ff;--tc-seat-glow:rgba(179,139,239,.48);--tc-seat-ink:#fff5ff;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="4"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="5"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="6"]{
+ --tc-seat-metal:#8bdaf3;--tc-seat-glow:rgba(87,193,239,.5);--tc-seat-ink:#effaff;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="7"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="8"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="9"]{
+ --tc-seat-metal:#f2d18b;--tc-seat-glow:rgba(251,203,111,.56);--tc-seat-ink:#fff5cf;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="10"]{
+ --tc-seat-metal:#ffdeb0;--tc-seat-glow:rgba(251,189,101,.72);--tc-seat-ink:#fff4d5;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-equipped-frame .seatface{
+ outline:2px solid var(--tc-seat-metal)!important;
+ outline-offset:3px!important;
+ box-shadow:inset 0 0 0 2px #fff2d83d,0 0 12px var(--tc-seat-glow),0 3px 8px #0009!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-vip-tier{
+ position:absolute;z-index:9;inset-block-end:-12px;left:50%;
+ transform:translateX(-50%);direction:ltr;display:block;
+ padding:1px 6px;min-width:35px;border:1px solid #ffebbd;
+ border-radius:999px;white-space:nowrap;text-align:center;
+ background:linear-gradient(135deg,#4b234f,#805096 55%,#492044);
+ color:#fff2d5;text-shadow:0 1px 2px #000c;
+ box-shadow:0 2px 6px #0009;font-size:8px;font-weight:900;line-height:1.4;
+ pointer-events:none;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="7"] .tc-seat-vip-tier,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="8"] .tc-seat-vip-tier,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="9"] .tc-seat-vip-tier,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="10"] .tc-seat-vip-tier{
+ background:linear-gradient(140deg,#6c3c1f,#a97d42,#513323);border-color:#ffe4a4;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-equipped-mark{
+ position:absolute;z-index:9;inset-block-start:-10px;inset-inline-start:-9px;
+ width:21px;height:21px;display:grid;place-items:center;
+ background:linear-gradient(155deg,#fff4df,#bfa4d2);color:#472f4d;
+ border:1px solid #fce7af;border-radius:50%;box-shadow:0 1px 7px #0009;
+ font-size:12px;line-height:1;pointer-events:none;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{
+ display:block!important;max-width:100%!important;margin-top:12px!important;
+ font-size:clamp(9px,2.7vw,11px)!important;text-align:center;
+ color:var(--tc-seat-ink)!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member:not(.tc-mic-vip) .seatname{
+ margin-top:6px!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatlv.tc-seat-gift-counter{
+ display:flex!important;align-items:center;justify-content:center;
+ min-width:37px;min-height:17px!important;margin:2px auto 0!important;
+ padding:2px 6px!important;border-radius:999px!important;
+ border:1px solid #e3c69491!important;
+ background:linear-gradient(110deg,#342018de,#58374cdb)!important;
+ color:#ffebbe!important;font-weight:900!important;
+ font-size:clamp(8px,2.05vw,9px)!important;
+ line-height:1.25!important;white-space:nowrap;
+ font-variant-numeric:tabular-nums;
+}
+@media(max-width:355px){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-vip-tier{font-size:7px;padding-inline:4px;min-width:29px}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-equipped-mark{width:17px;height:17px;font-size:10px}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{font-size:9px!important}
+}
+@media(max-height:590px){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{margin-top:7px!important}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member:not(.tc-mic-vip) .seatname{margin-top:3px!important}
+}
+
+
+/* Search dialog uses real room records only. */
+#sheet .tc-room-search{padding:4px 3px 14px;display:grid;gap:11px}
+#sheet .tc-room-search .sheethead h3{font-size:17px;color:#533263}
+#sheet .tc-room-search label{display:grid;gap:7px;font-weight:800;font-size:12px;color:#574266}
+#tc-real-room-search-query{
+ display:block;width:100%;min-height:46px;padding:11px 13px;
+ border-radius:13px;border:1px solid #dbcae5;
+ background:#fff;color:#352640;outline-offset:3px;
+ font:inherit;font-size:13px;
+}
+#sheet .tc-room-search-note{font-size:11px;color:#786b80;margin:0}
+#tc-real-room-search-results{display:grid;gap:7px;max-height:43dvh;overflow-y:auto;min-height:52px}
+#tc-real-room-search-results .tc-real-search-room{
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+ width:100%;min-height:50px;border:1px solid #e9ddec;border-radius:13px;
+ background:linear-gradient(100deg,#fff,#faf4ff);
+ color:#493456;padding:11px 13px;text-align:right;font:inherit;
+}
+#tc-real-room-search-results .tc-real-search-room b{
+ white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:12px
+}
+#tc-real-room-search-results .tc-real-search-room small{font-size:10px;color:#786c7f;flex:none}

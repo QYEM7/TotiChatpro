@@ -14,6 +14,8 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
 }[c]));
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let currentUser='',rooms=null,active=null,members=[],messages=[],loadingRooms=null,refreshing=null,entering=false;
+let realSpeakerRoom='',realSpeakingIds=new Set();
+let verifiedMicDecorations=new Map();
 let roomListError='';
 let sequence=0,sending=false;
 let realtime=null,realtimeUser='';
@@ -43,7 +45,7 @@ function publishedImage(path,id,revision){
  return imageServer+'/storage/v1/object/public/totichat-room-images/'+path.split('/').map(encodeURIComponent).join('/')+(UUID.test(String(revision))?'?v='+encodeURIComponent(revision):'');
 }
 function roomImage(room,index){
- return publishedImage(room.cover_path,room.id,room.image_revision)||A+assets[['room1','room2','room3','room4'][index%4]];
+ return publishedImage(room.cover_path,room.id,room.image_revision)||A+assets.logo;
 }
 function homeContent(){
   if(!session().signedIn||screen!=='home')return;
@@ -107,16 +109,20 @@ function clearUnjoinedRoom(view){
   if(activity)activity.textContent='● انتظار الانضمام';
   const crowd=$('.roomevents .crowd',view);
   if(crowd)crowd.textContent='👥 0';
+  const giftTicker=$('.giftTicker',view);
+  if(giftTicker){giftTicker.hidden=true;giftTicker.style.display='none';}
   const ticker=$('.giftTicker .tickerBody',view);
-  if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا مؤكدة';
+  if(ticker)ticker.textContent='';
   // The approved review template also ships a sample donor portrait.
   const donor=$('.giftTicker img',view);
   if(donor)donor.hidden=true;
   const count=$('.giftTicker .orb b',view);
   if(count)count.textContent='0';
+  realSpeakerRoom='';realSpeakingIds.clear();
   for(const [index,button] of $$('.seats .seat',view).entries()){
     button.disabled=true;
-    button.classList.remove('occupied','locked');
+    button.classList.remove('occupied','locked','tc-mic-member','tc-mic-muted','tc-mic-unmuted','tc-mic-owner','tc-mic-self','tc-mic-speaking','vip1','vip5','vip8');
+    button.dataset.tcMicOccupant='';
     button.setAttribute('aria-label','المقعد '+(index+1)+' — انضم لغرفة أولاً');
     const face=$('.seatface',button);
     if(face){
@@ -131,10 +137,12 @@ function clearUnjoinedRoom(view){
         glyph.className='tc-real-seat-glyph';
         face.appendChild(glyph);
       }
-      glyph.hidden=false;glyph.textContent='＋';
+      glyph.hidden=false;glyph.textContent='＋';glyph.classList.remove('tc-mic-monogram');
+      $('.tc-mic-indicator',face)?.remove();
+      $('.tc-mic-owner-mark',face)?.remove();
     }
     const label=$('.seatname',button);
-    if(label)label.textContent='مقعد '+(index+1);
+    if(label){label.textContent='مقعد '+(index+1);label.classList.remove('vipGold');}
     const level=$('.seatlv',button);
     if(level)level.textContent='بانتظار الغرفة';
   }
@@ -201,8 +209,10 @@ function roomContent(){
     if(activity)activity.textContent='● غرفة حقيقية';
     const crowd=$('.roomevents .crowd',view);
     if(crowd)crowd.textContent='👥 '+members.length;
+    const giftTicker=$('.giftTicker',view);
+    if(giftTicker){giftTicker.hidden=true;giftTicker.style.display='none';}
     const ticker=$('.giftTicker .tickerBody',view);
-    if(ticker)ticker.textContent='🎁 لا توجد إعلانات هدايا حقيقية الآن';
+    if(ticker)ticker.textContent='';
     const count=$('.giftTicker .orb b',view);
     if(count)count.textContent='0';
     window.TotiGlobalGiftFeed?.decorateTicker?.(view);
@@ -211,11 +221,36 @@ function roomContent(){
       button.disabled=false;
       const slot=index+1;
       const p=members.find(x=>x.seat_no===slot);
-      // Do not overwrite the approved VIP/decorative seat classes on every refresh.
+      // Verified room membership is authoritative. Never carry sample VIP
+      // badges/classes from the standalone visual review into real users.
+      // The roster returns no verified VIP tier, so a rank is never invented.
+      button.classList.remove('vip1','vip5','vip8');
+      const verified=p?verifiedMicDecorations.get(p.user_id):null;
+      const vip=Number.isInteger(verified?.vipTier)&&verified.vipTier>=1&&verified.vipTier<=10?verified.vipTier:0;
+      const frame=verified?.frame&&typeof verified.frame.name==='string'&&verified.frame.name.length<=100?verified.frame:null;
+      button.classList.toggle('tc-mic-vip',vip>0);
+      button.classList.toggle('tc-mic-equipped-frame',!!frame);
+      button.dataset.tcVipTier=vip?String(vip):'';
       button.classList.toggle('occupied',!!p);
+      button.classList.toggle('tc-mic-member',!!p);
+      button.classList.toggle('tc-mic-muted',!!p&&p.is_muted===true);
+      button.classList.toggle('tc-mic-unmuted',!!p&&p.is_muted===false);
+      button.classList.toggle('tc-mic-owner',!!p&&p.user_id===active.owner_id);
+      button.classList.toggle('tc-mic-self',!!p&&p.user_id===session().user?.id);
+      // Speech animation is tied to the genuinely connected LiveKit event, and
+      // must clear if the occupant changes or the server mutes this seat.
+      button.dataset.tcMicOccupant=p?.user_id||'';
+      button.classList.toggle('tc-mic-speaking',!!p&&p.is_muted===false&&
+        realSpeakerRoom===active.id&&realSpeakingIds.has(p.user_id));
       // An empty seat is available; the old preview class suggested a false lock.
       button.classList.remove('locked');
-      button.setAttribute('aria-label',p?'المقعد '+slot+': '+p.display_name:'المقعد '+slot+' متاح');
+      const baseAria=p
+        ?'المقعد '+slot+': '+p.display_name+
+          (p.user_id===active.owner_id?'، مالك الغرفة':'')+
+          (p.is_muted===true?'، المايك مكتوم':'، المايك غير مكتوم')
+        :'المقعد '+slot+' متاح';
+      button.dataset.tcMicAriaBase=baseAria;
+      button.setAttribute('aria-label',baseAria+(button.classList.contains('tc-mic-speaking')?'، يتحدث الآن':''));
       const face=$('.seatface',button);
       if(face){
         // Preserve original seat frames, ornaments, CSS effects and children.
@@ -244,13 +279,63 @@ function roomContent(){
           face.appendChild(glyph);
         }
         glyph.hidden=!!realAvatar;
-        glyph.textContent=p?(p.user_id===session().user?.id?'🎙️':'🎤'):'＋';
+        glyph.classList.toggle('tc-mic-monogram',!!p&&!realAvatar);
+        // Use the actual user's initial when no verified photo exists.
+        // Do not impersonate a profile using the preview-person images.
+        glyph.textContent=p?(Array.from(String(p.display_name||'مستخدم').trim())[0]||'م'):'＋';
+        let micStatus=$('.tc-mic-indicator',face);
+        if(p){
+          if(!micStatus){
+            micStatus=document.createElement('span');
+            micStatus.className='tc-mic-indicator';
+            micStatus.setAttribute('aria-hidden','true');
+            face.appendChild(micStatus);
+          }
+          micStatus.innerHTML=p.is_muted===true
+            ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9v3a3 3 0 0 0 5.1 2.1M15 9V6a3 3 0 0 0-5.6-1.5"/><path d="M5 11a7 7 0 0 0 12 4.5M19 11a7 7 0 0 1-.4 2.3M12 18v4m-4 0h8M3 3l18 18"/></svg>'
+            :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4m-4 0h8"/></svg>';
+          micStatus.title=p.is_muted===true?'المايك مكتوم':'المايك غير مكتوم';
+        }else micStatus?.remove();
+        let ownerMark=$('.tc-mic-owner-mark',face);
+        if(p&&p.user_id===active.owner_id){
+          if(!ownerMark){
+            ownerMark=document.createElement('span');
+            ownerMark.className='tc-mic-owner-mark';
+            ownerMark.setAttribute('aria-hidden','true');
+            ownerMark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 7 5.4 4.5L12 4l4.1 7.5L21.5 7l-1.8 12H4.3z"/><path d="M5 16.5h14"/></svg>';
+            face.appendChild(ownerMark);
+          }
+          ownerMark.title='مالك الغرفة';
+        }else ownerMark?.remove();
         const badge=$('.seatbadge',face);
         if(badge)badge.style.setProperty('display','none','important');
+        // Decorations are shown only when server records prove ownership.
+        let vipLabel=$('.tc-seat-vip-tier',face);
+        if(p&&vip){
+          if(!vipLabel){vipLabel=document.createElement('span');vipLabel.className='tc-seat-vip-tier';face.appendChild(vipLabel);}
+          vipLabel.textContent='VIP '+vip;vipLabel.hidden=false;
+        }else vipLabel?.remove();
+        let frameMark=$('.tc-seat-equipped-mark',face);
+        if(p&&frame){
+          if(!frameMark){frameMark=document.createElement('span');frameMark.className='tc-seat-equipped-mark';face.appendChild(frameMark);}
+          frameMark.textContent=String(frame.icon||'✦').slice(0,4);
+          frameMark.title=frame.name;frameMark.hidden=false;
+        }else frameMark?.remove();
       }
-      const label=$('.seatname',button);if(label)label.textContent=p?.display_name||'مقعد '+slot;
+      const label=$('.seatname',button);
+      if(label){
+        label.textContent=p?.display_name||'مقعد '+slot;
+        // The visual-only template hardcodes VIP Gold for unrelated people.
+        label.classList.remove('vipGold');
+      }
       const level=$('.seatlv',button);
-      if(level)level.textContent=p?(p.is_muted?'🔇 محجوز · صامت':'🎙️ محجوز'):'انضم للمايك';
+      if(level){
+        const count=verified?.receivedGifts;
+        const verifiedCount=Number.isSafeInteger(count)&&count>=0?count:null;
+        level.textContent=p?'🎁 '+(verifiedCount===null?'—':verifiedCount.toLocaleString('en-US')):'انضم للمايك';
+        level.title=p?'عدد الهدايا الحقيقية المستلمة داخل هذه الغرفة':'';
+        level.classList.toggle('tc-seat-gift-counter',!!p);
+      }
       button.dataset.phase2='seat-action';
       button.dataset.seat=String(slot);
     }
@@ -304,7 +389,7 @@ async function listRooms(){
 function roomMembershipRevoked(roomId){
   // Never keep a revoked room's voice/mic alive after the backend removes us.
   if(active?.id!==roomId)return;
-  sequence++;active=null;members=[];messages=[];rooms=null;
+  sequence++;active=null;members=[];messages=[];verifiedMicDecorations.clear();rooms=null;
   void window.TotiRealVoice?.disconnect?.();
   if(typeof closeSheet==='function')closeSheet();
   if(screen==='room')go('home');
@@ -322,12 +407,15 @@ async function refreshRoom(){
   refreshing=request;
   request.promise=(async()=>{
     try{
-      const [roster,history,roomMeta]=await Promise.all([
+      const [roster,history,roomMeta,cosmetics]=await Promise.all([
         rpc('phase2_room_members_visual',{p_room_id:current}),
         query('/rest/v1/room_messages?room_id=eq.'+encodeURIComponent(current)+
           '&select=id,sender_id,body,created_at&order=created_at.desc&limit=80'),
         query('/rest/v1/rooms?id=eq.'+encodeURIComponent(current)+
-          '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1')
+          '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1'),
+        query('/rest/v1/rpc/phase6_room_mic_decorations',{
+          method:'POST',body:{p_room_id:current}
+        }).catch(()=>null)
       ]);
       if(before!==sequence||active?.id!==current)return;
       if(!Array.isArray(roomMeta)||!Array.isArray(roster)||!Array.isArray(history))
@@ -339,6 +427,20 @@ async function refreshRoom(){
       }
       active=roomMeta[0];
       members=roster;
+      verifiedMicDecorations=new Map();
+      if(Array.isArray(cosmetics)){
+        const permitted=new Set(roster.filter(m=>Number.isInteger(m.seat_no)&&m.seat_no>0).map(m=>m.user_id));
+        for(const item of cosmetics){
+          if(!item||!UUID.test(String(item.userId))||!permitted.has(item.userId))continue;
+          const giftCount=Number(item.receivedGifts);
+          verifiedMicDecorations.set(item.userId,{
+            vipTier:Number.isInteger(item.vipTier)&&item.vipTier>=1&&item.vipTier<=10?item.vipTier:0,
+            frame:item.frame&&typeof item.frame.name==='string'&&item.frame.name.length<=100&&
+              typeof item.frame.icon==='string'&&item.frame.icon.length<=16?item.frame:null,
+            receivedGifts:Number.isSafeInteger(giftCount)&&giftCount>=0?giftCount:null
+          });
+        }
+      }
       messages=history.reverse();
       if(screen==='room')roomContent();
       // Sync client-side microphone publication after moderator changes.
@@ -366,7 +468,7 @@ async function resume(){
     const result=await query('/rest/v1/rooms?id=eq.'+encodeURIComponent(own[0].room_id)+
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(before!==sequence||!result?.length)return;
-    active=result[0];members=[];messages=[];
+    active=result[0];members=[];messages=[];verifiedMicDecorations.clear();
     if(screen==='room')roomContent();
     await refreshRoom();
   }catch(err){console.warn('Room restore pending:',failure(err));}
@@ -386,7 +488,7 @@ async function enterRoom(id){
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     if(!rows?.length)throw new Error('لم نعثر على الغرفة بعد الدخول');
-    sequence++;active=rows[0];members=[];messages=[];
+    sequence++;active=rows[0];members=[];messages=[];verifiedMicDecorations.clear();
     go('room');await refreshRoom();
   }catch(err){toast(failure(err));}
   finally{entering=false;}
@@ -435,7 +537,7 @@ async function redeemInvite(){
       '&select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&limit=1');
     if(before!==sequence||!session().signedIn||session().user?.id!==actor)return;
     if(!rows?.length)throw new Error('الغرفة ليست متاحة');
-    sequence++;active=rows[0];members=[];messages=[];
+    sequence++;active=rows[0];members=[];messages=[];verifiedMicDecorations.clear();
     if(typeof closeSheet==='function')closeSheet();
     go('room');await refreshRoom();
   }catch(err){toast(failure(err));}
@@ -508,6 +610,56 @@ async function createRoom(){
  }catch(err){toast(failure(err));}
  finally{entering=false;}
 }
+// Search only RLS-authorized room records already retrieved from Staging.
+// Never manufacture rooms, counts or a fake popular-ranking result.
+function displayRealRoomSearch(){
+ if(!session().signedIn){go('loginPreview');return;}
+ if(typeof showSheet!=='function')return;
+ showSheet('<section class="tc-room-search" dir="rtl">'+
+   '<header class="sheethead"><h3>⌕ البحث عن غرفة حقيقية</h3><button type="button" class="xbtn" data-a="close" aria-label="إغلاق">✕</button></header>'+
+   '<label>اسم الغرفة<input id="tc-real-room-search-query" type="search" maxlength="70" autocomplete="off" placeholder="ابحث في الغرف المحمّلة من الخادم"></label>'+
+   '<p class="tc-room-search-note">النتائج من أحدث 40 غرفة مرئية لحسابك، وليست غرفاً تجريبية.</p>'+
+   '<div id="tc-real-room-search-results" aria-live="polite"></div></section>',true);
+ paintRealRoomSearch();
+ // Always verify the current authenticated room directory when search opens.
+ // Repaint the still-open dialog after the real server request completes;
+ // never require the user to close/reopen it or show fabricated matches.
+ const account=session().user?.id;
+ void listRooms().then(()=>{
+   if(session().user?.id===account&&$('#tc-real-room-search-results'))
+     paintRealRoomSearch();
+ });
+}
+function paintRealRoomSearch(){
+ const list=$('#tc-real-room-search-results');
+ if(!list)return;
+ const q=String($('#tc-real-room-search-query')?.value||'').trim().toLocaleLowerCase();
+ list.replaceChildren();
+ if(roomListError){
+   const error=document.createElement('p');
+   error.setAttribute('role','alert');
+   error.textContent='تعذّر تحديث الغرف: '+roomListError;
+   list.appendChild(error);
+ }
+ if(!Array.isArray(rooms)){
+   if(!roomListError)list.textContent='جارٍ تحميل الغرف الحقيقية من الخادم…';
+   return;
+ }
+ const visible=rooms.filter(item=>UUID.test(String(item.id))&&
+   (!q||String(item.title||'').toLocaleLowerCase().includes(q)));
+ if(!visible.length){list.textContent='لا توجد غرف حقيقية مطابقة.';return;}
+ for(const room of visible){
+   const btn=document.createElement('button');btn.type='button';
+   btn.className='tc-real-search-room';btn.dataset.phase2='open-room';
+   btn.dataset.room=room.id;
+   const label=document.createElement('b');label.textContent=room.title;
+   const status=document.createElement('small');status.textContent=room.is_private?'غرفة خاصة':'غرفة عامة';
+   btn.append(label,status);list.appendChild(btn);
+ }
+}
+document.addEventListener('input',event=>{
+ if(event.target?.id==='tc-real-room-search-query')paintRealRoomSearch();
+},true);
 function showCreate(){
  if(!session().signedIn){go('loginPreview');return;}
  if(active){toast('اخرج من الغرفة الحالية قبل إنشاء غرفة جديدة');return;}
@@ -554,7 +706,7 @@ async function leaveRoom(){
   try{
     await window.TotiRealVoice?.disconnect?.();
     await rpc('phase2_room_leave',{p_room_id:room.id});
-    active=null;members=[];messages=[];sequence++;loadingRooms=null;roomListError='';
+    active=null;members=[];messages=[];verifiedMicDecorations.clear();sequence++;loadingRooms=null;roomListError='';
     if(typeof closeSheet==='function')closeSheet();
     minimizedRoom=false;rooms=null;
     go('home');void listRooms();
@@ -601,15 +753,16 @@ document.addEventListener('click',event=>{
   const b=event.target.closest('[data-phase2],[data-royal="create-room"],[data-royal="hero"],[data-a="leaveRoom"],[data-a="seat"],[data-a="sendPreview"]');
   if(!b)return;
   const kind=b.dataset.phase2||b.dataset.royal||b.dataset.a;
-  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy','retry-rooms','room-settings-save'].includes(kind))return;
+  if(!['create-room','hero','create-room-submit','open-room','seat-action','seat','leaveRoom','sendPreview','invite-enter','invite-redeem','invite-generate','invite-copy','retry-rooms','search-rooms','room-settings-save'].includes(kind))return;
   if((kind==='seat'||kind==='seat-action'||kind==='leaveRoom'||kind==='sendPreview')&&!active)return;
   event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
   if(kind==='retry-rooms')void listRooms();
+  else if(kind==='search-rooms'){displayRealRoomSearch();}
   else if(kind==='create-room')showCreate();
   else if(kind==='hero')toast('اختر غرفة حقيقية من قائمة الغرف');
   else if(kind==='create-room-submit'){void createRoom();}
   else if(kind==='room-settings-save'){void saveRoomSettings();}
-  else if(kind==='open-room')void enterRoom(b.dataset.room||'');
+  else if(kind==='open-room'){if($('#tc-real-room-search-results'))closeSheet();void enterRoom(b.dataset.room||'');}
   else if(kind==='seat'||kind==='seat-action')void setSeat(Number(b.dataset.seat||Number(b.dataset.v)+1));
   else if(kind==='leaveRoom')void leaveRoom();
   else if(kind==='sendPreview')void sendMessage();
@@ -623,13 +776,14 @@ function resumeRealRoomReads(){
   if(screen==='room'&&active)void refreshRoom();
   if(screen==='home')void listRooms();
 }
+window.addEventListener('totichat-gift-completed',()=>{if(active&&session().signedIn)void refreshRoom();});
 window.addEventListener('online',resumeRealRoomReads);
 window.addEventListener('focus',resumeRealRoomReads);
 document.addEventListener('visibilitychange',resumeRealRoomReads);
 window.addEventListener('totichat-phase2-auth',()=>{
   const id=session().user?.id||'';
   if(id!==currentUser){
-    currentUser=id;sequence++;rooms=null;roomListError='';loadingRooms=null;active=null;members=[];messages=[];
+    currentUser=id;sequence++;rooms=null;roomListError='';loadingRooms=null;active=null;members=[];messages=[];verifiedMicDecorations.clear();
     if(id){void listRooms();void resume();}
   }
   // User switches/revocations dispose the old socket, so no stale events
@@ -662,12 +816,29 @@ setInterval(()=>{
   if(screen==='room'&&active)void refreshRoom();
   if(screen==='home'&&!loadingRooms)void listRooms();
 },7500);
+// Only render real speaking accents if the current LiveKit room confirms
+// the speaker identities. UUIDs correspond to the signed token's participant identity.
+window.addEventListener('totichat-live-active-speakers',event=>{
+ const detail=event.detail;
+ if(!session().signedIn||!active||!detail||detail.roomId!==active.id)return;
+ realSpeakerRoom=active.id;
+ realSpeakingIds=new Set(Array.isArray(detail.userIds)
+  ?detail.userIds.filter(id=>typeof id==='string'&&UUID.test(id)):[]);
+ if(screen!=='room')return;
+ for(const button of $$('.roomview.room-v2 .seats > .seat')){
+  const userId=button.dataset.tcMicOccupant||'';
+  const talking=!!userId&&button.classList.contains('tc-mic-unmuted')&&realSpeakingIds.has(userId);
+  button.classList.toggle('tc-mic-speaking',talking);
+  const base=button.dataset.tcMicAriaBase;
+  if(base)button.setAttribute('aria-label',base+(talking?'، يتحدث الآن':''));
+ }
+});
 window.TotiPhase2Rooms=Object.freeze({
   // Deliberately do not expose raw tokens, owner-level mutations or balance writes.
   getStatus:()=>({signedIn:session().signedIn,activeRoomId:active?.id||null,roomCount:rooms?.length??null}),
   getRoomSummary:()=>active?Object.freeze({id:active.id,title:active.title,isPrivate:active.is_private,memberCount:members.length,isOwner:active.owner_id===session().user?.id,welcomeMessage:active.welcome_message||''}):null,
   getMyMicState:()=>{const m=members.find(x=>x.user_id===session().user?.id);return Object.freeze({seatNo:m?.seat_no??null,isMuted:m?.is_muted??true});},
   getMembers:()=>members.map(m=>Object.freeze({user_id:m.user_id,display_name:m.display_name})),
-  refreshRoom,openSettings
+  refreshRoom,openSettings,openSearch:displayRealRoomSearch
 });
 })();

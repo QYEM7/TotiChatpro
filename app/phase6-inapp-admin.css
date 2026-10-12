@@ -1,0 +1,93 @@
+/* Isolated RTL administration center. Does not override approved room/profile styling. */
+.tcac-entry{position:relative;display:flex;align-items:center;gap:13px;width:100%;min-height:68px;box-sizing:border-box;text-align:right;cursor:pointer;background:linear-gradient(120deg,#fffdf4,#f8f2df 65%,#fff9e9);color:#453318;border:1px solid #d8bf84;border-radius:15px;padding:12px 14px;margin-block:12px;box-shadow:0 4px 16px rgba(126,91,25,.1);font:inherit}
+.tcac-entry-icon{display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border-radius:12px;background:#7d5d27;color:#fff4cb;font-size:23px}
+.tcac-entry-text{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.tcac-entry-text b{font-size:15px;font-weight:800}
+.tcac-entry-text small{font-size:11px;color:#715a34;line-height:1.5}
+.tcac-entry-arrow{font-size:27px;color:#7d5d27}
+.tcac-root{position:fixed;inset:0;z-index:22000;background:#f4f1e8;color:#292922;font-family:inherit;direction:rtl;overflow:auto;overscroll-behavior:contain}
+.tcac-shell{max-width:760px;min-height:100dvh;margin:0 auto;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:#f9f8f4;display:flex;flex-direction:column}
+.tcac-header{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:68px;padding:10px 19px;background:#fff;border-bottom:1px solid #e9e1d2}
+.tcac-brand{display:flex;align-items:flex-start;flex-direction:column;gap:1px}
+.tcac-brand b{font-family:inherit;letter-spacing:1px;font-size:20px;color:#725321}
+.tcac-brand small{font-size:12px;color:#726b60}
+.tcac-header button{border:1px solid #eee2c9;background:#fff9e9;color:#785526;border-radius:12px;padding:10px 13px;min-width:44px;min-height:44px;font-size:19px;cursor:pointer}
+.tcac-hero{padding:23px 20px 17px;background:linear-gradient(125deg,#fffefa,#f3e6c7);border-bottom:1px solid #ebddbd}
+.tcac-hero small{font-size:12px;color:#807455}
+.tcac-hero h2{font-size:23px;line-height:1.4;margin:8px 0 10px;color:#3d3322;font-weight:800}
+.tcac-hero #tcac-role{display:inline-flex;border:1px solid #d9bf80;border-radius:24px;padding:5px 12px;color:#745425;background:#fffbef;font-size:12px;font-weight:700}
+.tcac-content{padding:20px;flex:1;max-width:100%;box-sizing:border-box}
+.tcac-content h3{font-size:17px;color:#413528;margin:12px 0}
+.tcac-notice{background:#fff;border:1px solid #eee1c8;padding:14px;border-radius:12px;color:#6e5b3b;font-size:13px;line-height:1.7;margin:0 0 16px}
+.tcac-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:14px 0 22px}
+.tcac-card{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;text-align:right;min-height:115px;background:#fff;color:#352e23;border:1px solid #e4d9c6;border-radius:17px;box-shadow:0 3px 12px rgba(72,60,37,.05);padding:15px;cursor:pointer;font:inherit}
+.tcac-card b{font-size:13px;font-weight:800;line-height:1.5}
+.tcac-card small{font-size:11px;color:#81776b;line-height:1.45}
+.tcac-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#f7eddb;color:#795724;font-size:22px}
+.tcac-module{background:#fff;border:1px solid #e7dcc7;border-radius:17px;padding:18px;line-height:1.8}
+.tcac-module p{font-size:14px;color:#625746}
+.tcac-primary,.tcac-search button{background:#7a5726!important;border:1px solid #7a5726!important;color:#fff!important;border-radius:11px;padding:11px 16px;min-height:44px;cursor:pointer;font:inherit;font-weight:700}
+.tcac-status{margin:8px 20px 95px;padding:10px 0;color:#7b6742;font-size:12px;min-height:22px}
+.tcac-bottom{position:sticky;bottom:0;display:flex;justify-content:space-evenly;gap:8px;background:#fff;border-top:1px solid #e9e0ce;padding:10px 12px max(10px,env(safe-area-inset-bottom));box-shadow:0 -6px 22px rgba(58,47,28,.07)}
+.tcac-bottom button{flex:1;min-height:45px;border:1px solid #e8ddc5;border-radius:11px;background:#fff9ed;color:#5e482a;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.tcac-search{display:grid;gap:10px;margin-bottom:17px}
+.tcac-search label{font-size:13px;font-weight:700}
+.tcac-search input{font:inherit;font-size:14px;border-radius:10px;border:1px solid #dbcdb3;background:#fff;color:#342b1d;padding:12px;max-width:100%;box-sizing:border-box}
+.tcac-search input:disabled{opacity:.55}
+.tcac-record{padding:15px;border:1px solid #e6dcc9;border-radius:14px;background:#fff;margin:10px 0;overflow-wrap:anywhere}
+.tcac-record div{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #f4f0e7}
+.tcac-record div:last-child{border-bottom:0}
+.tcac-record span{font-size:12px;flex:0 0 35%;color:#7a7164}
+.tcac-record strong{font-size:12px;text-align:left;overflow-wrap:anywhere;direction:auto;max-width:62%}
+.tcac-pager{display:flex;justify-content:space-between;align-items:center;gap:9px;font-size:12px;margin:20px 0}
+.tcac-pager button{min-height:41px;background:#fff9ec;color:#6c4d23;border:1px solid #e0d2b6;border-radius:10px;padding:8px 16px;cursor:pointer}
+.tcac-pager button:disabled{opacity:.4;cursor:not-allowed}
+.tcac-empty{background:#fff;padding:20px;border:1px dashed #d9c8a9;border-radius:13px;font-size:13px;color:#776955}
+.tcac-root button:focus-visible,.tcac-entry:focus-visible{outline:3px solid #a8751b;outline-offset:2px}
+@media(min-width:620px){.tcac-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tcac-content{padding:26px}}
+@media(prefers-reduced-motion:reduce){.tcac-root *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+.tcac-field{display:flex;flex-direction:column;gap:7px;margin:14px 0;color:#544831;font-size:13px;font-weight:700}
+.tcac-field input,.tcac-field select,.tcac-field textarea{min-width:0;max-width:100%;box-sizing:border-box;font:inherit;font-weight:400;font-size:14px;color:#2a2a28;background:#fff;border:1px solid #d9ccb6;border-radius:10px;padding:11px}
+.tcac-field textarea{min-height:86px;resize:vertical}
+.tcac-module form{border-top:1px solid #eee5d8;padding-top:8px;margin-top:14px}
+.tcac-module form button:disabled{opacity:.6}
+#tcac-vip-state{padding:9px 0;font-size:13px;overflow-wrap:anywhere}
+
+.tcac-brand{position:relative;padding-inline-start:0;padding-inline-end:48px;min-height:42px;justify-content:center}
+.tcac-brand::before{content:"";position:absolute;inset-inline-end:0;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:10px;border:1px solid #eee2c7;background:#fff url('../assets/images/toti_falcon_logo_1790422919580.jpg') center / contain no-repeat}
+
+
+/* Accessible unified outline icon family and restrained profile admin entry. */
+.tcac-entry-icon svg,.tcac-icon svg{display:block;width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tcac-entry-icon{background:linear-gradient(145deg,#604077,#916b9e);color:#fff5dd;border:1px solid #d9c2e8;box-shadow:0 4px 12px #5e396a24}
+.tcac-entry{background:linear-gradient(120deg,#fffdfd,#f9f0ff 57%,#fff6e5);border-color:#d9c4e1;box-shadow:0 6px 16px #69427717}
+.tcac-entry-text b{color:#462f54}
+.tcac-entry-arrow{color:#8864a1}
+.tcac-icon{background:linear-gradient(155deg,#f9ebff,#f9ecd6);color:#79538b;border:1px solid #ecd7e8}
+.tcac-card:hover{border-color:#bc9acb;box-shadow:0 6px 15px #63396816}
+.tcac-card:active{transform:translateY(1px)}
+.tcac-entry,.tcac-card,.tcac-header button,.tcac-bottom button{min-height:44px}
+@media(prefers-reduced-motion:reduce){.tcac-card:active{transform:none}}
+
+
+/* Owner / designated main partner: real Lucky Gifts odds config. */
+.tcac-lucky-tier{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+ margin:13px 0;padding:12px;border:1px solid #dcc7e1;border-radius:14px;
+ background:linear-gradient(150deg,#fff,#fcf8ff);
+}
+.tcac-lucky-tier legend{padding:0 7px;color:#674074;font-size:13px;font-weight:900}
+.tcac-lucky-tier label{
+ display:flex;flex-direction:column;gap:5px;min-width:0;
+ color:#624b68;font-weight:700;font-size:11px;
+}
+.tcac-lucky-tier input{
+ width:100%;min-height:43px;min-width:0;box-sizing:border-box;
+ border:1px solid #d5c4df;border-radius:10px;
+ background:white;color:#392545;padding:8px;font:inherit;font-size:13px;
+}
+#tcac-lucky-config{display:block}
+#tcac-lucky-config>.tcac-field{flex-direction:row;align-items:center;justify-content:space-between}
+#tcac-lucky-config>.tcac-field input{min-width:20px;width:20px;height:20px;accent-color:#75489a}
+#tcac-lucky-result{font-size:12px;color:#4e8064}
+@media(max-width:355px){.tcac-lucky-tier{grid-template-columns:1fr}}

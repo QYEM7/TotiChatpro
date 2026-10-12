@@ -30,15 +30,10 @@ function inject(){
   const label=settings.querySelectorAll('span')[1];if(label)label.textContent='أمان الحساب';
  }
  if(!panel.querySelector('[data-support-open]'))panel.appendChild(row('🛟','خدمة العملاء والتذاكر الحقيقية','supportOpen'));
- if(authority?.canManageCatalogs&&!panel.querySelector('[data-admin-open]'))
-  panel.appendChild(row('⚙️','لوحة الكتالوجات الحقيقية','adminOpen'));
- if(authority?.canReadReports&&!panel.querySelector('[data-reports-open]'))
-  panel.appendChild(row('📊','تقارير المعاملات الحقيقية','reportsOpen'));
- if((authority?.isOwner||authority?.isMainPartner)&&!panel.querySelector('[data-tc-global-gift-admin]'))
-  panel.appendChild(row('🎁','إعدادات إعلانات الهدايا','tcGlobalGiftAdmin'));
- if(authority?.role==='db'&&Array.isArray(authority.permissions)&&
-    authority.permissions.includes('host_agency.open')&&!panel.querySelector('[data-tc-host-approval]'))
-  panel.appendChild(row('🏢','فتح وكالة مضيفين بتفويض','tcHostApproval'));
+ // Consolidated administration: only the role-verified center entry is shown in Profile.
+ // Existing catalog, reports, gifts and DB opening handlers remain available inside it.
+ window.TotiInAppAdmin?.onProfile();
+
 }
 async function loadAuthority(){
  const id=auth.state().user?.id||'';
@@ -75,7 +70,7 @@ async function refreshGlobal(){
   if(!Array.isArray(state.gifts))throw Error('بيانات إعدادات غير متوقعة');
   config=state;
   n.innerHTML='<form data-global-config><label><input type="checkbox" name="enabled" '+(state.enabled?'checked':'')+'> تشغيل الإعلانات العالمية</label>'+
-   '<label>أقل سعر للوحدة بالكوينز<input type="number" name="minPrice" min="1" max="9007199254740991" step="1" required value="'+esc(state.minPrice||'')+'"></label>'+
+   '<label>الحد الأدنى للدعم المؤكد (إجمالي الكوينز في العملية)<input type="number" name="minPrice" min="7000" max="9007199254740991" step="1" required value="'+esc(Math.max(7000,Number(state.minPrice)||7000))+'"></label>'+
    '<button class="primary">حفظ الحد والإتاحة</button></form>'+
    '<h4>الهدايا المؤهلة للإعلان</h4>'+
    state.gifts.map(g=>'<article class="tc-global-gift-row"><span>'+esc(g.name)+' · '+esc(g.price)+' كوين</span>'+
@@ -88,7 +83,7 @@ async function saveConfig(form){
  const enabled=form.elements.enabled.checked;
  const value=String(form.elements.minPrice.value||'').trim();
  const price=Number(value);
- if(!Number.isSafeInteger(price)||price<1){explain('أدخل سعراً صحيحاً وآمناً');return;}
+ if(!Number.isSafeInteger(price)||price<7000){explain('الحد الأدنى لشريط الدعم هو 7,000 كوينز من عملية حقيقية مؤكدة');return;}
  await rpc('phase3_global_gift_admin',{p_action:'configure',p_enabled:enabled,p_min_price:price});
  await refreshGlobal();explain('تم حفظ إعداد الإعلان على الخادم');
 }
@@ -146,6 +141,22 @@ window.addEventListener('totichat-phase2-auth',()=>{
 // Approved HTML must stay byte-for-byte untouched. Enhance ONLY authenticated
 // live-mode sessions with independently tested modules, never demo preview.
 const moduleBase=new URL('.',document.currentScript?.src||location.href);
+const giftTrayStyle=document.createElement('link');
+giftTrayStyle.rel='stylesheet';
+giftTrayStyle.href=new URL('phase6-gift-tray.css',moduleBase).href;
+document.head.appendChild(giftTrayStyle);
+const micPresenceStyle=document.createElement('link');
+micPresenceStyle.rel='stylesheet';
+micPresenceStyle.href=new URL('phase6-mic-presence.css',moduleBase).href;
+document.head.appendChild(micPresenceStyle);
+const premiumIconStyle=document.createElement('link');
+premiumIconStyle.rel='stylesheet';
+premiumIconStyle.href=new URL('phase6-premium-icons.css',moduleBase).href;
+document.head.appendChild(premiumIconStyle);
+const inAppAdminStyle=document.createElement('link');
+inAppAdminStyle.rel='stylesheet';
+inAppAdminStyle.href=new URL('phase6-inapp-admin.css',moduleBase).href;
+document.head.appendChild(inAppAdminStyle);
 const notificationsStyle=document.createElement('link');
 notificationsStyle.rel='stylesheet';
 notificationsStyle.href=new URL('phase5-notifications-ui.css',moduleBase).href;
@@ -182,7 +193,7 @@ const financeAuditStyle=document.createElement('link');
 financeAuditStyle.rel='stylesheet';
 financeAuditStyle.href=new URL('phase5-finance-integrity-ui.css',moduleBase).href;
 document.head.appendChild(financeAuditStyle);
-for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js']){
+for(const name of ['phase5-notifications-ui.js','phase5-vip-status-ui.js','phase5-social-ui.js','phase5-special-id-ui.js','phase5-medals-ui.js','phase5-room-games-ui.js','phase5-solo-games-ui.js','phase5-gift-history-ui.js','phase5-host-month-review-ui.js','phase5-push-privacy-ui.js','phase5-finance-integrity-ui.js','phase6-inapp-admin.js','phase6-admin-banners.js','phase6-premium-icons.js','phase6-verified-state-sync.js']){
  const script=document.createElement('script');
  script.async=false;
  script.src=new URL(name,moduleBase).href;

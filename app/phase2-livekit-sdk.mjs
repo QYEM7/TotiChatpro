@@ -17,7 +17,7 @@ export function status(){return {connected:current?.state===ConnectionState.Conn
 export async function disconnect(){
  const old=current;current=null;cleanAudio();
  if(old){await old.disconnect().catch(()=>{});}
- signal({connected:false});
+ signal({connected:false,activeSpeakerIds:[]});
 }
 export async function connect(serverUrl,token,callback){
  if(typeof serverUrl!=='string'||!serverUrl.startsWith('wss://')||
@@ -44,8 +44,14 @@ export async function connect(serverUrl,token,callback){
    if(current!==room)return;
    track.detach().forEach(el=>{el.remove();audio=audio.filter(a=>a!==el)});
  });
- room.on(RoomEvent.Disconnected,()=>{if(current===room)signal({connected:false});});
- room.on(RoomEvent.Reconnecting,()=>{if(current===room)signal({connecting:true});});
+ // The only speaking halo signal comes from LiveKit's genuine audio analysis,
+ // never a timer, random activity, or just an unmuted roster entry.
+ room.on(RoomEvent.ActiveSpeakersChanged,speakers=>{
+   if(current!==room)return;
+   signal({activeSpeakerIds:speakers.map(p=>p.identity).filter(id=>typeof id==='string')});
+ });
+ room.on(RoomEvent.Disconnected,()=>{if(current===room)signal({connected:false,activeSpeakerIds:[]});});
+ room.on(RoomEvent.Reconnecting,()=>{if(current===room)signal({connecting:true,activeSpeakerIds:[]});});
  room.on(RoomEvent.Reconnected,()=>{if(current===room)signal({connected:true});});
  try{
    await room.connect(serverUrl,token,{autoSubscribe:true});

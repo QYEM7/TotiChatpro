@@ -8,8 +8,18 @@ const $=s=>document.querySelector(s);
 let account='',generation=0,rows=[],initialized=false,busy=false,stream=null;
 const seen=new Set();
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const valid=row=>row&&uuid.test(row.id)&&uuid.test(row.room_id)&&
- Number.isSafeInteger(Number(row.total_coins))&&Number(row.total_coins)>0;
+// A public strip is reserved for fresh, settled support of at least 7,000 coins
+// in ONE authenticated gift transaction; catalog/unit-price alone never qualifies.
+const MIN_REAL_SUPPORT_COINS=7000,FEED_LIFETIME_MS=5*60*1000;
+const valid=row=>{
+ if(!row||!uuid.test(row.id)||!uuid.test(row.room_id)||
+    !uuid.test(row.sender_id)||!uuid.test(row.recipient_id))return false;
+ const unit=Number(row.unit_price),quantity=Number(row.quantity),total=Number(row.total_coins);
+ const at=Date.parse(String(row.created_at||'')),age=Date.now()-at;
+ return Number.isSafeInteger(unit)&&unit>0&&Number.isSafeInteger(quantity)&&quantity>0&&
+  Number.isSafeInteger(total)&&total>=MIN_REAL_SUPPORT_COINS&&
+  unit*quantity===total&&Number.isFinite(age)&&age>=-30000&&age<=FEED_LIFETIME_MS;
+};
 function title(row){
  return '🎁 '+String(row.sender_name||'مستخدم').slice(0,55)+' أرسل '+String(row.gift_name||'هدية').slice(0,60)+
  ' × '+Number(row.quantity)+' إلى '+String(row.recipient_name||'مستخدم').slice(0,55);
@@ -19,7 +29,10 @@ function decorateTicker(view){
  if(!ticker)return;
  const node=ticker.querySelector('.tickerBody');
  const count=ticker.querySelector('.orb b');
- const current=rows[0];
+ const current=rows.find(valid)||null;
+ // No confirmed event means NO public activity strip, not a mock donor or '0' animation.
+ ticker.hidden=!current;
+ ticker.style.display=current?'':'none';
  // The visual-review template contains an illustrative person's portrait:
  // it must never be presented as the real sender of an audited gift.
  const sample=ticker.querySelector('img');
@@ -58,7 +71,8 @@ async function refresh(){
  if(!user||busy||document.hidden)return;
  busy=true;const stamp=generation;
  try{
-  const data=await auth.requestData('/rest/v1/gift_global_announcements?select=id,room_id,sender_id,recipient_id,gift_id,gift_name,gift_icon,sender_name,recipient_name,quantity,unit_price,total_coins,created_at&order=created_at.desc&limit=12');
+  const since=new Date(Date.now()-FEED_LIFETIME_MS).toISOString();
+  const data=await auth.requestData('/rest/v1/gift_global_announcements?select=id,room_id,sender_id,recipient_id,gift_id,gift_name,gift_icon,sender_name,recipient_name,quantity,unit_price,total_coins,created_at&total_coins=gte.'+MIN_REAL_SUPPORT_COINS+'&created_at=gte.'+encodeURIComponent(since)+'&order=created_at.desc&limit=12');
   if(stamp!==generation||user!==auth.state().user?.id||!Array.isArray(data))return;
   const confirmed=data.filter(valid);
   if(!initialized){
@@ -73,7 +87,11 @@ async function refresh(){
   rows=confirmed;
   if(seen.size>500){const recent=new Set(confirmed.map(r=>r.id));seen.clear();for(const id of recent)seen.add(id);}
   refreshTicker();
- }catch(error){console.warn('TotiChat global gift feed:',String(error.message||'network failure').slice(0,120));}
+ }catch(error){
+  // Fail closed: do not keep an old announcement alive when freshness cannot be checked.
+  if(stamp===generation&&user===auth.state().user?.id){rows=[];refreshTicker();}
+  console.warn('TotiChat global gift feed:',String(error.message||'network failure').slice(0,120));
+ }
  finally{busy=false;}
 }
 function start(){
@@ -95,6 +113,6 @@ window.addEventListener('totichat-gift-completed',()=>{if(account)void refresh()
 window.addEventListener('online',()=>{if(account)void refresh();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&account)void refresh();});
 setInterval(()=>{if(account&&!document.hidden)void refresh();},8500);
-window.TotiGlobalGiftFeed=Object.freeze({refresh,decorateTicker,getLatest:()=>rows[0]?Object.freeze({...rows[0]}):null});
+window.TotiGlobalGiftFeed=Object.freeze({refresh,decorateTicker,getLatest:()=>rows.find(valid)?Object.freeze({...rows.find(valid)}):null});
 start();
 })();

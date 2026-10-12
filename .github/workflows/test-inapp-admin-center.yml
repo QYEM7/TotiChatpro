@@ -1,0 +1,55 @@
+name: Test in-app administration center
+on:
+  push:
+    branches:
+      - 'feature/in-app-admin-center-*'
+    paths:
+      - 'app/phase6-inapp-admin.js'
+      - 'app/phase6-inapp-admin.css'
+      - 'app/phase2-backend-controls.js'
+      - 'tests/inapp-admin-center.test.mjs'
+      - 'tests/live-no-fake-content.test.mjs tests/verified-support-strip-contract.test.mjs tests/beta-ux-prelaunch-contract.test.mjs'
+      - 'tests/real-admin-banners-and-demo-guard.test.mjs'
+      - 'tests/premium-icon-visual-contract.test.mjs'
+      - 'app/phase6-premium-icons.js'
+      - 'app/phase6-premium-icons.css'
+      - 'app/phase6-mic-presence.css'
+      - 'app/phase2-rooms.js'
+      - 'tests/mic-occupant-visual-contract.test.mjs'
+      - 'app/phase6-admin-banners.js'
+      - 'app/phase2-auth.js'
+      - 'app/royal-visuals.js'
+      - 'app/home-banners.js'
+      - 'app/phase2-global-gifts.js'
+      - 'app/phase2-rooms.js'
+      - 'app/phase2-live-mode.js'
+      - 'scripts/build-live-preview.mjs'
+      - '.github/workflows/test-inapp-admin-center.yml'
+  pull_request:
+    branches:
+      - 'develop/phase-2'
+    paths:
+      - 'app/phase6-inapp-admin.js'
+      - 'app/phase6-inapp-admin.css'
+      - 'app/phase2-backend-controls.js'
+      - 'tests/inapp-admin-center.test.mjs'
+      - 'tests/live-no-fake-content.test.mjs'
+      - 'app/royal-visuals.js'
+      - 'app/home-banners.js'
+      - 'app/phase2-global-gifts.js'
+      - 'app/phase2-rooms.js'
+      - 'app/phase2-live-mode.js'
+      - 'scripts/build-live-preview.mjs'
+permissions:
+  contents: read
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax, user role and protected Profile integration
+        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs tests/premium-icon-visual-contract.test.mjs tests/mic-occupant-visual-contract.test.mjs tests/lucky-gifts-real-admin-sync.test.mjs

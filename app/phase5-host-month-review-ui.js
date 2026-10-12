@@ -26,6 +26,7 @@ function changeUser(){
  month='';offset=0;total=0;entries=[];snapshotBusy=false;
 }
 function entry(){
+ if(window.TotiInAppAdmin)return; // New unified center owns the Profile entry.
  if(!current()||!trustedAuthority()||screen!=='me')return;
  const panel=$('#app .me-more');
  if(!panel||panel.querySelector('[data-tc-host-month]'))return;

@@ -19,26 +19,34 @@ function roomCard(r,i){
  '<span class="royal-tile-detail"><strong>👑 '+esc(r.name)+'</strong><span>'+esc(r.desc)+'</span><span class="royal-tags">'+r.tags.map(x=>'<i>♡ '+esc(x)+'</i>').join('')+'</span></span></button>';
 }
 function royalHome(){
+ // Authenticated mode starts with zero fabricated rooms, counts, banners or nearby people.
+ // Guest design-review mode retains the immutable approved visual reference.
+ const real=window.TotiLiveMode?.enabled===true&&window.TotiPhase2Auth?.state()?.signedIn===true;
  const cat=[['🔥','الأكثر رواجاً','popular'],['👑','غرف VIP','vip'],['💗','تعارف','friends'],['♫','موسيقى','music'],['🎮','ألعاب','games'],['🌐','دولي','world'],['▦','جميع الفئات','all']];
  const near=[['room4','312'],['room3','288'],['room5','265'],['room2','198']];
+ const verifiedBanner=real&&window.TotiBannerData?.getItems?.().length>0
+   ?window.TotiBannerData.renderBanner():'';
  return '<div class="royal-home" dir="rtl"><div class="royal-home-haze"></div>'+
  '<header class="royal-topbar"><div class="royal-brand">✦ <strong>TotiChat</strong></div>'+
- '<div class="royal-top-actions"><button data-a="go" data-v="vip" aria-label="VIP" class="royal-vip-chip">👑 VIP</button><button data-royal="search" aria-label="بحث">⌕</button><button data-royal="friends" aria-label="الأصدقاء">♟</button><button data-royal="notify" aria-label="الإشعارات">♧<i></i></button></div></header>'+
+ '<div class="royal-top-actions">'+
+ (real?'<button data-a="go" data-v="me" aria-label="عرض حالة VIP في ملفي" class="royal-vip-chip">👑 VIP</button><button type="button" data-phase2="search-rooms" aria-label="بحث الغرف الحقيقية">⌕</button><button data-tc-social-open aria-label="الأصدقاء الحقيقيون">♟</button><button data-t57-open aria-label="الإشعارات الحقيقية">♧</button>':
+ '<button data-a="go" data-v="vip" aria-label="VIP" class="royal-vip-chip">👑 VIP</button><button data-royal="search" aria-label="بحث">⌕</button><button data-royal="friends" aria-label="الأصدقاء">♟</button><button data-royal="notify" aria-label="الإشعارات">♧<i></i></button>')+'</div></header>'+
  '<main class="royal-home-main">'+
- '<button class="royal-hero" data-royal="hero" aria-label="تفاصيل الغرفة المميزة"><img src="'+esc(imgs('room5'))+'" alt="ليلة ساحرة في TotiChat">'+
+  (real?verifiedBanner:'<button class="royal-hero" data-royal="hero" aria-label="تفاصيل الغرفة المميزة"><img src="'+esc(imgs('room5'))+'" alt="ليلة ساحرة في TotiChat">'+
  '<span class="royal-hero-shine"></span><span class="royal-hero-text"><b>هنا يجتمع<br>الصوت الجميل</b><small>⋆ كوّن صداقات حول العالم ⋆</small></span>'+
- '<span class="royal-hero-pips"><i></i><i></i><i></i><i></i></span></button>'+
- '<nav class="royal-category-row" aria-label="تصنيفات TotiChat">'+cat.map(x=>'<button data-royal="category" data-cat="'+x[2]+'" class="royal-cat"><span class="royal-cat-icon">'+x[0]+'</span><small>'+x[1]+'</small></button>').join('')+'</nav>'+
- '<button class="royal-vip-promo" data-a="go" data-v="vip"><span class="royal-vip-emblem">👑<b>VIP</b></span><span class="royal-vip-promo-copy"><b>أصبح عضو VIP</b><small>مزايا حصرية وتجربة أكثر تميزاً</small></span><span class="royal-gold-cta">اكتشف الآن ❮</span></button>'+
+ '<span class="royal-hero-pips"><i></i><i></i><i></i><i></i></span></button>')+
+ '<nav class="royal-category-row" aria-label="تصنيفات TotiChat">'+cat.map(x=>'<button '+(real&&x[2]!=='all'?'disabled title="التصنيفات تحتاج تصنيفاً موثقاً من الخادم" ':'')+'data-royal="category" data-cat="'+x[2]+'" class="royal-cat"><span class="royal-cat-icon">'+x[0]+'</span><small>'+x[1]+'</small></button>').join('')+'</nav>'+
+ (real?'<div class="royal-vip-promo" role="note" aria-label="حالة VIP الفعلية تظهر في ملفي"><span class="royal-vip-emblem">👑<b>VIP</b></span><span class="royal-vip-promo-copy"><b>امتيازات VIP</b><small>حالتك الفعلية وشاراتك تظهر داخل ملفي</small></span></div>':
+ '<button class="royal-vip-promo" data-a="go" data-v="vip"><span class="royal-vip-emblem">👑<b>VIP</b></span><span class="royal-vip-promo-copy"><b>أصبح عضو VIP</b><small>مزايا حصرية وتجربة أكثر تميزاً</small></span><span class="royal-gold-cta">اكتشف الآن ❮</span></button>')+
  '<div class="royal-section-label"><h2>🔥 الغرف المميزة</h2><button data-royal="view-all">عرض الكل ❮</button></div>'+
- '<div class="royal-room-gallery">'+roomItems.map(roomCard).join('')+'</div>'+
+ '<div class="royal-room-gallery">'+(real?'':roomItems.map(roomCard).join(''))+'</div>'+
  '<div class="royal-section-label"><h2>👑 غرف قريبة منك</h2><button data-royal="view-all">عرض الكل ❮</button></div>'+
- '<div class="royal-near">'+near.map(x=>'<button data-a="go" data-v="room" class="royal-near-tile"><img src="'+esc(imgs(x[0]))+'" alt=""><span>🟢 '+x[1]+'</span></button>').join('')+'</div>'+
+ '<div class="royal-near">'+(real?'':near.map(x=>'<button data-a="go" data-v="room" class="royal-near-tile"><img src="'+esc(imgs(x[0]))+'" alt=""><span>🟢 '+x[1]+'</span></button>').join(''))+'</div>'+
  /* End home feed after nearby rooms: top hero banner stays unchanged. */
  '</main>'+
  (minimizedRoom?'<button class="mini-room-pill tc-mini-room royal-mini-room" data-a="restoreRoom" aria-label="العودة إلى الغرفة المصغرة">🎙️ الغرفة المصغرة</button>':'')+
  '<nav class="royal-nav"><button data-a="go" data-v="home" class="selected"><span>⌂</span><small>الرئيسية</small></button>'+
- '<button data-a="go" data-v="discoverPreview"><span>◎</span><small>اكتشف</small></button>'+
+ '<button '+(real?'type="button" data-phase2="search-rooms" aria-label="استكشاف الغرف الحقيقية"':'data-a="go" data-v="discoverPreview"')+'><span>◎</span><small>اكتشف</small></button>'+
  '<button class="royal-create" data-royal="create-room" aria-label="إنشاء غرفة"><span>＋</span><small>إنشاء غرفة</small></button>'+
  '<button data-a="go" data-v="messages"><span>☏</span><small>الرسائل</small></button>'+
  '<button data-a="go" data-v="me"><span>♙</span><small>حسابي</small></button></nav></div>';
@@ -60,7 +68,7 @@ function decorate(){
  title.insertAdjacentHTML('afterend','<div class="royal-feature-title"><span class="royal-feature-emblem">'+({share:'➤',settings:'♛',games:'🎮'}[mode])+'</span><div><h2>'+english+'</h2><p>'+lead+'</p></div></div>');
  }
  const card=f.querySelector('.tc-room-card');
- if(card){
+ if(card&&!window.TotiLiveMode?.enabled){
    card.classList.add('royal-profile-card');
    card.insertAdjacentHTML('beforeend','<span class="royal-room-status">'+(mode==='settings'?'👑 Owner':'🔴 Live Voice Room')+'</span>');
  }
@@ -74,16 +82,21 @@ function decorate(){
      }
    }
  }
- if(mode==='share'){
+ if(mode==='share'&&!window.TotiLiveMode?.enabled){
    const friends=f.querySelector('.tc-subtitle');
    if(friends){friends.innerHTML='🟢 Online Friends <small>الأصدقاء المتصلون</small>';}
    const chosen=f.querySelector('.tc-sticky span');
    if(chosen)chosen.insertAdjacentHTML('beforeend',' <span class="royal-selected-faces"><img src="'+esc(imgs('female'))+'" alt=""><img src="'+esc(imgs('male'))+'" alt=""></span>');
  }
  if(mode==='games'){
-   f.querySelector('.tc-room-strip')?.classList.add('royal-live-strip');
    const strip=f.querySelector('.tc-room-strip');
-   if(strip)strip.insertAdjacentHTML('beforebegin','<div class="royal-games-ticker">🔥 ✨ ملكة الليل sent Royal Castle to سارة　👑 x1</div>');
+   if(window.TotiLiveMode?.enabled){
+    // This design-only ribbon is not a verified support event.
+    if(strip){strip.hidden=true;strip.style.display='none';}
+   }else{
+    strip?.classList.add('royal-live-strip');
+    if(strip)strip.insertAdjacentHTML('beforebegin','<div class="royal-games-ticker">🔥 ✨ ملكة الليل sent Royal Castle to سارة　👑 x1</div>');
+   }
  }
 }
 const originalRender=render;
@@ -100,6 +113,16 @@ function handle(e){
  if(window.TotiLiveMode?.enabled&&window.TotiPhase2Auth?.state()?.signedIn){
   if(a==='create-room'||a==='hero'||a==='close')return;
   e.preventDefault();e.stopImmediatePropagation();
+  // The design-era search button may remain on an already-open tab after
+  // sign-in. Route it to the actual RLS-authorized room search, not the
+  // historical "feature not connected" toast or demo search sheet.
+  if(a==='search'){
+   if(typeof window.TotiPhase2Rooms?.openSearch==='function')
+    window.TotiPhase2Rooms.openSearch();
+   else if(typeof showToast==='function')
+    showToast('بحث الغرف الحقيقية غير متاح الآن. أعد فتح التطبيق.');
+   return;
+  }
   if(a==='view-all'||(a==='category'&&['all','popular'].includes(el.dataset.cat))){
    document.querySelectorAll('.royal-room-gallery .royal-room-tile').forEach(b=>b.hidden=false);
    if(a==='category')document.querySelectorAll('.royal-cat').forEach(b=>b.classList.toggle('active',b===el));
@@ -137,6 +160,31 @@ function handle(e){
   if(n<15)showToast('هذا التغيير معاينة فقط؛ المقاعد المشغولة تبقى محفوظة');
  }
 }
+// Staging live navigation: capture the actual Discover/Search interaction at
+// the FIRST window listener (before old visual-review handlers and route guards).
+// Some mobile sessions retain an old search glyph or visual-only Discover tile
+// during auth transition; all of them must open the same server-backed directory.
+function routeRealSearchFirst(event){
+ // All legacy Discovery routes must converge on the RLS-backed room
+ // directory in authenticated live mode. Restrict to explicit navigation
+ // actions, not arbitrary text/visuals or disabled category controls.
+ const target=event.target?.closest?.(
+  'button[data-phase2="search-rooms"],'+
+  'button[data-royal="search"],'+
+  'button[data-a="go"][data-v="discoverPreview"],'+
+  'button[data-a="tab"][data-v="اكتشف"]'
+ );
+ if(!target||window.TotiLiveMode?.enabled!==true||
+    window.TotiPhase2Auth?.state?.()?.signedIn!==true)return;
+ event.preventDefault();
+ event.stopPropagation();
+ event.stopImmediatePropagation();
+ const open=window.TotiPhase2Rooms?.openSearch;
+ if(typeof open==='function')open();
+ else if(typeof showToast==='function')
+  showToast('تعذّر بدء بحث الغرف الحقيقي. أعد فتح TotiChat.');
+}
+window.addEventListener('click',routeRealSearchFirst,true);
 window.addEventListener('click',handle,true);
 const startUrl=new URLSearchParams(location.search);
 if(startUrl.get('view')==='royal-home'){minimizedRoom=false;screen='home';}

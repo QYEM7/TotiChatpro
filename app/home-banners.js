@@ -13,6 +13,7 @@
   };
   function current(){return state.items[state.index]||null;}
   function placeholder(){
+    if(window.TotiLiveMode?.enabled===true)return ''; // No blank advertising strip during real testing.
     return '<div class="hero" aria-live="polite"><span style="display:block;min-height:147px;position:relative"></span><b>'+core.escape(emptyCopy[state.status]||emptyCopy.empty)+'</b><div class="dots"></div></div>';
   }
   function renderBanner(){
@@ -23,7 +24,7 @@
     return '<div class="hero" data-a="liveBanner" data-v="'+state.index+'" role="button" tabindex="0" aria-label="'+aria+'"><img src="'+core.escape(item.imageUrl)+'" alt="'+label+'" loading="lazy"><b>'+label+'</b><div class="dots">'+state.items.map((_,i)=>'<i class="'+(i===state.index?'on':'')+'"></i>').join('')+'</div></div>';
   }
   function renderAnnouncements(){
-    if(!state.items.length)return '<div class="cardwhite">'+core.escape(emptyCopy[state.status]||emptyCopy.empty)+'</div>';
+    if(!state.items.length)return window.TotiLiveMode?.enabled===true?'':'<div class="cardwhite">'+core.escape(emptyCopy[state.status]||emptyCopy.empty)+'</div>';
     return state.items.map((item,i)=>'<button class="visual-row" data-a="liveBanner" data-v="'+i+'"><img src="'+core.escape(item.imageUrl)+'" alt=""><span class="visual-copy"><b>'+core.escape(item.title)+'</b><small>إعلان رسمي</small></span><span class="at-end">‹</span></button>').join('');
   }
   function redraw(){

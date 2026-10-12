@@ -1,6 +1,14 @@
 /* TotiChat agency/recharge complete UI flow. LOCAL DEMO ONLY; never transfer coins, charge users or write backend data. */
 (function(){
 'use strict';
+// LOCAL VISUAL-REVIEW MODULE ONLY. Never mount invented agency accounts,
+// test currency, or sample VIP 11-15 in authenticated Staging/Android mode.
+const liveSource=new URLSearchParams(location.search).get('mode')==='live'||
+ !!window.TotiLivePreviewOnly||
+ (location.protocol==='https:'&&location.hostname==='localhost')||
+ !!window.Capacitor?.isNativePlatform?.();
+if(liveSource)return;
+
 const KEY='totichat.agency.prototype.v2';
 const packs=[4900,24500,49000,122500,245000,490000];
 const demoAgents=[

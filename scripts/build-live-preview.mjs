@@ -17,17 +17,61 @@ export function injectPreviewEntry(html){
  const boot='<script>'+PREVIEW_FLAG+';'+
    '(function(){const u=new URL(location.href);u.searchParams.set("mode","live");'+
    'history.replaceState(history.state,"",u.href)})();</script>';
+ // Opt-in mobile diagnostic for invite-only UAT. Records only clicked
+ // navigation attributes and current UI state, never account IDs or tokens.
+ // Runs before legacy app scripts and is absent unless ?qa=discover.
+ const qaProbe=`<script>(function(){
+ var fromUrl=new URLSearchParams(location.search).get('qa')==='discover';
+ // OAuth safely returns to ?mode=live after provider login; persist ONLY
+ // the opt-in diagnostic flag within this tab (not OAuth credentials).
+ // Never alter the real redirect URL or the production application.
+ try{
+   if(fromUrl)sessionStorage.setItem('totichat.preview.qa-discover','1');
+   else if(sessionStorage.getItem('totichat.preview.qa-discover')!=='1')return;
+ }catch(_){if(!fromUrl)return;}
+ var marker='DISCOVER-QA-06',box;
+ function badge(){
+   if(box||!document.body)return;
+   box=document.createElement('output');
+   box.id='toti-search-qa-status';
+   box.setAttribute('role','status');
+   box.style.cssText='position:fixed;z-index:2147483647;top:6px;left:6px;right:6px;'+
+    'background:#24132eea;color:#fff8df;border:1px solid #dcbf89;border-radius:10px;'+
+    'padding:5px 9px;font:11px/1.45 system-ui,sans-serif;direction:rtl;text-align:center;pointer-events:none;';
+   box.textContent=marker+' · اضغط اكتشف أو بحث';document.body.appendChild(box);
+ }
+ document.addEventListener('DOMContentLoaded',badge);
+ window.addEventListener('click',function(e){
+   var t=e.target&&e.target.closest&&e.target.closest('button');
+   if(!t)return;
+   var label=(t.textContent||'').trim().slice(0,35);
+   var royal=t.getAttribute('data-royal')||'-';
+   var route=t.getAttribute('data-v')||'-';
+   var phase=t.getAttribute('data-phase2')||'-';
+   window.setTimeout(function(){
+     badge();
+     if(!box)return;
+     var open=!!document.getElementById('tc-real-room-search-query');
+     var live=window.TotiLiveMode&&window.TotiLiveMode.enabled===true;
+     var ready=typeof (window.TotiPhase2Rooms&&window.TotiPhase2Rooms.openSearch);
+     box.textContent=marker+' | '+label+' | v:'+route+' r:'+royal+' p:'+phase+
+        ' | Live:'+!!live+' | API:'+ready+' | بحث:'+!!open;
+   },220);
+ },true);
+ })();</script>`;
  if(html.includes(PREVIEW_FLAG))throw Error('BLOCKED preview: duplicate entry');
- return html.replace(anchor,anchor+boot)
+ return html.replace(anchor,anchor+boot+qaProbe)
    .replace(/<title>[^<]*<\/title>/,'<title>TotiChat | Live Preview</title>');
 }
 export function restrictDemoChoice(js){
  const anchor="if(screen==='loginPreview'){";
  const click="if(action.dataset.liveEntry==='preview'){";
- if(!js.includes(anchor)||!js.includes(click))
+ if(!js.includes(click))
   throw Error('BLOCKED preview: cannot restrict synthetic mode safely');
- return js.replace(anchor,"if(screen==='loginPreview'&&!window.TotiLivePreviewOnly){")
-  .replace(click,"if(action.dataset.liveEntry==='preview'){"+
+ // Recent live mode does not create a demo-choice banner at all. Support both
+ // historical approved layouts and the new clean-auth variant without adding it.
+ const restricted=js.includes(anchor)?js.replace(anchor,"if(screen==='loginPreview'&&!window.TotiLivePreviewOnly){"):js;
+ return restricted.replace(click,"if(action.dataset.liveEntry==='preview'){"+
    "if(window.TotiLivePreviewOnly){warn('المعاينة الحقيقية لا تسمح بالحسابات الوهمية.');return;}");
 }
 export async function buildLivePreview(env=process.env,{

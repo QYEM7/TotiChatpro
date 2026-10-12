@@ -73,6 +73,7 @@ async function load(force=false){
  }
 }
 function ownerEntry(){
+ if(window.TotiInAppAdmin)return; // New unified center owns the Profile entry.
  if(!signed()||screen!=='me'||!approvedOwner)return;
  const panel=$('#app .me-more');
  if(!panel||panel.querySelector('[data-tc-medal-owner]'))return;

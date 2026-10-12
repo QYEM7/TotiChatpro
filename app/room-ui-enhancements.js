@@ -1,6 +1,15 @@
 /* TotiChat room UI completion: frontend-only preview; no API/database calls. */
 (function(){
 'use strict';
+// This legacy share/settings/games file contains invented friends, room IDs and
+// local-only actions. It must NEVER intercept the authenticated TotiChat app.
+// The independent visual-review site may still use it, without claiming real data.
+const liveSource=new URLSearchParams(location.search).get('mode')==='live'||
+ !!window.TotiLivePreviewOnly||
+ (location.protocol==='https:'&&location.hostname==='localhost')||
+ !!window.Capacitor?.isNativePlatform?.()||
+ window.TotiLiveMode?.enabled===true;
+if(liveSource)return;
 const q=(s,root=document)=>root.querySelector(s);
 const overlay=q('#overlay');
 const params=new URLSearchParams(location.search);

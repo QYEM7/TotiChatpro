@@ -80,6 +80,8 @@ function protectIdentity(){
     if(about)about.textContent=profile?.bio||'لا توجد نبذة شخصية بعد';
     const gifts=$('.pr-event span');
     if(gifts)gifts.textContent='الهدايا والمكافآت · قيد الربط بالحساب';
+    // The reference header shipped with an invented donor portrait; never show it as a real sender.
+    const sampleDonor=$('.pr-event img');if(sampleDonor)sampleDonor.remove();
     const inventory=$('.pr-display-items');
     if(inventory){
       inventory.replaceChildren();
@@ -95,35 +97,20 @@ function protectIdentity(){
   }
 }
 function decorate(){
-  const state=auth.state();
-  if(!state.signedIn&&!explicitPreview&&authScreens.has(screen)){
-    const page=$('.fc-page')||$('#app .main')||$('#app');
-    banner(page,'tc-phase2-login-banner',
-      '🔐 هذه نسخة متصلة بقاعدة TotiChat الجديدة. لا توجد حسابات قديمة منقولة. سجّل حساباً جديداً حتى تظهر بياناتك الحقيقية.',
-      screen==='loginPreview'?'signup':'login',screen==='loginPreview'?'إنشاء حساب جديد':'تسجيل الدخول');
-    if(screen==='loginPreview'){
-      banner(page,'tc-phase2-demo-choice',
-        'تريد تشوف التصميم فقط؟ تستطيع فتح المعاينة، لكن كل الأرقام والمستخدمين فيها غير حقيقيين.',
-        'preview','عرض التصميم التجريبي');
-    }
-    return;
-  }
-  if(explicitPreview&&!state.signedIn){
-    banner($('#app .main')||$('#app'),'tc-phase2-demo-indicator',
-      '⚠️ وضع المعاينة: جميع الحسابات والأرصدة والغرف المعروضة غير حقيقية.',
-      'login','الدخول الحقيقي');
-    return;
-  }
-  if(state.signedIn){
-    protectIdentity();
-    const parent=screen==='home' ? $('.royal-home-main'):
-                 screen==='me' ? $('.me-royal'):
-                 screen==='room' ? $('.roomview.room-v2'):
-                 screen==='profilePreview' ? $('.profile-royal'):
-                 null;
-    if(parent)banner(parent,'tc-phase2-online-state',
-      '✓ الحساب حقيقي · الغرف والدردشة متصلة · الهدايا بأسعار الخادم · الصوت يحتاج خدمة بث مفعّلة');
-  }
+ const state=auth.state();
+ // Manual testing uses actual backend state. Do not add demo/online ribbons,
+ // promotional strips, misleading activity indicators or stale sample counts.
+ if(state.signedIn){
+   protectIdentity();
+   // The design shell contains a fixed, invented phone time/network status.
+   // Real sessions use Android's system status; the web preview must not fake one.
+   $$('#app > .status,#app > .previewflag').forEach(node=>node.remove());
+ }
+ else if(explicitPreview){
+   // Standalone visual preview is explicitly labelled, never confused with live accounts.
+   const page=$('#app .main')||$('#app');
+   banner(page,'tc-phase2-demo-indicator','⚠️ معاينة التصميم فقط: المعلومات غير حقيقية.','login','الدخول الحقيقي');
+ }
 }
 const originalRender=render;
 render=function(){
@@ -141,7 +128,10 @@ window.addEventListener('click',e=>{
   if(action){
     e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();
     if(action.dataset.liveEntry==='preview'){
-      explicitPreview=true;go('home');
+      // Real app sessions must never open local, fabricated social/financial data.
+      // Screenshot/design review lives in the separate visual-only project.
+      warn('المعاينة التجريبية غير متاحة داخل التطبيق الحقيقي.');
+      return;
     }else if(action.dataset.liveEntry==='signup'){
       explicitPreview=false;go('signupPreview');
     }else{
