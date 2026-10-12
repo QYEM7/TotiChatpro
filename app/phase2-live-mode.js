@@ -80,6 +80,8 @@ function protectIdentity(){
     if(about)about.textContent=profile?.bio||'لا توجد نبذة شخصية بعد';
     const gifts=$('.pr-event span');
     if(gifts)gifts.textContent='الهدايا والمكافآت · قيد الربط بالحساب';
+    // The reference header shipped with an invented donor portrait; never show it as a real sender.
+    const sampleDonor=$('.pr-event img');if(sampleDonor)sampleDonor.remove();
     const inventory=$('.pr-display-items');
     if(inventory){
       inventory.replaceChildren();
@@ -98,7 +100,12 @@ function decorate(){
  const state=auth.state();
  // Manual testing uses actual backend state. Do not add demo/online ribbons,
  // promotional strips, misleading activity indicators or stale sample counts.
- if(state.signedIn){protectIdentity();}
+ if(state.signedIn){
+   protectIdentity();
+   // The design shell contains a fixed, invented phone time/network status.
+   // Real sessions use Android's system status; the web preview must not fake one.
+   $$('#app > .status,#app > .previewflag').forEach(node=>node.remove());
+ }
  else if(explicitPreview){
    // Standalone visual preview is explicitly labelled, never confused with live accounts.
    const page=$('#app .main')||$('#app');
