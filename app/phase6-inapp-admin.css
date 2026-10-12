@@ -68,3 +68,26 @@
 .tcac-card:active{transform:translateY(1px)}
 .tcac-entry,.tcac-card,.tcac-header button,.tcac-bottom button{min-height:44px}
 @media(prefers-reduced-motion:reduce){.tcac-card:active{transform:none}}
+
+
+/* Owner / designated main partner: real Lucky Gifts odds config. */
+.tcac-lucky-tier{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+ margin:13px 0;padding:12px;border:1px solid #dcc7e1;border-radius:14px;
+ background:linear-gradient(150deg,#fff,#fcf8ff);
+}
+.tcac-lucky-tier legend{padding:0 7px;color:#674074;font-size:13px;font-weight:900}
+.tcac-lucky-tier label{
+ display:flex;flex-direction:column;gap:5px;min-width:0;
+ color:#624b68;font-weight:700;font-size:11px;
+}
+.tcac-lucky-tier input{
+ width:100%;min-height:43px;min-width:0;box-sizing:border-box;
+ border:1px solid #d5c4df;border-radius:10px;
+ background:white;color:#392545;padding:8px;font:inherit;font-size:13px;
+}
+#tcac-lucky-config{display:block}
+#tcac-lucky-config>.tcac-field{flex-direction:row;align-items:center;justify-content:space-between}
+#tcac-lucky-config>.tcac-field input{min-width:20px;width:20px;height:20px;accent-color:#75489a}
+#tcac-lucky-result{font-size:12px;color:#4e8064}
+@media(max-width:355px){.tcac-lucky-tier{grid-template-columns:1fr}}
