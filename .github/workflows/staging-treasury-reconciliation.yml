@@ -1,0 +1,25 @@
+name: Staging treasury reconciliation contract QA
+on:
+  push:
+    branches:
+      - 'feature/staging-finance-reconciliation-*'
+    paths:
+      - 'supabase/migrations/*staging_treasury_integrity_preflight_readonly_v1.sql'
+      - 'tests/staging-treasury-integrity.test.mjs'
+      - '.github/workflows/staging-treasury-reconciliation.yml'
+  pull_request:
+    branches:
+      - 'develop/phase-2'
+permissions:
+  contents: read
+jobs:
+  readonly-ledger-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify no payout, credit issuance, privilege bypass, or fake movement
+        run: node --test tests/staging-treasury-integrity.test.mjs tests/finance-integrity-readonly.test.mjs tests/finance-integrity-details.test.mjs tests/host-accrual-conservation.test.mjs tests/host-month-immutable-accrual.test.mjs
