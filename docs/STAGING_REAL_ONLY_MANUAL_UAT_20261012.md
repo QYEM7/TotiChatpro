@@ -11,6 +11,7 @@ Vercel readiness READY is NOT a substituted physical-device authenticated E2E pa
 - `main`, `develop/phase-2`, `release/uiux-v1-approved` and production Supabase must remain unmodified until explicit approval.
 - This is an isolated REAL Staging browser preview; no static fake room cards, no fake followers, no simulated gift ticker, no placeholder ad spaces, no fake financial summary. Empty real tables legitimately yield empty views.
 - Do not seed fake public activity, invented salary liabilities, test cash or diamonds to make a screen appear populated.
+- The real-only live mode now also blocks the local agency-ledger simulator and incompatible VIP 11–15 demo gallery. The backend supports VIP 1–10.
 - Do not make actual money transfers or pay salaries; month-end close/diamond reset is not implemented.
 - A verified Owner can intentionally test audited administrative actions using existing authorized staging identities; review IDs and account scope before each write.
 - Follow a new authenticated session through My/Profile -> مركز الإدارة. Never use the old standalone-admin redirect.
@@ -45,7 +46,14 @@ Vercel readiness READY is NOT a substituted physical-device authenticated E2E pa
 
 ## Known explicit NO-GO / not silently accepted
 - Full agency target and host salaries/commissions/month close/diamond reset await approved business parameters and conservation/idempotency validation.
-- Full global moderation, advanced room enforcement, complete banner upload/editor, all 41 UI routes/27 dialogs, native Android and end-to-end voice remain outside verified scope; no readiness percentage is implied by CI green.
+- Global account moderation, some advanced enforcement, all 41 UI routes/27 dialogs, native Android and end-to-end voice remain outside verified scope; banner upload/editor and room-scoped moderation now exist in source but still need authenticated mobile QA; no readiness percentage is implied by CI green.
 - Supabase Auth redirect/reset-password reliability remains a separate defect. The single in-app administration entry avoids a second admin login but does not itself fix OAuth/deep link/password flows.
 - Real two-account hosted E2E with dedicated staff roles, live gift transaction and room audio still required.
 - Keep draft PR #28 unmerged pending role/money/voice QA.
+
+
+## Implementation updates on 2026-10-12
+- Real mobile form for uploading/storing WebP banners through Owner/main-partner scoped Storage policies. Uses audited `phase6_admin_banner_action` and actual `home_banners` rows; create/edit/publish/archive/delete actions require manual signed-in QA.
+- Real Owner/main-partner room-scoped ban and unban through `phase6_admin_room_action`; protected principals cannot be targeted, all actions require a reason and a server confirmation.
+- Test on Staging with intentionally approved accounts; never create fake advertisements or fabricated account activity.
+- Full scoring and exact remaining blockers: [Handoff report](STAGING_HANDOFF_READINESS_PERCENT_20261012.md).
