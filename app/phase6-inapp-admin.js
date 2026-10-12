@@ -249,7 +249,6 @@ async function entitlementSubmit(form){
  const data=new FormData(form),get=k=>String(data.get(k)||'').trim();
  const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
  const reason=get('reason'),key=get('key'),action=get('action');
- if(reason.length<10||reason.length>300)throw Error('السبب يجب أن يحتوي 10–300 حرف');
  let fn,params,signature,confirmation;
  if(form.id==='tcac-vip-check'){
   const user=get('target');if(!uuid.test(user))throw Error('UUID غير صالح');
@@ -259,6 +258,7 @@ async function entitlementSubmit(form){
   }
   return;
  }
+ if(reason.length<10||reason.length>300)throw Error('السبب يجب أن يحتوي 10–300 حرف');
  if(form.id==='tcac-vip-write'){
   const user=get('target'),tier=Number(get('tier')),expires=get('expires');
   if(!uuid.test(user)||!['grant','revoke'].includes(action))throw Error('مدخلات VIP غير صالحة');
