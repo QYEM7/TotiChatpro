@@ -30,6 +30,7 @@ const nav=[
  ['catalog','الهدايا والمتجر','✧','catalog'],
  ['reports','التقارير','▥','reports'],
  ['global_gift','إعلانات الهدايا','★','chief'],
+ ['lucky_gifts','هدايا الحظ والاحتمالات','✦','chief'],
  ['open_agency','فتح وكالة مضيفين','＋','db_open'],
  ['support','صندوق خدمة العملاء','☏','support'],
  ['vip','VIP والامتيازات','♛','owner'],
@@ -55,6 +56,7 @@ const iconPaths=Object.freeze({
  catalog:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M12 7v14M3 12h18M12 7c-7-2-7-8-3-8 2 0 3 3 3 8 0-5 1-8 3-8 4 0 4 6-3 8"/>',
  reports:'<path d="M5 21V4h14v17M3 21h18M8 17v-5M12 17V8M16 17v-7"/>',
  global_gift:'<path d="m12 3 3 6 6.5 1-4.7 4.7 1.2 6.3-6-3.1-6 3.1 1.2-6.3L2.5 10 9 9z"/>',
+ lucky_gifts:'<path d="M4 4h16v16H4zM4 12h16M12 4v16M7 7l10 10M17 7 7 17"/>',
  open_agency:'<path d="M4 4h16v17H4zM9 21v-6h6v6M8 9h8M12 7v6"/>',
  support:'<path d="M4 13v-2a8 8 0 0 1 16 0v2M4 13H2v6h5v-6H4ZM20 13h2v6h-5v-6h3ZM17 21c-1 1-3 1-5 1"/>',
  vip:'<path d="m2.5 7 5.4 4.5L12 4l4.1 7.5L21.5 7l-1.8 12H4.3z"/><path d="M5 16.5h14"/>',
@@ -202,6 +204,7 @@ function draw(){
  }
  if(view==='room_moderation'){c.innerHTML=roomModerationForm();status('حظر غرفة فقط، لا يوجد حظر شامل للحساب.');return;}
  if(view==='support'){void supportPage();return;}
+ if(view==='lucky_gifts'){void showLuckyPolicy();return;}
  if(view==='vip'||view==='medals'){void entitlementScreen();return;}
  if(actionMap[view]){
   c.innerHTML='<div class="tcac-module"><h3>'+esc(item[1])+'</h3>'+
@@ -218,6 +221,79 @@ function draw(){
  esc(reasons[view]||'الوظيفة قيد الدمج ولا يوجد تنفيذ وهمي.')+'</p>'+
  '<p class="tcac-notice">لا توجد أزرار وهمية أو صلاحيات مفترضة.</p></div>';
  status('لا يمكن تنفيذ هذا القسم قبل استكمال الربط واختباره.');
+}
+
+
+let pendingLuckyPolicy=null,luckyPolicySaving=false;
+async function showLuckyPolicy(){
+ const content=qs('#tcac-content'),accountId=uid();
+ if(!opened||view!=='lucky_gifts'||!content)return;
+ content.innerHTML='<div class="tcac-module"><h3>✦ إدارة احتمالات الحظ</h3>'+
+  '<p>سحب حقيقي من الخادم، لكن المضاعفات تمنح نقاطاً غير نقدية فقط. الماس ورواتب المضيفين وتارجت الوكالات تُحتسب من القيمة الأصلية للهدية، بلا مضاعفة.</p>'+
+  '<div id="tcac-lucky-policy" role="status">جارٍ تحميل الإعدادات…</div></div>';
+ try{
+  const policy=await rpc('phase6_lucky_gift_policy',{});
+  if(!opened||view!=='lucky_gifts'||uid()!==accountId)return;
+  if(!policy||!Array.isArray(policy.tiers)||!policy.tiers.length)throw Error('بيانات الاحتمالات غير متاحة');
+  const box=qs('#tcac-lucky-policy');if(!box)return;
+  box.dataset.tierCount=String(policy.tiers.length);
+  box.innerHTML='<form id="tcac-lucky-config" autocomplete="off">'+
+    '<label class="tcac-field">تشغيل هدايا الحظ<input type="checkbox" name="enabled" '+(policy.enabled?'checked':'')+'></label>'+
+    policy.tiers.map((t,i)=>'<fieldset class="tcac-lucky-tier"><legend>'+esc(t.label)+'</legend>'+
+      '<input type="hidden" name="tier_'+i+'" value="'+esc(t.rewardTier)+'">'+
+      '<label>اسم الجائزة<input name="label_'+i+'" maxlength="70" required value="'+esc(t.label)+'"></label>'+
+      '<label>الوزن من 10,000<input name="weight_'+i+'" type="number" min="1" max="10000" step="1" required value="'+esc(t.weight)+'"></label>'+
+      '<label>مضاعف نقاط الحظ<input name="multiplier_'+i+'" type="number" min="1" max="100" step="1" required value="'+esc(t.multiplier)+'"></label>'+
+      '<label>أقصى مرات الربح اليومية للمستلم (فارغ = غير محدود)<input name="cap_'+i+'" type="number" min="1" max="10000" step="1" value="'+esc(t.maxDailyWins??'')+'"></label>'+
+      '</fieldset>').join('')+
+    '<p>الأوزان لازم مجموعها 10,000 (100%). لازم تبقى جائزة ×1 بدون حد يومي حتى ما يتعطل الإرسال.</p>'+
+    '<button class="tcac-primary" type="submit">حفظ وتنفيذ القرار</button>'+
+    '<p id="tcac-lucky-result" role="status" aria-live="polite"></p></form>';
+ }catch(error){
+  if(opened&&view==='lucky_gifts'&&uid()===accountId){
+   const n=qs('#tcac-lucky-policy');if(n)n.textContent='تعذّر جلب إعدادات الحظ: '+String(error.message).slice(0,150);
+  }
+ }
+}
+async function saveLuckyPolicy(form){
+ if(luckyPolicySaving||!form.reportValidity())return;
+ const accountId=uid(),permission=await verify();
+ if(!opened||view!=='lucky_gifts'||!chief(permission)||uid()!==accountId)
+  throw Error('لا تملك صلاحية إدارة الحظ');
+ const count=Number(qs('#tcac-lucky-policy')?.dataset.tierCount);
+ if(!Number.isInteger(count)||count<1||count>8)throw Error('عدد الجوائز غير صالح');
+ const data=new FormData(form),rules=[];
+ for(let i=0;i<count;i++){
+  const rewardTier=String(data.get('tier_'+i)||''),label=String(data.get('label_'+i)||'').trim();
+  const weight=Number(data.get('weight_'+i)),multiplier=Number(data.get('multiplier_'+i));
+  const capText=String(data.get('cap_'+i)||'').trim(),maxDailyWins=capText?Number(capText):null;
+  if(!/^[a-z][a-z0-9_]{0,24}$/.test(rewardTier)||!label||label.length>70||
+   !Number.isInteger(weight)||weight<1||weight>10000||
+   !Number.isInteger(multiplier)||multiplier<1||multiplier>100||
+   (maxDailyWins!==null&&(!Number.isInteger(maxDailyWins)||maxDailyWins<1||maxDailyWins>10000)))
+   throw Error('معلومات الجائزة أو حدودها غير صحيحة');
+  rules.push({rewardTier,label,weight,multiplier,maxDailyWins});
+ }
+ if(rules.reduce((a,t)=>a+t.weight,0)!==10000||
+   !rules.some(t=>t.multiplier===1&&t.maxDailyWins===null))
+  throw Error('اجمع الأوزان إلى 10000 وأبقِ جائزة ×1 مفتوحة دائماً');
+ const enabled=data.has('enabled'),signature=JSON.stringify([accountId,enabled,rules]);
+ if(!pendingLuckyPolicy||pendingLuckyPolicy.signature!==signature)
+  pendingLuckyPolicy={signature,id:crypto.randomUUID()};
+ if(!confirm('تأكيد '+(enabled?'تفعيل':'إيقاف')+' الحظ وتعديل احتمالاته الحقيقية في Staging؟'))return;
+ luckyPolicySaving=true;const button=form.querySelector('button[type="submit"]');
+ if(button)button.disabled=true;
+ try{
+  const result=await rpc('phase6_lucky_gift_configure',{
+   p_enabled:enabled,p_rules:rules,p_request_id:pendingLuckyPolicy.id
+  });
+  if(result?.enabled!==enabled||!Array.isArray(result.tiers))throw Error('الخادم لم يؤكد تطبيق القرار');
+  pendingLuckyPolicy=null;
+  if(uid()!==accountId||view!=='lucky_gifts'||!opened)return;
+  window.dispatchEvent(new CustomEvent('totichat-lucky-policy-updated',{detail:{version:result.version}}));
+  status('تم حفظ الاحتمالات في سجل التدقيق وتطبيقها على قاعدة Staging.');
+  void showLuckyPolicy();
+ }finally{luckyPolicySaving=false;if(button?.isConnected)button.disabled=false;}
 }
 
 function input(label,name,attributes=''){
@@ -541,6 +617,11 @@ document.addEventListener('click',e=>{
  if(action==='prev'||action==='next'){if(reading)return;offset=Math.max(0,offset+(action==='prev'?-20:20));void loadPage();}
 },true);
 document.addEventListener('submit',e=>{
+ if(e.target?.id==='tcac-lucky-config'){
+  e.preventDefault();e.stopImmediatePropagation();
+  void saveLuckyPolicy(e.target).catch(error=>status('رفض تطبيق الحظ: '+String(error.message).slice(0,180)));
+  return;
+ }
  if(['tcac-support-reply','tcac-support-status','tcac-staff-grant','tcac-support-staff','tcac-room-moderation'].includes(e.target?.id)){
   e.preventDefault();e.stopImmediatePropagation();
   if(!e.target.reportValidity())return;
