@@ -160,6 +160,28 @@ function handle(e){
   if(n<15)showToast('هذا التغيير معاينة فقط؛ المقاعد المشغولة تبقى محفوظة');
  }
 }
+// Staging live navigation: capture the actual Discover/Search interaction at
+// the FIRST window listener (before old visual-review handlers and route guards).
+// Some mobile sessions retain an old search glyph or visual-only Discover tile
+// during auth transition; all of them must open the same server-backed directory.
+function routeRealSearchFirst(event){
+ const target=event.target?.closest?.(
+  '.royal-top-actions [data-phase2="search-rooms"],'+
+  '.royal-nav [data-phase2="search-rooms"],'+
+  '.royal-top-actions [data-royal="search"],'+
+  '.royal-nav [data-a="go"][data-v="discoverPreview"]'
+ );
+ if(!target||window.TotiLiveMode?.enabled!==true||
+    window.TotiPhase2Auth?.state?.()?.signedIn!==true)return;
+ event.preventDefault();
+ event.stopPropagation();
+ event.stopImmediatePropagation();
+ const open=window.TotiPhase2Rooms?.openSearch;
+ if(typeof open==='function')open();
+ else if(typeof showToast==='function')
+  showToast('تعذّر بدء بحث الغرف الحقيقي. أعد فتح TotiChat.');
+}
+window.addEventListener('click',routeRealSearchFirst,true);
 window.addEventListener('click',handle,true);
 const startUrl=new URLSearchParams(location.search);
 if(startUrl.get('view')==='royal-home'){minimizedRoom=false;screen='home';}
