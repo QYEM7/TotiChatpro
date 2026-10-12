@@ -291,6 +291,7 @@ async function saveLuckyPolicy(form){
   pendingLuckyPolicy=null;
   if(uid()!==accountId||view!=='lucky_gifts'||!opened)return;
   window.dispatchEvent(new CustomEvent('totichat-lucky-policy-updated',{detail:{version:result.version}}));
+  window.dispatchEvent(new CustomEvent('totichat-admin-action-confirmed',{detail:{kind:'lucky_gifts'}}));
   status('تم حفظ الاحتمالات في سجل التدقيق وتطبيقها على قاعدة Staging.');
   void showLuckyPolicy();
  }finally{luckyPolicySaving=false;if(button?.isConnected)button.disabled=false;}
@@ -398,6 +399,7 @@ async function entitlementSubmit(form){
   const result=await rpc(fn,{...params,p_request_id:pendingMutation.id});
   if(!result||typeof result!=='object')throw Error('الخادم لم يؤكد العملية');
   pendingMutation=null;
+  window.dispatchEvent(new CustomEvent('totichat-admin-action-confirmed',{detail:{kind:current}}));
   if(opened&&uid()===id&&view===current){
    status('تم حفظ القرار الحقيقي في Supabase Staging.');
    if(current==='medals')void entitlementScreen();
@@ -525,6 +527,7 @@ async function adminFormAction(form){
   if(fn==='phase5_support_action'&&!strictUuid.test(result?.id||''))throw Error('الخادم لم يؤكد القرار');
   if(fn==='phase6_admin_room_action'&&result?.success!==true)throw Error('الخادم لم يؤكد الإشراف');
   pendingMutation=null;
+  window.dispatchEvent(new CustomEvent('totichat-admin-action-confirmed',{detail:{kind:form.id}}));
   if(opened&&uid()===id){
    status('تم تسجيل القرار في Staging، مع الحفاظ على سجل التدقيق.');
    if(view==='support'&&selectedTicket)void supportTicket(selectedTicket);
@@ -659,7 +662,7 @@ window.addEventListener('totichat-phase2-auth',()=>{
  else if(opened){void verify();}
 },true);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&opened)void verify();});
-window.TotiInAppAdmin=Object.freeze({onProfile,exit});
+window.TotiInAppAdmin=Object.freeze({onProfile,exit,recheck:verify});
 concealLegacyEntries();
 if(uid()&&typeof screen==='string'&&screen==='me')void onProfile();
 })();
