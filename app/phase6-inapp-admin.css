@@ -55,3 +55,16 @@
 
 .tcac-brand{position:relative;padding-inline-start:0;padding-inline-end:48px;min-height:42px;justify-content:center}
 .tcac-brand::before{content:"";position:absolute;inset-inline-end:0;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:10px;border:1px solid #eee2c7;background:#fff url('../assets/images/toti_falcon_logo_1790422919580.jpg') center / contain no-repeat}
+
+
+/* Accessible unified outline icon family and restrained profile admin entry. */
+.tcac-entry-icon svg,.tcac-icon svg{display:block;width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tcac-entry-icon{background:linear-gradient(145deg,#604077,#916b9e);color:#fff5dd;border:1px solid #d9c2e8;box-shadow:0 4px 12px #5e396a24}
+.tcac-entry{background:linear-gradient(120deg,#fffdfd,#f9f0ff 57%,#fff6e5);border-color:#d9c4e1;box-shadow:0 6px 16px #69427717}
+.tcac-entry-text b{color:#462f54}
+.tcac-entry-arrow{color:#8864a1}
+.tcac-icon{background:linear-gradient(155deg,#f9ebff,#f9ecd6);color:#79538b;border:1px solid #ecd7e8}
+.tcac-card:hover{border-color:#bc9acb;box-shadow:0 6px 15px #63396816}
+.tcac-card:active{transform:translateY(1px)}
+.tcac-entry,.tcac-card,.tcac-header button,.tcac-bottom button{min-height:44px}
+@media(prefers-reduced-motion:reduce){.tcac-card:active{transform:none}}
