@@ -150,3 +150,38 @@ test('legacy search icon performs a real authenticated search rather than the un
  assert.match(room,/if\(session\(\)\.user\?\.id===account&&\$\('#tc-real-room-search-results'\)\)/);
  assert.match(room,/if\(roomListError\)\{/);
 });
+
+
+test('mobile live Discover/Search wins before all legacy click handlers',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const home=get('app/royal-visuals.js');
+ const hook=home.indexOf("window.addEventListener('click',routeRealSearchFirst,true);");
+ const legacy=home.indexOf("window.addEventListener('click',handle,true);");
+ assert.ok(hook>=0&&hook<legacy,'real search capture must run before visual-only handlers');
+ const start=home.indexOf('function routeRealSearchFirst(event){');
+ assert.ok(start>=0&&start<hook);
+ const content=home.slice(start,hook)+'\nrouteRealSearchFirst';
+ let opened=0,noticeCount=0;
+ const auth={signedIn:true};
+ const navigate=runInNewContext(content,{
+  window:{TotiLiveMode:{enabled:true},TotiPhase2Auth:{state:()=>auth},
+   TotiPhase2Rooms:{openSearch:()=>opened++}},
+  showToast:()=>noticeCount++
+ });
+ const target=(attr)=>({
+  closest(selector){assert.match(selector,/\[data-phase2="search-rooms"\]/);
+   assert.match(selector,/\[data-royal="search"\]/);
+   assert.match(selector,/discoverPreview/);return attr?{}:null;}
+ });
+ let blocked=0;
+ const fire=(active=true)=>navigate({
+  target:target(active),preventDefault:()=>blocked++,
+  stopPropagation:()=>{},stopImmediatePropagation:()=>{}
+ });
+ fire();fire();fire();
+ assert.equal(opened,3);
+ assert.equal(blocked,3);
+ assert.equal(noticeCount,0);
+ auth.signedIn=false;fire();
+ assert.equal(opened,3,'signed-out users must never open real room directory');
+});
