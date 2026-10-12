@@ -69,7 +69,7 @@ test('speaking highlight must come only from true room LiveKit ActiveSpeakersCha
 
 
 test('real LiveKit speaker event updates each seat without iterating a single element',()=>{
- const vm=requireVm();
+ const vm=vmModule;
  const start=rooms.indexOf("window.addEventListener('totichat-live-active-speakers',event=>{");
  assert.notEqual(start,-1,'speaking event handler exists');
  const end=rooms.indexOf("\n});",start);
@@ -87,7 +87,7 @@ test('real LiveKit speaker event updates each seat without iterating a single el
     contains:name=>flags.has(name),
     toggle:(name,enabled)=>{if(enabled)flags.add(name);else flags.delete(name)}
    },
-   setAttribute:(name,value)=>{if(name==='aria-label')this.lastLabel=value},
+   setAttribute:()=>{},
    isSpeaking:()=>flags.has('tc-mic-speaking')
   };
  };
@@ -106,4 +106,3 @@ test('real LiveKit speaker event updates each seat without iterating a single el
  dispatch([]);
  assert.deepEqual(seats.map(s=>s.isSpeaking()),[false,false,false,false]);
 });
-function requireVm(){return vmModule;}
