@@ -93,3 +93,13 @@ test('Owner-only VIP and medal actions re-authorize and use real audited RPCs',(
  assert.match(center,/phase6_admin_banner_list/);
  assert.match(css,/toti_falcon_logo_1790422919580\.jpg/);
 });
+
+test('finance, host-month and medals no longer create duplicate visible Profile entries',()=>{
+ for(const file of ['phase5-finance-integrity-ui.js','phase5-host-month-review-ui.js','phase5-medals-ui.js']){
+  const src=load('../app/'+file);
+  assert.match(src,/if\(window\.TotiInAppAdmin\)return/,'legacy entry still present: '+file);
+ }
+ assert.match(center,/concealLegacyEntries\(\)/);
+ assert.match(center,/finance_integrity:'data-finance-inspect'/);
+ assert.match(center,/host_month:'data-tc-host-month'/);
+});
