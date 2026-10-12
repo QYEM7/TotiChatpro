@@ -11,7 +11,9 @@ test('host-month audit authorizes ONLY protected Owner and designated main partn
  assert.match(v1,/a\.owner_id=caller or a\.main_partner_id=caller/);
  assert.match(v1,/using errcode='42501'/);
  assert.match(v1,/create or replace function public\.phase6_host_month_evidence_integrity\(p_month date\)/i);
- assert.match(v1,/security invoker/i);
+ const wrapper=v1.split(/CREATE OR REPLACE FUNCTION public\.phase6_host_month_evidence_integrity/i)[1]?.split('revoke all on function public.phase6_host_month_evidence_integrity')[0];
+ assert(wrapper,'Expected unprivileged wrapper');
+ assert.doesNotMatch(wrapper,/\bSECURITY DEFINER\b/i); // PostgreSQL omits its default SECURITY INVOKER keyword
  assert.match(v1,/revoke all on function public\.phase6_host_month_evidence_integrity\(date\) from public,anon,authenticated/);
  assert.match(v1,/grant execute on function public\.phase6_host_month_evidence_integrity\(date\) to authenticated/);
  assert.match(v1,/set search_path to ''/i);
