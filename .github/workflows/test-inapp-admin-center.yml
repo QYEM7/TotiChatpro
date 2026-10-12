@@ -52,4 +52,4 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax, user role and protected Profile integration
-        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs tests/premium-icon-visual-contract.test.mjs tests/mic-occupant-visual-contract.test.mjs
+        run: node --test tests/inapp-admin-center.test.mjs tests/live-no-fake-content.test.mjs tests/registered-staging-preview.test.mjs tests/real-admin-banners-and-demo-guard.test.mjs tests/premium-icon-visual-contract.test.mjs tests/mic-occupant-visual-contract.test.mjs tests/lucky-gifts-real-admin-sync.test.mjs
