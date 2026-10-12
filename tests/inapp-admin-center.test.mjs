@@ -82,3 +82,14 @@ test('support-only employee may access the Center but ordinary support user cann
  assert.equal(support.panel.children.length,1);
  assert.equal(user.panel.children.length,0);
 });
+
+test('Owner-only VIP and medal actions re-authorize and use real audited RPCs',()=>{
+ for(const name of ['phase5_vip_owner_action','phase5_vip_status','phase5_medal_owner_action','phase5_medal_catalog'])
+  assert(center.includes(name),name);
+ assert.match(center,/if\(!opened\|\|!authz\|\|!owner\(authz\)/);
+ assert.match(center,/p_request_id:pendingMutation\.id/);
+ assert.match(center,/confirm\(confirmation\)/);
+ assert.match(center,/reason\.length<10/);
+ assert.match(center,/phase6_admin_banner_list/);
+ assert.match(css,/toti_falcon_logo_1790422919580\.jpg/);
+});
