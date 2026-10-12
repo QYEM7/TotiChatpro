@@ -59,7 +59,7 @@ const categoryIcons={popular:'flame',vip:'crown',friends:'heart',music:'music',g
 const adminIcons={overview:'grid',users:'users',rooms:'microphone',room_moderation:'shield',staff:'users',
  host_agencies:'building',recharge_agencies:'wallet',registrations:'document',agency_transfers:'arrows',
  audit:'history',finance_integrity:'shield',host_month:'chart',catalog:'gift',reports:'chart',
- global_gift:'megaphone',open_agency:'building',support:'headset',vip:'crown',
+ global_gift:'megaphone',lucky_gifts:'gift',open_agency:'building',support:'headset',vip:'crown',
  medals:'award',special_id:'gem',banners:'megaphone',settlement:'wallet'};
 const bottomRoomIcons={chatInput:'message',gift:'gift',messagesRoom:'messages',games:'gamepad',tools:'sliders'};
 function svg(name,className=''){
@@ -79,7 +79,7 @@ function decorate(){
   root.querySelectorAll('.tc-unified-nav button').forEach(b=>{
    if(b.querySelector('.tc-falcon-nav'))return; // Never replace the approved falcon identity.
    const icon=b.querySelector(':scope > span');
-   paint(icon,b.classList.contains('royal-create')?'plus':routeIcons[b.dataset.v]);
+   paint(icon,b.classList.contains('royal-create')?'plus':b.dataset.phase2==='search-rooms'?'compass':routeIcons[b.dataset.v]);
   });
   root.querySelectorAll('.royal-category-row .royal-cat').forEach(b=>
    paint(b.querySelector('.royal-cat-icon'),categoryIcons[b.dataset.cat]));
