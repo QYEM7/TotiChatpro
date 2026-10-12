@@ -128,7 +128,10 @@ window.addEventListener('click',e=>{
   if(action){
     e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();
     if(action.dataset.liveEntry==='preview'){
-      explicitPreview=true;go('home');
+      // Real app sessions must never open local, fabricated social/financial data.
+      // Screenshot/design review lives in the separate visual-only project.
+      warn('المعاينة التجريبية غير متاحة داخل التطبيق الحقيقي.');
+      return;
     }else if(action.dataset.liveEntry==='signup'){
       explicitPreview=false;go('signupPreview');
     }else{
