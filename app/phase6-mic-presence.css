@@ -165,3 +165,79 @@
   animation:none!important;box-shadow:0 0 8px rgba(233,195,151,.5)!important;
  }
 }
+
+
+/* Beta refinement: actual seated user + VIP entitlement + equipped frame only.
+   Keep the five-column/three-row seat geometry, original ornaments and buttons. */
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip{
+ --tc-seat-metal:#d5c2ff;--tc-seat-glow:rgba(179,139,239,.48);--tc-seat-ink:#fff5ff;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="4"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="5"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="6"]{
+ --tc-seat-metal:#8bdaf3;--tc-seat-glow:rgba(87,193,239,.5);--tc-seat-ink:#effaff;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="7"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="8"],
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="9"]{
+ --tc-seat-metal:#f2d18b;--tc-seat-glow:rgba(251,203,111,.56);--tc-seat-ink:#fff5cf;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-vip[data-tc-vip-tier="10"]{
+ --tc-seat-metal:#ffdeb0;--tc-seat-glow:rgba(251,189,101,.72);--tc-seat-ink:#fff4d5;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-equipped-frame .seatface{
+ outline:2px solid var(--tc-seat-metal)!important;
+ outline-offset:3px!important;
+ box-shadow:inset 0 0 0 2px #fff2d83d,0 0 12px var(--tc-seat-glow),0 3px 8px #0009!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-vip-tier{
+ position:absolute;z-index:9;inset-block-end:-12px;left:50%;
+ transform:translateX(-50%);direction:ltr;display:block;
+ padding:1px 6px;min-width:35px;border:1px solid #ffebbd;
+ border-radius:999px;white-space:nowrap;text-align:center;
+ background:linear-gradient(135deg,#4b234f,#805096 55%,#492044);
+ color:#fff2d5;text-shadow:0 1px 2px #000c;
+ box-shadow:0 2px 6px #0009;font-size:8px;font-weight:900;line-height:1.4;
+ pointer-events:none;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="7"] .tc-seat-vip-tier,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="8"] .tc-seat-vip-tier,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="9"] .tc-seat-vip-tier,
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat[data-tc-vip-tier="10"] .tc-seat-vip-tier{
+ background:linear-gradient(140deg,#6c3c1f,#a97d42,#513323);border-color:#ffe4a4;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-equipped-mark{
+ position:absolute;z-index:9;inset-block-start:-10px;inset-inline-start:-9px;
+ width:21px;height:21px;display:grid;place-items:center;
+ background:linear-gradient(155deg,#fff4df,#bfa4d2);color:#472f4d;
+ border:1px solid #fce7af;border-radius:50%;box-shadow:0 1px 7px #0009;
+ font-size:12px;line-height:1;pointer-events:none;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{
+ display:block!important;max-width:100%!important;margin-top:12px!important;
+ font-size:clamp(9px,2.7vw,11px)!important;text-align:center;
+ color:var(--tc-seat-ink)!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member:not(.tc-mic-vip) .seatname{
+ margin-top:6px!important;
+}
+#app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatlv.tc-seat-gift-counter{
+ display:flex!important;align-items:center;justify-content:center;
+ min-width:37px;min-height:17px!important;margin:2px auto 0!important;
+ padding:2px 6px!important;border-radius:999px!important;
+ border:1px solid #e3c69491!important;
+ background:linear-gradient(110deg,#342018de,#58374cdb)!important;
+ color:#ffebbe!important;font-weight:900!important;
+ font-size:clamp(8px,2.05vw,9px)!important;
+ line-height:1.25!important;white-space:nowrap;
+ font-variant-numeric:tabular-nums;
+}
+@media(max-width:355px){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-vip-tier{font-size:7px;padding-inline:4px;min-width:29px}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat .seatface .tc-seat-equipped-mark{width:17px;height:17px;font-size:10px}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{font-size:9px!important}
+}
+@media(max-height:590px){
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member .seatname{margin-top:7px!important}
+ #app.rf-app.rf-room .roomview.room-v2 .seats > .seat.tc-mic-member:not(.tc-mic-vip) .seatname{margin-top:3px!important}
+}
