@@ -236,7 +236,8 @@ test('live Discover also intercepts legacy page routes and old Home tabs',async(
 });
 test('Staging-only diagnostic probe is opt-in and exposes no account identity',()=>{
  const builder=get('scripts/build-live-preview.mjs');
- assert.match(builder,/DISCOVER-QA-05/);
+ assert.match(builder,/DISCOVER-QA-06/);
+ assert.match(builder,/totichat\.preview\.qa-discover/);
  assert.match(builder,/get\('qa'\)!=='discover'/);
  assert.match(builder,/tc-real-room-search-query/);
  assert.doesNotMatch(builder,/localStorage|sessionStorage|password|access_token|refresh_token/);
