@@ -19,21 +19,26 @@ function roomCard(r,i){
  '<span class="royal-tile-detail"><strong>👑 '+esc(r.name)+'</strong><span>'+esc(r.desc)+'</span><span class="royal-tags">'+r.tags.map(x=>'<i>♡ '+esc(x)+'</i>').join('')+'</span></span></button>';
 }
 function royalHome(){
+ // Authenticated mode starts with zero fabricated rooms, counts, banners or nearby people.
+ // Guest design-review mode retains the immutable approved visual reference.
+ const real=window.TotiLiveMode?.enabled===true&&window.TotiPhase2Auth?.state()?.signedIn===true;
  const cat=[['🔥','الأكثر رواجاً','popular'],['👑','غرف VIP','vip'],['💗','تعارف','friends'],['♫','موسيقى','music'],['🎮','ألعاب','games'],['🌐','دولي','world'],['▦','جميع الفئات','all']];
  const near=[['room4','312'],['room3','288'],['room5','265'],['room2','198']];
+ const verifiedBanner=real&&window.TotiBannerData?.getItems?.().length>0
+   ?window.TotiBannerData.renderBanner():'';
  return '<div class="royal-home" dir="rtl"><div class="royal-home-haze"></div>'+
  '<header class="royal-topbar"><div class="royal-brand">✦ <strong>TotiChat</strong></div>'+
  '<div class="royal-top-actions"><button data-a="go" data-v="vip" aria-label="VIP" class="royal-vip-chip">👑 VIP</button><button data-royal="search" aria-label="بحث">⌕</button><button data-royal="friends" aria-label="الأصدقاء">♟</button><button data-royal="notify" aria-label="الإشعارات">♧<i></i></button></div></header>'+
  '<main class="royal-home-main">'+
- '<button class="royal-hero" data-royal="hero" aria-label="تفاصيل الغرفة المميزة"><img src="'+esc(imgs('room5'))+'" alt="ليلة ساحرة في TotiChat">'+
+  (real?verifiedBanner:'<button class="royal-hero" data-royal="hero" aria-label="تفاصيل الغرفة المميزة"><img src="'+esc(imgs('room5'))+'" alt="ليلة ساحرة في TotiChat">'+
  '<span class="royal-hero-shine"></span><span class="royal-hero-text"><b>هنا يجتمع<br>الصوت الجميل</b><small>⋆ كوّن صداقات حول العالم ⋆</small></span>'+
- '<span class="royal-hero-pips"><i></i><i></i><i></i><i></i></span></button>'+
+ '<span class="royal-hero-pips"><i></i><i></i><i></i><i></i></span></button>')+
  '<nav class="royal-category-row" aria-label="تصنيفات TotiChat">'+cat.map(x=>'<button data-royal="category" data-cat="'+x[2]+'" class="royal-cat"><span class="royal-cat-icon">'+x[0]+'</span><small>'+x[1]+'</small></button>').join('')+'</nav>'+
  '<button class="royal-vip-promo" data-a="go" data-v="vip"><span class="royal-vip-emblem">👑<b>VIP</b></span><span class="royal-vip-promo-copy"><b>أصبح عضو VIP</b><small>مزايا حصرية وتجربة أكثر تميزاً</small></span><span class="royal-gold-cta">اكتشف الآن ❮</span></button>'+
  '<div class="royal-section-label"><h2>🔥 الغرف المميزة</h2><button data-royal="view-all">عرض الكل ❮</button></div>'+
- '<div class="royal-room-gallery">'+roomItems.map(roomCard).join('')+'</div>'+
+ '<div class="royal-room-gallery">'+(real?'':roomItems.map(roomCard).join(''))+'</div>'+
  '<div class="royal-section-label"><h2>👑 غرف قريبة منك</h2><button data-royal="view-all">عرض الكل ❮</button></div>'+
- '<div class="royal-near">'+near.map(x=>'<button data-a="go" data-v="room" class="royal-near-tile"><img src="'+esc(imgs(x[0]))+'" alt=""><span>🟢 '+x[1]+'</span></button>').join('')+'</div>'+
+ '<div class="royal-near">'+(real?'':near.map(x=>'<button data-a="go" data-v="room" class="royal-near-tile"><img src="'+esc(imgs(x[0]))+'" alt=""><span>🟢 '+x[1]+'</span></button>').join(''))+'</div>'+
  /* End home feed after nearby rooms: top hero banner stays unchanged. */
  '</main>'+
  (minimizedRoom?'<button class="mini-room-pill tc-mini-room royal-mini-room" data-a="restoreRoom" aria-label="العودة إلى الغرفة المصغرة">🎙️ الغرفة المصغرة</button>':'')+
@@ -83,7 +88,7 @@ function decorate(){
  if(mode==='games'){
    f.querySelector('.tc-room-strip')?.classList.add('royal-live-strip');
    const strip=f.querySelector('.tc-room-strip');
-   if(strip)strip.insertAdjacentHTML('beforebegin','<div class="royal-games-ticker">🔥 ✨ ملكة الليل sent Royal Castle to سارة　👑 x1</div>');
+   if(strip&&!window.TotiLiveMode?.enabled)strip.insertAdjacentHTML('beforebegin','<div class="royal-games-ticker">🔥 ✨ ملكة الليل sent Royal Castle to سارة　👑 x1</div>');
  }
 }
 const originalRender=render;
