@@ -30,23 +30,24 @@
       "phase": "P1",
       "contract": "google_auth",
       "qa": {
-        "visual": false,
-        "interactions": false,
+        "visual": true,
+        "interactions": true,
         "backend": false,
-        "device": false
+        "device": true
       },
       "progress": {
         "visual": "OWNER_APPROVED",
         "interaction": "IMPLEMENTED",
-        "backend": "USER_GOOGLE_AUTH_SESSION_AND_LOGOUT_CHECKS_PASSED_SERVER_SECURITY_REVIEW_PENDING",
-        "browser": "BROWSER_QA_PASSED_10_OF_10",
+        "backend": "HARDENED_WEB_GOOGLE_AUTH_AUTOMATED_VERIFIED_USER_RETEST_PENDING",
+        "browser": "BROWSER_QA_PASSED_12_OF_12",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "APPROVED_VISUAL_MANUAL_AUTH_TEST_PASSED",
+        "ownerDecision": "APPROVED_VISUAL_AND_PRIOR_PHONE_AUTH_TESTS",
         "readyToAdvance": false,
         "visualApprovedAt": "2026-10-13",
         "googleOAuth": "PASSED_USER_OBSERVED",
-        "sessionReload": "PASSED_USER_OBSERVED_SAME_TAB",
-        "signOut": "PASSED_USER_OBSERVED_AND_RELOAD"
+        "sessionReload": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
+        "signOut": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
+        "securityStatus": "HARDENED_AND_QA_GREEN_FINAL_PHONE_RETEST_PENDING"
       }
     },
     {
@@ -875,33 +876,33 @@
     "route": "loginPreview",
     "visual": "OWNER_APPROVED",
     "interaction": "IMPLEMENTED",
-    "backend": "USER_GOOGLE_AUTH_SESSION_AND_LOGOUT_CHECKS_PASSED_SERVER_SECURITY_REVIEW_PENDING",
-    "browser": "BROWSER_QA_PASSED_10_OF_10",
+    "backend": "HARDENED_WEB_GOOGLE_AUTH_AUTOMATED_VERIFIED_USER_RETEST_PENDING",
+    "browser": "BROWSER_QA_PASSED_12_OF_12",
     "android": "NOT_VERIFIED",
-    "ownerDecision": "APPROVE_VISUAL_ONLY",
+    "ownerDecision": "APPROVED_VISUAL_AND_PRIOR_PHONE_AUTH_TESTS",
     "readyToAdvance": false,
     "visualApprovedAt": "2026-10-13",
     "visualApprovalScope": "Login screen design only; protect layout/colors",
     "automatedChecks": {
       "sourcePass": 11,
-      "publicNetworkPass": 7,
-      "chromiumPass": 10,
-      "verifiedRealGoogleCallback": "USER_REPORTED_SUCCESS",
-      "verifiedRealLogout": false
+      "publicNetworkPass": 8,
+      "chromiumPass": 12,
+      "verifiedRealGoogleCallback": "USER_REPORTED_SUCCESS_PRE_SECURITY_PATCH",
+      "verifiedRealLogout": "USER_REPORTED_SUCCESS_PRE_SECURITY_PATCH"
     },
     "blockers": [
-      "Confirm server-side refresh token invalidation and failure handling; client can clear local state before remote logout succeeds",
-      "Audit public profile RLS and connected API access",
-      "Mobile Android native package OAuth not verified; no APK build approved"
+      "Owner real sign-in/refresh/logout/reload retest needed on hardened deployment after strict local logout patch",
+      "Server-side refresh-token revocation on owner's actual device was not independently attested; UI now warns on request failure",
+      "Native Android OAuth/deep-link flow not yet verified; APK build not authorized"
     ],
     "googleOAuthUserReported": {
       "status": "PASSED_USER_OBSERVED",
       "date": "2026-10-13",
-      "evidence": "Owner confirmed real Google sign-in returned to the same review page with 'You're signed in'."
+      "evidence": "User confirmed Google login and return to review page."
     },
-    "sessionReload": "PASSED_USER_OBSERVED_SAME_TAB",
-    "signOut": "PASSED_USER_OBSERVED",
-    "signOutReload": "PASSED_USER_OBSERVED_REMAINS_SIGNED_OUT",
+    "sessionReload": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
+    "signOut": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
+    "signOutReload": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
     "manualAcceptance": {
       "date": "2026-10-13",
       "signIn": true,
@@ -909,7 +910,10 @@
       "signOutReturnsGoogle": true,
       "refreshRemainsSignedOut": true,
       "source": "user reported firsthand on phone",
-      "serverRefreshTokenRevocation": "NOT_DIRECTLY_VERIFIED"
-    }
+      "hardenedBuildRegression": "PENDING",
+      "serverRefreshTokenRevocation": "NOT_DIRECTLY_ATTESTED"
+    },
+    "securityReview": "docs/LOGIN_SCREEN_01_SECURITY_REVIEW_2026-10-13.md",
+    "securityStatus": "HARDENED_AND_QA_GREEN_FINAL_PHONE_RETEST_PENDING"
   }
 }
