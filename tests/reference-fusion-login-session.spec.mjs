@@ -22,8 +22,10 @@ async function mount(page,{initialSession=session(),logoutStatus=204,refreshStat
   const calls=[];
   await page.addInitScript(({value,key})=>{
     // Stored only in this test's clean browser context.
-    if (location.hostname==='totichat-login-review-20261013.vercel.app') {
+    if (location.hostname==='totichat-login-review-20261013.vercel.app'
+        && sessionStorage.getItem('__tc_session_qa_initialized__')!=='1') {
       sessionStorage.setItem(key,JSON.stringify(value));
+      sessionStorage.setItem('__tc_session_qa_initialized__','1');
       localStorage.removeItem('totichat.phase2.remember.session.v1');
     }
   },{value:initialSession,key:sessionKey});
