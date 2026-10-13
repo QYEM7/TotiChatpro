@@ -108,9 +108,9 @@
         "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
         "interaction": "IMPLEMENTED",
         "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
-        "browser": "QA_PENDING",
+        "browser": "CHROMIUM_8_PASS_1_FAILED_BLOB_IMAGE_STABLE_ALIAS",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "AWAITING_OWNER_PREVIEW",
+        "ownerDecision": "AWAITING_OWNER_VISUAL_REVIEW",
         "readyToAdvance": false
       }
     },
@@ -887,16 +887,26 @@
     "id": 5,
     "route": "home",
     "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
-    "ownerDecision": "AWAITING_OWNER_PREVIEW",
+    "ownerDecision": "AWAITING_OWNER_VISUAL_REVIEW",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
     "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
-    "browser": "QA_PENDING",
+    "browser": "CHROMIUM_8_PASS_1_FAILED_BLOB_IMAGE_STABLE_ALIAS",
     "android": "NOT_VERIFIED",
     "readyToAdvance": false,
     "dependencies": [
       "Voice Room screen must be implemented separately before enabling room join",
       "Messages/Explore/CP/Agency/VIP/My are later screen approvals",
       "Existing user cannot create new room while occupying another; do not auto-leave an owner room"
+    ],
+    "previewUrl": "https://totichat-login-review-20261013.vercel.app/home/",
+    "latestReadyDeployment": "dpl_BNXkXnyNorASwJ5GZA1jWzWGJn4t",
+    "qaRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/38469687736",
+    "blockers": [
+      "Home real room-create image conversion failed on original Google OAuth host because deployed CSP lacks blob:; patch committed but original Vercel alias not moved due 403 scope xd-481e",
+      "Vercel alias move/promote to latest READY review deployment requires corrected connector permission/scope, otherwise stable callback domain remains on earlier build",
+      "Real authenticated staging room create not user-tested; never perform unattended create or auto-leave an existing owned room",
+      "Room join/voice, Messages, Discover, CP, Agency, VIP are separately unapproved screens",
+      "Await owner visual decision on Home; Android native and Login provider policy remain separately pending"
     ]
   },
   "archivedLoginApproval": {
