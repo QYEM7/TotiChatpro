@@ -25,9 +25,9 @@ Protected scope: original `main` and `develop/phase-2`, the existing live full-a
 - **11/11** source + unit tests: https://github.com/QYEM7/TotiChatpro/actions/runs/38456627901
 - **12/12** live Chromium browser / synthetic session tests: https://github.com/QYEM7/TotiChatpro/actions/runs/38456557240
   Includes 360/390/430px and desktop render, same-tab session reload, remote `scope=local` signout + reload, invalid/expired tokens, identity mismatch, remote signout HTTP 503 honest failure state, CSP and same-origin scripts.
-- **8/8** real public HTTPS/Supabase checks: https://github.com/QYEM7/TotiChatpro/actions/runs/38456675129
+- **8/9** latest public HTTPS/Supabase checks: https://github.com/QYEM7/TotiChatpro/actions/runs/38456898811
   Includes deployed source, security headers, real Google provider availability, authenticated endpoint 401 without token, and Google authorize initiation.
-- **Total: 31/31** *in these latest checks*, not a claim of a penetration test or native app release.
+- **Current automated verification: 31 PASS / 1 FAIL** across 11 source, 12 browser, and 9 network/provider checks. The failure is a real Supabase Staging configuration violation: Email provider remains enabled (`external.email=true`) while the TotiChat beta policy is Google-only. Source/browser/published page hardening still passes. Staging settings must be fixed and provider checks rerun. Not a penetration test or native app release.
 - Current isolated Vercel preview deployment: `dpl_DUPjHDDmfFrxLGEZ5J4YHrPh4J1f`, status READY, Git commit `cc243ff45c9d368cefc348a51647b9d8c6149886`. Alias: https://totichat-login-review-20261013.vercel.app/ .
 
 ## Staging RLS and database read-only checks
@@ -46,7 +46,7 @@ Protected scope: original `main` and `develop/phase-2`, the existing live full-a
 5. As directed, **do not progress to Home until screen gate approved** after the hardened-build regression; no product-wide 100% readiness claim.
 
 ## Decision
-**WEB LOGIN SCREEN: SECURITY-HARDENED, AUTOMATED CHECKS GREEN, OWNER FINAL REGRESSION PENDING.**
+**WEB LOGIN SCREEN: SECURITY-HARDENED, GOOGLE-ONLY BACKEND POLICY NOT ENFORCED, OWNER FINAL REGRESSION PENDING.**
 Owner visual design remains frozen. No production changes made.
 
 ## Primary documentation
