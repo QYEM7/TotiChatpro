@@ -34,6 +34,15 @@
         "interactions": false,
         "backend": false,
         "device": false
+      },
+      "progress": {
+        "visual": "DESIGNED",
+        "interaction": "IMPLEMENTED",
+        "backend": "CONTRACT_CONNECTED_NOT_VERIFIED",
+        "browser": "NOT_VERIFIED",
+        "android": "NOT_VERIFIED",
+        "ownerDecision": "AWAITING_REVIEW",
+        "readyToAdvance": false
       }
     },
     {
@@ -855,5 +864,17 @@
         "device": false
       }
     }
-  ]
+  ],
+  "processPolicy": "docs/SCREEN_BY_SCREEN_APPROVAL_POLICY_2026-10-13.md",
+  "currentScreen": {
+    "id": 1,
+    "route": "loginPreview",
+    "visual": "DESIGNED",
+    "interaction": "IMPLEMENTED",
+    "backend": "CONTRACT_CONNECTED_NOT_VERIFIED",
+    "browser": "NOT_VERIFIED",
+    "android": "NOT_VERIFIED",
+    "ownerDecision": "AWAITING_REVIEW",
+    "readyToAdvance": false
+  }
 }
