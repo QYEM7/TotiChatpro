@@ -5,7 +5,7 @@
 (function initTotiLoginReview(){
   'use strict';
 
-  const allowedHosts = new Set(['totichat-live-preview.pages.dev']);
+  const allowedHosts = new Set(['totichat-login-review-20261013.vercel.app']);
   const isApprovedHost = location.protocol === 'https:' && allowedHosts.has(location.hostname);
   const nativeAndroidHost = location.protocol === 'https:' && location.hostname === 'localhost'
     && Boolean(window.Capacitor?.Plugins?.App && window.Capacitor?.Plugins?.Browser);
