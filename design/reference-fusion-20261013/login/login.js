@@ -21,6 +21,13 @@
 
   if (!googleButton || !authMessage || !signedOutPanel || !signedInPanel) return;
 
+  // CSP-safe image fallback: no inline event handlers that could weaken script policy.
+  const logoImage = document.querySelector('.falcon-original');
+  if (logoImage) logoImage.addEventListener('error', () => {
+    logoImage.hidden = true;
+    const fallback = logoImage.nextElementSibling;
+    if (fallback) fallback.hidden = false;
+  });
   let busy = false;
   let lastValidation = 0;
   let providerReady = false;
@@ -158,7 +165,8 @@
       showSignedOut();
       setStatus('You are signed out.', 'info');
     } catch (error) {
-      setStatus('Could not complete sign-out. Please retry.', 'error');
+      showSignedOut();
+      setStatus(error?.message || 'Signed out locally, but server sign-out could not be confirmed.', 'error');
     } finally {
       signoutButton.disabled = false;
     }
