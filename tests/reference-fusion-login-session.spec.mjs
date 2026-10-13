@@ -92,7 +92,7 @@ test('sign out clears local session and remains signed out after reload',async({
   await expect(page.getByRole('heading',{name:"You're signed in"})).toBeVisible({timeout:20000});
   await page.getByRole('button',{name:'Sign out'}).click();
   await expect(page.getByRole('button',{name:/Continue with Google/})).toBeVisible();
-  expect(calls.some(x=>x.path==='/auth/v1/logout'&&x.method==='POST')).toBe(true);
+  expect(calls.some(x=>x.path==='/auth/v1/logout'&&x.method==='POST'&&x.query==='?scope=local')).toBe(true);
   expect(await page.evaluate(key=>sessionStorage.getItem(key),sessionKey)).toBeNull();
   expect(await page.evaluate(key=>localStorage.getItem(key),rememberKey)).toBeNull();
   await page.reload({waitUntil:'domcontentloaded'});
@@ -133,4 +133,28 @@ test('account identity mismatch cannot show the cached identity as verified',asy
   await expect(page.getByRole('button',{name:/Continue with Google/})).toBeVisible({timeout:20000});
   await expect(page.getByRole('heading',{name:"You're signed in"})).toBeHidden();
   expect(calls.some(x=>x.path==='/auth/v1/user')).toBe(true);
+});
+
+test('failed remote logout never claims server revocation; browser session still clears',async({page})=>{
+  const calls=await mount(page,{logoutStatus:503});
+  await page.goto(base,{waitUntil:'domcontentloaded'});
+  await expect(page.getByRole('heading',{name:"You're signed in"})).toBeVisible({timeout:20000});
+  await page.getByRole('button',{name:'Sign out'}).click();
+  await expect(page.getByRole('button',{name:/Continue with Google/})).toBeVisible();
+  await expect(page.locator('#auth-message')).toContainText('server could not confirm session revocation');
+  expect(calls.some(x=>x.path==='/auth/v1/logout'&&x.query==='?scope=local')).toBe(true);
+  expect(await page.evaluate(key=>sessionStorage.getItem(key),sessionKey)).toBeNull();
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.getByRole('button',{name:/Continue with Google/})).toBeVisible();
+});
+
+test('security headers and self-hosted executable scripts are enforced',async({page})=>{
+  const response=await page.goto(base,{waitUntil:'domcontentloaded'});
+  expect(response?.status()).toBe(200);
+  const policy=response?.headers()['content-security-policy']||'';
+  expect(policy).toContain("script-src 'self'");
+  expect(policy).toContain("frame-ancestors 'none'");
+  const scripts=await page.locator('script[src]').evaluateAll(nodes=>nodes.map(n=>new URL(n.src).origin));
+  expect(scripts.length).toBeGreaterThanOrEqual(3);
+  expect(scripts.every(origin=>origin===new URL(base).origin)).toBe(true);
 });
