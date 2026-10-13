@@ -41,13 +41,14 @@
         "backend": "STAGING_EMAIL_PROVIDER_STILL_TRUE_AT_2026_10_13T20_35Z",
         "browser": "BROWSER_QA_PASSED_12_OF_12",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "APPROVED_VISUAL_AND_PRIOR_PHONE_AUTH_TESTS",
+        "ownerDecision": "CONDITIONALLY_APPROVED_90_PERCENT",
         "readyToAdvance": false,
         "visualApprovedAt": "2026-10-13",
         "googleOAuth": "PASSED_USER_OBSERVED",
         "sessionReload": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
         "signOut": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
-        "securityStatus": "HARDENED_UI_AND_LOGOUT_PROVIDER_POLICY_BLOCKED_EMAIL_ENABLED"
+        "securityStatus": "HARDENED_UI_AND_LOGOUT_PROVIDER_POLICY_BLOCKED_EMAIL_ENABLED",
+        "ownerApprovalPercent": 90
       }
     },
     {
@@ -879,7 +880,7 @@
     "backend": "STAGING_EMAIL_PROVIDER_STILL_TRUE_AT_2026_10_13T20_35Z",
     "browser": "BROWSER_QA_PASSED_12_OF_12",
     "android": "NOT_VERIFIED",
-    "ownerDecision": "APPROVED_VISUAL_AND_PRIOR_PHONE_AUTH_TESTS",
+    "ownerDecision": "CONDITIONALLY_APPROVED_90_PERCENT",
     "readyToAdvance": false,
     "visualApprovedAt": "2026-10-13",
     "visualApprovalScope": "Login screen design only; protect layout/colors",
@@ -921,6 +922,8 @@
     "securityReview": "docs/LOGIN_SCREEN_01_SECURITY_REVIEW_2026-10-13.md",
     "securityStatus": "GOOGLE_ENABLED_EMAIL_ENABLED_SERVER_POLICY_BLOCKED",
     "finalAcceptanceChecklist": "docs/LOGIN_SCREEN_01_FINAL_ACCEPTANCE_CHECKLIST_2026-10-13.md",
-    "lastOwnerStatement": "2026-10-13: owner reports Email provider disabled and Google remains enabled; backend HTTP probe still returned external.email=true after this report"
+    "lastOwnerStatement": "2026-10-13: owner reports Email provider disabled and Google remains enabled; backend HTTP probe still returned external.email=true after this report",
+    "ownerApprovalPercent": 90,
+    "ownerApprovalNote": "Owner accepts Login Screen 01 at 90% for current stage, not a claim that security/technical readiness is 90%, and not 100% final signoff."
   }
 }
