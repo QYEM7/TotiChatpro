@@ -40,3 +40,14 @@ Owner conditionally approved Login Screen 01 **90%**. This is **not** completion
 
 ## Honest limits
 Actual creation on a real authenticated staging account **requires a user-triggered test**, not an autonomous write. Browser automation uses synthetic data only in intercepted test responses; the published preview never populates mock data. Full voice-room navigation (LiveKit join) is intentionally not implemented in Home. Banner data currently absent and must not be rendered. Login visual stays as approved.
+
+
+## Browser QA as tested on stable Google OAuth preview (2026-10-14)
+- [GitHub Actions Home QA](https://github.com/QYEM7/TotiChatpro/actions/runs/38469687736): **8 passed, 1 failed**.
+- Passed: viewport 360/390/430 responsive pages; empty dataset hides fake banners/tickers; search & real filters; backend-event-only banner/gift display in isolated tests; room details and future screen disclosures; backend room-fetch error never replaced by fake rooms.
+- Failing: **create-room image conversion** on the stable OAuth preview. Browser error: `تعذّر قراءة الصورة`, caused by CSP image policy blocking `blob:` on this deployed alias. The design branch fix adds `blob:` to `img-src` **only**, preserving `script-src 'self'`.
+- New isolated Vercel production-target deployment `dpl_BNXkXnyNorASwJ5GZA1jWzWGJn4t` is **READY**, but Vercel currently lists only the `...-xd-481e.vercel.app` project alias, not the original short `totichat-login-review-20261013.vercel.app` Google callback alias.
+- Attempting to assign the original alias to the new deployment and to promote the new deployment returned **403 forbidden scope xd-481e**. Do not claim that the original public login callback URL serves the latest blob-policy patch. Do not ask users to authorize or transmit access tokens to a new URL.
+- Current owner can inspect Home visually from the existing original short callback domain at `/home/`. **Creation image submit remains UNVERIFIED/BLOCKED** on that short URL until Vercel alias permission is repaired and 9/9 QA passes.
+- No real staging room was created by the assistant; test room objects only exist in intercepted Playwright network fixtures. Live room joining / LiveKit remains future Screen 03, not a fake Home action.
+- This is **not a final technical approval**. User approval on this preview should count only for visual layout until deployment/creation and real-backend acceptance are verified.
