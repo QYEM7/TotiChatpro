@@ -8,7 +8,7 @@ for (const width of [360, 390, 430]) {
     page.on('pageerror', err=>consoleErrors.push(String(err).slice(0,250)));
     const response=await page.goto(base+'/', {waitUntil:'domcontentloaded',timeout:30000});
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole('button',{name:'Continue with Google'})).toBeVisible();
+    await expect(page.getByRole('button',{name:/Continue with Google/})).toBeVisible();
     await expect(page.locator('#signed-out-panel')).toBeVisible();
     await expect(page.locator('#signed-in-panel')).toBeHidden();
     await expect(page.locator('.brand-name')).toHaveText('TotiChat');
@@ -31,7 +31,7 @@ test('Desktop split-screen and accessible Google button', async ({page})=>{
   await page.goto(base+'/', {waitUntil:'domcontentloaded'});
   await expect(page.locator('.story')).toBeVisible();
   await expect(page.locator('.signin')).toBeVisible();
-  await expect(page.getByRole('button',{name:'Continue with Google'})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Continue with Google/})).toBeVisible();
   const geometry=await page.locator('.story').boundingBox();
   expect(geometry?.width).toBeGreaterThan(450);
   await page.screenshot({ path:'test-results/login-desktop.png',fullPage:true,animations:'disabled' });
