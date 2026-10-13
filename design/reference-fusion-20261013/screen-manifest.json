@@ -1,0 +1,859 @@
+{
+  "schema": "totichat-ui-route-manifest-v1",
+  "sourceBranch": "develop/phase-2",
+  "designBranch": "design/totichat-ui-20261013",
+  "visualReference": "approved concept board, generated 2026-10-13",
+  "actualProductionBindings": false,
+  "invariants": {
+    "noFakeLiveData": true,
+    "googleOnly": true,
+    "coinsViaAgentsOnly": true,
+    "roomSeats": 15,
+    "adminEntry": "my_only",
+    "giftQuantities": [
+      1,
+      7,
+      17,
+      77,
+      777
+    ],
+    "globalVerifiedGiftMinCoins": 7000,
+    "directMessageVoiceNotes": false,
+    "standalonePreviewBeforeMerge": true,
+    "noApkBeforeApproval": true
+  },
+  "screens": [
+    {
+      "id": 1,
+      "route": "loginPreview",
+      "name": "Google Login",
+      "phase": "P1",
+      "contract": "google_auth",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 2,
+      "route": "signupPreview",
+      "name": "Signup legacy guard",
+      "phase": "P3",
+      "contract": "hide_google_only",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 3,
+      "route": "passwordResetPreview",
+      "name": "Password recovery legacy guard",
+      "phase": "P3",
+      "contract": "hide_google_only",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 4,
+      "route": "verifyAccountPreview",
+      "name": "OTP legacy guard",
+      "phase": "P3",
+      "contract": "hide_google_only",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 5,
+      "route": "home",
+      "name": "Home",
+      "phase": "P1",
+      "contract": "rooms_banners",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 6,
+      "route": "discoverPreview",
+      "name": "Discover",
+      "phase": "P2",
+      "contract": "verified_search",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 7,
+      "route": "tour",
+      "name": "Internal screen navigator",
+      "phase": "P3",
+      "contract": "qa_only",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 8,
+      "route": "ranks",
+      "name": "Leaderboards",
+      "phase": "P3",
+      "contract": "pending_verified_metrics",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 9,
+      "route": "missionsPreview",
+      "name": "Missions",
+      "phase": "P3",
+      "contract": "pending_server",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 10,
+      "route": "treasurePreview",
+      "name": "Treasure",
+      "phase": "P3",
+      "contract": "pending_server",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 11,
+      "route": "notificationsPreview",
+      "name": "Notifications",
+      "phase": "P2",
+      "contract": "phase5_notification_feed",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 12,
+      "route": "welcomePreview",
+      "name": "Welcome rewards",
+      "phase": "P3",
+      "contract": "pending_policy",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 13,
+      "route": "room",
+      "name": "Voice room 15 seats",
+      "phase": "P1",
+      "contract": "phase2_room_rpc_livekit",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 14,
+      "route": "roomAdminPreview",
+      "name": "Room moderation",
+      "phase": "P2",
+      "contract": "phase2_room_moderate",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 15,
+      "route": "gamesPreview",
+      "name": "In-room games",
+      "phase": "P3",
+      "contract": "phase5_room_game",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 16,
+      "route": "musicPreview",
+      "name": "Room music",
+      "phase": "P3",
+      "contract": "room_music_queue_partial",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 17,
+      "route": "giftsPreview",
+      "name": "Gift bottom sheet",
+      "phase": "P1",
+      "contract": "phase3_send_gift",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 18,
+      "route": "messages",
+      "name": "Inbox",
+      "phase": "P2",
+      "contract": "phase2_dm_inbox",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 19,
+      "route": "chatPreview",
+      "name": "Text DM",
+      "phase": "P2",
+      "contract": "phase2_dm_thread",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 20,
+      "route": "friendsPreview",
+      "name": "Friends",
+      "phase": "P2",
+      "contract": "phase5_social_rpc",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 21,
+      "route": "me",
+      "name": "My profile dashboard",
+      "phase": "P2",
+      "contract": "profiles_auth",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 22,
+      "route": "profilePreview",
+      "name": "Full user profile",
+      "phase": "P2",
+      "contract": "profiles_vip_cp_medals",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 23,
+      "route": "profileEdit",
+      "name": "Profile editor",
+      "phase": "P3",
+      "contract": "profile_update_storage",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 24,
+      "route": "settings",
+      "name": "Settings",
+      "phase": "P3",
+      "contract": "auth_privacy",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 25,
+      "route": "languages",
+      "name": "Language",
+      "phase": "P3",
+      "contract": "client_localization",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 26,
+      "route": "block",
+      "name": "Blocked users",
+      "phase": "P3",
+      "contract": "phase2_dm_block",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 27,
+      "route": "report",
+      "name": "Report",
+      "phase": "P3",
+      "contract": "phase5_support_action",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 28,
+      "route": "level",
+      "name": "Wealth/Charm levels",
+      "phase": "P3",
+      "contract": "pending_verified_experience",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 29,
+      "route": "honor",
+      "name": "Medals",
+      "phase": "P3",
+      "contract": "phase5_medal_rpc",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 30,
+      "route": "storage",
+      "name": "Owned items",
+      "phase": "P3",
+      "contract": "store_ownership",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 31,
+      "route": "bagPreview",
+      "name": "Inventory",
+      "phase": "P2",
+      "contract": "store_ownership",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 32,
+      "route": "vip",
+      "name": "VIP 1-10",
+      "phase": "P2",
+      "contract": "phase5_vip_status",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 33,
+      "route": "wallet",
+      "name": "Wallet and ledger",
+      "phase": "P2",
+      "contract": "wallets_phase3_transfer_coins",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 34,
+      "route": "rechargePreview",
+      "name": "Agent recharge",
+      "phase": "P2",
+      "contract": "phase4_recharge_action",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 35,
+      "route": "storePreview",
+      "name": "Store",
+      "phase": "P2",
+      "contract": "phase3_purchase_store",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 36,
+      "route": "cp",
+      "name": "CP relationship",
+      "phase": "P2",
+      "contract": "phase4_cp_state_action",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 37,
+      "route": "agency",
+      "name": "Agency rankings",
+      "phase": "P3",
+      "contract": "pending_verified_agency_rank",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 38,
+      "route": "agencyPreview",
+      "name": "Agency hub",
+      "phase": "P2",
+      "contract": "phase4_agency_state",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 39,
+      "route": "agencyApply",
+      "name": "Apply for host agency",
+      "phase": "P2",
+      "contract": "phase4_agency_action",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 40,
+      "route": "agencyStatusPreview",
+      "name": "Agency application status",
+      "phase": "P3",
+      "contract": "agency_registration",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 41,
+      "route": "agencyJoinPreview",
+      "name": "Join host agency",
+      "phase": "P2",
+      "contract": "phase4_agency_action",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    }
+  ],
+  "secondaryFeatures": [
+    {
+      "id": 1,
+      "key": "roomCreate",
+      "name": "Create room",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 2,
+      "key": "roomOwnerSettings",
+      "name": "Room owner settings",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 3,
+      "key": "roomInfo",
+      "name": "Room details",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 4,
+      "key": "seatActions",
+      "name": "Seat take/release and mic",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 5,
+      "key": "voiceActions",
+      "name": "Voice control",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 6,
+      "key": "roomChat",
+      "name": "Room text chat",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 7,
+      "key": "giftSheet",
+      "name": "Gift bottom sheet",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 8,
+      "key": "globalGiftStrip",
+      "name": "Verified gift announcement",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 9,
+      "key": "homeBanners",
+      "name": "Real admin banners",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 10,
+      "key": "roomMembers",
+      "name": "Room members",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 11,
+      "key": "privateRoomInvite",
+      "name": "Private room invitation",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 12,
+      "key": "roomLeaveMinimize",
+      "name": "Room leave/minimize blur overlay",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 13,
+      "key": "roomGames",
+      "name": "Games overlay",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 14,
+      "key": "roomMusic",
+      "name": "Music queue",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 15,
+      "key": "roomVoiceRecording",
+      "name": "Room-only recordings",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 16,
+      "key": "dmFromRoom",
+      "name": "Text DM from room",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 17,
+      "key": "productDetail",
+      "name": "Store product details",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 18,
+      "key": "giftHistory",
+      "name": "Gift transaction history",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 19,
+      "key": "coinTransfer",
+      "name": "Coin transfer",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 20,
+      "key": "diamondRedemption",
+      "name": "Diamond redemption",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 21,
+      "key": "accountSecurity",
+      "name": "Account and session safety",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 22,
+      "key": "adminCatalog",
+      "name": "Admin catalog",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 23,
+      "key": "adminReports",
+      "name": "Admin finance report",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 24,
+      "key": "hostAgencyManagement",
+      "name": "Protected host agency management",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 25,
+      "key": "officialSupport",
+      "name": "Official support tickets",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 26,
+      "key": "preferencesSheets",
+      "name": "Language/block/report sheets",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    },
+    {
+      "id": 27,
+      "key": "designReviewNavigator",
+      "name": "Internal UI review navigator",
+      "qa": {
+        "visual": false,
+        "interactions": false,
+        "backend": false,
+        "device": false
+      }
+    }
+  ]
+}
