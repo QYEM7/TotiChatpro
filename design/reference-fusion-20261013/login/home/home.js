@@ -7,7 +7,7 @@
   const byId=id=>document.getElementById(id);
   const auth=window.TotiPhase2Auth;
   const origin=window.TOTICHAT_PUBLIC_BACKEND?.supabaseUrl;
-  const state={rooms:[],mine:new Set(),banners:[],events:[],filter:'all',query:'',user:null,
+  const state={rooms:[],mine:new Set(),joined:new Set(),banners:[],events:[],filter:'all',query:'',user:null,
     authenticated:false,loadTicket:0,viewReady:false,activeBanner:0,fetching:false,creating:false};
   const icons={sparkle:'✧',private:'♕'};
   const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -196,7 +196,8 @@
       if(ticket!==state.loadTicket || !state.authenticated || owner!==state.user)return;
       if(results[0].status==='rejected')throw results[0].reason;
       state.rooms=Array.isArray(results[0].value)?results[0].value:[];
-      state.mine=new Set(results[1].status==='fulfilled'&&Array.isArray(results[1].value)?results[1].value.map(x=>x.room_id):[]);
+      state.joined=new Set(results[1].status==='fulfilled'&&Array.isArray(results[1].value)?results[1].value.map(x=>x.room_id):[]);
+      state.mine=new Set(state.joined);
       if(results[2].status==='fulfilled')state.banners=Array.isArray(results[2].value)?results[2].value:[];
       if(results[3].status==='fulfilled')state.events=Array.isArray(results[3].value)?results[3].value:[];
       renderRooms();renderBanners();renderGiftStrip();
@@ -258,6 +259,12 @@
       setCreateMessage('أدخل الاسم، رسالة الترحيب والصورة قبل الإنشاء.','error');return;
     }
     if(!state.authenticated){setCreateMessage('انتهت الجلسة، سجّل الدخول مرة ثانية.','error');return}
+    // The live RPC refuses creating a new room while the account is a room member.
+    // Never call phase2_room_leave here: for room owners it DELETES the owned room.
+    if(state.joined.size>0){
+      setCreateMessage('حسابك مشترك حالياً في غرفة. تحتاج مغادرتها من واجهة الغرفة قبل إنشاء أخرى. لن نحذف غرفتك تلقائياً.','error');
+      return;
+    }
     state.creating=true;byId('create-submit').disabled=true;setCreateMessage('جاري تجهيز الصورة…');
     let newId=null;
     try{
