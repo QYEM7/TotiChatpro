@@ -43,7 +43,10 @@
         "android": "NOT_VERIFIED",
         "ownerDecision": "APPROVE_VISUAL_ONLY",
         "readyToAdvance": false,
-        "visualApprovedAt": "2026-10-13"
+        "visualApprovedAt": "2026-10-13",
+        "googleOAuth": "PASSED_USER_OBSERVED",
+        "sessionReload": "PENDING_REAL_USER_TEST",
+        "signOut": "PENDING_REAL_USER_TEST"
       }
     },
     {
@@ -890,6 +893,13 @@
       "Complete real Google consent and PKCE callback on review link",
       "Verify refresh, session resume and logout with real account",
       "Confirm mobile browser behavior with user"
-    ]
+    ],
+    "googleOAuthUserReported": {
+      "status": "PASSED_USER_OBSERVED",
+      "evidence": "User signed in using Google on independent TotiChat staging review and reported return to same page with 'You're signed in'.",
+      "date": "2026-10-13"
+    },
+    "sessionReload": "PENDING_REAL_USER_TEST",
+    "signOut": "PENDING_REAL_USER_TEST"
   }
 }
