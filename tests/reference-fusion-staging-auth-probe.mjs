@@ -68,6 +68,15 @@ await check('Google enabled on Supabase Staging',async()=>{
   assert.equal(ext.google,true,'external.google is not enabled');
   return 'public provider setting enabled';
 });
+await check('No other social sign-in providers enabled in staging',async()=>{
+  const r=await fetchTimeout(staging+'/auth/v1/settings',{headers:{apikey:key,Accept:'application/json'}});
+  assert.equal(r.status,200,'HTTP '+r.status);
+  const obj=await r.json();
+  const ext=obj.external||obj.external_providers||{};
+  const unexpected=Object.entries(ext).filter(([name,enabled])=>name!=='google'&&enabled===true).map(([name])=>name);
+  assert.deepEqual(unexpected,[],'non-Google providers enabled: '+unexpected.join(','));
+  return 'Google is the only enabled social provider';
+});
 await check('Unauthorized session is blocked',async()=>{
   const r=await fetchTimeout(staging+'/auth/v1/user',{headers:{apikey:key,Accept:'application/json'}});
   assert.ok(r.status===401||r.status===403,'unauthenticated /user returned HTTP '+r.status);
