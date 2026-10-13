@@ -1,0 +1,37 @@
+name: TotiChat Home 02 Real Browser QA
+on:
+  push:
+    branches:
+      - design/totichat-ui-20261013
+    paths:
+      - 'design/reference-fusion-20261013/login/home/**'
+      - 'design/reference-fusion-20261013/login/index.html'
+      - 'design/reference-fusion-20261013/login/login.js'
+      - 'tests/reference-fusion-home-browser.spec.mjs'
+      - 'tests/reference-fusion-home.config.mjs'
+      - '.github/workflows/reference-fusion-home-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install existing pinned dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Home visual and backend contract browser tests
+        run: npx playwright test --config=tests/reference-fusion-home.config.mjs
+      - name: Publish QA screenshots and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-home-02-review
+          path: test-results
+          if-no-files-found: ignore
+          retention-days: 7
