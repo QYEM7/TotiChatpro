@@ -38,7 +38,7 @@
       "progress": {
         "visual": "OWNER_APPROVED",
         "interaction": "IMPLEMENTED",
-        "backend": "STAGING_EMAIL_PROVIDER_ENABLED_GOOGLE_ONLY_POLICY_FAILED",
+        "backend": "STAGING_EMAIL_PROVIDER_STILL_TRUE_AT_2026_10_13T20_35Z",
         "browser": "BROWSER_QA_PASSED_12_OF_12",
         "android": "NOT_VERIFIED",
         "ownerDecision": "APPROVED_VISUAL_AND_PRIOR_PHONE_AUTH_TESTS",
@@ -876,7 +876,7 @@
     "route": "loginPreview",
     "visual": "OWNER_APPROVED",
     "interaction": "IMPLEMENTED",
-    "backend": "STAGING_EMAIL_PROVIDER_ENABLED_GOOGLE_ONLY_POLICY_FAILED",
+    "backend": "STAGING_EMAIL_PROVIDER_STILL_TRUE_AT_2026_10_13T20_35Z",
     "browser": "BROWSER_QA_PASSED_12_OF_12",
     "android": "NOT_VERIFIED",
     "ownerDecision": "APPROVED_VISUAL_AND_PRIOR_PHONE_AUTH_TESTS",
@@ -889,14 +889,16 @@
       "chromiumPass": 12,
       "verifiedRealGoogleCallback": "USER_REPORTED_SUCCESS_PRE_SECURITY_PATCH",
       "verifiedRealLogout": "USER_REPORTED_SUCCESS_PRE_SECURITY_PATCH",
-      "publicNetworkFail": 1
+      "publicNetworkFail": 1,
+      "latestRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/38456898811",
+      "latestRunAttempt": 2,
+      "latestCheckedAtUTC": "2026-10-13T20:35:03Z"
     },
     "blockers": [
-      "Staging Auth external.email=true: disable Email provider in Staging under Authentication > Sign In / Providers, keep Google enabled; no Supabase config write action currently available",
-      "Re-run read-only provider probe after Email disabled; latest 8/9 (one policy FAIL) https://github.com/QYEM7/TotiChatpro/actions/runs/38456898811",
-      "Owner must retest Google sign-in, reload, Sign out, reload once on the security-hardened review build",
-      "Server-side access JWTs may remain valid until expiration even when refresh tokens are revoked; sensitive app operations must verify active sessions",
-      "Android native deep-link not verified; APK not authorized"
+      "After owner's reported change, Staging public /auth/v1/settings still returns external.email=true as of 2026-10-13T20:35Z, Google true.",
+      "Confirm correct project and Email provider toggle was saved and disable actual Email sign-in provider (not just sign-up/confirmations); rerun 9 read-only checks.",
+      "Owner retest Google sign in, refresh, Sign out, refresh on hardened web preview.",
+      "Native Android APK/deep-link remains untested and no APK build is authorized."
     ],
     "googleOAuthUserReported": {
       "status": "PASSED_USER_OBSERVED",
@@ -917,6 +919,8 @@
       "serverRefreshTokenRevocation": "NOT_DIRECTLY_ATTESTED"
     },
     "securityReview": "docs/LOGIN_SCREEN_01_SECURITY_REVIEW_2026-10-13.md",
-    "securityStatus": "HARDENED_UI_AND_LOGOUT_PROVIDER_POLICY_BLOCKED_EMAIL_ENABLED"
+    "securityStatus": "GOOGLE_ENABLED_EMAIL_ENABLED_SERVER_POLICY_BLOCKED",
+    "finalAcceptanceChecklist": "docs/LOGIN_SCREEN_01_FINAL_ACCEPTANCE_CHECKLIST_2026-10-13.md",
+    "lastOwnerStatement": "2026-10-13: owner reports Email provider disabled and Google remains enabled; backend HTTP probe still returned external.email=true after this report"
   }
 }
