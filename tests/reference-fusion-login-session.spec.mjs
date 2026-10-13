@@ -34,10 +34,15 @@ async function mount(page,{initialSession=session(),logoutStatus=204,refreshStat
     const request=route.request(),url=new URL(request.url());
     const method=request.method();
     calls.push({method,path:url.pathname,query:url.search});
+    const cors={
+      'access-control-allow-origin':'https://totichat-login-review-20261013.vercel.app',
+      'access-control-allow-headers':'authorization,apikey,content-type,accept',
+      'access-control-allow-methods':'GET,POST,OPTIONS',
+      'access-control-max-age':'600'
+    };
+    if(method==='OPTIONS')return route.fulfill({status:204,headers:cors,body:''});
     const json=(status,obj)=>route.fulfill({
-      status,contentType:'application/json',
-      headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*'},
-      body:JSON.stringify(obj)
+      status,contentType:'application/json',headers:cors,body:JSON.stringify(obj)
     });
     if(url.pathname==='/auth/v1/settings')return json(200,{external:{google:true}});
     if(url.pathname==='/auth/v1/user')return json(userStatus,userStatus===200?returnUser:{message:'Invalid JWT'});
@@ -49,7 +54,7 @@ async function mount(page,{initialSession=session(),logoutStatus=204,refreshStat
     }
     if(url.pathname==='/auth/v1/logout'&&method==='POST'){
       if(logoutStatus===204)return route.fulfill({
-        status:204,headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*'},body:''});
+        status:204,headers:cors,body:''});
       return json(logoutStatus,{message:'Service temporarily unavailable'});
     }
     return json(404,{message:'Unmocked session contract endpoint'});
@@ -57,10 +62,23 @@ async function mount(page,{initialSession=session(),logoutStatus=204,refreshStat
   return calls;
 }
 
+async function debugSession(page,label,calls) {
+  const data=await page.evaluate(key=>({
+    adapterLoaded:Boolean(window.TotiPhase2Auth),
+    configLoaded:Boolean(window.TOTICHAT_PUBLIC_BACKEND),
+    sessionPresent:Boolean(sessionStorage.getItem(key)),
+    stateSignedIn:Boolean(window.TotiPhase2Auth?.state()?.signedIn),
+    errorText:document.getElementById('auth-message')?.textContent?.slice(0,140)||''
+  }),sessionKey);
+  console.log('SESSION_QA_DIAGNOSTIC '+label+': '+JSON.stringify({ ...data,paths:calls.map(x=>x.path).slice(0,14) }));
+}
+
 test('cached session resumes after page reload only after server verification',async({page})=>{
   const calls=await mount(page);
   await page.goto(base,{waitUntil:'domcontentloaded'});
-  await expect(page.getByRole('heading',{name:"You're signed in"})).toBeVisible({timeout:20000});
+  await page.waitForTimeout(350);
+  await debugSession(page,'init',calls);
+  await expect(page.getByRole('heading',{name:"You're signed in"})).toBeVisible({timeout:12000});
   expect(calls.some(x=>x.path==='/auth/v1/user')).toBe(true);
   expect(calls.some(x=>x.path==='/rest/v1/profiles')).toBe(true);
   await page.reload({waitUntil:'domcontentloaded'});
