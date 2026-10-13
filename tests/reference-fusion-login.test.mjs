@@ -13,9 +13,9 @@ test('login screen has exactly one visible sign-in method', () => {
   assert.doesNotMatch(html, /Continue with (Apple|Phone|Email|Facebook)/);
   assert.doesNotMatch(html, /type="password"|type="tel"/);
   assert.match(script, /signInWithProvider\('google'\)/);
-  assert.match(html,/src="\\.\\/auth-adapter\\.js"/);
-  assert.match(html,/src="\\.\\/backend-config\\.js"/);
-  assert.doesNotMatch(html,/cdn\\.jsdelivr\\.net\\/gh\\/QYEM7\\/TotiChatpro.*app\\/phase2-auth/);
+  assert.ok(html.includes('src="./auth-adapter.js"'));
+  assert.ok(html.includes('src="./backend-config.js"'));
+  assert.ok(!html.includes('/app/phase2-auth.js'));
   assert.doesNotMatch(script, /service_role|sb_secret_|mockSuccess|fakeUser/);
 });
 test('mobile UI and accessibility contracts exist', () => {
