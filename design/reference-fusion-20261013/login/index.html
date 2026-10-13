@@ -7,8 +7,8 @@
   <meta name="description" content="TotiChat Google-only sign-in design review.">
   <title>TotiChat — Sign in · Design review</title>
   <link rel="stylesheet" href="./login.css">
-  <script defer src="https://cdn.jsdelivr.net/gh/QYEM7/TotiChatpro@8e56d9535d352221f5ad434be6d4289cd33b2415/app/config.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/QYEM7/TotiChatpro@8e56d9535d352221f5ad434be6d4289cd33b2415/app/phase2-auth.js"></script>
+  <script defer src="./backend-config.js"></script>
+  <script defer src="./auth-adapter.js"></script>
   <script defer src="./login.js"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
 
         <div class="identity">
           <div class="brand-mark">
-            <img src="https://cdn.jsdelivr.net/gh/QYEM7/TotiChatpro@8e56d9535d352221f5ad434be6d4289cd33b2415/assets/images/toti_falcon_logo_1790422919580.jpg" alt="" class="falcon-original" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+            <img src="https://cdn.jsdelivr.net/gh/QYEM7/TotiChatpro@8e56d9535d352221f5ad434be6d4289cd33b2415/assets/images/toti_falcon_logo_1790422919580.jpg" alt="" class="falcon-original">
             <svg hidden viewBox="0 0 100 100" class="falcon-fallback" aria-hidden="true"><path fill="#8c60d9" d="M15 57 50 14 89 27 61 36 77 45 53 48 37 79 31 54Z"/><path fill="#d7b469" d="M38 48 60 35 54 51 41 61Z"/><circle cx="60" cy="35" r="3" fill="#302044"/></svg>
           </div>
           <div class="brand-name">Toti<span>Chat</span></div>
