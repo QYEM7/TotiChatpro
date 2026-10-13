@@ -36,13 +36,14 @@
         "device": false
       },
       "progress": {
-        "visual": "DESIGNED",
+        "visual": "OWNER_APPROVED",
         "interaction": "IMPLEMENTED",
         "backend": "CONTRACT_CONNECTED_NOT_VERIFIED",
         "browser": "NOT_VERIFIED",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "AWAITING_REVIEW",
-        "readyToAdvance": false
+        "ownerDecision": "APPROVE_VISUAL_ONLY",
+        "readyToAdvance": false,
+        "visualApprovedAt": "2026-10-13"
       }
     },
     {
@@ -869,12 +870,14 @@
   "currentScreen": {
     "id": 1,
     "route": "loginPreview",
-    "visual": "DESIGNED",
+    "visual": "OWNER_APPROVED",
     "interaction": "IMPLEMENTED",
     "backend": "CONTRACT_CONNECTED_NOT_VERIFIED",
     "browser": "NOT_VERIFIED",
     "android": "NOT_VERIFIED",
-    "ownerDecision": "AWAITING_REVIEW",
-    "readyToAdvance": false
+    "ownerDecision": "APPROVE_VISUAL_ONLY",
+    "readyToAdvance": false,
+    "visualApprovedAt": "2026-10-13",
+    "visualApprovalScope": "Login screen design only; protect layout/colors"
   }
 }
