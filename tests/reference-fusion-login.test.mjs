@@ -111,7 +111,7 @@ test('server-verified signed-in session appears only after auth checks',async()=
   await flush();
   assert.equal(h.elements['signed-in-panel'].hidden,false);
   assert.equal(h.elements['signed-out-panel'].hidden,true);
-  assert.equal(h.elements['continue-link'].hidden,true,'Do not promise cross-origin session handoff');
+  assert.equal(h.elements['continue-link'].hidden,false,'A verified session can safely access same-origin Home');
   assert.ok(h.calls.includes('security'));
   assert.ok(h.calls.includes('profile'));
 });
