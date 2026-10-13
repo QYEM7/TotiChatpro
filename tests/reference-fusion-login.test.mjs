@@ -46,14 +46,19 @@ function harness({hostname='totichat-login-review-20261013.vercel.app',online=tr
     'account-summary','signout-button','continue-link'
   ].map(id=>[id,mockEl(id)]));
   let currentUser=signedIn?{id:'real-user-1',email:'verified@example.test'}:null;
+  let currentProfile=null;
   const calls=[];
   const auth={
-    state(){return {signedIn:!!currentUser,user:currentUser}},
+    state(){return {signedIn:!!currentUser,user:currentUser,profile:currentProfile}},
     async providers(){calls.push('providers');return {google:provider}},
     async signInWithProvider(s){calls.push('signIn:'+s)},
     async securityState(){calls.push('security');if(!verify)throw Error('invalid')},
-    async readProfile(){calls.push('profile')},
-    async signOut(){calls.push('signOut');currentUser=null}
+    async readProfile(){
+      calls.push('profile');
+      currentProfile=currentUser?{id:currentUser.id}:null;
+      listeners.get('totichat-phase2-auth')?.();
+    },
+    async signOut(){calls.push('signOut');currentUser=null;currentProfile=null}
   };
   const window={
     TotiPhase2Auth:auth,
@@ -121,4 +126,16 @@ test('sign-out revokes through adapter and returns to signed-out view',async()=>
   assert.ok(h.calls.includes('signOut'));
   assert.equal(h.elements['signed-in-panel'].hidden,true);
   assert.equal(h.elements['signed-out-panel'].hidden,false);
+});
+
+
+test('profile events cannot recursively trigger unbounded session checks',async()=>{
+  const h=harness({signedIn:true});
+  await flush();
+  assert.equal(h.elements['signed-in-panel'].hidden,false);
+  const before=h.calls.filter(x=>x==='profile').length;
+  assert.equal(before,1,'one profile read is sufficient for an account');
+  h.listeners.get('totichat-phase2-auth')?.();
+  await flush();
+  assert.equal(h.calls.filter(x=>x==='profile').length,1,'revalidated profile should be cached');
 });
