@@ -33,6 +33,15 @@ async function setup(page,{rooms=[publicRoom,privateRoom],members=[],banners=[],
    if(method==='OPTIONS')return route.fulfill({status:204,headers:cors,body:''});
    if(path==='/auth/v1/user')return response({...cache().user,id:userId});
    if(path==='/auth/v1/settings')return response({external:{google:true,email:false}});
+   if(path.startsWith('/storage/v1/object/public/')){
+ const imageBase64=await page.evaluate(()=>{
+   const canvas=document.createElement('canvas');canvas.width=80;canvas.height=80;
+   const ctx=canvas.getContext('2d');ctx.fillStyle='#9672c8';ctx.fillRect(0,0,80,80);
+   return canvas.toDataURL('image/png').split(',')[1];
+ });
+ const png=Buffer.from(imageBase64,'base64');
+     return route.fulfill({status:200,contentType:'image/png',headers:cors,body:png});
+   }
    if(path==='/rest/v1/profiles')return response([profile]);
    if(path==='/rest/v1/rooms')return failRooms?response({message:'Server unavailable'},503):response(rooms);
    if(path==='/rest/v1/room_members')return response(members);
@@ -58,7 +67,7 @@ for(const width of [360,390,430]){
   const response=await page.goto(base,{waitUntil:'domcontentloaded'});
   expect(response?.status()).toBe(200);await loaded(page);
   await expect(page.locator('.room-card')).toHaveCount(2);
-  await expect(page.locator('.room-card').first()).toContainText('QA Private Space');
+  await expect(page.locator('.room-card').first()).toContainText('QA Open Voice');
   await expect(page.locator('#banners')).toBeHidden();
   await expect(page.locator('#global-gift-strip')).toBeHidden();
   await expect(page.locator('.bottom-nav')).toBeVisible();
@@ -103,7 +112,7 @@ test('future navigation honestly discloses unfinished screens, room detail sourc
  await setup(page);await page.goto(base,{waitUntil:'domcontentloaded'});await loaded(page);
  await page.locator('.room-card').first().click();
  await expect(page.locator('#info-sheet')).toBeVisible();
- await expect(page.locator('#info-sheet')).toContainText('QA Private Space');
+ await expect(page.locator('#info-sheet')).toContainText('QA Open Voice');
  await expect(page.locator('#info-sheet .sheet-primary')).toBeDisabled();
  await page.locator('#sheet-close').click();
  await page.locator('[data-future="messages"]').click();
@@ -121,6 +130,8 @@ test('actual room creation controls validate required image/name/welcome before 
  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/KZ0AAAAASUVORK5CYII=','base64');
  await page.locator('#create-cover').setInputFiles({name:'test.png',mimeType:'image/png',buffer:png});
  await page.locator('#create-submit').click();
+ await page.waitForTimeout(200);
+ console.log('CREATE_QA_STATUS:',await page.locator('#create-message').textContent());
  await expect.poll(()=>calls.filter(c=>c.path==='/rest/v1/rpc/phase2_room_create').length,{timeout:15000}).toBe(1);
  await expect.poll(()=>calls.filter(c=>c.path==='/rest/v1/rpc/phase2_room_customize').length,{timeout:15000}).toBe(1);
  await expect(page.locator('#create-sheet')).toBeHidden();
