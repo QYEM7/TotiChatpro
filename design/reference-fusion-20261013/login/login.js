@@ -52,30 +52,56 @@
     return expectedId && auth?.state()?.signedIn === true
       && auth?.state()?.user?.id === expectedId;
   }
+  let validationInFlight = null;
+  let validationUserId = '';
+
   async function validateSession() {
     if (!auth) return false;
-    const requested = ++lastValidation;
     const initial = auth.state();
     if (!initial?.signedIn || !initial.user?.id) {
+      lastValidation++;
+      validationUserId = '';
       showSignedOut();
       return false;
     }
     const expectedId = initial.user.id;
-    try {
-      // A locally cached session alone is not proof of a real valid session.
-      // securityState() requests the server-authoritative authenticated user.
-      await auth.securityState();
-      if (requested !== lastValidation || !isSameUser(expectedId)) return false;
-      await auth.readProfile();
-      if (requested !== lastValidation || !isSameUser(expectedId)) return false;
-      showVerified(auth.state().user);
-      return true;
-    } catch (error) {
-      if (requested === lastValidation) {
-        showSignedOut();
-        setStatus('Your sign-in could not be verified. Check your connection and retry.', 'error');
+    // readProfile() emits totichat-phase2-auth. Re-entering validation on that
+    // event would trigger unbounded user/profile RPCs without this guard.
+    if (validationInFlight && validationUserId === expectedId) {
+      return validationInFlight;
+    }
+    const requested = ++lastValidation;
+    validationUserId = expectedId;
+    const task = (async () => {
+      try {
+        // Confirm on the server that the cached browser session is valid.
+        await auth.securityState();
+        if (requested !== lastValidation || !isSameUser(expectedId)) return false;
+        // Only fetch the profile if it is missing. The adapter broadcasts
+        // profile reads, so never refetch an already loaded matching profile.
+        if (auth.state().profile?.id !== expectedId) {
+          await auth.readProfile();
+        }
+        if (requested !== lastValidation || !isSameUser(expectedId)
+            || auth.state().profile?.id !== expectedId) return false;
+        showVerified(auth.state().user);
+        return true;
+      } catch (error) {
+        if (requested === lastValidation) {
+          showSignedOut();
+          setStatus('Your sign-in could not be verified. Check your connection and retry.', 'error');
+        }
+        return false;
       }
-      return false;
+    })();
+    validationInFlight = task;
+    try {
+      return await task;
+    } finally {
+      if (validationInFlight === task) {
+        validationInFlight = null;
+        validationUserId = '';
+      }
     }
   }
   async function checkProvider() {
