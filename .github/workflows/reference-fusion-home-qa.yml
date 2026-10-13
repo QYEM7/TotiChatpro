@@ -6,6 +6,7 @@ on:
     paths:
       - 'design/reference-fusion-20261013/login/home/**'
       - 'design/reference-fusion-20261013/login/index.html'
+      - 'design/reference-fusion-20261013/login/vercel.json'
       - 'design/reference-fusion-20261013/login/login.js'
       - 'tests/reference-fusion-home-browser.spec.mjs'
       - 'tests/reference-fusion-home.config.mjs'
