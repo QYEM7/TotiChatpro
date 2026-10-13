@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs';
 
 const staging = 'https://rziaedugbdwefbefcxjt.supabase.co';
 const preview = 'https://totichat-login-review-20261013.vercel.app';
-const pinnedSha = '8e56d9535d352221f5ad434be6d4289cd33b2415';
 const publicConfig = readFileSync(new URL('../app/config.js',import.meta.url),'utf8');
 const key = publicConfig.match(/publishableKey:\s*"(sb_publishable_[^"]+)"/)?.[1];
 assert.ok(key?.startsWith('sb_publishable_'),'expected existing browser-safe publishable key');
@@ -39,13 +38,27 @@ await check('Published CSS loads',async()=>{
   assert.ok((await r.text()).includes('grid-template-columns'));
   return 'HTTP 200';
 });
-await check('Pinned browser-safe auth adapter loads from CDN',async()=>{
-  const url='https://cdn.jsdelivr.net/gh/QYEM7/TotiChatpro@'+pinnedSha+'/app/phase2-auth.js';
-  const r=await fetchTimeout(url);
+await check('Self-hosted Google auth adapter is deployed with strict server logout behavior',async()=>{
+  const r=await fetchTimeout(preview+'/auth-adapter.js');
   assert.equal(r.status,200,'HTTP '+r.status);
   const body=await r.text();
   assert.ok(body.includes('TotiPhase2Auth'));
-  return 'HTTP 200; pinned reference';
+  assert.ok(body.includes("/auth/v1/logout?scope=local"));
+  assert.ok(body.includes('server could not confirm session revocation'));
+  assert.ok(!/sb_secret_|service_role/.test(body));
+  return 'HTTP 200; server-signout error handling and local session scope';
+});
+await check('Preview enforces strict CSP and referrer policy',async()=>{
+  const r=await fetchTimeout(preview+'/');
+  assert.equal(r.status,200,'HTTP '+r.status);
+  const csp=r.headers.get('content-security-policy')||'';
+  assert.ok(csp.includes("script-src 'self'"),'missing same-origin script restriction');
+  assert.ok(csp.includes("frame-ancestors 'none'"),'missing frame protection');
+  assert.equal(r.headers.get('referrer-policy'),'no-referrer');
+  const html=await r.text();
+  assert.ok(html.includes('src="./auth-adapter.js"'));
+  assert.ok(html.includes('src="./backend-config.js"'));
+  return 'CSP and same-origin scripts enforced';
 });
 await check('Google enabled on Supabase Staging',async()=>{
   const r=await fetchTimeout(staging+'/auth/v1/settings',{headers:{apikey:key,Accept:'application/json'}});
