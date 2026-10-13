@@ -38,8 +38,8 @@
       "progress": {
         "visual": "OWNER_APPROVED",
         "interaction": "IMPLEMENTED",
-        "backend": "CONTRACT_CONNECTED_NOT_VERIFIED",
-        "browser": "NOT_VERIFIED",
+        "backend": "PUBLIC_PROVIDER_AND_AUTHZ_PROBED_NOT_VERIFIED_E2E",
+        "browser": "BROWSER_QA_PASSED_4_OF_4",
         "android": "NOT_VERIFIED",
         "ownerDecision": "APPROVE_VISUAL_ONLY",
         "readyToAdvance": false,
@@ -873,11 +873,23 @@
     "visual": "OWNER_APPROVED",
     "interaction": "IMPLEMENTED",
     "backend": "CONTRACT_CONNECTED_NOT_VERIFIED",
-    "browser": "NOT_VERIFIED",
+    "browser": "BROWSER_QA_PASSED_4_OF_4",
     "android": "NOT_VERIFIED",
     "ownerDecision": "APPROVE_VISUAL_ONLY",
     "readyToAdvance": false,
     "visualApprovedAt": "2026-10-13",
-    "visualApprovalScope": "Login screen design only; protect layout/colors"
+    "visualApprovalScope": "Login screen design only; protect layout/colors",
+    "automatedChecks": {
+      "sourcePass": 10,
+      "publicNetworkPass": 7,
+      "chromiumPass": 4,
+      "verifiedRealGoogleCallback": false
+    },
+    "blockers": [
+      "Confirm exact redirect URL is allowed on Supabase Staging Auth",
+      "Complete real Google consent and PKCE callback on review link",
+      "Verify refresh, session resume and logout with real account",
+      "Confirm mobile browser behavior with user"
+    ]
   }
 }
