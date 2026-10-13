@@ -5,6 +5,7 @@ on:
       - design/totichat-ui-20261013
     paths:
       - 'tests/reference-fusion-login-browser.spec.mjs'
+      - 'tests/reference-fusion-login-session.spec.mjs'
       - 'tests/reference-fusion-playwright.config.mjs'
       - '.github/workflows/reference-fusion-login-browser.yml'
   workflow_dispatch:
