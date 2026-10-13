@@ -44,6 +44,9 @@
     signedOutPanel.hidden = true;
     signedInPanel.hidden = false;
     accountSummary.textContent = user.email || 'Authenticated Google account';
+    // This independent review origin cannot share sessionStorage with the live app origin.
+    // Never suggest an authenticated app handoff that would silently lose the session.
+    continueLink.hidden = true;
   }
   function isSameUser(expectedId) {
     return expectedId && auth?.state()?.signedIn === true
