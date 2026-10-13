@@ -4,6 +4,7 @@ on:
     branches:
       - design/totichat-ui-20261013
     paths:
+      - 'design/reference-fusion-20261013/login/**'
       - 'tests/reference-fusion-login-browser.spec.mjs'
       - 'tests/reference-fusion-login-session.spec.mjs'
       - 'tests/reference-fusion-playwright.config.mjs'
