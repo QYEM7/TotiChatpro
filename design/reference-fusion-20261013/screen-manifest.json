@@ -48,7 +48,9 @@
         "sessionReload": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
         "signOut": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
         "securityStatus": "HARDENED_UI_AND_LOGOUT_PROVIDER_POLICY_BLOCKED_EMAIL_ENABLED",
-        "ownerApprovalPercent": 90
+        "ownerApprovalPercent": 90,
+        "previousStatus": "STAGING_EMAIL_PROVIDER_STILL_TRUE_AT_2026_10_13T20_35Z",
+        "loginNeedsFinalSecurityReview": true
       }
     },
     {
@@ -101,6 +103,15 @@
         "interactions": false,
         "backend": false,
         "device": false
+      },
+      "progress": {
+        "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
+        "interaction": "IMPLEMENTED",
+        "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
+        "browser": "QA_PENDING",
+        "android": "NOT_VERIFIED",
+        "ownerDecision": "AWAITING_OWNER_PREVIEW",
+        "readyToAdvance": false
       }
     },
     {
@@ -873,57 +884,29 @@
   ],
   "processPolicy": "docs/SCREEN_BY_SCREEN_APPROVAL_POLICY_2026-10-13.md",
   "currentScreen": {
-    "id": 1,
-    "route": "loginPreview",
-    "visual": "OWNER_APPROVED",
-    "interaction": "IMPLEMENTED",
-    "backend": "STAGING_EMAIL_PROVIDER_STILL_TRUE_AT_2026_10_13T20_35Z",
-    "browser": "BROWSER_QA_PASSED_12_OF_12",
+    "id": 5,
+    "route": "home",
+    "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
+    "ownerDecision": "AWAITING_OWNER_PREVIEW",
+    "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
+    "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
+    "browser": "QA_PENDING",
     "android": "NOT_VERIFIED",
-    "ownerDecision": "CONDITIONALLY_APPROVED_90_PERCENT",
     "readyToAdvance": false,
-    "visualApprovedAt": "2026-10-13",
-    "visualApprovalScope": "Login screen design only; protect layout/colors",
-    "automatedChecks": {
-      "sourcePass": 11,
-      "publicNetworkPass": 8,
-      "chromiumPass": 12,
-      "verifiedRealGoogleCallback": "USER_REPORTED_SUCCESS_PRE_SECURITY_PATCH",
-      "verifiedRealLogout": "USER_REPORTED_SUCCESS_PRE_SECURITY_PATCH",
-      "publicNetworkFail": 1,
-      "latestRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/38456898811",
-      "latestRunAttempt": 2,
-      "latestCheckedAtUTC": "2026-10-13T20:35:03Z"
-    },
-    "blockers": [
-      "After owner's reported change, Staging public /auth/v1/settings still returns external.email=true as of 2026-10-13T20:35Z, Google true.",
-      "Confirm correct project and Email provider toggle was saved and disable actual Email sign-in provider (not just sign-up/confirmations); rerun 9 read-only checks.",
-      "Owner retest Google sign in, refresh, Sign out, refresh on hardened web preview.",
-      "Native Android APK/deep-link remains untested and no APK build is authorized."
-    ],
-    "googleOAuthUserReported": {
-      "status": "PASSED_USER_OBSERVED",
-      "date": "2026-10-13",
-      "evidence": "User confirmed Google login and return to review page."
-    },
-    "sessionReload": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
-    "signOut": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
-    "signOutReload": "PASSED_USER_OBSERVED_PRIOR_DEPLOYMENT",
-    "manualAcceptance": {
-      "date": "2026-10-13",
-      "signIn": true,
-      "refreshPersistsSession": true,
-      "signOutReturnsGoogle": true,
-      "refreshRemainsSignedOut": true,
-      "source": "user reported firsthand on phone",
-      "hardenedBuildRegression": "PENDING",
-      "serverRefreshTokenRevocation": "NOT_DIRECTLY_ATTESTED"
-    },
-    "securityReview": "docs/LOGIN_SCREEN_01_SECURITY_REVIEW_2026-10-13.md",
-    "securityStatus": "GOOGLE_ENABLED_EMAIL_ENABLED_SERVER_POLICY_BLOCKED",
-    "finalAcceptanceChecklist": "docs/LOGIN_SCREEN_01_FINAL_ACCEPTANCE_CHECKLIST_2026-10-13.md",
-    "lastOwnerStatement": "2026-10-13: owner reports Email provider disabled and Google remains enabled; backend HTTP probe still returned external.email=true after this report",
-    "ownerApprovalPercent": 90,
-    "ownerApprovalNote": "Owner accepts Login Screen 01 at 90% for current stage, not a claim that security/technical readiness is 90%, and not 100% final signoff."
-  }
+    "dependencies": [
+      "Voice Room screen must be implemented separately before enabling room join",
+      "Messages/Explore/CP/Agency/VIP/My are later screen approvals",
+      "Existing user cannot create new room while occupying another; do not auto-leave an owner room"
+    ]
+  },
+  "archivedLoginApproval": {
+    "screen": 1,
+    "ownerDecision": "CONDITIONALLY_APPROVED_90_PERCENT",
+    "approvedPercent": 90,
+    "securityOutstanding": true,
+    "notes": "Owner authorized beginning Home despite the previous Login final gate; preserve outstanding Email provider and Android OAuth checks."
+  },
+  "activeScreenId": 5,
+  "previousScreenId": 1,
+  "currentPriority": "Complete Home 02 live preview and owner acceptance; do not start Room 03"
 }
