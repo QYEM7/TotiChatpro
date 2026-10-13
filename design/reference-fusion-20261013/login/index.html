@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f6f0ff">
+  <meta name="description" content="TotiChat Google-only sign-in design review.">
+  <title>TotiChat — Sign in · Design review</title>
+  <link rel="stylesheet" href="./login.css">
+  <script defer src="../../../app/config.js"></script>
+  <script defer src="../../../app/phase2-auth.js"></script>
+  <script defer src="./login.js"></script>
+</head>
+<body>
+  <main class="login-shell" id="login-shell">
+    <section class="story" aria-label="TotiChat introduction">
+      <div class="star-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="story-content">
+        <div class="mini-brand"><span class="mini-brand-emblem">✦</span> TOTICHAT <span class="mini-brand-rule"></span> YOUR SPACE</div>
+        <div class="castle-scene" aria-hidden="true">
+          <div class="halo"></div>
+          <div class="tower tower-left"><span></span></div>
+          <div class="tower tower-right"><span></span></div>
+          <div class="palace">
+            <div class="palace-dome"></div><div class="palace-wall">
+              <div class="palace-window"></div><div class="palace-window"></div><div class="palace-window"></div>
+            </div>
+          </div>
+          <div class="floor-line"></div>
+          <div class="sparkle sp1">✧</div><div class="sparkle sp2">✦</div><div class="sparkle sp3">✧</div>
+        </div>
+        <h1>Every voice deserves<br><em>a place to shine.</em></h1>
+        <p>Discover your people. Share the moment. Make every room feel like home.</p>
+        <div class="story-motifs" aria-hidden="true"><span>◌</span><span>✧</span><span>♬</span><span>♡</span></div>
+      </div>
+      <div class="story-caption">VOICE ROOMS <span>·</span> COMMUNITY <span>·</span> MOMENTS</div>
+    </section>
+
+    <section class="signin" aria-labelledby="signin-title">
+      <div class="signin-body">
+        <div class="review-label" aria-label="Design work in review">UI REVIEW 01 / LOGIN</div>
+
+        <div class="identity">
+          <div class="brand-mark">
+            <img src="../../../assets/images/toti_falcon_logo_1790422919580.jpg" alt="" class="falcon-original" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+            <svg hidden viewBox="0 0 100 100" class="falcon-fallback" aria-hidden="true"><path fill="#8c60d9" d="M15 57 50 14 89 27 61 36 77 45 53 48 37 79 31 54Z"/><path fill="#d7b469" d="M38 48 60 35 54 51 41 61Z"/><circle cx="60" cy="35" r="3" fill="#302044"/></svg>
+          </div>
+          <div class="brand-name">Toti<span>Chat</span></div>
+          <div class="brand-subtitle">MORE THAN A VOICE</div>
+        </div>
+
+        <div class="signin-heading">
+          <span class="overline"><span></span> WELCOME TO YOUR WORLD <span></span></span>
+          <h2 id="signin-title">Where every voice<br>finds its people.</h2>
+          <p>One account. Countless moments together.</p>
+        </div>
+
+        <div id="signed-out-panel" class="signin-card">
+          <div class="card-head"><span class="head-star">✦</span><span>GET STARTED</span><span class="card-line"></span></div>
+          <button class="google-button" id="google-button" type="button">
+            <svg class="google-icon" viewBox="0 0 48 48" role="img" aria-label="Google"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6C44.4 38.03 46.98 31.88 46.98 24.55Z"/><path fill="#FBBC05" d="M10.53 28.59a14.41 14.41 0 0 1 0-9.18l-7.97-6.2a23.97 23.97 0 0 0 0 21.58l7.97-6.2Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.17 2.3-6.25 0-11.56-4.22-13.47-9.91l-7.97 6.2C6.51 42.62 14.62 48 24 48Z"/></svg>
+            <span>Continue with Google</span>
+            <svg class="google-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12h14m-6-6 6 6-6 6"/></svg>
+          </button>
+          <p class="secure-note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg> Secure sign-in with your Google account</p>
+          <p id="auth-message" class="status-message" role="status" aria-live="polite"></p>
+        </div>
+
+        <div id="signed-in-panel" class="signin-card signed-in" hidden>
+          <div class="verified-icon" aria-hidden="true">✓</div>
+          <h3>You're signed in</h3>
+          <p class="verified-copy">Google authentication was verified by the connected staging service.</p>
+          <p class="account-summary" id="account-summary"></p>
+          <a class="continue-link" id="continue-link" href="../../../app/?mode=live">Open current TotiChat preview <span aria-hidden="true">→</span></a>
+          <button class="signout-link" id="signout-button" type="button">Sign out</button>
+        </div>
+
+        <p class="bottom-note">Welcome to the TotiChat community.<br>Designed for connection, built around your voice.</p>
+        <div class="bottom-detail"><span class="petal">✧</span> YOUR NEXT FAVORITE PLACE <span class="petal">✧</span></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
