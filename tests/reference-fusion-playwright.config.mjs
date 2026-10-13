@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 export default defineConfig({
-  testDir: './tests',
+  testDir: '.',
   testMatch: 'reference-fusion-login-browser.spec.mjs',
   fullyParallel: false,
   workers: 1,
