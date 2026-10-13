@@ -53,7 +53,8 @@
     accountSummary.textContent = user.email || 'Authenticated Google account';
     // This independent review origin cannot share sessionStorage with the live app origin.
     // Never suggest an authenticated app handoff that would silently lose the session.
-    continueLink.hidden = true;
+    // The Home review is now on the same HTTPS origin and uses this verified session.
+    continueLink.hidden = false;
   }
   function isSameUser(expectedId) {
     return expectedId && auth?.state()?.signedIn === true
