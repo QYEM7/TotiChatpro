@@ -32,7 +32,7 @@ test('production app files are not part of login directory', () => {
   assert.match(script, /auth\.readProfile\(\)/);
 });
 
-function harness({hostname='totichat-live-preview.pages.dev',online=true,signedIn=false,verify=true,provider=true} = {}) {
+function harness({hostname='totichat-login-review-20261013.vercel.app',online=true,signedIn=false,verify=true,provider=true} = {}) {
   const listeners = new Map();
   function mockEl(id) {
     return { id, hidden:id==='signed-in-panel', disabled:false, textContent:'', dataset:{},
