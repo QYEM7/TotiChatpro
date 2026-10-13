@@ -13,7 +13,9 @@ test('login screen has exactly one visible sign-in method', () => {
   assert.doesNotMatch(html, /Continue with (Apple|Phone|Email|Facebook)/);
   assert.doesNotMatch(html, /type="password"|type="tel"/);
   assert.match(script, /signInWithProvider\('google'\)/);
-  assert.ok(html.includes('https://cdn.jsdelivr.net/gh/QYEM7/TotiChatpro@8e56d9535d352221f5ad434be6d4289cd33b2415/app/phase2-auth.js'));
+  assert.match(html,/src="\\.\\/auth-adapter\\.js"/);
+  assert.match(html,/src="\\.\\/backend-config\\.js"/);
+  assert.doesNotMatch(html,/cdn\\.jsdelivr\\.net\\/gh\\/QYEM7\\/TotiChatpro.*app\\/phase2-auth/);
   assert.doesNotMatch(script, /service_role|sb_secret_|mockSuccess|fakeUser/);
 });
 test('mobile UI and accessibility contracts exist', () => {
@@ -67,7 +69,7 @@ function harness({hostname='totichat-login-review-20261013.vercel.app',online=tr
   };
   const context={
     window, location:{protocol:'https:',hostname},
-    document:{getElementById(id){return elements[id]}},
+    document:{getElementById(id){return elements[id]},querySelector(){return null}},
     navigator:{onLine:online},
     console
   };
