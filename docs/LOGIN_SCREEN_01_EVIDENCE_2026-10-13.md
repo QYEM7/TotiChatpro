@@ -1,3 +1,29 @@
+## Session and sign-out verification — final code checks (2026-10-13)
+
+**Owner user report:** real Google OAuth login on the isolated review domain returned to the same page with `You're signed in`. This is accepted as user-observed Google sign-in success, not as proof of logout or session longevity.
+
+**Bug found and repaired:** `auth.readProfile()` broadcasts `totichat-phase2-auth`. The Login UI previously called `readProfile()` for every broadcast and re-entered validation, producing repeated `/auth/v1/user` and `/rest/v1/profiles` requests. The isolated Login controller now deduplicates ongoing validation for the same user and fetches the profile only if missing. Visual CSS remains unchanged.
+
+**Code CI:** https://github.com/QYEM7/TotiChatpro/actions/runs/38455731946 — 11 pass / 0 fail, including an explicit guard against recursive profile events.
+
+**Real Chromium browser QA:** https://github.com/QYEM7/TotiChatpro/actions/runs/38455816128 — **10 pass / 0 fail**. Four actual hosted viewport tests and six isolated-browser synthetic auth session tests:
+- reopen/reload same-tab signed-in session after server-stub verification;
+- sign out clears local session and stays signed out after refresh;
+- expired access token renews using refresh token;
+- revoked/401 access token cannot display authenticated state;
+- invalid/401 refresh token forces re-authentication;
+- mismatch between account and token does not show cached identity as authenticated.
+
+**Network-level public checks:** https://github.com/QYEM7/TotiChatpro/actions/runs/38452591382 — 7 pass / 0 fail on the actual staging/public HTTPS endpoints. No user credentials obtained or saved.
+
+**Latest independent visual-preview deployment:** Vercel `dpl_9YQHs7QwtqXHRtUPXJeVrL1CBteh`, READY, public alias `https://totichat-login-review-20261013.vercel.app/`. Only this isolated review project was redeployed; the current full app, database schema/data, main branch and live voice core were not changed.
+
+**Still not yet accepted:** real user's same-tab page refresh and real Sign out + post-logout refresh on their phone; server-side logout success cannot be attested merely because the adapter clears the browser session (it catches remote logout failures). Do not mark READY_TO_ADVANCE until user confirms manual behavior and the required access controls are checked. Closing a browser tab may discard a session held in sessionStorage; the current approved Login has no separate Remember Me control.
+
+**Readiness:** `OWNER_APPROVED_VISUAL`; `GOOGLE_OAUTH_USER_REPORTED_SUCCESS`; `BROWSER_10/10`; `REAL_LOGOUT_PENDING`; `ANDROID_NATIVE_UNVERIFIED`; `READY_TO_ADVANCE=false`.
+
+---
+
 # Login Screen 01 — Progress and evidence (2026-10-13)
 
 ## Owner decision — 2026-10-13 update
