@@ -13,7 +13,7 @@ test('login screen has exactly one visible sign-in method', () => {
   assert.doesNotMatch(html, /Continue with (Apple|Phone|Email|Facebook)/);
   assert.doesNotMatch(html, /type="password"|type="tel"/);
   assert.match(script, /signInWithProvider\('google'\)/);
-  assert.match(html, /\.\.\/\.\.\/\.\.\/app\/phase2-auth\.js/);
+  assert.match(html, /cdn\\.jsdelivr\\.net\\/gh\\/QYEM7\\/TotiChatpro@8e56d9535d352221f5ad434be6d4289cd33b2415\\/app\\/phase2-auth\\.js/);
   assert.doesNotMatch(script, /service_role|sb_secret_|mockSuccess|fakeUser/);
 });
 test('mobile UI and accessibility contracts exist', () => {
