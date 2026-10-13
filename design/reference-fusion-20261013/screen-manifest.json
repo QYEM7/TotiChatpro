@@ -38,15 +38,15 @@
       "progress": {
         "visual": "OWNER_APPROVED",
         "interaction": "IMPLEMENTED",
-        "backend": "GOOGLE_OAUTH_USER_CONFIRMED_SESSION_LOGOUT_MANUAL_PENDING",
+        "backend": "USER_GOOGLE_AUTH_SESSION_AND_LOGOUT_CHECKS_PASSED_SERVER_SECURITY_REVIEW_PENDING",
         "browser": "BROWSER_QA_PASSED_10_OF_10",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "APPROVE_VISUAL_ONLY",
+        "ownerDecision": "APPROVED_VISUAL_MANUAL_AUTH_TEST_PASSED",
         "readyToAdvance": false,
         "visualApprovedAt": "2026-10-13",
         "googleOAuth": "PASSED_USER_OBSERVED",
-        "sessionReload": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER",
-        "signOut": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER"
+        "sessionReload": "PASSED_USER_OBSERVED_SAME_TAB",
+        "signOut": "PASSED_USER_OBSERVED_AND_RELOAD"
       }
     },
     {
@@ -875,7 +875,7 @@
     "route": "loginPreview",
     "visual": "OWNER_APPROVED",
     "interaction": "IMPLEMENTED",
-    "backend": "GOOGLE_OAUTH_USER_CONFIRMED_SESSION_LOGOUT_MANUAL_PENDING",
+    "backend": "USER_GOOGLE_AUTH_SESSION_AND_LOGOUT_CHECKS_PASSED_SERVER_SECURITY_REVIEW_PENDING",
     "browser": "BROWSER_QA_PASSED_10_OF_10",
     "android": "NOT_VERIFIED",
     "ownerDecision": "APPROVE_VISUAL_ONLY",
@@ -890,17 +890,26 @@
       "verifiedRealLogout": false
     },
     "blockers": [
-      "Confirm real user account remains authenticated after same-tab refresh",
-      "Confirm real Sign out returns Google login and remains signed out after refresh",
-      "Do not equate mocked token refresh to real token rotation or server-side revocation",
-      "Android native deep-link verification requires separate approved mobile testing"
+      "Confirm server-side refresh token invalidation and failure handling; client can clear local state before remote logout succeeds",
+      "Audit public profile RLS and connected API access",
+      "Mobile Android native package OAuth not verified; no APK build approved"
     ],
     "googleOAuthUserReported": {
       "status": "PASSED_USER_OBSERVED",
-      "evidence": "User signed in using Google on independent TotiChat staging review and reported return to same page with 'You're signed in'.",
-      "date": "2026-10-13"
+      "date": "2026-10-13",
+      "evidence": "Owner confirmed real Google sign-in returned to the same review page with 'You're signed in'."
     },
-    "sessionReload": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER",
-    "signOut": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER"
+    "sessionReload": "PASSED_USER_OBSERVED_SAME_TAB",
+    "signOut": "PASSED_USER_OBSERVED",
+    "signOutReload": "PASSED_USER_OBSERVED_REMAINS_SIGNED_OUT",
+    "manualAcceptance": {
+      "date": "2026-10-13",
+      "signIn": true,
+      "refreshPersistsSession": true,
+      "signOutReturnsGoogle": true,
+      "refreshRemainsSignedOut": true,
+      "source": "user reported firsthand on phone",
+      "serverRefreshTokenRevocation": "NOT_DIRECTLY_VERIFIED"
+    }
   }
 }
