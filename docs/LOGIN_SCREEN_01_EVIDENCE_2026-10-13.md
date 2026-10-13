@@ -1,5 +1,21 @@
 # Login Screen 01 — Progress and evidence (2026-10-13)
 
+## Owner decision — 2026-10-13 update
+- **Visual design: APPROVED BY OWNER.** Freeze the existing look, colors, overall login layout and primary Google sign-in button. No general visual redesign.
+- **Technical release/readiness: NOT APPROVED; READY_TO_ADVANCE=false.**
+- Fixed isolated login host allowlist to include the verified review domain. Legacy live app hostname no longer used for the standalone review sign-in.
+- The standalone login page now loads a **commit-pinned** public auth adapter and config for that static deployment; the CSS was not redesigned.
+- Cross-domain app handoff hidden after sign-in: the separate review site's browser session does not automatically transfer into `totichat-live-preview.pages.dev`. Do not present that as a successful same-session navigation.
+- Independent Vercel review deployment confirmed **READY** and stable public alias is `https://totichat-login-review-20261013.vercel.app/`, separately from existing live app.
+- Real read-only network checks: **7 PASS / 0 FAIL**, GitHub Actions run https://github.com/QYEM7/TotiChatpro/actions/runs/38452591382. Checked HTTP 200 home, Google-only deployed controller, CSS, pinned auth script CDN, Google enabled on Supabase Staging, /auth/v1/user rejects anonymous requests with HTTP 401, and the Google authorize endpoint returns HTTP 302 to Google. **A redirect to Google does not prove end-to-end callback or session establishment.**
+- Latest source-level mocked adapter tests: **10 PASS / 0 FAIL**, https://github.com/QYEM7/TotiChatpro/actions/runs/38452942856. Older intermediate CI failures were test fixture/path mistakes and have been repaired; do not cite them as the current gate.
+- Supabase Staging SQL read-only aggregate: 3 `auth.users`, 3 `profiles`, 3 users with Google identity, 0 existing accounts without profiles. This is historical state validation, **not a fresh Google sign-in test**.
+- Chromium mobile 360/390/430px and desktop screenshot tests added at `tests/reference-fusion-login-browser.spec.mjs`. Status must be read from the latest successful browser QA run; don't report passed until runner completes.
+- OAuth redirect URL intended by current web adapter: `https://totichat-login-review-20261013.vercel.app/?mode=live`. It must be explicitly allowlisted in **Supabase Staging Auth > URL Configuration > Redirect URLs**. No tool here currently provides a supported Auth config mutation, so this allowlist was not altered or verified directly.
+- **BLOCKING** real Google login acceptance: an authorized user must perform the consent/login flow in a browser, let PKCE callback complete, verify actual session/profile, refresh, and test logout. This cannot be truthfully simulated with anonymous endpoint checks alone.
+- **BLOCKING** Android native acceptance: no APK build authorized; native deep link and resume unverified.
+- Existing main/develop code, finance, staging schema/data and real audio SDK untouched.
+
 ## Current decision
 **Screen-by-screen workflow: APPROVED by owner.**
 **Login screen itself: NOT APPROVED.**
