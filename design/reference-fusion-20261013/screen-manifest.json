@@ -38,15 +38,15 @@
       "progress": {
         "visual": "OWNER_APPROVED",
         "interaction": "IMPLEMENTED",
-        "backend": "PUBLIC_PROVIDER_AND_AUTHZ_PROBED_NOT_VERIFIED_E2E",
-        "browser": "BROWSER_QA_PASSED_4_OF_4",
+        "backend": "GOOGLE_OAUTH_USER_CONFIRMED_SESSION_LOGOUT_MANUAL_PENDING",
+        "browser": "BROWSER_QA_PASSED_10_OF_10",
         "android": "NOT_VERIFIED",
         "ownerDecision": "APPROVE_VISUAL_ONLY",
         "readyToAdvance": false,
         "visualApprovedAt": "2026-10-13",
         "googleOAuth": "PASSED_USER_OBSERVED",
-        "sessionReload": "PENDING_REAL_USER_TEST",
-        "signOut": "PENDING_REAL_USER_TEST"
+        "sessionReload": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER",
+        "signOut": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER"
       }
     },
     {
@@ -875,31 +875,32 @@
     "route": "loginPreview",
     "visual": "OWNER_APPROVED",
     "interaction": "IMPLEMENTED",
-    "backend": "CONTRACT_CONNECTED_NOT_VERIFIED",
-    "browser": "BROWSER_QA_PASSED_4_OF_4",
+    "backend": "GOOGLE_OAUTH_USER_CONFIRMED_SESSION_LOGOUT_MANUAL_PENDING",
+    "browser": "BROWSER_QA_PASSED_10_OF_10",
     "android": "NOT_VERIFIED",
     "ownerDecision": "APPROVE_VISUAL_ONLY",
     "readyToAdvance": false,
     "visualApprovedAt": "2026-10-13",
     "visualApprovalScope": "Login screen design only; protect layout/colors",
     "automatedChecks": {
-      "sourcePass": 10,
+      "sourcePass": 11,
       "publicNetworkPass": 7,
-      "chromiumPass": 4,
-      "verifiedRealGoogleCallback": false
+      "chromiumPass": 10,
+      "verifiedRealGoogleCallback": "USER_REPORTED_SUCCESS",
+      "verifiedRealLogout": false
     },
     "blockers": [
-      "Confirm exact redirect URL is allowed on Supabase Staging Auth",
-      "Complete real Google consent and PKCE callback on review link",
-      "Verify refresh, session resume and logout with real account",
-      "Confirm mobile browser behavior with user"
+      "Confirm real user account remains authenticated after same-tab refresh",
+      "Confirm real Sign out returns Google login and remains signed out after refresh",
+      "Do not equate mocked token refresh to real token rotation or server-side revocation",
+      "Android native deep-link verification requires separate approved mobile testing"
     ],
     "googleOAuthUserReported": {
       "status": "PASSED_USER_OBSERVED",
       "evidence": "User signed in using Google on independent TotiChat staging review and reported return to same page with 'You're signed in'.",
       "date": "2026-10-13"
     },
-    "sessionReload": "PENDING_REAL_USER_TEST",
-    "signOut": "PENDING_REAL_USER_TEST"
+    "sessionReload": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER",
+    "signOut": "PASSED_IN_ISOLATED_CHROMIUM_MOCK_PENDING_REAL_USER"
   }
 }
