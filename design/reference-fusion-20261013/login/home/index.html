@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#faf7ff">
+  <meta name="description" content="TotiChat — authentic voice rooms, community and real live content.">
+  <title>TotiChat · الرئيسية</title>
+  <link rel="stylesheet" href="./home.css">
+  <script defer src="../backend-config.js"></script>
+  <script defer src="../auth-adapter.js"></script>
+  <script defer src="./home.js"></script>
+</head>
+<body>
+<div class="device">
+ <div class="ambient ambience-one" aria-hidden="true"></div>
+ <div class="ambient ambience-two" aria-hidden="true"></div>
+ <main id="home-view" class="home-view" aria-labelledby="welcome-heading">
+  <header class="topbar">
+   <div class="identity">
+    <div class="brand-seal" aria-hidden="true">
+      <svg viewBox="0 0 72 72" class="brand-falcon"><defs><linearGradient id="falconFill" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#D0A864"/><stop offset=".6" stop-color="#8B61D8"/><stop offset="1" stop-color="#5C4BAD"/></linearGradient></defs><path fill="url(#falconFill)" d="M7 39 41 7l23 13-23 5 12 10-18 1-14 28-4-23-10-2Z"/><path fill="#fff4da" d="m18 40 28-17-12 20-15 12Z"/><circle cx="45" cy="23" r="3" fill="#40285d"/></svg>
+    </div>
+    <div class="brand-word">Toti<span>Chat</span><small>حيث يجتمع جمال الصوت</small></div>
+   </div>
+   <div class="header-actions">
+    <button id="search-trigger" class="icon-circle" aria-label="بحث عن غرفة" title="بحث" type="button"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 5.2 5.2"/></svg></button>
+    <button id="notifications-trigger" class="icon-circle" aria-label="الإشعارات" title="الإشعارات" type="button"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></button>
+   </div>
+  </header>
+
+  <section class="hero" aria-labelledby="welcome-heading">
+   <div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div>
+   <div class="hero-dazzle dazzle-one">✦</div><div class="hero-dazzle dazzle-two">✧</div>
+   <div class="hero-copy"><div class="mini-eyebrow"><span>✦</span> YOUR VOICE WORLD <span>✦</span></div>
+    <h1 id="welcome-heading">أهلاً بك في<br><em>عالم الأصوات الجميلة</em></h1>
+    <p>صوتك يجمعنا، ولحظاتنا أحلى معاً</p>
+    <button id="hero-create" type="button" class="hero-cta">أنشئ غرفتك <span aria-hidden="true">←</span></button>
+   </div>
+   <div class="hero-art" aria-hidden="true"><div class="planet-ring planet-ring-a"></div><div class="planet-ring planet-ring-b"></div>
+    <div class="hero-mic"><svg viewBox="0 0 80 100"><defs><linearGradient id="micGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#fff9e7"/><stop offset=".43" stop-color="#e8bfe8"/><stop offset="1" stop-color="#a7adfb"/></linearGradient></defs><rect x="23" y="10" width="34" height="50" rx="17" fill="url(#micGrad)" stroke="#fff8" stroke-width="3"/><path d="M14 49a26 26 0 0 0 52 0" fill="none" stroke="#fbe1b1" stroke-width="5" stroke-linecap="round"/><path d="M40 76v13M24 89h32" stroke="#fff6e1" stroke-width="5" stroke-linecap="round"/></svg></div>
+    <div class="floating-note note-a">♫</div><div class="floating-note note-b">✦</div><div class="floating-note note-c">♡</div>
+   </div>
+  </section>
+
+  <div id="auth-status" class="status-panel" role="status" aria-live="polite">
+   <div class="loading-gem" aria-hidden="true">✦</div>
+   <span id="auth-status-text">جاري التحقق من جلسة حسابك…</span>
+  </div>
+
+  <div id="secure-content" hidden>
+   <div id="banners" class="banners" hidden aria-label="إعلانات الإدارة"><div id="banner-items"></div><div id="banner-pagination" class="banner-dots"></div></div>
+   <div id="global-gift-strip" class="gift-ticker" hidden role="status"><span class="ticker-gem">✧</span><span id="gift-ticker-content"></span></div>
+
+   <section class="quick-section" aria-label="اختصارات المجتمع">
+    <button data-future="cp" class="quick-tile love-tile" type="button"><span class="quick-symbol">♡</span><span class="quick-label">CP</span><small>روابط جميلة</small><span class="quick-spark">✧</span></button>
+    <button data-future="agency" class="quick-tile agency-tile" type="button"><span class="quick-symbol">♕</span><span class="quick-label">الوكالات</span><small>كون مجتمعك</small><span class="quick-spark">✧</span></button>
+    <button data-future="vip" class="quick-tile vip-tile" type="button"><span class="quick-symbol">♛</span><span class="quick-label">VIP</span><small>تميّز بأسلوبك</small><span class="quick-spark">✧</span></button>
+   </section>
+
+   <section class="rooms-section" aria-labelledby="rooms-title">
+     <div class="section-title"><div><small class="section-overline">EXPLORE ROOMS</small><h2 id="rooms-title">الغرف الصوتية <span class="heading-star">✦</span></h2></div>
+      <button id="refresh-rooms" class="refresh-button" type="button" aria-label="تحديث الغرف" title="تحديث"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-1.6 5M20 5v6h-6"/></svg></button>
+     </div>
+     <div id="search-region" class="search-region" hidden><label for="room-search">ابحث باسم الغرفة</label><div class="search-field"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 5.2 5.2"/></svg><input id="room-search" type="search" placeholder="اسم الغرفة…" autocomplete="off"><button id="search-clear" type="button" aria-label="إغلاق البحث">×</button></div></div>
+     <div class="room-filters" role="group" aria-label="تصنيف الغرف">
+      <button type="button" data-filter="all" class="filter-pill is-active" aria-pressed="true">الكل <span>✦</span></button>
+      <button type="button" data-filter="public" class="filter-pill" aria-pressed="false">عامة</button>
+      <button type="button" data-filter="mine" class="filter-pill" aria-pressed="false">غرفي</button>
+     </div>
+     <div id="rooms-loading" class="rooms-loading"><div class="mini-loader" aria-hidden="true"></div><span>جاري تحميل الغرف الحقيقية…</span></div>
+     <div id="rooms-grid" class="room-grid" aria-live="polite" hidden></div>
+     <div id="rooms-empty" class="empty-state" hidden><div class="empty-emblem"><span>✧</span><svg viewBox="0 0 80 85"><rect x="25" y="11" width="30" height="44" rx="15"/><path d="M16 45a24 24 0 0 0 48 0M40 70V57M25 71h30"/></svg></div><h3 id="empty-title">لا توجد غرف متاحة حالياً</h3><p id="empty-copy">الغرف ستظهر هنا عندما تتوفر بيانات حقيقية من الخادم.</p><button id="empty-create" type="button">ابدأ بغرفتك الخاصة <span>←</span></button></div>
+     <div id="rooms-error" class="rooms-error" hidden role="alert"></div>
+   </section>
+   <div class="bottom-copy"><span>✧</span> WITH LOVE, TOTICHAT <span>✧</span></div>
+  </div>
+ </main>
+
+ <nav class="bottom-nav" aria-label="التنقل الأساسي">
+  <button id="nav-home" type="button" class="nav-link active" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg><span>الرئيسية</span></button>
+  <button data-future="discover" type="button" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 15 6-6-2 6-4-0z"/></svg><span>اكتشف</span></button>
+  <button id="nav-create" type="button" class="nav-link create-nav"><span class="plus-orb"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span>إنشاء</span></button>
+  <button data-future="messages" type="button" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="4"/><path d="m8 18-2 3M8 10h8M8 14h5"/></svg><span>الرسائل</span></button>
+  <button data-future="me" type="button" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c.4-5 3-7 7.5-7s7.1 2 7.5 7"/></svg><span>ملفي</span></button>
+ </nav>
+</div>
+
+<div id="sheet-scrim" class="sheet-scrim" hidden></div>
+<section id="info-sheet" class="dialog-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+ <div class="sheet-handle"></div><div class="sheet-header"><h2 id="sheet-title">معلومات</h2><button id="sheet-close" type="button" aria-label="إغلاق" class="sheet-close">×</button></div>
+ <div id="sheet-body"></div>
+</section>
+
+<section id="create-sheet" class="dialog-sheet create-sheet" role="dialog" aria-modal="true" aria-labelledby="create-title" hidden>
+ <div class="sheet-handle"></div><div class="sheet-header"><h2 id="create-title">أنشئ غرفتك الصوتية</h2><button id="create-close" type="button" aria-label="إغلاق" class="sheet-close">×</button></div>
+ <form id="create-form">
+  <p class="form-intro">أضف التفاصيل المطلوبة حتى تكون غرفتك جاهزة ومميزة.</p>
+  <label for="create-name">اسم الغرفة <span>*</span></label><input required id="create-name" name="name" minlength="2" maxlength="48" placeholder="اسم غرفتك الجميلة">
+  <label for="create-welcome">رسالة الترحيب <span>*</span></label><textarea required id="create-welcome" name="welcome" minlength="2" maxlength="220" rows="2" placeholder="رسالة للمنضمين إلى غرفتك"></textarea>
+  <label for="create-cover">صورة الغرفة <span>*</span></label><div class="cover-selector"><input id="create-cover" name="cover" type="file" accept="image/jpeg,image/png,image/webp" required><p>اختر JPG أو PNG أو WebP (حد 2 ميغابايت بعد التحويل)</p><img id="cover-preview" alt="معاينة صورة الغرفة" hidden></div>
+  <label class="check-row" for="create-private"><input type="checkbox" id="create-private"><span>غرفة خاصة (الدخول بالدعوة)</span></label>
+  <div id="create-message" class="form-status" role="status" aria-live="polite"></div>
+  <button id="create-submit" class="submit-create" type="submit">إنشاء الغرفة الحقيقية <span>←</span></button>
+  <p class="form-footnote">يتم الحفظ على Supabase Staging فقط. الصورة والترحيب مطلوبان.</p>
+ </form>
+</section>
+<div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+</body>
+</html>
