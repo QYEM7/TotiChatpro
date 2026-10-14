@@ -67,14 +67,27 @@ function harness({hostname='totichat-login-review-20261013.vercel.app',online=tr
     Capacitor:null,
     addEventListener(event,handler){listeners.set(event,handler)}
   };
+  const sessionData=new Map();
+  const navigations=[];
+  const location={
+    protocol:'https:',hostname,origin:'https://'+hostname,
+    href:'https://'+hostname+'/',
+    search:'',
+    replace(url){navigations.push(url)}
+  };
+  const sessionStorage={
+    getItem(key){return sessionData.get(key)??null},
+    setItem(key,val){sessionData.set(key,String(val))},
+    removeItem(key){sessionData.delete(key)}
+  };
   const context={
-    window, location:{protocol:'https:',hostname},
+    window, location,URL,URLSearchParams,sessionStorage,
     document:{getElementById(id){return elements[id]},querySelector(){return null}},
     navigator:{onLine:online},
     console
   };
   vm.runInNewContext(script,context,{timeout:3000,filename:'login.js'});
-  return {elements,calls,auth,listeners,setUser(user){currentUser=user}};
+  return {elements,calls,auth,listeners,navigations,sessionStorage,setUser(user){currentUser=user}};
 }
 const flush=async()=>{for(let i=0;i<5;i++) await new Promise(resolve=>setImmediate(resolve))};
 
@@ -140,4 +153,25 @@ test('profile events cannot recursively trigger unbounded session checks',async(
   h.listeners.get('totichat-phase2-auth')?.();
   await flush();
   assert.equal(h.calls.filter(x=>x==='profile').length,1,'revalidated profile should be cached');
+});
+
+test('Google-only click routes to NEW Home immediately after verified callback, never old app',async()=>{
+  const h=harness();
+  await flush();
+  await h.elements['google-button'].listeners.click();
+  assert.equal(h.sessionStorage.getItem('totichat.review.returnHome.v1'),'1');
+  assert.equal(h.navigations.length,0,'Unverified click cannot navigate to Home');
+  h.setUser({id:'real-user-1',email:'verified@example.test'});
+  h.listeners.get('totichat-phase2-auth')?.();
+  await flush();
+  assert.equal(h.navigations.length,1);
+  assert.equal(h.navigations[0],'https://totichat-login-review-20261013.vercel.app/home/?review=home02');
+  assert.equal(h.sessionStorage.getItem('totichat.review.returnHome.v1'),null);
+  assert.ok(!h.navigations.some(url=>url.includes('totichat-live-preview.pages.dev')));
+});
+test('isolated auth adapter has canonical callback and no old Cloudflare site',()=>{
+  const adapter=fs.readFileSync(new URL('auth-adapter.js',root),'utf8');
+  assert.match(adapter,/Unapproved Google callback origin/);
+  assert.match(adapter,/return 'https:\/\/'\+approved\+'\/\?mode=live'/);
+  assert.doesNotMatch(adapter,/totichat-live-preview\.pages\.dev/);
 });
