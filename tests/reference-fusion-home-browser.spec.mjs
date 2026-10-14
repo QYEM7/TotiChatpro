@@ -86,6 +86,15 @@ test('published Home URL always serves new lavender UI and sign-in returns to Ho
   await anon.close();
 });
 
+test('verified Google session returns automatically to the new Home, not old live preview',async({page})=>{
+ await setup(page,{rooms:[publicRoom]});
+ await page.goto('https://totichat-login-review-20261013.vercel.app/?returnTo=home', {waitUntil:'domcontentloaded'});
+ await expect(page).toHaveURL(/\/home\//,{timeout:17000});
+ await loaded(page);
+ await expect(page.locator('.hero')).toContainText('عالم الأصوات الجميلة');
+ await expect(page.locator('.room-card')).toHaveCount(1);
+});
+
 test('Home has deployed current design and CSP permits chosen-image previews',async({page})=>{
  const calls=await setup(page);
  const response=await page.goto(base,{waitUntil:'domcontentloaded'});
