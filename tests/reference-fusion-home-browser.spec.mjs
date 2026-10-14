@@ -68,7 +68,9 @@ for(const width of [360,390,430]){
   expect(response?.status()).toBe(200);await loaded(page);
   await expect(page.locator('.room-card')).toHaveCount(2);
   await expect(page.locator('.room-card').first()).toContainText('QA Open Voice');
-  await expect(page.locator('#banners')).toBeHidden();
+  await expect(page.locator('#banners')).toBeVisible();
+  await expect(page.locator('#banner-placeholder')).toBeVisible();
+  await expect(page.locator('.banner-entry')).toHaveCount(0);
   await expect(page.locator('#global-gift-strip')).toBeHidden();
   await expect(page.locator('.bottom-nav')).toBeVisible();
   const x=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth}));
@@ -77,6 +79,23 @@ for(const width of [360,390,430]){
   await page.screenshot({path:'test-results/home-'+width+'.png',fullPage:true,animations:'disabled'});
  });
 }
+test('top reserved banner area is visually above the welcome section without fake ads',async({page})=>{
+ await setup(page,{rooms:[],banners:[]});
+ await page.setViewportSize({width:390,height:844});
+ await page.goto(base,{waitUntil:'domcontentloaded'});
+ await loaded(page);
+ const top=await page.locator('#banners').boundingBox();
+ const hero=await page.locator('.hero').boundingBox();
+ const header=await page.locator('.topbar').boundingBox();
+ expect(top).toBeTruthy();expect(hero).toBeTruthy();expect(header).toBeTruthy();
+ expect(top.y).toBeGreaterThanOrEqual(header.y+header.height-1);
+ expect(top.y+top.height).toBeLessThan(hero.y);
+ await expect(page.locator('#banner-placeholder')).toContainText('مساحة البنرات');
+ await expect(page.locator('#banner-placeholder')).toContainText('تظهر الإعلانات المعتمدة هنا عند نشرها');
+ await expect(page.locator('.banner-entry')).toHaveCount(0);
+ await expect(page.locator('#global-gift-strip')).toBeHidden();
+});
+
 test('published Home URL always serves new lavender UI and sign-in returns to Home',async({browser})=>{
   const anon=await browser.newContext({viewport:{width:390,height:844}});
   const page=await anon.newPage();
@@ -157,7 +176,9 @@ test('staging-empty feed displays real empty state, never mock banners or gifts'
  await setup(page,{rooms:[]});await page.goto(base,{waitUntil:'domcontentloaded'});await loaded(page);
  await expect(page.locator('#rooms-empty')).toBeVisible();
  await expect(page.locator('.room-card')).toHaveCount(0);
- await expect(page.locator('#banners')).toBeHidden();
+ await expect(page.locator('#banners')).toBeVisible();
+  await expect(page.locator('#banner-placeholder')).toBeVisible();
+  await expect(page.locator('.banner-entry')).toHaveCount(0);
  await expect(page.locator('#global-gift-strip')).toBeHidden();
 });
 test('filter and search only matching backend-authorized rooms',async({page})=>{
@@ -183,6 +204,8 @@ test('admin banners and 7000+ gift ticker appear only with verified backend rows
  await expect(page.locator('#banners')).toBeVisible();
  await expect(page.locator('#global-gift-strip')).toBeVisible();
  await expect(page.locator('#global-gift-strip')).toContainText('7,000');
+ await expect(page.locator('#banner-placeholder')).toBeHidden();
+ await expect(page.locator('.banner-entry')).toHaveCount(1);
 });
 test('future navigation honestly discloses unfinished screens, room detail sourced from database',async({page})=>{
  await setup(page);await page.goto(base,{waitUntil:'domcontentloaded'});await loaded(page);
