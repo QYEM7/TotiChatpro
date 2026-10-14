@@ -66,7 +66,7 @@
   }
   async function verifyAccount(){
     if(!auth||!origin){status('خدمة تسجيل الدخول غير متوفرة في المعاينة.','error');return false}
-    if(!auth.state()?.signedIn){location.replace('../');return false}
+    if(!auth.state()?.signedIn){location.replace('../?returnTo=home');return false}
     if(authTask)return authTask;
     authTask=(async()=>{
       try{
