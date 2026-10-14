@@ -98,7 +98,10 @@
     const wrapper=byId('banners'),list=byId('banner-items'),dots=byId('banner-pagination');
     clear(list);clear(dots);clearInterval(backgroundTimer);backgroundTimer=null;
     const items=state.banners.filter(b=>safeImage(b.image_url)&&b.status==='published');
-    wrapper.hidden=items.length===0;
+    // Reserve banner placement at the top even when no real approved rows exist.
+    // Only this clearly labeled neutral placeholder appears; never synthesize ads.
+    wrapper.hidden=false;
+    byId('banner-placeholder').hidden=items.length>0;
     items.forEach((b,index)=>{
       const entry=document.createElement('div');entry.className='banner-entry'+(index===0?' active':'');
       const img=document.createElement('img');img.src=safeImage(b.image_url);img.alt=escapeText(b.title);
@@ -207,7 +210,8 @@
       const fail=byId('rooms-error');fail.hidden=false;
       fail.textContent='تعذّر تحميل الغرف من الخادم. تحقق من الاتصال واضغط زر التحديث.';
       // Never replace a network error with invented fallback rooms.
-      state.rooms=[];byId('banners').hidden=true;byId('global-gift-strip').hidden=true;
+      state.rooms=[];state.banners=[];renderBanners();
+      byId('global-gift-strip').hidden=true;
     }finally{if(ticket===state.loadTicket){state.fetching=false;byId('rooms-loading').hidden=true}}
   }
   function setFilter(next){
