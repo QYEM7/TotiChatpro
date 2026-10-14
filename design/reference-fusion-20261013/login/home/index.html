@@ -29,6 +29,26 @@
    </div>
   </header>
 
+
+
+  <div id="auth-status" class="status-panel" role="status" aria-live="polite">
+   <div class="loading-gem" aria-hidden="true">✦</div>
+   <span id="auth-status-text">جاري التحقق من جلسة حسابك…</span>
+  </div>
+
+  <div id="secure-content" hidden>
+   <section id="banners" class="banners" aria-label="المساحة المخصصة للبنرات الإدارية">
+    <div id="banner-placeholder" class="banner-placeholder" aria-live="polite">
+     <div class="banner-placeholder-icon" aria-hidden="true">
+      <svg viewBox="0 0 32 32"><rect x="3" y="5" width="26" height="22" rx="5"/><circle cx="11" cy="12" r="2.5"/><path d="m5 23 8-8 6 5 5-5 4 5"/></svg>
+     </div>
+     <div class="banner-placeholder-copy"><strong>مساحة البنرات</strong><span>تظهر الإعلانات المعتمدة هنا عند نشرها</span></div>
+     <span class="banner-placeholder-ornament" aria-hidden="true">✦</span>
+    </div>
+    <div id="banner-items"></div>
+    <div id="banner-pagination" class="banner-dots"></div>
+   </section>
+
   <section class="hero" aria-labelledby="welcome-heading">
    <div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div>
    <div class="hero-dazzle dazzle-one">✦</div><div class="hero-dazzle dazzle-two">✧</div>
@@ -42,14 +62,6 @@
     <div class="floating-note note-a">♫</div><div class="floating-note note-b">✦</div><div class="floating-note note-c">♡</div>
    </div>
   </section>
-
-  <div id="auth-status" class="status-panel" role="status" aria-live="polite">
-   <div class="loading-gem" aria-hidden="true">✦</div>
-   <span id="auth-status-text">جاري التحقق من جلسة حسابك…</span>
-  </div>
-
-  <div id="secure-content" hidden>
-   <div id="banners" class="banners" hidden aria-label="إعلانات الإدارة"><div id="banner-items"></div><div id="banner-pagination" class="banner-dots"></div></div>
    <div id="global-gift-strip" class="gift-ticker" hidden role="status"><span class="ticker-gem">✧</span><span id="gift-ticker-content"></span></div>
 
    <section class="quick-section" aria-label="اختصارات المجتمع">
