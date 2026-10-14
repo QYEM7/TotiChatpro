@@ -354,7 +354,12 @@
   const OAUTH_PENDING='totichat.phase2.oauth.pending';
   function callbackDestination(){
     if(location.hostname==='localhost'&&location.protocol==='https:')return 'com.totichat.beta://auth/callback';
-    const url=new URL('./',location.href);url.searchParams.set('mode','live');return url.href;
+    // The verified Vercel review is the only web OAuth callback for this
+    // isolated design branch. Never fall back to the old Cloudflare app.
+    const approved='totichat-login-review-20261013.vercel.app';
+    if(location.protocol!=='https:' || location.hostname!==approved)
+      throw new Error('Unapproved Google callback origin');
+    return 'https://'+approved+'/?mode=live';
   }
   async function signInWithProvider(provider){
     if(!['google','apple','facebook'].includes(provider))throw new Error('Invalid provider');
