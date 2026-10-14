@@ -31,7 +31,21 @@ button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,in
 .hero-dazzle{position:absolute;color:#ffeab3;font-size:23px}.dazzle-one{top:6px;right:10px}.dazzle-two{bottom:19px;right:59%}
 .status-panel{margin:20px 18px 0;border:1px solid #eee2f5;border-radius:17px;padding:15px;background:#ffffffd9;display:flex;justify-content:center;align-items:center;gap:11px;color:#8b759f;font-size:12px;line-height:1.7;box-shadow:var(--shadow)}
 .loading-gem{color:#bd92e3;animation:gem-spin 2s linear infinite;font-size:20px}@keyframes gem-spin{to{transform:rotate(360deg)}}
-.banners{margin:13px 16px 0;position:relative}.banner-entry{height:119px;border-radius:19px;position:relative;overflow:hidden;border:1px solid #eadbef;background:#ece0fa;box-shadow:var(--shadow);display:none}.banner-entry.active{display:block}.banner-entry img{width:100%;height:100%;object-fit:cover}.banner-entry .banner-label{position:absolute;bottom:8px;right:9px;max-width:92%;padding:4px 11px;background:#473155aa;color:white;border-radius:16px;font-size:11px;font-weight:800}.banner-dots{display:flex;justify-content:center;gap:5px;margin:8px}.banner-dots button{width:6px;height:6px;background:#ddd0ec;border:0;border-radius:50%;padding:0}.banner-dots button.current{width:19px;background:#9b6be3;border-radius:8px}
+.banners{margin:0 16px 16px;position:relative}.banner-entry{height:119px;border-radius:19px;position:relative;overflow:hidden;border:1px solid #eadbef;background:#ece0fa;box-shadow:var(--shadow);display:none}.banner-entry.active{display:block}.banner-entry img{width:100%;height:100%;object-fit:cover}.banner-entry .banner-label{position:absolute;bottom:8px;right:9px;max-width:92%;padding:4px 11px;background:#473155aa;color:white;border-radius:16px;font-size:11px;font-weight:800}.banner-dots{display:flex;justify-content:center;gap:5px;margin:8px}.banner-dots button{width:6px;height:6px;background:#ddd0ec;border:0;border-radius:50%;padding:0}.banner-dots button.current{width:19px;background:#9b6be3;border-radius:8px}
+
+/* Empty banner *location*, never a fabricated advertisement; kept visible on Home. */
+.banner-placeholder{height:122px;border-radius:22px;border:1px dashed #d8c0ec;background:linear-gradient(117deg,#fffdfc 0%,#f9f1fc 48%,#f2e9fa 100%);display:flex;align-items:center;justify-content:center;gap:14px;position:relative;overflow:hidden;box-shadow:0 7px 17px #745b9820}
+.banner-placeholder:before{content:'';position:absolute;width:180px;height:180px;border:1px solid #d7c0e866;border-radius:50%;left:-85px;top:-88px}
+.banner-placeholder:after{content:'';position:absolute;width:130px;height:130px;border:1px solid #d7c0e866;border-radius:50%;right:-82px;bottom:-79px}
+.banner-placeholder-icon{display:grid;place-items:center;flex-shrink:0;width:49px;height:49px;border-radius:16px;background:linear-gradient(135deg,#f5e7fa,#fcece5);border:1px solid #e9d9f2;color:#a78ac8}
+.banner-placeholder-icon svg{width:26px;height:26px;stroke-width:1.5}
+.banner-placeholder-copy{display:flex;flex-direction:column;gap:3px;text-align:right;position:relative;z-index:1}
+.banner-placeholder-copy strong{font-size:14px;font-weight:900;color:#806199}
+.banner-placeholder-copy span{font-size:10px;line-height:1.75;font-weight:650;color:#ac9bb6}
+.banner-placeholder-ornament{position:absolute;top:10px;left:15px;color:#d6b780;font-size:18px}
+.banner-dots:empty{display:none}
+@media(max-width:375px){.banners{margin-inline:12px}.banner-placeholder{height:112px;gap:9px}.banner-placeholder-icon{width:42px;height:42px}.banner-placeholder-copy strong{font-size:13px}.banner-placeholder-copy span{font-size:9px}}
+
 .gift-ticker{margin:14px 18px 1px;border-radius:19px;padding:11px 15px;background:linear-gradient(105deg,#fff8e6,#fceaca);border:1px solid #edd4a5;display:flex;align-items:center;gap:10px;font-size:10px;color:#8c6b40;font-weight:800;box-shadow:var(--shadow)}.ticker-gem{font-size:24px;color:#d1a14d}
 .quick-section{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:21px 17px 5px}
 .quick-tile{position:relative;isolation:isolate;min-width:0;min-height:101px;display:flex;align-items:flex-start;flex-direction:column;justify-content:center;padding:13px 13px 12px;text-align:right;border-radius:21px;border:1px solid #fff9;box-shadow:0 8px 20px #8f79bc20;overflow:hidden}
