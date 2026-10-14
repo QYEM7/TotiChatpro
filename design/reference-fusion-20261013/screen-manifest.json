@@ -107,10 +107,10 @@
       "progress": {
         "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
         "interaction": "IMPLEMENTED",
-        "backend": "AUTH_REDIRECT_BLOCKED_BY_STAGING_CONFIG",
+        "backend": "REAL_GOOGLE_REDIRECT_ACCEPTED_ROOM_BACKEND_OWNER_TEST_PENDING",
         "browser": "CHROMIUM_12_OF_12_PASSED_HOSTED_HOME_REVIEW",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "AUTH_REDIRECT_BLOCKER_CONFIRMED_DO_NOT_APPROVE",
+        "ownerDecision": "AWAITING_OWNER_VISUAL_REVIEW",
         "readyToAdvance": false
       }
     },
@@ -887,9 +887,9 @@
     "id": 5,
     "route": "home",
     "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
-    "ownerDecision": "AUTH_REDIRECT_BLOCKER_CONFIRMED_DO_NOT_APPROVE",
+    "ownerDecision": "REAL_GOOGLE_TO_HOME_ACCEPTED_HOME_VISUAL_PENDING",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
-    "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
+    "backend": "AUTH_SUCCESS_CONFIRMED_BY_OWNER_AND_STAGING_OAUTH_LOG_TIMING",
     "browser": "CHROMIUM_13_OF_13_PASS",
     "android": "NOT_VERIFIED",
     "readyToAdvance": false,
@@ -902,28 +902,51 @@
     "latestReadyDeployment": "dpl_AS2ichk9fBPZdcVDQkfRCNRHPPWd",
     "qaRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/38545394441",
     "blockers": [
-      "At last read, ALL 32 authorize and 16 callback auth log events over past 24h use old Cloudflare referer, none new Vercel.",
-      "Supabase Staging Site URL and Redirect URLs settings are not readable/mutable with current connected Supabase tools; must be corrected in dashboard.",
-      "Google Cloud Console OAuth redirect URI must remain the Supabase callback, not the Vercel website.",
-      "Real Google sign-in callback must be verified by owner after Staging URL changes; no success may be claimed from synthetic browser tests.",
-      "Old Cloudflare site is a separate deployment; its deletion/replacement was not performed and requires Cloudflare project access."
+      "Referer values in callback/token/user logs still mention old Cloudflare; monitor as diagnostic, not a user-facing failure.",
+      "Old Cloudflare app is a separate still-deployed artifact, not deleted or altered.",
+      "Google-only Email provider policy remains a separate security gate; Login approved 90% conditionally.",
+      "Home visual acceptance and room-create live account testing not finished; do not advance to next screen.",
+      "Native Android APK OAuth/deep link untested; no APK authorized."
     ],
     "previewAliasVerified": true,
     "loginToHomeRedirect": "TESTED_SAME_ORIGIN_AUTOMATIC_AFTER_VERIFIED_SESSION",
-    "authFlow": "GOOGLE_NEW_LOGIN_ONLY_DIRECT_TO_SAME_ORIGIN_HOME",
+    "authFlow": "GOOGLE_NEW_LOGIN_TO_NEW_VERCEL_HOME_REAL_USER_CONFIRMED",
     "authRegression": "13_OF_13_BROWSER_PASSED_SYNTHETIC_GOOGLE_PKCE",
     "appCutover": "ISOLATED_VERCEL_REVIEW_ONLY_OLD_CLOUDFLARE_DEPLOYMENT_NOT_MODIFIED",
     "deployId": "dpl_7VMPeqyxQWmhpR3LeNqXJYhq4pkd",
-    "oauthRedirectStatus": "BLOCKED_BY_STAGING_AUTH_URL_CONFIGURATION_OR_OLD_OAUTH_ORIGIN",
+    "oauthRedirectStatus": "REAL_USER_GOOGLE_TO_NEW_HOME_PASSED_WITH_STAGING_LOG_EVIDENCE",
     "oauthRedirectEvidence": {
-      "source": "Supabase Staging auth_logs read-only within previous 24 hours",
-      "authorizeOldCloudflare": 32,
-      "callbackOldCloudflare": 16,
-      "vercelRefererObserved": 0,
-      "dataCaveat": "Logs may contain multiple entries per request; figures are log entries, not distinct users.",
-      "canonicalSiteUrl": "https://totichat-login-review-20261013.vercel.app/",
-      "exactAllowedRedirect": "https://totichat-login-review-20261013.vercel.app/?mode=live",
-      "requiredAction": "Inspect Staging Auth URL Configuration; replace old Cloudflare Site URL with canonical Vercel, allowlist exact redirect, then retest real Google callback."
+      "source": "Read-only Supabase Staging auth logs on 2026-10-14, 14:30–14:39 UTC",
+      "newVercelAuthorize": {
+        "at": "14:33:34Z",
+        "provider": "google",
+        "result": "302",
+        "referer": "NEW_VERCEL"
+      },
+      "callback": {
+        "at": "14:33:38Z",
+        "result": "302",
+        "referer": "OLD_CLOUDFLARE"
+      },
+      "pkceToken": {
+        "at": "14:33:39Z",
+        "result": "200",
+        "referer": "OLD_CLOUDFLARE"
+      },
+      "sessionUser": {
+        "range": "14:33:39Z–14:33:41Z",
+        "result": "200",
+        "entries": 4,
+        "referer": "OLD_CLOUDFLARE"
+      },
+      "ownerObservation": "Real Google OAuth returned directly to Vercel new TotiChat Home without old login or a second login.",
+      "caveat": "Callback/token/user Referer retains old Cloudflare; logs alone do not identify final redirect destination. Keep this as diagnostic, not a claim of full old deployment cleanup."
+    },
+    "oauthRealUserAcceptance": {
+      "status": "PASS",
+      "scope": "Isolated Vercel Login → Google → Vercel new Home, no second login",
+      "date": "2026-10-14",
+      "verifiedBy": "Owner device report and staging auth logs"
     }
   },
   "archivedLoginApproval": {
@@ -934,7 +957,10 @@
     "notes": "Owner authorized beginning Home despite the previous Login final gate; preserve outstanding Email provider and Android OAuth checks.",
     "directToNewHome": "IMPLEMENTED_VERIFIED_IN_SYNTHETIC_GOOGLE_FLOW",
     "oldCloudflareAppModified": false,
-    "canonicalCallback": "https://totichat-login-review-20261013.vercel.app/?mode=live"
+    "canonicalCallback": "https://totichat-login-review-20261013.vercel.app/?mode=live",
+    "webGoogleRedirectRealUser": "PASSED_2026-10-14",
+    "webGoogleFlow": "GOOGLE_NEW_LOGIN_TO_NEW_VERCEL_HOME",
+    "notFinalSecuritySignoff": true
   },
   "activeScreenId": 5,
   "previousScreenId": 1,
