@@ -69,6 +69,7 @@
     // Never suggest an authenticated app handoff that would silently lose the session.
     // The Home review is now on the same HTTPS origin and uses this verified session.
     continueLink.hidden = false;
+    returnToHomeOnceVerified();
   }
   function isSameUser(expectedId) {
     return expectedId && auth?.state()?.signedIn === true
