@@ -110,7 +110,7 @@
         "backend": "REAL_GOOGLE_REDIRECT_ACCEPTED_ROOM_BACKEND_OWNER_TEST_PENDING",
         "browser": "CHROMIUM_12_OF_12_PASSED_HOSTED_HOME_REVIEW",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "AWAITING_OWNER_VISUAL_REVIEW",
+        "ownerDecision": "HOME_VISUAL_STEP_01_AWAITING_OWNER",
         "readyToAdvance": false
       }
     },
@@ -887,7 +887,7 @@
     "id": 5,
     "route": "home",
     "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
-    "ownerDecision": "REAL_GOOGLE_TO_HOME_ACCEPTED_HOME_VISUAL_PENDING",
+    "ownerDecision": "HOME_VISUAL_STEP_01_AWAITING_OWNER",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
     "backend": "AUTH_SUCCESS_CONFIRMED_BY_OWNER_AND_STAGING_OAUTH_LOG_TIMING",
     "browser": "CHROMIUM_13_OF_13_PASS",
@@ -947,6 +947,46 @@
       "scope": "Isolated Vercel Login → Google → Vercel new Home, no second login",
       "date": "2026-10-14",
       "verifiedBy": "Owner device report and staging auth logs"
+    },
+    "ownerReview": {
+      "status": "STEP_01_VISUAL_PENDING_OWNER_OBSERVATION",
+      "startedAt": "2026-10-14",
+      "step": 1,
+      "steps": [
+        {
+          "id": 1,
+          "name": "Home mobile appearance and arrangement",
+          "status": "PENDING_OWNER"
+        },
+        {
+          "id": 2,
+          "name": "Home header, search, filters and fixed navigation",
+          "status": "NOT_STARTED"
+        },
+        {
+          "id": 3,
+          "name": "Staging-authorized room list, room details and missing data states",
+          "status": "NOT_STARTED"
+        },
+        {
+          "id": 4,
+          "name": "Create room form, image and actual staging RPC safeguards",
+          "status": "NOT_STARTED"
+        },
+        {
+          "id": 5,
+          "name": "Final visual and functional owner decision",
+          "status": "NOT_STARTED"
+        }
+      ],
+      "googleToNewHome": "OWNER_CONFIRMED_REAL_USER",
+      "realStagingSnapshot": {
+        "rooms": 1,
+        "publicRooms": 0,
+        "banners": 0,
+        "giftAnnouncements": 0
+      },
+      "finalApproval": false
     }
   },
   "archivedLoginApproval": {
