@@ -106,11 +106,11 @@
       },
       "progress": {
         "visual": "OWNER_APPROVED_AFTER_BANNER_FIX",
-        "interaction": "STEP_02_OWNER_TEST_PENDING",
+        "interaction": "S2_01_REAL_DEVICE_PASS_S2_02_S2_04_PENDING",
         "backend": "REAL_GOOGLE_REDIRECT_ACCEPTED_ROOM_BACKEND_OWNER_TEST_PENDING",
         "browser": "CHROMIUM_14_OF_14_PASS",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "HOME_VISUAL_APPROVED_STEP_02_FUNCTIONS_IN_PROGRESS",
+        "ownerDecision": "HOME_STEP_01_APPROVED_STEP_02_SEARCH_PASSED_FILTERS_NAV_PENDING",
         "readyToAdvance": false
       }
     },
@@ -887,7 +887,7 @@
     "id": 5,
     "route": "home",
     "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
-    "ownerDecision": "HOME_VISUAL_APPROVED_STEP_02_FUNCTIONS_IN_PROGRESS",
+    "ownerDecision": "HOME_STEP_01_APPROVED_STEP_02_SEARCH_PASSED_FILTERS_NAV_PENDING",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
     "backend": "AUTH_SUCCESS_CONFIRMED_BY_OWNER_AND_STAGING_OAUTH_LOG_TIMING",
     "browser": "CHROMIUM_14_OF_14_PASS",
@@ -949,7 +949,7 @@
       "verifiedBy": "Owner device report and staging auth logs"
     },
     "ownerReview": {
-      "status": "STEP_02_FUNCTIONAL_HEADER_SEARCH_NAVIGATION_OWNER_TEST_PENDING",
+      "status": "STEP_02_TESTS_S2_02_FILTERS_S2_03_REFRESH_S2_04_NAV_OWNER_PENDING",
       "startedAt": "2026-10-14",
       "step": 2,
       "steps": [
@@ -997,7 +997,9 @@
         {
           "id": "S2-01",
           "name": "Search button opens search field, typing and clear, no fabricated room results",
-          "status": "OWNER_TEST_PENDING"
+          "status": "PASSED_OWNER_REAL_DEVICE",
+          "observed": "Owner confirmed Home search opens, accepts typing, and closes correctly.",
+          "acceptedDate": "2026-10-14"
         },
         {
           "id": "S2-02",
@@ -1019,7 +1021,8 @@
           "name": "Notification/Discover/Messages/CP/Agency/VIP are honest pending-screen sheets, not linked features",
           "status": "KNOWN_INCOMPLETE_SEPARATE_SCREENS"
         }
-      ]
+      ],
+      "nextTest": "S2-02"
     },
     "bannerSlot": {
       "position": "DIRECTLY_BELOW_TOPBAR_ABOVE_WELCOME_HERO",
