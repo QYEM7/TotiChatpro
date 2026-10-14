@@ -35,11 +35,14 @@
     if(new URLSearchParams(location.search).get('returnTo')==='home')
       sessionStorage.setItem(HOME_RETURN_FLAG,'1');
   } catch(_) {}
+  // Canonical post-Google destination: never chain to an older login or Cloudflare app.
   function returnToHomeOnceVerified(){
     try{
       if(sessionStorage.getItem(HOME_RETURN_FLAG)!=='1')return;
       sessionStorage.removeItem(HOME_RETURN_FLAG);
-      location.replace('./home/?review=home02');
+      const next=new URL('./home/?review=home02',location.href);
+      if(next.origin!==location.origin || next.pathname!=='/home/')throw new Error('Invalid Home target');
+      location.replace(next.href);
     }catch(_){}
   }
   let busy = false;
@@ -162,10 +165,14 @@
       if (!canStartOAuth) throw new Error('Staging HTTPS preview URL has not been authorized for Google login.');
       if (!auth) throw new Error('Authentication adapter is unavailable on this visual preview.');
       if (!providerReady && !(await checkProvider())) return;
-      // The existing adapter enforces PKCE, provider status and callback validation.
-      // Do not create success state here; only verified session may do so.
+      // Remember Home as the final destination BEFORE leaving for Google.
+      // The flag survives the PKCE callback on this SAME HTTPS origin.
+      sessionStorage.setItem(HOME_RETURN_FLAG,'1');
+      // The adapter enforces PKCE, provider status and callback validation.
+      // Never take the user to another login screen after the callback.
       await auth.signInWithProvider('google');
     } catch (error) {
+      try{sessionStorage.removeItem(HOME_RETURN_FLAG)}catch(_){}
       setStatus(error?.message || 'Unable to start Google sign-in.', 'error');
     } finally {
       setBusy(false);
