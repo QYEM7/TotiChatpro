@@ -108,9 +108,9 @@
         "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
         "interaction": "IMPLEMENTED",
         "backend": "REAL_GOOGLE_REDIRECT_ACCEPTED_ROOM_BACKEND_OWNER_TEST_PENDING",
-        "browser": "CHROMIUM_12_OF_12_PASSED_HOSTED_HOME_REVIEW",
+        "browser": "CHROMIUM_14_OF_14_PASS",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "HOME_VISUAL_STEP_01_AWAITING_OWNER",
+        "ownerDecision": "HOME_STEP_01_BANNER_SLOT_UPDATED_OWNER_CONFIRMATION_PENDING",
         "readyToAdvance": false
       }
     },
@@ -887,10 +887,10 @@
     "id": 5,
     "route": "home",
     "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
-    "ownerDecision": "HOME_VISUAL_STEP_01_AWAITING_OWNER",
+    "ownerDecision": "HOME_STEP_01_BANNER_SLOT_UPDATED_OWNER_CONFIRMATION_PENDING",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
     "backend": "AUTH_SUCCESS_CONFIRMED_BY_OWNER_AND_STAGING_OAUTH_LOG_TIMING",
-    "browser": "CHROMIUM_13_OF_13_PASS",
+    "browser": "CHROMIUM_14_OF_14_PASS",
     "android": "NOT_VERIFIED",
     "readyToAdvance": false,
     "dependencies": [
@@ -900,7 +900,7 @@
     ],
     "previewUrl": "https://totichat-login-review-20261013.vercel.app/home/?review=home02",
     "latestReadyDeployment": "dpl_AS2ichk9fBPZdcVDQkfRCNRHPPWd",
-    "qaRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/38545394441",
+    "qaRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/38585692559",
     "blockers": [
       "Referer values in callback/token/user logs still mention old Cloudflare; monitor as diagnostic, not a user-facing failure.",
       "Old Cloudflare app is a separate still-deployed artifact, not deleted or altered.",
@@ -913,7 +913,7 @@
     "authFlow": "GOOGLE_NEW_LOGIN_TO_NEW_VERCEL_HOME_REAL_USER_CONFIRMED",
     "authRegression": "13_OF_13_BROWSER_PASSED_SYNTHETIC_GOOGLE_PKCE",
     "appCutover": "ISOLATED_VERCEL_REVIEW_ONLY_OLD_CLOUDFLARE_DEPLOYMENT_NOT_MODIFIED",
-    "deployId": "dpl_7VMPeqyxQWmhpR3LeNqXJYhq4pkd",
+    "deployId": "dpl_GLw22LK1bK36DNGSkWQ9zTSyfPXq",
     "oauthRedirectStatus": "REAL_USER_GOOGLE_TO_NEW_HOME_PASSED_WITH_STAGING_LOG_EVIDENCE",
     "oauthRedirectEvidence": {
       "source": "Read-only Supabase Staging auth logs on 2026-10-14, 14:30–14:39 UTC",
@@ -949,14 +949,14 @@
       "verifiedBy": "Owner device report and staging auth logs"
     },
     "ownerReview": {
-      "status": "STEP_01_VISUAL_PENDING_OWNER_OBSERVATION",
+      "status": "STEP_01_BANNER_LAYOUT_FIX_PUBLISHED_AWAITING_OWNER",
       "startedAt": "2026-10-14",
       "step": 1,
       "steps": [
         {
           "id": 1,
           "name": "Home mobile appearance and arrangement",
-          "status": "PENDING_OWNER"
+          "status": "RECHECK_REQUIRED_AFTER_BANNER_FIX"
         },
         {
           "id": 2,
@@ -986,7 +986,15 @@
         "banners": 0,
         "giftAnnouncements": 0
       },
-      "finalApproval": false
+      "finalApproval": false,
+      "bannerSlotFeedback": "Place a reserved banner area at the top of Home; corrected below falcon header and above welcome hero"
+    },
+    "bannerSlot": {
+      "position": "DIRECTLY_BELOW_TOPBAR_ABOVE_WELCOME_HERO",
+      "emptyState": "NEUTRAL_LABELLED_SPACE_NO_FAKE_AD",
+      "publishedState": "LIVE_STAGING_ADMIN_BANNER_ROWS_ONLY",
+      "status": "IMPLEMENTED_PUBLISHED_AWAITING_OWNER_VISUAL_CONFIRMATION",
+      "date": "2026-10-14"
     }
   },
   "archivedLoginApproval": {
