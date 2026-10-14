@@ -105,12 +105,12 @@
         "device": false
       },
       "progress": {
-        "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
-        "interaction": "IMPLEMENTED",
+        "visual": "OWNER_APPROVED_AFTER_BANNER_FIX",
+        "interaction": "STEP_02_OWNER_TEST_PENDING",
         "backend": "REAL_GOOGLE_REDIRECT_ACCEPTED_ROOM_BACKEND_OWNER_TEST_PENDING",
         "browser": "CHROMIUM_14_OF_14_PASS",
         "android": "NOT_VERIFIED",
-        "ownerDecision": "HOME_STEP_01_BANNER_SLOT_UPDATED_OWNER_CONFIRMATION_PENDING",
+        "ownerDecision": "HOME_VISUAL_APPROVED_STEP_02_FUNCTIONS_IN_PROGRESS",
         "readyToAdvance": false
       }
     },
@@ -887,7 +887,7 @@
     "id": 5,
     "route": "home",
     "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
-    "ownerDecision": "HOME_STEP_01_BANNER_SLOT_UPDATED_OWNER_CONFIRMATION_PENDING",
+    "ownerDecision": "HOME_VISUAL_APPROVED_STEP_02_FUNCTIONS_IN_PROGRESS",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
     "backend": "AUTH_SUCCESS_CONFIRMED_BY_OWNER_AND_STAGING_OAUTH_LOG_TIMING",
     "browser": "CHROMIUM_14_OF_14_PASS",
@@ -949,19 +949,19 @@
       "verifiedBy": "Owner device report and staging auth logs"
     },
     "ownerReview": {
-      "status": "STEP_01_BANNER_LAYOUT_FIX_PUBLISHED_AWAITING_OWNER",
+      "status": "STEP_02_FUNCTIONAL_HEADER_SEARCH_NAVIGATION_OWNER_TEST_PENDING",
       "startedAt": "2026-10-14",
-      "step": 1,
+      "step": 2,
       "steps": [
         {
           "id": 1,
           "name": "Home mobile appearance and arrangement",
-          "status": "RECHECK_REQUIRED_AFTER_BANNER_FIX"
+          "status": "OWNER_APPROVED"
         },
         {
           "id": 2,
           "name": "Home header, search, filters and fixed navigation",
-          "status": "NOT_STARTED"
+          "status": "IN_PROGRESS_OWNER_TEST"
         },
         {
           "id": 3,
@@ -987,7 +987,39 @@
         "giftAnnouncements": 0
       },
       "finalApproval": false,
-      "bannerSlotFeedback": "Place a reserved banner area at the top of Home; corrected below falcon header and above welcome hero"
+      "bannerSlotFeedback": "Place a reserved banner area at the top of Home; corrected below falcon header and above welcome hero",
+      "step1Acceptance": {
+        "status": "APPROVED_BY_OWNER",
+        "date": "2026-10-14",
+        "scope": "Home visual layout including top banner area directly below TotiChat header; no final Home signoff"
+      },
+      "step2Tests": [
+        {
+          "id": "S2-01",
+          "name": "Search button opens search field, typing and clear, no fabricated room results",
+          "status": "OWNER_TEST_PENDING"
+        },
+        {
+          "id": "S2-02",
+          "name": "All/Public/My filters select and clear appropriately; private rooms stay private",
+          "status": "OWNER_TEST_PENDING"
+        },
+        {
+          "id": "S2-03",
+          "name": "Refresh rooms responds without UI crash, no invented content",
+          "status": "OWNER_TEST_PENDING"
+        },
+        {
+          "id": "S2-04",
+          "name": "Bottom navigation remains fixed, Home click returns top; Create opens real form but DO NOT submit",
+          "status": "OWNER_TEST_PENDING"
+        },
+        {
+          "id": "S2-05",
+          "name": "Notification/Discover/Messages/CP/Agency/VIP are honest pending-screen sheets, not linked features",
+          "status": "KNOWN_INCOMPLETE_SEPARATE_SCREENS"
+        }
+      ]
     },
     "bannerSlot": {
       "position": "DIRECTLY_BELOW_TOPBAR_ABOVE_WELCOME_HERO",
