@@ -890,7 +890,7 @@
     "ownerDecision": "AWAITING_OWNER_VISUAL_REVIEW",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
     "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
-    "browser": "CHROMIUM_12_OF_12_PASSED_HOSTED_HOME_REVIEW",
+    "browser": "CHROMIUM_13_OF_13_PASS",
     "android": "NOT_VERIFIED",
     "readyToAdvance": false,
     "dependencies": [
@@ -905,17 +905,27 @@
       "Owner has not yet visually approved the new Home 02",
       "Room create passed Chromium tests with intercepted synthetic network responses; real user-initiated staging create remains unverified",
       "Room voice join and downstream messages/agency/CP/VIP remain later screens",
-      "Login approved 90% only; outstanding Email provider and native Android OAuth gates remain open"
+      "Live Android/Cloudflare app still uses its separate old frontend; not removed from that deployment in this change",
+      "Confirm real Google OAuth returns to Vercel Home after this fix; browser test uses intercepted Google response",
+      "Supabase Staging Authentication > URL Configuration must allow exact https://totichat-login-review-20261013.vercel.app/?mode=live",
+      "Home full functionality still awaiting owner visual and real-backend acceptance"
     ],
     "previewAliasVerified": true,
-    "loginToHomeRedirect": "TESTED_SAME_ORIGIN_AUTOMATIC_AFTER_VERIFIED_SESSION"
+    "loginToHomeRedirect": "TESTED_SAME_ORIGIN_AUTOMATIC_AFTER_VERIFIED_SESSION",
+    "authFlow": "GOOGLE_NEW_LOGIN_ONLY_DIRECT_TO_SAME_ORIGIN_HOME",
+    "authRegression": "13_OF_13_BROWSER_PASSED_SYNTHETIC_GOOGLE_PKCE",
+    "appCutover": "ISOLATED_VERCEL_REVIEW_ONLY_OLD_CLOUDFLARE_DEPLOYMENT_NOT_MODIFIED",
+    "deployId": "dpl_7VMPeqyxQWmhpR3LeNqXJYhq4pkd"
   },
   "archivedLoginApproval": {
     "screen": 1,
     "ownerDecision": "CONDITIONALLY_APPROVED_90_PERCENT",
     "approvedPercent": 90,
     "securityOutstanding": true,
-    "notes": "Owner authorized beginning Home despite the previous Login final gate; preserve outstanding Email provider and Android OAuth checks."
+    "notes": "Owner authorized beginning Home despite the previous Login final gate; preserve outstanding Email provider and Android OAuth checks.",
+    "directToNewHome": "IMPLEMENTED_VERIFIED_IN_SYNTHETIC_GOOGLE_FLOW",
+    "oldCloudflareAppModified": false,
+    "canonicalCallback": "https://totichat-login-review-20261013.vercel.app/?mode=live"
   },
   "activeScreenId": 5,
   "previousScreenId": 1,
