@@ -108,7 +108,7 @@
         "visual": "IMPLEMENTED_PENDING_OWNER_REVIEW",
         "interaction": "IMPLEMENTED",
         "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
-        "browser": "CHROMIUM_8_PASS_1_FAILED_BLOB_IMAGE_STABLE_ALIAS",
+        "browser": "CHROMIUM_12_OF_12_PASSED_HOSTED_HOME_REVIEW",
         "android": "NOT_VERIFIED",
         "ownerDecision": "AWAITING_OWNER_VISUAL_REVIEW",
         "readyToAdvance": false
@@ -890,7 +890,7 @@
     "ownerDecision": "AWAITING_OWNER_VISUAL_REVIEW",
     "interaction": "IMPLEMENTED_AUTH_STAGING_WITH_DEPENDENCIES",
     "backend": "RLS_REVIEWED_REAL_DATA_READS_AND_ROOM_CREATE_RPC_CONNECTED_NOT_USER_VERIFIED",
-    "browser": "CHROMIUM_8_PASS_1_FAILED_BLOB_IMAGE_STABLE_ALIAS",
+    "browser": "CHROMIUM_12_OF_12_PASSED_HOSTED_HOME_REVIEW",
     "android": "NOT_VERIFIED",
     "readyToAdvance": false,
     "dependencies": [
@@ -898,16 +898,17 @@
       "Messages/Explore/CP/Agency/VIP/My are later screen approvals",
       "Existing user cannot create new room while occupying another; do not auto-leave an owner room"
     ],
-    "previewUrl": "https://totichat-login-review-20261013.vercel.app/home/",
-    "latestReadyDeployment": "dpl_BNXkXnyNorASwJ5GZA1jWzWGJn4t",
-    "qaRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/38469687736",
+    "previewUrl": "https://totichat-login-review-20261013.vercel.app/home/?review=home02",
+    "latestReadyDeployment": "dpl_AS2ichk9fBPZdcVDQkfRCNRHPPWd",
+    "qaRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/38545394441",
     "blockers": [
-      "Home real room-create image conversion failed on original Google OAuth host because deployed CSP lacks blob:; patch committed but original Vercel alias not moved due 403 scope xd-481e",
-      "Vercel alias move/promote to latest READY review deployment requires corrected connector permission/scope, otherwise stable callback domain remains on earlier build",
-      "Real authenticated staging room create not user-tested; never perform unattended create or auto-leave an existing owned room",
-      "Room join/voice, Messages, Discover, CP, Agency, VIP are separately unapproved screens",
-      "Await owner visual decision on Home; Android native and Login provider policy remain separately pending"
-    ]
+      "Owner has not yet visually approved the new Home 02",
+      "Room create passed Chromium tests with intercepted synthetic network responses; real user-initiated staging create remains unverified",
+      "Room voice join and downstream messages/agency/CP/VIP remain later screens",
+      "Login approved 90% only; outstanding Email provider and native Android OAuth gates remain open"
+    ],
+    "previewAliasVerified": true,
+    "loginToHomeRedirect": "TESTED_SAME_ORIGIN_AUTOMATIC_AFTER_VERIFIED_SESSION"
   },
   "archivedLoginApproval": {
     "screen": 1,
