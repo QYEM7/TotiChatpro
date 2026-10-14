@@ -95,6 +95,51 @@ test('verified Google session returns automatically to the new Home, not old liv
  await expect(page.locator('.room-card')).toHaveCount(1);
 });
 
+test('Google OAuth PKCE callback on new Login enters new Home directly; never old app login',async({page})=>{
+ const previewOrigin='https://totichat-login-review-20261013.vercel.app';
+ const requests=[];
+ let oauthRedirect=null;
+ const errors=[];
+ page.on('request',r=>requests.push(r.url()));
+ page.on('pageerror',e=>errors.push(String(e)));
+ await page.route('https://'+authHost+'/**',async route=>{
+   const url=new URL(route.request().url());
+   const path=url.pathname,method=route.request().method();
+   const cors={
+     'access-control-allow-origin':previewOrigin,
+     'access-control-allow-headers':'authorization,apikey,content-type,accept',
+     'access-control-allow-methods':'GET,POST,OPTIONS'
+   };
+   const answer=(data,status=200)=>route.fulfill({
+     status,headers:cors,contentType:'application/json',body:JSON.stringify(data)
+   });
+   if(method==='OPTIONS')return route.fulfill({status:204,headers:cors,body:''});
+   if(path==='/auth/v1/settings')return answer({external:{google:true,email:false}});
+   if(path==='/auth/v1/authorize'){
+     oauthRedirect=url.searchParams.get('redirect_to');
+     return route.fulfill({status:302,headers:{Location:previewOrigin+'/?mode=live&code=synthetic-google-code'}});
+   }
+   if(path==='/auth/v1/token'&&url.searchParams.get('grant_type')==='pkce'){
+     return answer({access_token:'synthetic-access-token',refresh_token:'synthetic-refresh-token',
+       expires_in:3600,user:{id:userId,email:'qa-home@example.invalid'}});
+   }
+   if(path==='/auth/v1/user')return answer({id:userId,email:'qa-home@example.invalid'});
+   if(path==='/rest/v1/profiles')return answer([profile]);
+   if(path==='/rest/v1/rooms')return answer([publicRoom]);
+   if(path==='/rest/v1/room_members'||path==='/rest/v1/home_banners'||path==='/rest/v1/gift_global_announcements')return answer([]);
+   return answer({message:'Unexpected mock URL'},404);
+ });
+ await page.goto(previewOrigin+'/',{waitUntil:'domcontentloaded'});
+ await page.getByRole('button',{name:/Continue with Google/}).click();
+ await expect(page).toHaveURL(/\/home\/\?review=home02/,{timeout:17000});
+ await loaded(page);
+ expect(oauthRedirect).toBe(previewOrigin+'/?mode=live');
+ expect(requests.some(u=>u.includes('totichat-live-preview.pages.dev'))).toBe(false);
+ expect(requests.some(u=>u.includes('/auth/v1/token?grant_type=pkce'))).toBe(true);
+ expect(errors).toEqual([]);
+ await expect(page.locator('.hero')).toContainText('عالم الأصوات الجميلة');
+});
+
 test('Home has deployed current design and CSP permits chosen-image previews',async({page})=>{
  const calls=await setup(page);
  const response=await page.goto(base,{waitUntil:'domcontentloaded'});
