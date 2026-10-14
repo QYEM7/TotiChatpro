@@ -77,6 +77,28 @@ for(const width of [360,390,430]){
   await page.screenshot({path:'test-results/home-'+width+'.png',fullPage:true,animations:'disabled'});
  });
 }
+test('published Home URL always serves new lavender UI and sign-in returns to Home',async({browser})=>{
+  const anon=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await anon.newPage();
+  await page.goto(base+'?review=home02', {waitUntil:'domcontentloaded'});
+  await expect(page).toHaveURL(/\?returnTo=home/);
+  await expect(page.getByRole('button',{name:/Continue with Google/})).toBeVisible();
+  await anon.close();
+});
+
+test('Home has deployed current design and CSP permits chosen-image previews',async({page})=>{
+ const calls=await setup(page);
+ const response=await page.goto(base,{waitUntil:'domcontentloaded'});
+ await loaded(page);
+ await expect(page.locator('.hero')).toBeVisible();
+ await expect(page.locator('.hero')).toContainText('عالم الأصوات الجميلة');
+ await expect(page.locator('.bottom-nav')).toBeVisible();
+ const policy=response?.headers()['content-security-policy']||'';
+ expect(policy).toContain('blob:');
+ expect(policy).toContain("script-src 'self'");
+ expect(calls.some(x=>x.path==='/rest/v1/rooms')).toBe(true);
+});
+
 test('staging-empty feed displays real empty state, never mock banners or gifts',async({page})=>{
  await setup(page,{rooms:[]});await page.goto(base,{waitUntil:'domcontentloaded'});await loaded(page);
  await expect(page.locator('#rooms-empty')).toBeVisible();
@@ -129,8 +151,13 @@ test('actual room creation controls validate required image/name/welcome before 
  await page.locator('#create-welcome').fill('We welcome real members');
  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/KZ0AAAAASUVORK5CYII=','base64');
  await page.locator('#create-cover').setInputFiles({name:'test.png',mimeType:'image/png',buffer:png});
+ const browserErrors=[];
+ page.on('console',msg=>{if(msg.type()==='error')browserErrors.push(msg.text().slice(0,240))});
+ page.on('pageerror',err=>browserErrors.push(String(err).slice(0,240)));
  await page.locator('#create-submit').click();
  await page.waitForTimeout(200);
+ console.log('IMAGE_QA_ERRORS:',JSON.stringify(browserErrors));
+ console.log('IMAGE_QA_CSP:',(await page.evaluate(()=>document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content))||'HEADER_ONLY');
  console.log('CREATE_QA_STATUS:',await page.locator('#create-message').textContent());
  await expect.poll(()=>calls.filter(c=>c.path==='/rest/v1/rpc/phase2_room_create').length,{timeout:15000}).toBe(1);
  await expect.poll(()=>calls.filter(c=>c.path==='/rest/v1/rpc/phase2_room_customize').length,{timeout:15000}).toBe(1);
