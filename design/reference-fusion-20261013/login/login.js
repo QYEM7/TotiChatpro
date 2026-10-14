@@ -28,6 +28,20 @@
     const fallback = logoImage.nextElementSibling;
     if (fallback) fallback.hidden = false;
   });
+  // When a user opened the Home preview directly, return there only after
+  // the existing adapter verifies the SAME-ORIGIN real Google session.
+  const HOME_RETURN_FLAG='totichat.review.returnHome.v1';
+  try {
+    if(new URLSearchParams(location.search).get('returnTo')==='home')
+      sessionStorage.setItem(HOME_RETURN_FLAG,'1');
+  } catch(_) {}
+  function returnToHomeOnceVerified(){
+    try{
+      if(sessionStorage.getItem(HOME_RETURN_FLAG)!=='1')return;
+      sessionStorage.removeItem(HOME_RETURN_FLAG);
+      location.replace('./home/?review=home02');
+    }catch(_){}
+  }
   let busy = false;
   let lastValidation = 0;
   let providerReady = false;
