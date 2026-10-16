@@ -657,22 +657,9 @@
     providers,signInWithProvider,handleOAuthCallback,setRememberMe,isRemembered,requestVoiceToken,uploadAvatar,uploadRoomImage,
     securityState,changePassword,revokeOtherSessions,enrollMFA,verifyMFA,unenrollMFA,linkProvider,watchRoomUpdates,watchSocialUpdates});
   window.TotiPhase2Auth=api;
-  if(typeof location!=='undefined'&&location.hostname==='localhost'){
-    const app=window.Capacitor?.Plugins?.App;
-    if(app?.addListener){
-      let callbackInFlight=false;
-      const callback=async event=>{
-        if(callbackInFlight||!sessionStorage.getItem(OAUTH_PENDING))return;
-        if(!event?.url?.startsWith('com.totichat.beta://auth/callback'))return;
-        callbackInFlight=true;
-        try{try{await window.Capacitor?.Plugins?.Browser?.close?.();}catch(_){}await handleOAuthCallback(event.url);}
-        catch(error){window.dispatchEvent(new CustomEvent('totichat-auth-error',{detail:String(error.message)}));}
-        finally{callbackInFlight=false;}
-      };
-      void app.addListener('appUrlOpen',callback);
-      if(app.getLaunchUrl)void app.getLaunchUrl().then(callback).catch(error=>console.warn(String(error.message)));
-    }
-  }
+  // Reborn registers the ONE Android deep-link callback handler after importing
+  // its Capacitor App/Browser bridge. Duplicated listeners race to consume the
+  // same one-time PKCE verifier and may falsely report a login failure.
   if(session){void resume();}
   else queueMicrotask(notify);
 })();
