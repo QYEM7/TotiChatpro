@@ -191,6 +191,37 @@ class TotiChatServices {
     }
   }
 
+  Future<void> reviewHostRegistration({
+    required String registrationId,
+    required bool approve,
+    required String note,
+    required String requestId,
+    double? commissionPercent,
+  }) async {
+    userId;
+    final clean = note.trim();
+    if (registrationId.isEmpty || clean.length < 3 || clean.length > 500 ||
+        (approve && (commissionPercent == null ||
+          !commissionPercent.isFinite ||
+          commissionPercent < 0 || commissionPercent > 100))) {
+      throw ArgumentError('Invalid host agency review');
+    }
+    final expectedStatus = approve ? 'approved' : 'rejected';
+    final result = object(await client.rpc('phase4_agency_action', params: {
+      'p_action': approve ? 'approve_registration' : 'reject_registration',
+      'p_data': {
+        'id': registrationId,
+        'note': clean,
+        if (approve) 'commission_percent': commissionPercent,
+      },
+      'p_request_id': requestId,
+    }));
+    if (result['id']?.toString() != registrationId ||
+        result['status'] != expectedStatus) {
+      throw StateError('Agency decision not confirmed by server');
+    }
+  }
+
   Future<Map<String,dynamic>> agencyState() async {
     userId;
     return object(await client.rpc('phase4_agency_state'));
