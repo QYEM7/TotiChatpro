@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
 import 'dm_screen.dart';
+import 'support_tickets_screen.dart';
 import '../agency/host_membership_screen.dart';
 
 class CommunityScreen extends StatelessWidget {
@@ -246,17 +247,27 @@ class _SupportTab extends StatefulWidget {
 class _SupportTabState extends State<_SupportTab>{
   late Future<List<Map<String,dynamic>>> _future;
   final _subject=TextEditingController(),_message=TextEditingController();
-  String _category='technical';bool _sending=false;String? _pendingId;
+  String _category='technical';bool _sending=false;String? _pendingId,_pendingSignature;
   @override void initState(){super.initState();_refresh();}
   void _refresh()=>setState(()=>_future=widget.api.supportTickets());
   @override void dispose(){_subject.dispose();_message.dispose();super.dispose();}
   Future<void> _submit() async {
-    if(_sending)return;setState(()=>_sending=true);
+    if(_sending)return;
+    final signature='$_category|${_subject.text.trim()}|${_message.text.trim()}';
+    if(_pendingSignature!=null && signature!=_pendingSignature){
+      showApiError(context,'A previous ticket has an uncertain result. '
+        'Retry its original details before creating a different ticket.');
+      return;
+    }
+    _pendingSignature=signature;
+    setState(()=>_sending=true);
     _pendingId??=TotiChatServices.requestId();
     try{
-      final id=await widget.api.supportRequest(category:_category,subject:_subject.text,
+      final id=await widget.api.supportRequest(
+        category:_category,subject:_subject.text,
         message:_message.text,requestId:_pendingId!);
-      _pendingId=null;_subject.clear();_message.clear();
+      _pendingId=null;_pendingSignature=null;
+      _subject.clear();_message.clear();
       if(mounted){_refresh();ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content:Text('تم تسجيل التذكرة: $id')));}
     }catch(e){if(mounted)showApiError(context,e);}
@@ -266,7 +277,7 @@ class _SupportTabState extends State<_SupportTab>{
     const Text('الدعم الفني الرسمي',style:TextStyle(fontWeight:FontWeight.w800,fontSize:18)),
     const SizedBox(height:8),
     DropdownButtonFormField<String>(initialValue:_category,
-      onChanged:(v)=>setState(()=>_category=v??'technical'),
+      onChanged:_pendingId!=null?null:(v)=>setState(()=>_category=v??'technical'),
       items:const [
         DropdownMenuItem(value:'technical',child:Text('مشكلة تقنية')),
         DropdownMenuItem(value:'account',child:Text('الحساب')),
@@ -275,16 +286,33 @@ class _SupportTabState extends State<_SupportTab>{
       ]),
     const SizedBox(height:8),
     TextField(controller:_subject,maxLength:120,
+      readOnly:_pendingId!=null,
       decoration:const InputDecoration(labelText:'عنوان الطلب')),
     TextField(controller:_message,maxLength:2500,maxLines:3,
+      readOnly:_pendingId!=null,
       decoration:const InputDecoration(labelText:'تفاصيل الطلب')),
     FilledButton(onPressed:_sending?null:_submit,child:const Text('إرسال تذكرة حقيقية')),
     const SizedBox(height:18),
-    const Text('تذاكري',style:TextStyle(fontWeight:FontWeight.w700)),
+    Row(children:[
+      const Expanded(child:Text('تذاكري',
+        style:TextStyle(fontWeight:FontWeight.w700))),
+      TextButton.icon(
+        onPressed:()=>Navigator.of(context).push(MaterialPageRoute(
+          builder:(_)=>SupportTicketListScreen(api:widget.api))),
+        icon:const Icon(Icons.list_alt_outlined),
+        label:const Text('All my tickets')),
+    ]),
     ServerPanel<List<Map<String,dynamic>>>(future:_future,retry:_refresh,
       builder:(context,rows)=>rows.isEmpty?const NoRecords('ليس عندك تذاكر.') :
         Column(children:rows.map((r)=>recordCard(context,
           title:r['subject']?.toString()??r['category']?.toString()??'تذكرة',
-          description:r['status']?.toString())).toList())),
+          description:r['status']?.toString(),
+          onTap:r['id']==null?null:() async {
+            await Navigator.of(context).push(MaterialPageRoute(
+              builder:(_)=>SupportTicketThreadScreen(
+                api:widget.api, ticketId:r['id'].toString(),
+                title:r['subject']?.toString()??'Support ticket')));
+            if(mounted)_refresh();
+          })).toList())),
   ]);
 }
