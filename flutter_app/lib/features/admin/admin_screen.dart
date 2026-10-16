@@ -5,6 +5,7 @@ import 'host_agency_admin_screen.dart';
 import 'host_month_evidence_screen.dart';
 import 'owner_treasury_screen.dart';
 import 'owner_banner_screen.dart';
+import '../community/support_tickets_screen.dart';
 
 bool canOpenAdmin(Map<String,dynamic> a) =>
   a['isOwner']==true || a['isMainPartner']==true ||
@@ -17,9 +18,13 @@ class AdminScreen extends StatefulWidget{
 }
 class _AdminScreenState extends State<AdminScreen>{
   late Future<Map<String,dynamic>> _role;
+  late Future<Map<String,dynamic>> _supportRights;
   Future<Map<String,dynamic>>? _report;
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_role=widget.api.authority());
+  void _refresh()=>setState((){
+    _role=widget.api.authority();
+    _supportRights=widget.api.supportTicketPage();
+  });
   @override Widget build(BuildContext context)=>Directionality(
     textDirection:TextDirection.rtl,child:Scaffold(
       appBar:AppBar(title:const Text('مركز الإدارة')),
@@ -38,6 +43,17 @@ class _AdminScreenState extends State<AdminScreen>{
                 fontSize:20,fontWeight:FontWeight.w800)),
             const SizedBox(height:12),
             const Text('القوائم حسب صلاحيات الخادم. الإجراءات الحساسة تُفحص خادمياً.'),
+            FutureBuilder<Map<String,dynamic>>(
+              future:_supportRights,
+              builder:(context,access) => access.data?['canHandle']==true
+                ?recordCard(context,
+                  title:'Official support tickets',
+                  description:'Read verified reports and reply with server permissions.',
+                  icon:Icons.support_agent_outlined,
+                  onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                    builder:(_)=>SupportTicketListScreen(
+                      api:widget.api,staff:true))))
+                :const SizedBox.shrink()),
             if(reports)recordCard(context,title:'التقارير المالية والإدارية',
               icon:Icons.analytics_outlined,
               onTap:()=>setState(()=>_report=widget.api.report())),
