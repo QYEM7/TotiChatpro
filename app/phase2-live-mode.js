@@ -174,7 +174,10 @@ window.addEventListener('click',e=>{
   const route=item.dataset.v||'';
   const op=item.dataset.a||'';
   const royal=item.dataset.royal||'';
-  if(royal==='search'||(op==='sheet'&&route==='search')){\n    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();\n    go('discoverPreview');return;\n  }
+  if(royal==='search'||(op==='sheet'&&route==='search')){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    go('discoverPreview');return;
+  }
   if(screen==='room'&&op==='sheet'&&route==='roomInfo'){
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
     const info=window.TotiPhase2Rooms?.getRoomSummary?.();
