@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/totichat_repository.dart';
 import '../../models/room_models.dart';
@@ -159,7 +158,9 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
         if (!widget.explore) SliverToBoxAdapter(child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _banners,
           builder: (context, snapshot) {
-            if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const SizedBox.shrink();
+            }
             return SizedBox(height: 145, child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
@@ -251,7 +252,7 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
                           ])),
                         const Icon(Icons.chevron_left_rounded),
                       ]))),
-                  )),
+                  ),
                 );
               },
             );
