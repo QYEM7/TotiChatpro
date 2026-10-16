@@ -7,6 +7,17 @@ class TotiChatServices {
   const TotiChatServices(this.client);
   final SupabaseClient client;
   static const uuid = Uuid();
+  static const socialSearchLimit = 20;
+  static const notificationPageLimit = 50;
+
+  /// Social search returns user_id, not id. Never guess a recipient identity.
+  static String verifiedSocialUserId(Map<String, dynamic> person) {
+    final id = person['user_id'];
+    if (id is! String || id.isEmpty) {
+      throw StateError('Missing real social user ID');
+    }
+    return id;
+  }
 
   String get userId => client.auth.currentUser?.id ??
       (throw StateError('Sign in is required'));
@@ -62,9 +73,15 @@ class TotiChatServices {
   Future<List<Map<String, dynamic>>> socialSearch(String text) async {
     userId;
     final prefix = text.trim();
-    if (prefix.isEmpty || prefix.length > 35) throw ArgumentError('Search text invalid');
-    return rows(await client.rpc('phase5_social_search',
-      params: {'p_prefix': prefix, 'p_limit': 25}));
+    if (prefix.length < 2 || prefix.length > 40) {
+      throw ArgumentError('Search requires 2-40 characters');
+    }
+    final found = rows(await client.rpc('phase5_social_search',
+      params: {'p_prefix': prefix, 'p_limit': socialSearchLimit}));
+    for (final person in found) {
+      verifiedSocialUserId(person);
+    }
+    return found;
   }
 
   Future<void> follow(String peer, {required bool enabled, required String requestId}) async {
@@ -199,7 +216,7 @@ class TotiChatServices {
   Future<List<Map<String,dynamic>>> notifications() async {
     userId;
     return rows(await client.rpc('phase5_notification_feed',
-      params:{'p_limit':70,'p_before':null}));
+      params:{'p_limit':notificationPageLimit,'p_before':null}));
   }
 
   Future<void> readNotifications() async {
