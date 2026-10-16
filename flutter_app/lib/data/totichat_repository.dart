@@ -88,6 +88,13 @@ class TotiChatRepository {
     return (result as num).toInt();
   }
 
+  Future<void> setMicMuted(String roomId, bool muted) async {
+    currentUserId;
+    final result = await client.rpc('phase2_room_set_muted',
+      params: {'p_room_id': roomId, 'p_muted': muted});
+    if (result != true) throw StateError('Server did not confirm microphone state');
+  }
+
   Future<List<RoomMessage>> messages(String roomId) async {
     currentUserId;
     final rows = await client.from('room_messages')
