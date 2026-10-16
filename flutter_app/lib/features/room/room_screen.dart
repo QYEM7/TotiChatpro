@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
@@ -31,6 +32,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   bool _active = true;
   String? _error;
   Timer? _refreshTimer;
+  RealtimeChannel? _liveChannel;
 
   RoomMember? get _mine {
     final uid = widget.repository.client.auth.currentUser?.id;
@@ -66,7 +68,8 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         return;
       }
       await _refresh();
-      _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _subscribeRoomChanges();
+      _refreshTimer = Timer.periodic(const Duration(seconds: 45), (_) {
         if (_active && _joined && !_leaving) _refresh();
       });
     } catch (error) {
@@ -74,6 +77,23 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         _joining = false; _error = 'Server rejected room entry: $error';
       });
     }
+  }
+
+  void _subscribeRoomChanges() {
+    final id=widget.room.id;
+    _liveChannel=widget.repository.client.channel('voice-room-live:$id')
+      .onPostgresChanges(
+        event:PostgresChangeEvent.all,schema:'public',table:'room_messages',
+        filter:PostgresChangeFilter(type:PostgresChangeFilterType.eq,
+          column:'room_id',value:id),
+        callback:(_){if(_active&&_joined&&!_leaving)_refresh();},
+      )
+      .onPostgresChanges(
+        event:PostgresChangeEvent.all,schema:'public',table:'room_members',
+        filter:PostgresChangeFilter(type:PostgresChangeFilterType.eq,
+          column:'room_id',value:id),
+        callback:(_){if(_active&&_joined&&!_leaving)_refresh();},
+      ).subscribe();
   }
 
   Future<void> _refresh() async {
@@ -176,6 +196,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     }
     setState(() => _leaving = true);
     _refreshTimer?.cancel();
+    final live=_liveChannel;
+    _liveChannel=null;
+    if(live!=null)await widget.repository.client.removeChannel(live);
     try {
       await _voice.disconnect();
       if (_joined) await widget.repository.leaveRoom(widget.room.id);
@@ -261,6 +284,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _refreshTimer?.cancel();
+    final live=_liveChannel;
+    _liveChannel=null;
+    if(live!=null)unawaited(widget.repository.client.removeChannel(live));
     // Leaving normally happens through _leave. Defensive clean-up on teardown.
     unawaited(_voice.disconnect());
     _message.dispose();
