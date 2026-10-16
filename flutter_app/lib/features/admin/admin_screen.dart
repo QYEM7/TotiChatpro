@@ -6,6 +6,7 @@ import 'host_month_evidence_screen.dart';
 import 'owner_treasury_screen.dart';
 import 'owner_banner_screen.dart';
 import '../community/support_tickets_screen.dart';
+import 'support_staff_screen.dart';
 
 bool canOpenAdmin(Map<String,dynamic> a) =>
   a['isOwner']==true || a['isMainPartner']==true ||
@@ -60,6 +61,12 @@ class _AdminScreenState extends State<AdminScreen>{
             if(catalog)recordCard(context,title:'صلاحية إدارة الكتالوج',
               description:'عرض الصلاحية فقط؛ التعديل غير متاح في هذه الواجهة.',
               icon:Icons.inventory_2_outlined),
+            if(owner)recordCard(context,
+              title:'Manage support staff',
+              description:'Grant or revoke verified support handlers.',
+              icon:Icons.manage_accounts_outlined,
+              onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                builder:(_)=>SupportStaffScreen(api:widget.api)))),
             if(owner)recordCard(context,
               title:'Official banners',
               description:'Upload, review, publish or archive real promotions.',
