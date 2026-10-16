@@ -10,6 +10,7 @@ on:
       - 'scripts/build-reborn-web.mjs'
       - 'tests/reborn-frontend.test.mjs'
       - 'tests/reborn-browser.test.mjs'
+      - 'tests/reborn-signedin-browser.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/reborn-frontend-qa.yml'
@@ -51,6 +52,7 @@ jobs:
           python3 -m http.server 8765 --directory dist --bind 127.0.0.1 >/tmp/reborn-web.log 2>&1 &
           sleep 3
           node tests/reborn-browser.test.mjs
+          node tests/reborn-signedin-browser.test.mjs
       - name: Upload Android-ready web payload
         uses: actions/upload-artifact@v4
         with:
