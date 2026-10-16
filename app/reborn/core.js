@@ -6,7 +6,7 @@ const auth=window.TotiPhase2Auth;
 const root=document.getElementById('app');
 const falcon='../assets/images/toti_falcon_logo_1790422919580.jpg';
 const s={screen:'login',sheet:'',loading:true,busy:false,notice:'',error:'',
-  rooms:[],room:null,members:[],messages:[],banners:[],wallet:null,inbox:[],thread:[],
+  rooms:[],roomsStatus:'loading',room:null,members:[],messages:[],banners:[],wallet:null,inbox:[],thread:[],
   profile:null,authority:null,selectedPeer:null,peerName:'',selectedSeat:null,
   gifts:[],store:[],giftCategory:'all',selectedGift:null,recipient:null,qty:1,
   tab:'all',search:'',roomFilter:'all',voice:false,mic:false,audioGesture:false,
@@ -81,7 +81,9 @@ function home(){
  '<div class="section-head"><h2>عالمك في TotiChat</h2></div>'+
  '<div class="quick"><button data-nav="wallet"><span>◈</span>المحفظة</button><button data-nav="cp"><span>♡</span>علاقات CP</button><button data-nav="agencies"><span>♛</span>الوكالات</button></div>'+
  '<div class="section-head"><h2>الغرف العامة</h2><button data-nav="explore">عرض الكل ‹</button></div>'+
- (show.length?roomTiles(show.slice(0,14)):empty('ماكو غرف مفتوحة هسه','اصنع أول غرفة وابدأ حديثك.','<button class="primary" data-act="create">إنشاء غرفة</button>'));
+ (s.roomsStatus==='error'?empty('تعذّر الاتصال بالغرف','تعذر التأكد من قائمة الغرف الحقيقية. حاول مجدداً.','<button class="secondary" data-act="refresh">إعادة المحاولة</button>'):
+  s.roomsStatus==='loading'?'<div class="skeleton" role="status" aria-label="جارٍ تحميل الغرف"></div>':
+  show.length?roomTiles(show.slice(0,14)):empty('ماكو غرف مفتوحة هسه','اصنع أول غرفة وابدأ حديثك.','<button class="primary" data-act="create">إنشاء غرفة</button>'));
 }
 function explore(){
  const found=s.rooms.filter(r=>!r.is_private&&String(r.title||'').toLocaleLowerCase().includes(s.search.toLocaleLowerCase()));
@@ -89,7 +91,9 @@ function explore(){
  '<div class="hero"><img src="'+falcon+'" alt=""><div><h1>اكتشف مجتمعك</h1><p>كل الغرف هنا من الخادم الحقيقي.</p></div></div>'+
  '<div style="margin:15px 0"><input class="field" data-input="search" placeholder="ابحث عن غرفة باسمها…" aria-label="ابحث عن غرفة" value="'+esc(s.search)+'"></div>'+
  '<div class="section-head"><h2>الغرف المتاحة</h2><button class="secondary" data-act="inviteJoin">🔒 رمز دعوة</button><span class="inline-badge">'+found.length+' غرفة</span></div>'+
- (found.length?roomTiles(found):empty('ماكو نتائج','جرّب بحثاً مختلفاً أو أنشئ غرفة جديدة.'));
+ (s.roomsStatus==='error'?empty('تعذّر جلب الغرف','خادم الغرف غير متاح حالياً. اضغط التحديث لإعادة المحاولة.'):
+  s.roomsStatus==='loading'?'<div class="skeleton" role="status" aria-label="جارٍ تحميل الغرف"></div>':
+  found.length?roomTiles(found):empty('ماكو نتائج','جرّب بحثاً مختلفاً أو أنشئ غرفة جديدة.'));
 }
 function profile(){
  const p=myProfile();return header('ملفي',false,'<button class="icon-btn" data-nav="notifications">♧</button>')+
@@ -186,10 +190,16 @@ function sheet(name){s.sheet=name;render();}
 function closeSheet(){s.sheet='';render();}
 async function readRooms(){
  const owner=me();if(!owner)return;
- const rows=await endpoint('rooms?select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&order=created_at.desc&limit=100');
- if(owner!==me())return;
- if(!Array.isArray(rows))throw Error('Invalid room directory response');
- s.rooms=rows.filter(r=>validId(r.id));if(s.screen==='home'||s.screen==='explore')render();
+ if(s.roomsStatus!=='ready')s.roomsStatus='loading';
+ try{
+  const rows=await endpoint('rooms?select=id,title,owner_id,is_private,created_at,cover_path,background_path,welcome_message,image_revision&order=created_at.desc&limit=100');
+  if(owner!==me())return;
+  if(!Array.isArray(rows))throw Error('Invalid room directory response');
+  s.rooms=rows.filter(r=>validId(r.id));s.roomsStatus='ready';
+ }catch(error){
+  if(owner===me())s.roomsStatus='error';
+  throw error;
+ }finally{if(owner===me()&&(s.screen==='home'||s.screen==='explore'))render();}
 }
 async function readBanners(){
  const rows=await endpoint('home_banners?select=id,title,image_url,status,starts_at,ends_at,sort_order&status=eq.published&order=sort_order.asc&limit=20');
@@ -242,7 +252,20 @@ async function refreshRoom(){
  if(!s.room||s.room.id!==r.id)return;
  if(!Array.isArray(members)||!Array.isArray(messages))throw Error('Invalid room state');
  s.members=members;s.messages=messages.slice().reverse();
- if(s.screen==='room'){render();const chat=el('#room-messages');if(chat)chat.scrollTop=chat.scrollHeight;}
+ if(s.screen==='room'){
+  // Realtime refresh must not destroy an unsent message or steal keyboard focus.
+  const draft=el('#chat-form input[name="body"]');
+  const value=draft?.value||'',focused=draft===document.activeElement;
+  const caret=focused?draft.selectionStart:0;
+  const before=el('#room-messages');
+  const nearBottom=!before||before.scrollHeight-before.scrollTop-before.clientHeight<55;
+  const scrollTop=before?.scrollTop||0;
+  render();
+  const next=el('#chat-form input[name="body"]');
+  if(next){next.value=value;if(focused){next.focus();next.setSelectionRange(caret,caret);}}
+  const chat=el('#room-messages');
+  if(chat)chat.scrollTop=nearBottom?chat.scrollHeight:scrollTop;
+ }
  if(s.voice&&!s.members.some(m=>m.user_id===me()&&m.seat_no&&!m.is_muted)){
   void s.voiceClient?.microphone(false).catch(()=>disconnectVoice());
   s.mic=false;
@@ -374,7 +397,7 @@ async function loadRoute(route){
 }
 function onAuthChange(){
  const id=me();if(id!==s.userId){
-  s.userId=id;s.rooms=[];s.room=null;s.messages=[];s.wallet=null;s.authority=null;
+  s.userId=id;s.rooms=[];s.roomsStatus='loading';s.room=null;s.messages=[];s.wallet=null;s.authority=null;
   s.inbox=[];s.profile=null;s.sheet='';s.notice='';s.error='';s.extra={};
   if(polling)clearInterval(polling);polling=null;void disconnectVoice();bindRealtime();
  }
