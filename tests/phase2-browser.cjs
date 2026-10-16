@@ -110,7 +110,15 @@ function json(data,status=200){
    assert.equal(actor,guest,'Invite should only be redeemed by guest');
    guestJoined=true;result=json(true);
   }
-  else if(route==='/rest/v1/rpc/phase2_room_customize'){result=json(true);}
+  else if(route.startsWith('/storage/v1/object/totichat-room-images/')&&method==='POST'){
+   assert.equal(req.headers()['content-type'],'image/webp');result=json({Key:route});
+  }
+  else if(route==='/rest/v1/rpc/phase2_room_customize'){
+   assert.equal(body.p_welcome_message.length>1,true);
+   assert.ok(body.p_cover_path?.endsWith('/cover.webp'));
+   room={...room,welcome_message:body.p_welcome_message,cover_path:body.p_cover_path,image_revision:1};
+   result=json(true);
+  }
   else if(route==='/rest/v1/gift_global_announcements'){result=json([]);}
   else if(route==='/rest/v1/rpc/phase2_dm_inbox'){result=json([]);}
   else if(route==='/rest/v1/rpc/phase3_admin_session'){
@@ -156,6 +164,8 @@ function json(data,status=200){
    'Signed-in user never sees demo rooms when actual directory empty');
  await page.click('[data-phase2="create-room"]');
  await page.type('#tc-phase2-room-title','غرفة الاختبار الحقيقية');
+ await page.type('#tc-phase2-room-welcome','أهلاً بكل أعضاء غرفة الاختبار');
+ await (await page.$('#tc-phase2-room-cover')).uploadFile('assets/images/toti_falcon_logo_1790422919580.jpg');
  await page.$eval('[data-phase2="create-room-submit"]',button=>button.click());
  await waitUntil(page,()=>document.querySelector('#app')?.dataset.route==='room');
  await waitUntil(page,()=>document.querySelector('.roomidentity b')?.textContent==='غرفة الاختبار الحقيقية');
@@ -196,6 +206,8 @@ function json(data,status=200){
  await waitUntil(page,()=>document.querySelector('[data-phase2="create-room"]')!==null);
  await page.$eval('[data-phase2="create-room"]',el=>el.click());
  await page.type('#tc-phase2-room-title','غرفتي الخاصة');
+ await page.type('#tc-phase2-room-welcome','مرحباً بالأعضاء المدعوين إلى الغرفة');
+ await (await page.$('#tc-phase2-room-cover')).uploadFile('assets/images/toti_falcon_logo_1790422919580.jpg');
  await page.click('#tc-phase2-room-private');
  await page.$eval('[data-phase2="create-room-submit"]',el=>el.click());
  await waitUntil(page,()=>document.querySelector('.roomidentity b')?.textContent==='غرفتي الخاصة');
