@@ -123,9 +123,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         // Server mute state and LiveKit track state must agree.
         await widget.repository.setMicMuted(widget.room.id, false);
         await _voice.connect(widget.room.id);
-        await _voice.setMicrophone(true, canPublish: true);
+        await _voice.setMicrophone(true);
       } else {
-        await _voice.setMicrophone(false, canPublish: true);
+        await _voice.setMicrophone(false);
         await widget.repository.setMicMuted(widget.room.id, true);
       }
       await _refresh();
