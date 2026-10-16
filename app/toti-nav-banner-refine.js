@@ -54,9 +54,12 @@ function slides(){
     ?window.TotiBannerData.getItems():[];
   // A genuine published banner comes only from the existing validated Supabase feed.
   // The static brand artwork is the visual placeholder, never a fake paid ad.
-  if(raw.length)return [localSlides()[0]].concat(raw.map(function(x,i){
+  if(window.TotiLiveMode?.enabled)return raw.map(function(x,i){
     return {title:x.title,caption:'إعلان رسمي في TotiChat',url:x.imageUrl,
       action:'live',liveIndex:i,label:x.title};
+  });
+  if(raw.length)return [localSlides()[0]].concat(raw.map(function(x,i){
+    return {title:x.title,caption:'إعلان رسمي في TotiChat',url:x.imageUrl,action:'live',liveIndex:i,label:x.title};
   }));
   return localSlides();
 }
@@ -121,6 +124,7 @@ function enhanceBanner(){
   hero.parentNode.insertBefore(stage,hero);
   stage.appendChild(hero);
   const list=slides();
+  if(!list.length){stage.remove();return;}
   state.index=Math.min(state.index,Math.max(0,list.length-1));
   const dots=document.createElement('div');
   dots.className='tc-banner-controls';
