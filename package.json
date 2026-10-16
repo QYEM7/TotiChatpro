@@ -2,16 +2,17 @@
   "name": "totichat-approved-phase2",
   "private": true,
   "version": "0.1.0",
-  "description": "Approved TotiChat UI packaged unchanged for a clean Android backend integration",
+  "description": "TotiChat Reborn frontend — Google-only secure staging voice app",
   "scripts": {
-    "build": "node scripts/build-approved-web.mjs",
+    "build": "node scripts/build-reborn-web.mjs",
     "test:foundation": "node --test tests/phase2-foundation.test.mjs",
     "android:sync": "npm run build && npx cap sync android",
     "android:init": "npm run build && npx cap add android",
     "test:real-e2e": "playwright test",
     "check:services": "node scripts/check-service-readiness.mjs",
     "build:staging": "npm run build && node scripts/prepare-staging-preview.mjs",
-    "test:real-e2e:staging": "npm run build:staging && playwright test"
+    "test:real-e2e:staging": "npm run build:staging && playwright test",
+    "test:reborn": "node --test tests/reborn-frontend.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.5.2",
