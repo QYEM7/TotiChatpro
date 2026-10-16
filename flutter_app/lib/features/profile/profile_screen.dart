@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/totichat_repository.dart';
+import '../../data/totichat_services.dart';
+import '../economy/economy_screen.dart';
+import '../admin/admin_screen.dart';
 import '../../ui/toti_theme.dart';
 
 class AccountPage extends StatefulWidget {
@@ -98,6 +101,12 @@ class _AccountPageState extends State<AccountPage> {
             ]),
             if (!widget.walletOnly) ...[
               const SizedBox(height: 22),
+              Card(child:ListTile(
+                leading:const Icon(Icons.storefront_outlined),
+                title:const Text('المتجر والمقتنيات والهدايا وVIP'),
+                onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                  builder:(_)=>EconomyScreen(api:TotiChatServices(widget.repository.client)))))),
+              _AdminEntry(api:TotiChatServices(widget.repository.client)),
               Card(child: ListTile(
                 leading: const Icon(Icons.verified_user_outlined),
                 title: const Text('تسجيل Google'),
