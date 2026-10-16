@@ -115,7 +115,7 @@ function wallet(){
  '<div class="balance"><small>💎 ماس</small><b>'+money(w.diamonds)+'</b></div>'+
  '<div class="balance"><small>◈ فضة</small><b>'+money(w.silver)+'</b></div></div>':
  empty('الرصيد غير متوفر','أعد المحاولة إذا لم يتم تحميله من الخادم.'))+
- '<div class="card" style="margin-top:15px"><b>شحن العملات</b><p class="hint">الشحن يتم عبر وكلاء الشحن المعتمدين. لا توجد مشتريات مباشرة داخل هذا التطبيق.</p><button class="secondary" data-nav="agencies">الوكالات</button></div>';
+ '<div class="card" style="margin-top:15px"><b>عمليات الرصيد</b><p class="hint">هذه الأرصدة مأخوذة مباشرة من محفظتك على الخادم، ولا يتوفر شراء العملات أو توجيه إلى وسائل دفع أخرى داخل نسخة التطبيق.</p></div>';
 }
 function room(){
  const r=s.room;if(!r)return home();
