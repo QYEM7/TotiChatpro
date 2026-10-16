@@ -457,14 +457,30 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: active ?
                               TotiColors.gold : Colors.white24)),
-                          child: Center(child: active &&
-                              avatarUrl?.startsWith('https://') == true
-                            ? ClipRRect(borderRadius: BorderRadius.circular(15),
-                                child: Image.network(avatarUrl ?? '',
-                                  fit: BoxFit.cover, errorBuilder: (_, _, _) =>
-                                    const Icon(Icons.person, color: Colors.white)))
-                            : Icon(active ? Icons.person_rounded :
-                                Icons.add_rounded, color: Colors.white70))),
+                          child: Stack(fit:StackFit.expand,children:[
+                            Center(child:active &&
+                                avatarUrl?.startsWith('https://') == true
+                              ?ClipRRect(borderRadius:BorderRadius.circular(15),
+                                  child:Image.network(avatarUrl ?? '',
+                                    fit:BoxFit.cover,
+                                    errorBuilder:(_,_,_)=>
+                                      const Icon(Icons.person,color:Colors.white)))
+                              :Icon(active ? Icons.person_rounded :
+                                  Icons.add_rounded,color:Colors.white70)),
+                            if(active && occupant!.userId == widget.room.ownerId)
+                              const Positioned(left:3,top:3,
+                                child:Icon(Icons.workspace_premium_rounded,
+                                  size:15,color:TotiColors.gold)),
+                            if(active && occupant!.isMuted)
+                              Positioned(right:3,bottom:3,
+                                child:Container(
+                                  padding:const EdgeInsets.all(3),
+                                  decoration:const BoxDecoration(
+                                    color:Color(0xFF29233E),
+                                    shape:BoxShape.circle),
+                                  child:const Icon(Icons.mic_off_rounded,
+                                    size:13,color:Colors.white))),
+                          ])),
                         ),
                         const SizedBox(height: 5),
                         Text(occupant?.displayName ?? '$seat',
