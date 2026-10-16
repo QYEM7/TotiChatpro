@@ -25,6 +25,29 @@ void main() {
     expect(TotiChatServices.notificationPageLimit, 50);
   });
 
+  test('notification mark-all uses an explicit empty list, never null', () {
+    final params = TotiChatServices.markAllNotificationParams();
+    expect(params['p_all'], isTrue);
+    expect(params['p_ids'], isA<List<int>>());
+    expect(params['p_ids'], isEmpty);
+    expect(params['p_ids'], isNotNull);
+  });
+
+  test('support lists never substitute bad server list envelopes', () {
+    final rows = TotiChatServices.rows({
+      'rows': [
+        {'id': 'verified-server-id', 'status': 'open'}
+      ],
+      'total': 1,
+      'canHandle': false,
+    });
+    expect(rows.single['id'], 'verified-server-id');
+    expect(() => TotiChatServices.rows({'rows': null}),
+      throwsA(isA<StateError>()));
+    expect(() => TotiChatServices.object({'ticket': 'not a map'}),
+      returnsNormally);
+  });
+
   test('mocked finance or customer identities are never substituted', () {
     expect(() => TotiChatServices.object(null),
       throwsA(isA<StateError>()));
