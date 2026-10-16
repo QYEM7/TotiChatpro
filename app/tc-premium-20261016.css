@@ -8,6 +8,7 @@
 }
 html,body{background:#f0edf6!important;color:var(--tc-ink);-webkit-tap-highlight-color:transparent}
 body{overscroll-behavior-y:none}
+body.tc-real-mode #app .previewflag,body.tc-real-mode #app .status{display:none!important}
 #app.phone,#app.rf-app{color:var(--tc-ink);border-color:var(--tc-edge);box-shadow:0 15px 60px #44315718!important}
 #app.rf-app:not(.rf-room):not(.tc-auth-root){
   background:linear-gradient(165deg,#f6f1ff 0%,#fffbf5 35%,#f9fbff 74%,#f4f0fb 100%)!important;
