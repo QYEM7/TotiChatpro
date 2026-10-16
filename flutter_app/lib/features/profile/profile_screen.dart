@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
 import '../economy/economy_screen.dart';
+import '../economy/recharge_activity_screen.dart';
 import '../admin/admin_screen.dart';
 import '../agency/charging_agent_screen.dart';
 import 'settings_screen.dart';
@@ -101,6 +102,16 @@ class _AccountPageState extends State<AccountPage> {
               const SizedBox(width: 8),
               Expanded(child: _metric('فضة', _coins(wallet['silver']), Icons.stars_outlined)),
             ]),
+            if (widget.walletOnly) ...[
+              const SizedBox(height:16),
+              Card(child:ListTile(
+                leading:const Icon(Icons.receipt_long_outlined),
+                title:const Text('سجل الشحن والمكافآت'),
+                subtitle:const Text('اطلع على السجل المؤكد من الخادم'),
+                onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                  builder:(_)=>RechargeActivityScreen(
+                    api:TotiChatServices(widget.repository.client)))))),
+            ],
             if (!widget.walletOnly) ...[
               const SizedBox(height: 22),
               Card(child:ListTile(
