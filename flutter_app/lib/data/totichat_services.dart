@@ -14,7 +14,11 @@ class TotiChatServices {
   /// Parse exact positive integers; reject decimals and scientific notation.
   static int? parseTreasuryAmount(String raw) {
     final text = raw.trim();
-    if (!RegExp(r'^[1-9][0-9]*
+    if (!RegExp(r'^[1-9][0-9]*$').hasMatch(text)) return null;
+    final value = int.tryParse(text);
+    if (value == null || value > maxSafeCoinAmount) return null;
+    return value;
+  }
 
   /// Social search returns user_id, not id. Never guess a recipient identity.
   static String verifiedSocialUserId(Map<String, dynamic> person) {
