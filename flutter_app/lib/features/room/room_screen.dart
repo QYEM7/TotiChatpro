@@ -238,6 +238,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                       if (member.seatNo == seat) occupant = member;
                     }
                     final active = occupant != null;
+                    final avatarUrl = occupant?.avatarUrl;
                     return InkWell(
                       onTap: () => _seat(seat),
                       borderRadius: BorderRadius.circular(14),
@@ -251,16 +252,16 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                             border: Border.all(color: active ?
                               TotiColors.gold : Colors.white24)),
                           child: Center(child: active &&
-                              occupant!.avatarUrl?.startsWith('https://') == true
+                              avatarUrl?.startsWith('https://') == true
                             ? ClipRRect(borderRadius: BorderRadius.circular(15),
-                                child: Image.network(occupant.avatarUrl!,
+                                child: Image.network(avatarUrl ?? '',
                                   fit: BoxFit.cover, errorBuilder: (_, _, _) =>
                                     const Icon(Icons.person, color: Colors.white)))
                             : Icon(active ? Icons.person_rounded :
                                 Icons.add_rounded, color: Colors.white70))),
                         ),
                         const SizedBox(height: 5),
-                        Text(active ? occupant!.displayName : '$seat',
+                        Text(occupant?.displayName ?? '$seat',
                           textAlign: TextAlign.center, maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 10, color: Colors.white)),
