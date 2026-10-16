@@ -37,7 +37,7 @@ jobs:
         run: flutter analyze lib test --no-fatal-infos
       - name: Flutter source and widget tests
         working-directory: flutter_app
-        run: flutter test test/architecture_test.dart
+        run: flutter test
       - name: Verify staging-only configuration, permissions and no compiled APK
         run: |
           python3 - <<'PY'
