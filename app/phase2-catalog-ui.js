@@ -15,7 +15,12 @@ function shell(title,type){
 }
 const prevStore=vStore,prevRecharge=vRecharge,prevCP=cp,prevGifts=showGifts;
 vStore=function(){return live()?shell('متجر TotiChat','store'):prevStore.apply(this,arguments);};
-vRecharge=function(){return live()?shell('باقات الشحن عبر الوكلاء','recharge'):prevRecharge.apply(this,arguments);};
+vRecharge=function(){
+ if(!live())return prevRecharge.apply(this,arguments);
+ const native=(location.hostname==='localhost')||!!window.Capacitor?.isNativePlatform?.();
+ if(native)return page('المحفظة','<section class="tc-phase2-empty" dir="rtl"><h3>محفظتك في TotiChat</h3><p>يمكنك استعمال العملات الموجودة في حسابك. عمليات شراء العملات غير متوفرة داخل نسخة المتجر حالياً.</p><button class="primary" data-a="go" data-v="wallet">عرض رصيدي الحقيقي</button></section>');
+ return shell('باقات الشحن عبر الوكلاء','recharge');
+};
 cp=function(){return live()?shell('رفقاء الروح · CP','cp'):prevCP.apply(this,arguments);};
 showGifts=function(){
  if(!live())return prevGifts.apply(this,arguments);
