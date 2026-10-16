@@ -362,15 +362,37 @@ class TotiChatServices {
     }
   }
 
+  static Map<String, dynamic> verifyHostMonthIntegrity(Object? result) {
+    final data = object(result);
+    _checkHostAudit(data);
+    if (data['hasEvidenceProblems'] is! bool ||
+        data['snapshotCaptured'] is! bool ||
+        data['hasVerifiedHistory'] is! bool) {
+      throw StateError('Missing host accrual audit indicators');
+    }
+    return data;
+  }
+
   Future<Map<String, dynamic>> hostMonthIntegrity(DateTime month) async {
     userId;
     final params = hostConservationParams(month);
-    final data = object(await client.rpc('phase6_host_month_evidence_integrity',
+    return verifyHostMonthIntegrity(await client.rpc(
+      'phase6_host_month_evidence_integrity',
       params: {'p_month': params['p_month']}));
+  }
+
+  static Map<String, dynamic> verifyHostConservation(
+      Object? result, {required int offset}) {
+    final data = object(result);
     _checkHostAudit(data);
-    if (data['hasEvidenceProblems'] is! bool ||
-        data['snapshotCaptured'] is! bool) {
-      throw StateError('Missing host accrual audit indicators');
+    if (data['isReadyForFinalClose'] != false ||
+        data['hasPayrollRates'] != false ||
+        data['hasDiscrepancies'] is! bool ||
+        data['hosts'] is! List ||
+        (data['hosts'] as List).length > 30 ||
+        data['pageOffset'] != offset ||
+        data['pageLimit'] != 30) {
+      throw StateError('Invalid or unsafe diamond conservation audit');
     }
     return data;
   }
@@ -379,18 +401,9 @@ class TotiChatServices {
       {int offset = 0}) async {
     userId;
     final params = hostConservationParams(month, offset: offset);
-    final data = object(await client.rpc('phase7_host_month_diamond_conservation',
-      params: params));
-    _checkHostAudit(data);
-    if (data['isReadyForFinalClose'] != false ||
-        data['hasPayrollRates'] != false ||
-        data['hasDiscrepancies'] is! bool ||
-        data['hosts'] is! List ||
-        data['pageOffset'] != offset ||
-        data['pageLimit'] != 30) {
-      throw StateError('Invalid or unsafe diamond conservation audit');
-    }
-    return data;
+    final response = await client.rpc('phase7_host_month_diamond_conservation',
+      params: params);
+    return verifyHostConservation(response, offset: offset);
   }
 
   Future<Map<String,dynamic>> agencyState() async {
