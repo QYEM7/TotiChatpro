@@ -140,6 +140,22 @@ test('app preserves approved HTML and changes only the five reviewed banner-inte
     assert.match(app,re);
     app=app.replace(re,'');
   }
+  // Owner-authorized October 16 UX changes are tightly scoped. These
+  // transformations restore just the explicitly reviewed layer references
+  // and two-action room menu before the immutable visual-master comparison.
+  const premiumCss='<link rel="stylesheet" href="./tc-premium-20261016.css?v=1">';
+  const premiumJs='<script src="./tc-premium-20261016.js?v=1"></script>';
+  assert.ok(app.includes(premiumCss),'Premium theme not mounted');
+  assert.ok(app.includes(premiumJs),'Real Explore module not mounted');
+  app=app.replace(premiumCss,'').replace(premiumJs,'');
+  const menuBefore="const actions=[['share','مشاركة','shareRoom'],['mini','تصغير','minimizeRoom'],['exit','خروج','leaveRoom']];";
+  const menuAfter="const actions=[['mini','تصغير الغرفة','minimizeRoom'],['exit','مغادرة الغرفة','leaveRoom']];";
+  assert.ok(app.includes(menuAfter),'Expected user-approved two-button exit overlay');
+  app=app.replace(menuAfter,menuBefore);
+  const closeBefore="box.innerHTML='<button class=\"room-glass-close\" '+act('close')+' aria-label=\"إغلاق القائمة\">×</button>'+";
+  const closeAfter="box.innerHTML=''+";
+  assert.ok(app.includes(closeAfter),'Expected no X close button on room exit');
+  app=app.replace(closeAfter,closeBefore);
   app=app.replace('\n<!-- Final UI approved from visual-review-20261009; remove incompatible temporary lavender override. -->','');
   app=app.replaceAll('../assets/images/','assets/images/');
   for(const [oldCode,newCode] of substitutions){
