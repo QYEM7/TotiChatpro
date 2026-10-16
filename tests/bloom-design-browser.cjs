@@ -18,7 +18,7 @@ try{
   const s=t=>getComputedStyle(document.querySelector(t));
   return {background:s('.royal-home').backgroundImage,heroRadius:parseFloat(s('.royal-hero').borderTopLeftRadius),catRadius:parseFloat(s('.royal-cat').borderTopLeftRadius),brand:s('.royal-brand').color};
  });
- assert.equal(home.background,'none','no large photographic wallpaper on main page');
+ assert.match(home.background,/linear-gradient/,'light gradient replaces old photographic wallpaper on main page');
  assert.ok(home.heroRadius>=20&&home.catRadius>=16,'tactile, high-detail home cards');
  assert.ok(home.brand.includes('109, 58, 206'),'fresh vivid wordmark should display');
  await p.evaluate(()=>go('room'));
