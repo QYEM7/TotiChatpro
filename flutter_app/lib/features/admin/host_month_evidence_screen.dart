@@ -17,6 +17,7 @@ class HostMonthEvidenceScreen extends StatefulWidget {
 class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
   late DateTime _month;
   late Future<Map<String, dynamic>> _future;
+  int _conservationOffset = 0;
 
   @override
   void initState() {
@@ -30,8 +31,16 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
     final results = await Future.wait([
       widget.api.hostMonthPreflight(_month),
       widget.api.hostMonthSnapshot(_month),
+      widget.api.hostMonthIntegrity(_month),
+      widget.api.hostMonthConservation(
+        _month, offset: _conservationOffset),
     ]);
-    return {'preflight': results[0], 'snapshot': results[1]};
+    return {
+      'preflight': results[0],
+      'snapshot': results[1],
+      'integrity': results[2],
+      'conservation': results[3],
+    };
   }
 
   void _reload() => setState(() => _future = _readEvidence());
@@ -45,6 +54,16 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
     }
     setState(() {
       _month = target;
+      _conservationOffset = 0;
+      _future = _readEvidence();
+    });
+  }
+
+  void _changeConservationPage(int delta) {
+    final target = _conservationOffset + delta * 30;
+    if (target < 0 || target > 99990) return;
+    setState(() {
+      _conservationOffset = target;
       _future = _readEvidence();
     });
   }
@@ -67,6 +86,14 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
             data['preflight'] as Map);
           final snapshot = Map<String, dynamic>.from(
             data['snapshot'] as Map);
+          final integrity = Map<String, dynamic>.from(
+            data['integrity'] as Map);
+          final conservation = Map<String, dynamic>.from(
+            data['conservation'] as Map);
+          final conservationHosts = (conservation['hosts'] as List)
+              .whereType<Map>().toList();
+          final auditHasProblems = integrity['hasEvidenceProblems'] == true ||
+            conservation['hasDiscrepancies'] == true;
           final entries = (preflight['entries'] as List? ?? [])
               .whereType<Map>().toList();
           final capturedItems = (snapshot['items'] as List? ?? [])
@@ -120,6 +147,90 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
                       (snapshot['totalDiamonds']?.toString() ?? 'Unavailable')
                   : 'No immutable capture exists for this month.',
                 icon: Icons.verified_outlined),
+              const SizedBox(height: 18),
+              const Text('Historical gift and diamond audit',
+                style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w800)),
+              const SizedBox(height: 10),
+              Card(child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(auditHasProblems
+                        ? 'Audit: discrepancies detected — review required'
+                        : 'Audit: no discrepancies detected in current evidence',
+                      style: TextStyle(fontWeight: FontWeight.w800,
+                        color: auditHasProblems
+                          ? Colors.red.shade800 : Colors.black87)),
+                    const SizedBox(height: 8),
+                    Text('Historical host gifts: ' +
+                      (integrity['hostGiftEvents']?.toString() ?? 'Unknown')),
+                    Text('Missing or mismatched diamond lots: ' +
+                      (integrity['hostGiftsMissingOrMismatchedLots']
+                        ?.toString() ?? 'Unknown')),
+                    Text('Unassigned gift events for review: ' +
+                      (integrity['unassignedGiftEventsForReview']
+                        ?.toString() ?? 'Unknown')),
+                    Text('Snapshot: ' + (integrity['snapshotCaptured'] == true
+                      ? integrity['snapshotConsistent'] == true
+                        ? 'Captured and consistent'
+                        : 'Captured — consistency not established'
+                      : 'Not captured')),
+                    const SizedBox(height: 10),
+                    Text('Lot discrepancies: ' +
+                      (conservation['hostLotDiscrepancies']?.toString() ?? 'Unknown')),
+                    Text('Redemption allocation owner issues: ' +
+                      (conservation['foreignOwnerRedemptionAllocations']
+                        ?.toString() ?? 'Unknown')),
+                    Text('Redemption conservation issues: ' +
+                      (conservation['redemptionConservationDiscrepancies']
+                        ?.toString() ?? 'Unknown')),
+                    Text('Host wallet balance issues: ' +
+                      (conservation['hostWalletBalanceDiscrepancies']
+                        ?.toString() ?? 'Unknown')),
+                    const Divider(),
+                    const Text('Payroll approval, salary transfers, '
+                      'conversion rates and diamond reset are not enabled. '
+                      'A clean audit is NOT payroll authorization.'),
+                  ],
+                ),
+              )),
+              const SizedBox(height: 16),
+              Row(children: [
+                Expanded(child: Text(
+                  'Host conservation evidence (page ' +
+                    (_conservationOffset ~/ 30 + 1).toString() + ')',
+                  style: const TextStyle(fontSize: 16,
+                    fontWeight: FontWeight.w800))),
+                OutlinedButton(
+                  onPressed: _conservationOffset == 0 ? null
+                    : () => _changeConservationPage(-1),
+                  child: const Text('Previous')),
+                const SizedBox(width: 6),
+                OutlinedButton(
+                  onPressed: conservationHosts.length < 30 ||
+                      _conservationOffset >= 99990 ? null
+                    : () => _changeConservationPage(1),
+                  child: const Text('Next')),
+              ]),
+              if (conservationHosts.isEmpty)
+                const NoRecords('No historical host conservation rows.'),
+              ...conservationHosts.map((entry) => recordCard(context,
+                icon: Icons.fact_check_outlined,
+                title: 'Host: ' +
+                  (entry['hostId']?.toString() ?? 'Unknown'),
+                description: [
+                  'Agency: ' + (entry['agencyId']?.toString() ?? 'Unknown'),
+                  'Completed gifts: ' +
+                    (entry['giftCount']?.toString() ?? 'Unknown'),
+                  'Historical earned diamonds: ' +
+                    (entry['earnedDiamonds']?.toString() ?? 'Unknown'),
+                  'Redeemed up to now: ' +
+                    (entry['redeemedDiamondsToDate']?.toString() ?? 'Unknown'),
+                  'Remaining now (not historical): ' +
+                    (entry['unredeemedDiamondsNow']?.toString() ?? 'Unknown'),
+                ].join('\n'))),
               const SizedBox(height: 18),
               const Text('Observed host earnings',
                 style: TextStyle(fontSize: 18,
