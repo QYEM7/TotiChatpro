@@ -11,7 +11,9 @@ import '../economy/real_gift_ticker.dart';
 import 'room_game_screen.dart';
 import 'room_moderation_screen.dart';
 import 'room_music_queue_screen.dart';
+import 'room_seat_visual.dart';
 import '../../models/room_models.dart';
+import '../../models/room_seat_decoration.dart';
 import '../../ui/toti_theme.dart';
 import 'voice_session.dart';
 
@@ -35,6 +37,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   final TextEditingController _message = TextEditingController();
   List<RoomMember> _members = const [];
   List<RoomMessage> _messages = const [];
+  Map<String,RoomSeatDecoration> _seatDecorations = const {};
+  String? _seatDecorationError;
+  bool _refreshing = false, _refreshRequestedAgain = false;
   bool _joined = false, _joining = true, _sending = false, _leaving = false;
   bool _workingAudio = false;
   bool _leaveRequested = false;
@@ -77,6 +82,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         return;
       }
       await _refresh();
+      if (!mounted || !_joined || _leaving || _leaveRequested) return;
       _subscribeRoomChanges();
       _refreshTimer = Timer.periodic(const Duration(seconds: 45), (_) {
         if (_active && _joined && !_leaving) _refresh();
@@ -105,21 +111,48 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       ).subscribe();
   }
 
+  /// Coalesces simultaneous Realtime/poll calls to prevent stale room updates.
+  /// Visual decoration failures must never block seat or chat refresh.
   Future<void> _refresh() async {
-    if (!_joined || _leaving) return;
+    if (!_joined || _leaving || !mounted) return;
+    if (_refreshing) {
+      _refreshRequestedAgain = true;
+      return;
+    }
+    _refreshing = true;
     try {
-      final result = await Future.wait<dynamic>([
-        widget.repository.members(widget.room.id),
-        widget.repository.messages(widget.room.id),
-      ]);
-      if (mounted && !_leaving) setState(() {
-        _members = result[0] as List<RoomMember>;
-        _messages = result[1] as List<RoomMessage>;
-        _error = null;
-      });
-    } catch (error) {
-      if (mounted && !_leaving) setState(
-        () => _error = 'Failed to refresh real room state: $error');
+      do {
+        _refreshRequestedAgain = false;
+        try {
+          final decorations = widget.repository.seatDecorations(widget.room.id)
+            .then<Object?>((items) => items)
+            .catchError((Object error) => error);
+          final result = await Future.wait<dynamic>([
+            widget.repository.members(widget.room.id),
+            widget.repository.messages(widget.room.id),
+            decorations,
+          ]);
+          if (mounted && _joined && !_leaving) setState(() {
+            _members = result[0] as List<RoomMember>;
+            _messages = result[1] as List<RoomMessage>;
+            final visual = result[2];
+            if (visual is Map<String, RoomSeatDecoration>) {
+              _seatDecorations = visual;
+              _seatDecorationError = null;
+            } else {
+              _seatDecorations = const {};
+              _seatDecorationError =
+                'Seat decorations could not be verified with the server.';
+            }
+            _error = null;
+          });
+        } catch (error) {
+          if (mounted && _joined && !_leaving) setState(
+            () => _error = 'Failed to refresh real room state: $error');
+        }
+      } while (_refreshRequestedAgain && mounted && _joined && !_leaving);
+    } finally {
+      _refreshing = false;
     }
   }
 
@@ -423,6 +456,12 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                 width: double.infinity, color: Colors.red.shade900,
                 padding: const EdgeInsets.all(8),
                 child: Text(_error!, style: const TextStyle(color: Colors.white))),
+              if (_seatDecorationError != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(_seatDecorationError!,
+                    style: const TextStyle(
+                      color: Colors.amberAccent, fontSize: 11))),
               if (widget.room.welcomeMessage?.isNotEmpty == true)
                 Padding(padding: const EdgeInsets.all(12),
                   child: Text(widget.room.welcomeMessage!,
@@ -443,45 +482,17 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                     for (final member in _members) {
                       if (member.seatNo == seat) occupant = member;
                     }
-                    final active = occupant != null;
-                    final avatarUrl = occupant?.avatarUrl;
+                    final decoration = occupant == null
+                      ? null : _seatDecorations[occupant.userId];
                     return InkWell(
                       onTap: () => occupant == null ? _seat(seat) : _memberActions(occupant, seat),
                       borderRadius: BorderRadius.circular(14),
                       child: Column(children: [
-                        Expanded(child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: active ? const Color(0xFF6D5AA6) :
-                              const Color(0xFF423A5A),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: active ?
-                              TotiColors.gold : Colors.white24)),
-                          child: Stack(fit:StackFit.expand,children:[
-                            Center(child:active &&
-                                avatarUrl?.startsWith('https://') == true
-                              ?ClipRRect(borderRadius:BorderRadius.circular(15),
-                                  child:Image.network(avatarUrl ?? '',
-                                    fit:BoxFit.cover,
-                                    errorBuilder:(_,_,_)=>
-                                      const Icon(Icons.person,color:Colors.white)))
-                              :Icon(active ? Icons.person_rounded :
-                                  Icons.add_rounded,color:Colors.white70)),
-                            if(active && occupant.userId == widget.room.ownerId)
-                              const Positioned(left:3,top:3,
-                                child:Icon(Icons.workspace_premium_rounded,
-                                  size:15,color:TotiColors.gold)),
-                            if(active && occupant.isMuted)
-                              Positioned(right:3,bottom:3,
-                                child:Container(
-                                  padding:const EdgeInsets.all(3),
-                                  decoration:const BoxDecoration(
-                                    color:Color(0xFF29233E),
-                                    shape:BoxShape.circle),
-                                  child:const Icon(Icons.mic_off_rounded,
-                                    size:13,color:Colors.white))),
-                          ])),
-                        ),
+                        Expanded(child: RoomSeatVisual(
+                          member: occupant,
+                          isOwner: occupant?.userId == widget.room.ownerId,
+                          decoration: decoration,
+                        )),
                         const SizedBox(height: 5),
                         Text(occupant?.displayName ?? '$seat',
                           textAlign: TextAlign.center, maxLines: 1,
