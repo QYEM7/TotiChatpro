@@ -366,10 +366,84 @@ class TotiChatServices {
     await client.rpc('phase5_notification_mark',params:{'p_ids':null,'p_all':true});
   }
 
-  Future<List<Map<String,dynamic>>> supportTickets() async {
+  Future<Map<String, dynamic>> supportTicketPage({
+    bool staff = false,
+    int offset = 0,
+  }) async {
     userId;
-    return rows(await client.rpc('phase5_support_list',
-      params:{'p_scope':'mine','p_offset':0,'p_limit':40}));
+    if (offset < 0 || offset > 50000) {
+      throw ArgumentError('Invalid ticket page offset');
+    }
+    final result = object(await client.rpc('phase5_support_list',
+      params: {'p_scope': staff ? 'all' : 'mine',
+               'p_offset': offset, 'p_limit': 50}));
+    if (result['rows'] is! List || result['canHandle'] is! bool) {
+      throw StateError('Malformed authenticated ticket list');
+    }
+    return result;
+  }
+
+  Future<List<Map<String,dynamic>>> supportTickets() async {
+    return rows(await supportTicketPage());
+  }
+
+  Future<Map<String, dynamic>> supportThread(String ticketId) async {
+    userId;
+    if (ticketId.isEmpty) throw ArgumentError('Ticket ID required');
+    final result = object(await client.rpc('phase5_support_thread_page',
+      params: {'p_ticket_id': ticketId,
+               'p_offset': 0, 'p_limit': 50}));
+    if (result['ticket'] is! Map || result['messages'] is! List ||
+        result['canHandle'] is! bool) {
+      throw StateError('Malformed authenticated ticket thread');
+    }
+    return result;
+  }
+
+  Future<void> supportReply({
+    required String ticketId,
+    required String message,
+    required String requestId,
+  }) async {
+    userId;
+    final clean = message.trim();
+    if (ticketId.isEmpty || clean.length < 2 || clean.length > 2500) {
+      throw ArgumentError('Reply must be between 2 and 2500 characters');
+    }
+    final result = object(await client.rpc('phase5_support_action',
+      params: {
+        'p_action': 'reply',
+        'p_data': {'ticket_id': ticketId, 'message': clean},
+        'p_request_id': requestId,
+      }));
+    if (result['id']?.toString() != ticketId ||
+        result['action'] != 'reply' ||
+        result['status'] != 'completed') {
+      throw StateError('Ticket reply not confirmed by server');
+    }
+  }
+
+  Future<void> supportChangeStatus({
+    required String ticketId,
+    required String status,
+    required String requestId,
+  }) async {
+    userId;
+    if (ticketId.isEmpty ||
+        !['open','in_progress','resolved','closed'].contains(status)) {
+      throw ArgumentError('Invalid ticket status change');
+    }
+    final result = object(await client.rpc('phase5_support_action',
+      params: {
+        'p_action': 'status',
+        'p_data': {'ticket_id': ticketId, 'status': status},
+        'p_request_id': requestId,
+      }));
+    if (result['id']?.toString() != ticketId ||
+        result['action'] != 'status' ||
+        result['status'] != 'completed') {
+      throw StateError('Ticket status change not confirmed by server');
+    }
   }
 
   Future<String> supportRequest({
