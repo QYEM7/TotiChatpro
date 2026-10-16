@@ -113,7 +113,7 @@ class _VipTabState extends State<_VipTab>{
           style:const TextStyle(fontSize:22,fontWeight:FontWeight.w800),
           textAlign:TextAlign.center),
         const SizedBox(height:12),
-        if(data['expires_at']!=null)Text('انتهاء العضوية: ${data['expires_at']}',
+        if(data['expiresAt']!=null)Text('انتهاء العضوية: ${data['expiresAt']}',
           textAlign:TextAlign.center),
         const NoRecords('هذه العضوية تُقرأ من استحقاقات الخادم. لا نعرض مستويات تجريبية.'),
       ]);
@@ -135,7 +135,7 @@ class _GiftHistoryTabState extends State<_GiftHistoryTab>{
       ListView.builder(itemCount:items.length,itemBuilder:(context,i){
         final item=items[i];
         return recordCard(context,title:item['gift_name']?.toString()??'هدية',
-          description:'العدد: ${item['quantity']??'—'}  ·  القيمة: ${item['total_coins']??'—'} كوين',
+          description:'العدد: ${item['quantity']??'—'}  ·  القيمة: ${item['gift_coins']??'—'} كوين',
           icon:Icons.card_giftcard_rounded);
       }),
   );
