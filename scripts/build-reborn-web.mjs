@@ -22,6 +22,10 @@ await build({entryPoints:[join(root,'app','phase2-livekit-sdk.mjs')],
  outfile:join(output,'app','phase2-livekit-sdk.bundle.js'),
  bundle:true,format:'esm',platform:'browser',target:'es2022',
  minify:true,sourcemap:false,logLevel:'warning'});
+await build({entryPoints:[join(root,'app','reborn','native-bridge.mjs')],
+ outfile:join(output,'app','reborn','native-bridge.bundle.js'),
+ bundle:true,format:'esm',platform:'browser',target:'es2022',
+ minify:true,sourcemap:false,logLevel:'warning'});
 await writeFile(join(output,'app','index.html'),html,'utf8');
 await writeFile(join(output,'index.html'),html.replace('<html lang="ar" dir="rtl"><head>','<html lang="ar" dir="rtl"><head><base href="./app/">'),'utf8');
 console.log('PASS: freshly rebuilt TotiChat app packaged at WebView root; isolated Staging, real Google + LiveKit.');
