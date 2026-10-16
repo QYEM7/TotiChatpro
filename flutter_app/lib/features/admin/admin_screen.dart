@@ -31,7 +31,30 @@ class _AdminScreenState extends State<AdminScreen>{
       appBar:AppBar(title:const Text('مركز الإدارة')),
       body:ServerPanel<Map<String,dynamic>>(future:_role,retry:_refresh,
         builder:(context,a){
-          if(!canOpenAdmin(a))return const NoRecords('ممنوع دخول مركز الإدارة لهذا الحساب.');
+          if(!canOpenAdmin(a)) {
+            // Support-only staff can access tickets, never other admin pages.
+            // The capability comes from phase3.support_handler(), not role text.
+            return ServerPanel<Map<String,dynamic>>(
+              future:_supportRights,
+              retry:_refresh,
+              builder:(context,rights) => rights['canHandle']==true
+                ?ListView(padding:const EdgeInsets.all(18),children:[
+                    const Text('Official support desk',
+                      style:TextStyle(fontSize:21,
+                        fontWeight:FontWeight.w800)),
+                    const SizedBox(height:12),
+                    const Text('Ticket handling only. Financial, agencies, '
+                      'banners and Owner operations are not available.'),
+                    recordCard(context,title:'Support tickets',
+                      icon:Icons.support_agent_outlined,
+                      onTap:()=>Navigator.of(context).push(
+                        MaterialPageRoute(builder:(_)=>
+                          SupportTicketListScreen(
+                            api:widget.api,staff:true)))),
+                  ])
+                :const NoRecords('No admin or support permissions found.'),
+            );
+          }
           final owner=a['isOwner']==true,partner=a['isMainPartner']==true;
           final reports=a['canReadReports']==true||owner||partner;
           final catalog=a['canManageCatalogs']==true||owner||partner;
