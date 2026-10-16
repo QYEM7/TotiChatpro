@@ -265,6 +265,31 @@ class TotiChatServices {
     }));
   }
 
+  Future<Map<String,dynamic>> roomModerationState(String roomId) async {
+    userId;
+    return object(await client.rpc('phase2_room_moderation_state',
+      params:{'p_room_id':roomId}));
+  }
+
+  Future<void> moderateRoom({
+    required String roomId, required String targetId,
+    required String action, required String requestId,
+    String? reason,
+  }) async {
+    userId;
+    if(!['grant_moderator','revoke_moderator','kick','ban','unban',
+      'mute','allow_mic','release_seat'].contains(action) ||
+      targetId==userId || (action=='ban' &&
+        (reason==null || reason.trim().length<5 || reason.length>300))) {
+      throw ArgumentError('Invalid room moderation action');
+    }
+    final result=object(await client.rpc('phase2_room_moderate',params:{
+      'p_room_id':roomId,'p_target':targetId,'p_action':action,
+      'p_request_id':requestId,'p_reason':reason,
+    }));
+    if(result['success']!=true)throw StateError('Moderation not confirmed');
+  }
+
   Future<List<Map<String,dynamic>>> musicQueue(String roomId) async {
     userId;
     final rows=await client.from('room_music_queue')
