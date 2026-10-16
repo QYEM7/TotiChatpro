@@ -73,8 +73,8 @@ class _OwnerBannerScreenState extends State<OwnerBannerScreen> {
           minWidth: 720,
           minHeight: 240,
         );
-        if (webp.isEmpty || webp.length > 2 * 1024 * 1024) {
-          throw StateError('WebP image exceeds 2 MB after compression');
+        if (webp.isEmpty || webp.length > 512000) {
+          throw StateError('Banner exceeds the 500 KB Staging bucket limit');
         }
         await widget.api.client.storage.from('totichat-admin-banners')
           .uploadBinary(_pendingImagePath!, webp,
