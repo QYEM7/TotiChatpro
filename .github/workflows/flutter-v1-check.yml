@@ -1,0 +1,48 @@
+name: TotiChat Flutter V1 QA
+
+on:
+  push:
+    branches:
+      - rebuild/flutter-v1
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/flutter-v1-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  flutter-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate missing standard Android project scaffolding
+        working-directory: flutter_app
+        run: flutter create --platforms=android --org com.totichat --project-name totichat .
+      - name: Restore pinned Dart dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+      - name: Static analysis
+        working-directory: flutter_app
+        run: flutter analyze lib test --no-fatal-infos
+      - name: Flutter source and widget tests
+        working-directory: flutter_app
+        run: flutter test test/architecture_test.dart
+      - name: Verify staging-only configuration, permissions and no compiled APK
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          c=Path('flutter_app/lib/core/app_config.dart').read_text()
+          assert 'rziaedugbdwefbefcxjt' in c
+          assert "isStaging && publishableKey.isNotEmpty" in c
+          m=Path('flutter_app/android/app/src/main/AndroidManifest.xml').read_text()
+          assert 'android.permission.RECORD_AUDIO' in m
+          assert 'com.totichat.next' in m
+          assert not list(Path('flutter_app').rglob('*.apk'))
+          PY
