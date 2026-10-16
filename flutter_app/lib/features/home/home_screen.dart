@@ -159,6 +159,33 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
     }
   }
 
+  Future<void> _joinPrivate() async {
+    final controller = TextEditingController();
+    final value = await showDialog<String>(context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('الانضمام لغرفة خاصة'),
+        content: TextField(controller: controller,
+          decoration: const InputDecoration(labelText: 'رمز الدعوة من صاحب الغرفة'),
+          maxLines: 2),
+        actions: [
+          TextButton(onPressed:()=>Navigator.pop(ctx),child:const Text('إلغاء')),
+          FilledButton(onPressed:()=>Navigator.pop(ctx,controller.text.trim()),
+            child:const Text('الانضمام')),
+        ],
+      ));
+    controller.dispose();
+    if(value==null||value.isEmpty||!mounted)return;
+    try{
+      final room=await widget.repository.acceptInvite(value);
+      if(!mounted)return;
+      await Navigator.of(context).push(MaterialPageRoute(
+        builder:(_)=>RoomScreen(repository:widget.repository,room:room)));
+    }catch(error){
+      if(mounted)ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content:Text('فشل قبول الدعوة: $error')));
+    }
+  }
+
   Future<void> _enter(RoomInfo room) async {
     await Navigator.push(context, MaterialPageRoute(
       builder: (_) => RoomScreen(repository: widget.repository, room: room)));
@@ -236,6 +263,10 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
           child: Row(children: [
             Expanded(child: Text(widget.explore ? 'اكتشف الغرف' : 'الغرف العامة',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800))),
+            if(widget.explore)IconButton(
+              onPressed:_joinPrivate,
+              tooltip:'دخول غرفة خاصة',
+              icon:const Icon(Icons.lock_open_rounded)),
             FilledButton.tonalIcon(onPressed: _createRoom,
               icon: const Icon(Icons.add), label: const Text('غرفة جديدة')),
           ]),
