@@ -107,9 +107,8 @@ class _OwnerTreasuryScreenState extends State<OwnerTreasuryScreen> {
     noteField.dispose();
     referenceField.dispose();
     if (proposal == null || !mounted) return;
-    final validInteger = RegExp(r'^[1-9][0-9]*$').hasMatch(proposal.amount);
-    final amount = validInteger ? int.tryParse(proposal.amount) : null;
-    if (amount == null || amount > 9007199254740991 ||
+    final amount = TotiChatServices.parseTreasuryAmount(proposal.amount);
+    if (amount == null ||
         proposal.note.length < 10 || proposal.note.length > 500 ||
         (action == 'issue' &&
           (proposal.reference.length < 3 || proposal.reference.length > 120)) ||
