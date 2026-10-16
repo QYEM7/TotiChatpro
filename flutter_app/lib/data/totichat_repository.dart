@@ -1,4 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../models/room_models.dart';
 
@@ -46,6 +48,54 @@ class TotiChatRepository {
     });
     if (id is! String || id.isEmpty) throw StateError('Room was not confirmed');
     return roomById(id);
+  }
+
+  Future<RoomInfo> createRoomWithCover({
+    required String title, required String welcome, required XFile image,
+    bool isPrivate = false,
+  }) async {
+    final message = welcome.trim();
+    if (message.length < 2 || message.length > 500) {
+      throw ArgumentError('Welcome must be 2–500 characters');
+    }
+    final sourceBytes = await image.readAsBytes();
+    if (sourceBytes.isEmpty || sourceBytes.length > 10 * 1024 * 1024) {
+      throw ArgumentError('Cover image must not exceed 10 MB');
+    }
+    final compressed = await FlutterImageCompress.compressWithList(
+      sourceBytes, quality: 77, format: CompressFormat.webp,
+      minWidth: 720, minHeight: 720,
+    );
+    if (compressed.isEmpty || compressed.length > 2 * 1024 * 1024) {
+      throw StateError('WebP cover compression failed or file is too large');
+    }
+    // Create a real owned room first: Storage RLS requires owner_id and room_id.
+    final created = await createRoom(title, isPrivate: isPrivate);
+    final path = '${created.id}/cover.webp';
+    try {
+      await client.storage.from('totichat-room-images').uploadBinary(
+        path, compressed,
+        fileOptions: const FileOptions(contentType: 'image/webp', upsert: false),
+      );
+      final saved = await client.rpc('phase2_room_customize', params: {
+        'p_room_id': created.id,
+        'p_welcome_message': message,
+        'p_cover_path': path,
+        'p_background_path': null,
+      });
+      if (saved != true) throw StateError('Customization not confirmed');
+      return roomById(created.id);
+    } catch (e) {
+      // Never claim complete creation if an upload or customization failed.
+      // Preserve the created room for an owner/admin recovery path.
+      throw StateError('Room ${created.id} was created but cover/welcome failed: $e');
+    }
+  }
+
+  String? coverUrl(RoomInfo room) {
+    final path = room.coverPath;
+    if (path == null || path != '${room.id}/cover.webp') return null;
+    return client.storage.from('totichat-room-images').getPublicUrl(path);
   }
 
   Future<RoomInfo> roomById(String roomId) async {
