@@ -7,7 +7,9 @@ class AppConfig {
     'SUPABASE_URL', defaultValue: stagingUrl,
   );
   // Only the public/anon publishable key can be passed here. Never service_role.
-  static const publishableKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+  static const publishableKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY', defaultValue: 'sb_publishable_vVYku5VtyohuiGgehC3EdA_rSDGOUKB',
+  );
   static const oauthRedirect = 'com.totichat.next://auth/callback';
 
   static bool get isStaging => supabaseUrl == stagingUrl;
