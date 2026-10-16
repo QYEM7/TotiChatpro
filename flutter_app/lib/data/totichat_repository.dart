@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../models/room_models.dart';
+import '../models/room_seat_decoration.dart';
 
 /// Staging-only typed gateway. All state-changing actions use existing
 /// server-authorized RPCs, never a direct client-side financial table update.
@@ -149,6 +150,15 @@ class TotiChatRepository {
     if (result is! List) throw StateError('Invalid members response');
     return result.map((row) =>
       RoomMember.fromJson(Map<String, dynamic>.from(row as Map))).toList(growable: false);
+  }
+
+  /// Real in-room decorations, server-scoped to authenticated members.
+  Future<Map<String, RoomSeatDecoration>> seatDecorations(String roomId) async {
+    currentUserId;
+    if (roomId.isEmpty) throw ArgumentError('Room ID required');
+    final response = await client.rpc('phase6_room_mic_decorations',
+      params: {'p_room_id': roomId});
+    return RoomSeatDecoration.indexFromResponse(response);
   }
 
   Future<int?> setSeat(String roomId, int? seatNo) async {
