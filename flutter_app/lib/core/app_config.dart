@@ -15,8 +15,7 @@ class AppConfig {
   static bool get isStaging => supabaseUrl == stagingUrl;
 
   static bool get isConfigured =>
-      isStaging && publishableKey.isNotEmpty &&
-      !publishableKey.toLowerCase().contains('service_role');
+      isStaging && publishableKey.startsWith('sb_publishable_');
 
   static String get setupMessage {
     if (!isStaging) {
