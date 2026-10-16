@@ -1,6 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import 'notification_models.dart';
+
 /// Real authenticated Staging APIs. Server remains the authority for all money,
 /// permissions, CP, gifts and moderation. No client-side ledger writes.
 class TotiChatServices {
@@ -353,6 +355,52 @@ class TotiChatServices {
       'p_request_id':requestId,
     }));
     if (result['id']==null) throw StateError('Agency request not confirmed');
+  }
+
+  static Map<String, dynamic> notificationFeedParams({
+    int limit = notificationPageLimit,
+    int? before,
+  }) {
+    if (limit < 1 || limit > notificationPageLimit ||
+        (before != null && before < 1)) {
+      throw ArgumentError('Invalid notification page');
+    }
+    return {'p_limit': limit, 'p_before': before};
+  }
+
+  Future<NotificationPage> notificationPage({
+    int limit = notificationPageLimit,
+    int? before,
+  }) async {
+    userId;
+    final raw = await client.rpc('phase5_notification_feed',
+      params: notificationFeedParams(limit: limit, before: before));
+    final page = NotificationPage.fromJson(raw);
+    if (page.items.length > limit) {
+      throw StateError('Server exceeded notification page size');
+    }
+    return page;
+  }
+
+  static Map<String, dynamic> notificationMarkSelectedParams(
+      List<int> rawIds) {
+    final ids = rawIds.toSet().toList();
+    if (ids.isEmpty || ids.length > 100 || ids.any((x) => x < 1)) {
+      throw ArgumentError('Select between 1 and 100 valid notifications');
+    }
+    return {'p_ids': ids, 'p_all': false};
+  }
+
+  Future<int> markSelectedNotificationsRead(List<int> ids) async {
+    userId;
+    final result = object(await client.rpc('phase5_notification_mark',
+      params: notificationMarkSelectedParams(ids)));
+    final count = result['updated'];
+    if (count is! num || count < 0 || !count.isFinite ||
+        count.toInt() != count) {
+      throw StateError('Notification read receipt not confirmed');
+    }
+    return count.toInt();
   }
 
   Future<List<Map<String,dynamic>>> notifications() async {
