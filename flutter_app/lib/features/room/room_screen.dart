@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../data/totichat_repository.dart';
+import '../../data/totichat_services.dart';
+import '../community/dm_screen.dart';
+import '../economy/gift_sheet.dart';
 import '../../models/room_models.dart';
 import '../../ui/toti_theme.dart';
 import 'voice_session.dart';
@@ -185,6 +188,54 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _openGifts() async {
+    if (!_joined || _leaving) return;
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => GiftSheet(
+        api: TotiChatServices(widget.repository.client),
+        roomId: widget.room.id,
+        members: _members,
+      ),
+    );
+    if (confirmed == true && mounted) {
+      _show('تم إرسال الهدية بعد تأكيد الخادم');
+      await _refresh();
+    }
+  }
+
+  Future<void> _memberActions(RoomMember member, int seat) async {
+    if (member.userId == widget.repository.currentUserId) {
+      await _seat(seat);
+      return;
+    }
+    await showModalBottomSheet<void>(context: context, builder: (sheetContext) =>
+      SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        ListTile(title: Text(member.displayName),
+          subtitle: const Text('مستخدم داخل الغرفة الحقيقية')),
+        ListTile(leading: const Icon(Icons.mail_outline_rounded),
+          title: const Text('مراسلة خاصة'),
+          onTap: () async {
+            Navigator.pop(sheetContext);
+            await Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => DmThread(
+                api: TotiChatServices(widget.repository.client),
+                peerId: member.userId,
+                title: member.displayName,
+              ),
+            ));
+          }),
+        ListTile(leading: const Icon(Icons.card_giftcard_outlined),
+          title: const Text('إهداء'),
+          onTap: () {
+            Navigator.pop(sheetContext);
+            _openGifts();
+          }),
+      ])));
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -252,7 +303,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                     final active = occupant != null;
                     final avatarUrl = occupant?.avatarUrl;
                     return InkWell(
-                      onTap: () => _seat(seat),
+                      onTap: () => occupant == null ? _seat(seat) : _memberActions(occupant, seat),
                       borderRadius: BorderRadius.circular(14),
                       child: Column(children: [
                         Expanded(child: Container(
@@ -300,6 +351,16 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                       await _voice.disconnect();
                       if (mounted) setState(() {});
                     }, icon: const Icon(Icons.call_end_rounded)),
+                ]),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(children: [
+                  FilledButton.tonalIcon(
+                    onPressed: _joined && !_leaving ? _openGifts : null,
+                    icon: const Icon(Icons.card_giftcard_rounded),
+                    label: const Text('صندوق الهدايا'),
+                  ),
                 ]),
               ),
               const Divider(color: Colors.white24),
