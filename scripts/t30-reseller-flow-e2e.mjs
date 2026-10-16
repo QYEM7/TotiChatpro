@@ -62,6 +62,14 @@ const ag=reviewed.agency_id;
 const agentMint=await cash(agent,'issue',{coins:50,note:'Not an owner request',cash_reference:'T30-FAIL-'+nonce});
 if(agentMint.code>=200&&agentMint.code<300)fail('non-Owner issued coins');
 ok(await cash(owner,'issue',{coins:500,note:'Simulated receipt: no external cash paid',cash_reference:'T30-ISSUE-'+nonce}),'Owner issue');
+const duplicateMint=await cash(owner,'issue',{
+ coins:1,note:'Reject same bank receipt with different letter case and padding',
+ cash_reference:'  t30-issue-'+nonce.toLowerCase()+'  '
+});
+if(duplicateMint.code>=200&&duplicateMint.code<300||
+ !error(duplicateMint).includes('tc_owner_coin_issue_cash_reference_normalized_unique'))
+ fail('Owner duplicate cash receipt minted a second coin with different case/spacing');
+
 ok(await cash(owner,'allocate',{coins:500,note:'Local only agent allocation',agency_id:ag}),'Owner allocation');
 const state=ok(await call('/rest/v1/rpc/phase4_recharge_state',agent),'agent state after allocation');
 if(BigInt(state.treasury)!==500n)fail('agent did not receive 500 coins');
@@ -98,7 +106,67 @@ if(BigInt(snapshot.ownerCoins)!==0n||BigInt(snapshot.agentCoins)!==500n-credit||
 const next=await cash(agent,'approve',decision,randomUUID());
 if(next.code>=200&&next.code<300||!error(next).includes('Request already resolved'))
  fail('resolved request credited second time');
+
+// New Staging backend reconciliation is verified on a completely local, disposable
+// GoTrue/PostgREST/Postgres instance with real transaction writes and rollbacks.
+const integrity=ok(await call('/rest/v1/rpc/phase6_treasury_integrity_preflight',owner),'Owner treasury integrity');
+if(integrity.isReadOnly!==true||integrity.hasDetectedLedgerIssues!==false||
+ integrity.issuanceControlMismatch!==false||
+ Number(integrity.issuedOperationsChecked)<1||
+ Number(integrity.agentAllocationsChecked)<1||
+ Number(integrity.agentTopupsChecked)<1||
+ Number(integrity.customerTopupMismatches)!==0||
+ Number(integrity.userCoinBalanceMismatches)!==0)
+ fail('Owner read-only treasury audit reported a mismatch after valid reseller flow');
+const deniedAudit=await call('/rest/v1/rpc/phase6_treasury_integrity_preflight',customer);
+if(deniedAudit.code>=200&&deniedAudit.code<300)
+ fail('normal customer unexpectedly gained private treasury audit access');
+
+// Existing exact-reference constraint only compared case-sensitive text.
+// A new normalized UNIQUE index must reject a *different* legitimate pending
+// request attempting to reuse the same receipt after case/space normalization.
+const secondReq=ok(await cash(customer,'request',{
+ agency_id:ag,package_id:packageId,expected_coins:7,expected_price_usd:0.01
+}),'second pending cash request');
+if(!secondReq.id||secondReq.status!=='pending')fail('second pending recharge request missing');
+const alteredReceipt=await cash(agent,'approve',{
+ id:secondReq.id,note:'Case-folded duplicate cash receipt must fail',
+ cash_reference:'  '+decision.cash_reference.toLowerCase()+'  '
+});
+if(alteredReceipt.code>=200&&alteredReceipt.code<300||
+ !error(alteredReceipt).includes('tc_recharge_completed_receipt_normalized_unique'))
+ fail('case/space receipt reuse was not rejected by the database');
+const unchangedCash=sql(`select json_build_object(
+ 'coins',(select coins from public.wallets where user_id='${customer.id}'::uuid),
+ 'agent',(select coins from phase3.treasury_accounts where user_id='${agent.id}'::uuid),
+ 'pending',(select status from public.recharge_requests where id='${secondReq.id}'::uuid)
+)::text;`);
+const afterReject=JSON.parse(unchangedCash);
+if(BigInt(afterReject.coins)!==credit||BigInt(afterReject.agent)!==500n-credit||afterReject.pending!=='pending')
+ fail('failed cash receipt replay altered a balance or closed the pending request');
+
+// A closed host month with no genuine local gifts must not present fictitious
+// salary obligations, snapshots or permission to zero diamonds.
+const lastMonth=new Date();
+lastMonth.setUTCDate(1);lastMonth.setUTCMonth(lastMonth.getUTCMonth()-1);
+const auditMonth=lastMonth.toISOString().slice(0,10);
+const hostIntegrity=ok(await call('/rest/v1/rpc/phase6_host_month_evidence_integrity',owner,{p_month:auditMonth}),
+ 'Owner host month evidence audit');
+if(hostIntegrity.isReadOnly!==true||hostIntegrity.snapshotCaptured!==false||
+ hostIntegrity.hostGiftEvents!==0||hostIntegrity.canPaySalaries!==false||
+ hostIntegrity.canZeroDiamonds!==false||hostIntegrity.canApprovePayroll!==false)
+ fail('empty host month generated fictitious liabilities or permitted salary/diamond clearing');
+const deniedHost=await call('/rest/v1/rpc/phase6_host_month_evidence_integrity',customer,{p_month:auditMonth});
+if(deniedHost.code>=200&&deniedHost.code<300)
+ fail('customer unexpectedly read protected host monthly accrual audit');
+
 console.log('PASS T30: real local GoTrue agent registered recharge agency; Owner-only reviewed agency and issued/allocated 500 synthetic coins.');
 console.log('PASS T30: customer request persisted; wrong-person approvals and agent mint denied; six concurrent identical cash confirmations credited ONCE.');
 console.log('PASS T30: customer wallet and ledger credited '+credit+' coins, Owner 0, agent '+(500n-credit)+'; exact 500-coin conservation, cash reference and recharge agency verified.');
 console.log('PASS T30: repeat approval with different idempotency key refused; no live bank receipts, real reseller accounts or production balance changes.');
+
+console.log('PASS T30: Owner finance preflight verified actual local ledger, normal customer access denied.');
+console.log('PASS T30: normalized completed cash receipt index denied case/space replay across distinct requests with zero balance drift.');
+console.log('PASS T30: monthly host evidence audit returned honest empty state, no payroll/reset authority; outsider denied.');
+
+console.log('PASS T30: normalized Owner cash receipt unique index rejected a second issuance despite changed case/whitespace.');

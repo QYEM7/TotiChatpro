@@ -14,3 +14,16 @@ test('T30 tests real Owner/agent/customer, concurrent idempotency and ledger con
  'cash_reference','agent_topup','customerLedger','Request already resolved','500n-credit'])
  assert(s.includes(token),token);
 });
+
+test('T30 covers real local owner audit, receipt replay denial and read-only monthly host evidence',()=>{
+ for(const token of [
+  'phase6_treasury_integrity_preflight',
+  'customerTopupMismatches','userCoinBalanceMismatches',
+  'tc_recharge_completed_receipt_normalized_unique',
+  'decision.cash_reference.toLowerCase()',
+  "afterReject.pending!=='pending'",
+  'phase6_host_month_evidence_integrity',
+  'canZeroDiamonds','canPaySalaries','canApprovePayroll',
+  'normal customer access denied'
+ ])assert(s.includes(token),token);
+});
