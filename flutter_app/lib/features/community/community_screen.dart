@@ -38,16 +38,23 @@ class _PeopleTabState extends State<_PeopleTab>{
   final _search=TextEditingController();
   Future<List<Map<String,dynamic>>>? _results;
   bool _busy=false;
-  String? _pendingId;
+  String? _pendingId,_pendingPeer;
   void _lookup(){
     if(_search.text.trim().length<2)return;
     setState(()=>_results=widget.api.socialSearch(_search.text));
   }
   Future<void> _follow(String peer) async{
-    if(_busy)return;setState(()=>_busy=true);
+    if(_busy)return;
+    if(_pendingId!=null && _pendingPeer!=peer){
+      showApiError(context,'The previous follow request has an unknown result. '
+        'Retry that same user before following another.');
+      return;
+    }
+    setState(()=>_busy=true);
+    _pendingPeer=peer;
     _pendingId??=TotiChatServices.requestId();
     try{await widget.api.follow(peer,enabled:true,requestId:_pendingId!);
-      _pendingId=null;
+      _pendingId=null;_pendingPeer=null;
       if(mounted)ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content:Text('تم تسجيل المتابعة على الخادم')));
     }catch(e){if(mounted)showApiError(context,e);}
@@ -94,15 +101,23 @@ class _CpTabState extends State<_CpTab>{
   late Future<Map<String,dynamic>> _future;
   Future<List<Map<String,dynamic>>>? _people;
   final _query=TextEditingController();
-  String? _peer,_type,_pendingId;
+  String? _peer,_type,_pendingId,_pendingSignature;
   bool _busy=false;
   @override void initState(){super.initState();_refresh();}
   void _refresh()=>setState(()=>_future=widget.api.cpState());
   Future<void> _send(String peer,String type,String action) async{
     if(_busy)return;
-    setState(()=>_busy=true);_pendingId??=TotiChatServices.requestId();
+    final signature='$peer|$type|$action';
+    if(_pendingId!=null && _pendingSignature!=signature){
+      showApiError(context,'A previous relationship action must be retried '
+        'with identical details before a new action.');
+      return;
+    }
+    setState(()=>_busy=true);
+    _pendingSignature=signature;
+    _pendingId??=TotiChatServices.requestId();
     try{await widget.api.cpAction(peer:peer,type:type,action:action,requestId:_pendingId!);
-      _pendingId=null;if(mounted)_refresh();
+      _pendingId=null;_pendingSignature=null;if(mounted)_refresh();
     }catch(e){if(mounted)showApiError(context,e);}
     finally{if(mounted)setState(()=>_busy=false);}
   }
