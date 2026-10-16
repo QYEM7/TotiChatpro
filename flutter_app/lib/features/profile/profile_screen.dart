@@ -5,6 +5,7 @@ import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
 import '../economy/economy_screen.dart';
 import '../admin/admin_screen.dart';
+import '../agency/charging_agent_screen.dart';
 import 'settings_screen.dart';
 import '../../ui/toti_theme.dart';
 
@@ -108,6 +109,7 @@ class _AccountPageState extends State<AccountPage> {
                 onTap:()=>Navigator.of(context).push(MaterialPageRoute(
                   builder:(_)=>EconomyScreen(api:TotiChatServices(widget.repository.client)))))),
               _AdminEntry(api:TotiChatServices(widget.repository.client)),
+              _AgentEntry(api:TotiChatServices(widget.repository.client)),
               Card(child:ListTile(
                 leading:const Icon(Icons.manage_accounts_outlined),
                 title:const Text('تعديل الملف والخصوصية'),
@@ -165,6 +167,33 @@ class _AdminEntryState extends State<_AdminEntry> {
         subtitle:const Text('متاح حسب صلاحية الخادم'),
         onTap:()=>Navigator.of(context).push(MaterialPageRoute(
           builder:(_)=>AdminScreen(api:widget.api)))));
+    },
+  );
+}
+
+class _AgentEntry extends StatefulWidget {
+  const _AgentEntry({required this.api});
+  final TotiChatServices api;
+  @override State<_AgentEntry> createState()=>_AgentEntryState();
+}
+
+class _AgentEntryState extends State<_AgentEntry> {
+  late final Future<Map<String,dynamic>> _state=widget.api.rechargeState();
+  @override Widget build(BuildContext context)=>FutureBuilder<Map<String,dynamic>>(
+    future:_state,builder:(context,snapshot){
+      final data=snapshot.data;
+      if(data==null)return const SizedBox.shrink();
+      final agencies=(data['agencies'] as List? ?? []).whereType<Map>()
+        .where((a)=>a['owner_id']==widget.api.userId && a['is_active']==true);
+      if(agencies.isEmpty && data['isOwner']!=true && data['canManage']!=true) {
+        return const SizedBox.shrink();
+      }
+      return Card(child:ListTile(
+        leading:const Icon(Icons.store_mall_directory_outlined),
+        title:const Text('عمليات وكيل الشحن'),
+        subtitle:const Text('تشغيل الوكالة داخل التطبيق، دون دخول مركز الإدارة'),
+        onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+          builder:(_)=>ChargingAgentScreen(api:widget.api)))));
     },
   );
 }
