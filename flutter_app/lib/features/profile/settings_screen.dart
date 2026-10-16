@@ -96,6 +96,6 @@ class _ProfileSettingsState extends State<ProfileSettings>{
               label:const Text('طلب حذف الحساب والبيانات')),
           ]);
         }),
-    )),
+    ),
   );
 }
