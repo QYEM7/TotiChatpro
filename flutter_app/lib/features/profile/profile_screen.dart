@@ -25,11 +25,17 @@ class AccountPage extends StatefulWidget {
 
 class _AccountPageState extends State<AccountPage> {
   Future<List<Object?>>? _data;
+  Future<Map<String,dynamic>>? _vipStatus,_cpStatus;
 
   @override
   void initState() { super.initState(); _refresh(); }
 
   void _refresh() {
+    if (!widget.walletOnly) {
+      final api=TotiChatServices(widget.repository.client);
+      _vipStatus=api.vip();
+      _cpStatus=api.cpState();
+    }
     setState(() {
       _data = Future.wait<Object?>([
         widget.repository.ownProfile(),
@@ -73,17 +79,73 @@ class _AccountPageState extends State<AccountPage> {
             if (!widget.walletOnly) Card(child: Padding(
               padding: const EdgeInsets.all(22),
               child: Column(children: [
-                CircleAvatar(radius: 34, backgroundColor: TotiColors.lavender,
-                  backgroundImage: profile?['avatar_url']?.toString().startsWith('https://') == true ?
-                    NetworkImage(profile!['avatar_url'] as String) : null,
-                  child: profile?['avatar_url'] == null ?
-                    const Icon(Icons.person, size: 34) : null),
+                FutureBuilder<Map<String,dynamic>>(
+                  future:_vipStatus,
+                  builder:(context,vipSnapshot){
+                    final level=(vipSnapshot.data?['tier'] as num?)?.toInt()??0;
+                    final ring=level<=3
+                      ?const Color(0xFF55A5AD)
+                      :level<=6?const Color(0xFF8C6CD1)
+                      :const Color(0xFFC89A43);
+                    return Column(children:[
+                      Container(
+                        padding:EdgeInsets.all(level>0?4:0),
+                        decoration:BoxDecoration(
+                          shape:BoxShape.circle,
+                          border:level>0?Border.all(color:ring,width:3):null),
+                        child:CircleAvatar(radius:34,
+                          backgroundColor:TotiColors.lavender,
+                          backgroundImage:profile?['avatar_url']?.toString()
+                            .startsWith('https://')==true
+                            ?NetworkImage(profile!['avatar_url'] as String):null,
+                          child:profile?['avatar_url']==null
+                            ?const Icon(Icons.person,size:34):null)),
+                      if(level>0)Padding(padding:const EdgeInsets.only(top:7),
+                        child:Chip(avatar:const Icon(Icons.workspace_premium,
+                          size:17),label:Text('VIP $level'))),
+                      if(vipSnapshot.hasError)const Text(
+                        'VIP status unavailable',
+                        style:TextStyle(fontSize:12,color:Colors.black54)),
+                    ]);
+                  }),
                 const SizedBox(height: 14),
                 Text(profile?['display_name']?.toString() ?? 'مستخدم TotiChat',
                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 8),
                 Text('ID: $publicId', textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.black54)),
+                FutureBuilder<Map<String,dynamic>>(
+                  future:_cpStatus,
+                  builder:(context,cpSnapshot){
+                    if(cpSnapshot.hasError) {
+                      return const Text('CP status unavailable',
+                        style:TextStyle(fontSize:12,color:Colors.black54));
+                    }
+                    final relations=(cpSnapshot.data?['relations'] as List? ?? [])
+                      .whereType<Map>()
+                      .where((r)=>r['accepted_at']!=null)
+                      .toList();
+                    return relations.isEmpty?const SizedBox.shrink()
+                      :Column(children:[
+                        const SizedBox(height:8),
+                        ...relations.map((rel){
+                          final partner=rel['partner'] is Map
+                            ?rel['partner'] as Map:<String,dynamic>{};
+                          final started=DateTime.tryParse(
+                            rel['created_at']?.toString()??'');
+                          final elapsed=started==null?null:
+                            DateTime.now().difference(started).inDays+1;
+                          return Chip(
+                            avatar:const Icon(Icons.favorite,size:17),
+                            label:Text(
+                              '${rel['type_label']??'CP'} · '
+                              '${partner['display_name']??'Member'}'
+                              ' · L${rel['level']??1}'
+                              '${elapsed!=null&&elapsed>0?' · $elapsed days':''}'),
+                          );
+                        }),
+                      ]);
+                  }),
                 if (profile?['bio']?.toString().isNotEmpty == true) ...[
                   const SizedBox(height: 10),
                   Text(profile!['bio'].toString(), textAlign: TextAlign.center),
