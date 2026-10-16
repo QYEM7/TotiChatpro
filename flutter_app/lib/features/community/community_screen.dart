@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
 import 'dm_screen.dart';
+import '../agency/host_membership_screen.dart';
 
 class CommunityScreen extends StatelessWidget {
   const CommunityScreen({super.key,required this.api});
@@ -179,6 +180,12 @@ class _AgencyTabState extends State<_AgencyTab>{
         ...regs.map((r)=>recordCard(context,title:r['name']?.toString()??'طلب',
           description:'الحالة: ${r['status']??'بانتظار المراجعة'}')),
         const SizedBox(height:12),
+        OutlinedButton.icon(
+          onPressed:()=>Navigator.of(context).push(MaterialPageRoute(
+            builder:(_)=>HostAgencyMembershipScreen(api:widget.api))),
+          icon:const Icon(Icons.group_add_outlined),
+          label:const Text('Join host agency / transfer request')),
+        const SizedBox(height:10),
         FilledButton.icon(onPressed:()=>_openAgencyDialog(),icon:const Icon(Icons.add_business),
           label:const Text('طلب فتح وكالة')),
       ]);
