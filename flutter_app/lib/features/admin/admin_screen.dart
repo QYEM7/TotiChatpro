@@ -4,6 +4,7 @@ import '../../ui/server_panel.dart';
 import 'host_agency_admin_screen.dart';
 import 'host_month_evidence_screen.dart';
 import 'owner_treasury_screen.dart';
+import 'owner_banner_screen.dart';
 
 bool canOpenAdmin(Map<String,dynamic> a) =>
   a['isOwner']==true || a['isMainPartner']==true ||
@@ -43,6 +44,12 @@ class _AdminScreenState extends State<AdminScreen>{
             if(catalog)recordCard(context,title:'صلاحية إدارة الكتالوج',
               description:'عرض الصلاحية فقط؛ التعديل غير متاح في هذه الواجهة.',
               icon:Icons.inventory_2_outlined),
+            if(owner)recordCard(context,
+              title:'Official banners',
+              description:'Upload, review, publish or archive real promotions.',
+              icon:Icons.view_carousel_outlined,
+              onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                builder:(_)=>OwnerBannerScreen(api:widget.api)))),
             if(owner)recordCard(context,title:'إدارة وكالات المضيفين',
               description:'مراجعة طلبات الوكالات المسجلة بالخادم.',
               icon:Icons.business_center_outlined,
