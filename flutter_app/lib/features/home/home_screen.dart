@@ -50,12 +50,14 @@ class _HomeShellState extends State<HomeShell> {
     final rooms = _activeRoom;
     final pages = [
       RoomsDirectory(repository: widget.repository, explore: false,
-        onOpenRoom: _openRoom),
+        onOpenRoom: _openRoom, activeRoomId: rooms?.id),
       RoomsDirectory(repository: widget.repository, explore: true,
-        onOpenRoom: _openRoom),
+        onOpenRoom: _openRoom, activeRoomId: rooms?.id),
       CommunityScreen(api: TotiChatServices(widget.repository.client)),
-      AccountPage(repository: widget.repository, walletOnly: true),
-      AccountPage(repository: widget.repository, walletOnly: false),
+      AccountPage(repository: widget.repository, walletOnly: true,
+        roomActive: rooms != null),
+      AccountPage(repository: widget.repository, walletOnly: false,
+        roomActive: rooms != null),
     ];
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -127,10 +129,11 @@ class _HomeShellState extends State<HomeShell> {
 
 class RoomsDirectory extends StatefulWidget {
   const RoomsDirectory({super.key, required this.repository, required this.explore,
-    required this.onOpenRoom});
+    required this.onOpenRoom, this.activeRoomId});
   final TotiChatRepository repository;
   final bool explore;
   final ValueChanged<RoomInfo> onOpenRoom;
+  final String? activeRoomId;
 
   @override
   State<RoomsDirectory> createState() => _RoomsDirectoryState();
@@ -152,6 +155,11 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
   }
 
   Future<void> _createRoom() async {
+    if (widget.activeRoomId != null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Leave the active room before creating another.')));
+      return;
+    }
     final name = TextEditingController();
     final welcome = TextEditingController();
     var privateRoom = false;
@@ -236,6 +244,11 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
   }
 
   Future<void> _joinPrivate() async {
+    if (widget.activeRoomId != null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Leave the active room before joining another.')));
+      return;
+    }
     final controller = TextEditingController();
     final value = await showDialog<String>(context: context,
       builder: (ctx) => AlertDialog(
