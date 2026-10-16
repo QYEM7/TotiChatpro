@@ -390,6 +390,186 @@ class TotiChatServices {
     return result['id'] as String;
   }
 
+  Future<List<Map<String, dynamic>>> adminBanners() async {
+    userId;
+    final result=object(await client.rpc('phase6_admin_banner_list',
+      params:{'p_offset':0,'p_limit':60}));
+    return rows(result);
+  }
+
+  Future<void> saveOwnerBanner({
+    required String action,
+    required Map<String,dynamic> data,
+    required String requestId,
+    String? bannerId,
+  }) async {
+    userId;
+    if (!['create','update'].contains(action) ||
+        (action == 'create' && bannerId != null) ||
+        (action == 'update' && (bannerId == null || bannerId.isEmpty))) {
+      throw ArgumentError('Invalid banner action');
+    }
+    final title=data['title']?.toString().trim() ?? '';
+    final path=data['image_path']?.toString() ?? '';
+    if (title.isEmpty || title.length > 120 ||
+        !RegExp(r'^[0-9a-f-]{36}/[0-9a-f-]{36}\.webp
+    userId;
+    return object(await client.rpc('phase3_admin_session'));
+  }
+
+  Future<Map<String,dynamic>> report() async {
+    userId;
+    final role=await authority();
+    if (role['isOwner']!=true && role['isMainPartner']!=true &&
+        role['canReadReports']!=true) {
+      throw StateError('Access denied by role');
+    }
+    final now=DateTime.now().toUtc();
+    return object(await client.rpc('phase4_admin_report',params:{
+      'p_from':now.subtract(const Duration(days:30)).toIso8601String(),
+      'p_to':now.toIso8601String(),'p_status':null,
+      'p_offset':0,'p_limit':30,
+    }));
+  }
+
+  Future<Map<String,dynamic>> gameState(String roomId) async {
+    userId;
+    return object(await client.rpc('phase5_room_game_state',
+      params:{'p_room_id':roomId}));
+  }
+
+  Future<Map<String,dynamic>> gameAction(String roomId,String action,
+      int? cell,String requestId) async {
+    userId;
+    return object(await client.rpc('phase5_room_game_action',params:{
+      'p_room_id':roomId,'p_action':action,'p_cell':cell,'p_request_id':requestId,
+    }));
+  }
+
+  Future<Map<String,dynamic>> rechargeState() async {
+    userId;
+    return object(await client.rpc('phase4_recharge_state'));
+  }
+
+  /// Owner-only issuance/allocation. The backend holds all authority,
+  /// treasury ledgers, idempotency and debit checks.
+  Future<void> ownerTreasuryAction({
+    required String action,
+    required int coins,
+    required String note,
+    required String requestId,
+    String? cashReference,
+    String? agencyId,
+  }) async {
+    userId;
+    final cleanNote = note.trim();
+    if (!['issue', 'allocate'].contains(action) ||
+        coins < 1 || coins > maxSafeCoinAmount ||
+        cleanNote.length < 10 || cleanNote.length > 500 ||
+        (action == 'issue' &&
+          (cashReference == null || cashReference.trim().length < 3 ||
+           cashReference.trim().length > 120)) ||
+        (action == 'allocate' && (agencyId == null || agencyId.isEmpty))) {
+      throw ArgumentError('Owner treasury evidence is incomplete');
+    }
+    final data = <String, dynamic>{
+      'coins': coins,
+      'note': cleanNote,
+      if (action == 'issue') 'cash_reference': cashReference!.trim(),
+      if (action == 'allocate') 'agency_id': agencyId!,
+    };
+    final result = object(await client.rpc('phase4_recharge_action', params: {
+      'p_action': action,
+      'p_data': data,
+      'p_request_id': requestId,
+    }));
+    if (result['id'] is! String ||
+        result['status'] != 'completed' ||
+        (result['coins'] as num?)?.toInt() != coins) {
+      throw StateError('Treasury change not confirmed');
+    }
+  }
+
+  Future<void> decideAgentRequest({
+    required String operationId, required String action,
+    required String note, required String requestId,
+    String? cashReference,
+  }) async {
+    userId;
+    if(!['approve','reject'].contains(action)||
+      note.trim().length<3||note.length>500||
+      (action=='approve'&&(cashReference==null||
+         cashReference.trim().length<3||cashReference.length>120))){
+      throw ArgumentError('Documented recharge decision required');
+    }
+    final result=object(await client.rpc('phase4_recharge_action',
+      params:{
+        'p_action':action,
+        'p_data':{
+          'id':operationId,
+          'note':note.trim(),
+          if(action=='approve')'cash_reference':cashReference!.trim(),
+        },
+        'p_request_id':requestId,
+      }));
+    final expected = action == 'approve' ? 'completed' : 'failed';
+    if (result['id'] is! String ||
+        result['request_id']?.toString() != operationId ||
+        result['status'] != expected) {
+      throw StateError('Recharge operation not confirmed');
+    }
+  }
+
+  Future<Map<String,dynamic>> roomModerationState(String roomId) async {
+    userId;
+    return object(await client.rpc('phase2_room_moderation_state',
+      params:{'p_room_id':roomId}));
+  }
+
+  Future<void> moderateRoom({
+    required String roomId, required String targetId,
+    required String action, required String requestId,
+    String? reason,
+  }) async {
+    userId;
+    if(!['grant_moderator','revoke_moderator','kick','ban','unban',
+      'mute','allow_mic','release_seat'].contains(action) ||
+      targetId==userId || (action=='ban' &&
+        (reason==null || reason.trim().length<5 || reason.length>300))) {
+      throw ArgumentError('Invalid room moderation action');
+    }
+    final result=object(await client.rpc('phase2_room_moderate',params:{
+      'p_room_id':roomId,'p_target':targetId,'p_action':action,
+      'p_request_id':requestId,'p_reason':reason,
+    }));
+    if(result['success']!=true)throw StateError('Moderation not confirmed');
+  }
+
+  Future<List<Map<String,dynamic>>> musicQueue(String roomId) async {
+    userId;
+    final rows=await client.from('room_music_queue')
+      .select('id,title,artist,bookmark_id,added_by,created_at')
+      .eq('room_id',roomId).order('created_at');
+    return rows.map((x)=>Map<String,dynamic>.from(x)).toList();
+  }
+}
+).hasMatch(path) ||
+        !['draft','published','archived'].contains(data['status'])) {
+      throw ArgumentError('Invalid banner details');
+    }
+    final result=object(await client.rpc('phase6_admin_banner_action',
+      params:{
+        'p_action':action,'p_id':bannerId,
+        'p_data':data,'p_request_id':requestId,
+      }));
+    if (result['saved']!=true ||
+        result['status']!=data['status'] ||
+        result['id'] is! String ||
+        (bannerId!=null && result['id']!=bannerId)) {
+      throw StateError('Banner change was not confirmed');
+    }
+  }
+
   Future<Map<String,dynamic>> authority() async {
     userId;
     return object(await client.rpc('phase3_admin_session'));
