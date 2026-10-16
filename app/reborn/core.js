@@ -382,8 +382,12 @@ function onAuthChange(){
 }
 async function boot(){
  if(!auth){s.loading=false;notify('إعدادات تسجيل الدخول غير متاحة',true);render();return;}
- await bindNativeOAuth();
- window.addEventListener('totichat-auth-error',e=>{fail(e.detail);render();});
+ window.addEventListener('totichat-auth-error',e=>{fail(e.detail);s.busy=false;render();});
+ try{await bindNativeOAuth();}catch(error){
+  // Never leave every real user permanently staring at a loading spinner.
+  console.error('Android OAuth bridge:',String(error?.message||'unavailable'));
+  s.extra.nativeAuthError=String(error?.message||'Android OAuth unavailable');
+ }
  try{await auth.resume();}catch(e){fail(e);}
  s.loading=false;s.userId=me();s.screen=live()?'home':'login';
  bindRealtime();render();
@@ -401,14 +405,33 @@ async function bindNativeOAuth(){
  const native=await import('./native-bridge.bundle.js');
  const app=native.App;
  if(!app?.addListener||!native.Browser?.open)throw Error('Android Google login bridge unavailable');
- await app.addListener('appUrlOpen',async event=>{
-  if(!event?.url||!event.url.startsWith('com.totichat.beta://auth/callback'))return;
-  try{await auth.handleOAuthCallback(event.url);await native.Browser.close().catch(()=>{});s.sheet='';s.screen='home';render();await loadRoute('home');}
-  catch(e){fail(e);render();}
- });
+ let pending=false,handledUrl='';
+ const callback=async event=>{
+  const url=event?.url||'';
+  if(!url.startsWith('com.totichat.beta://auth/callback'))return;
+  if(pending||url===handledUrl)return;
+  pending=true;handledUrl=url;
+  try{
+   await auth.handleOAuthCallback(url);
+   await native.Browser.close().catch(()=>{});
+   s.sheet='';s.screen='home';s.busy=false;s.notice='';s.error='';
+   render();await loadRoute('home');
+  }catch(error){
+   // Do not repeatedly consume the same one-time OAuth code after a failure.
+   s.busy=false;fail(error);render();
+  }finally{pending=false;}
+ };
+ await app.addListener('appUrlOpen',callback);
+ // OAuth may complete before the WebView listener is attached (cold launch).
+ if(app.getLaunchUrl){
+  const launch=await app.getLaunchUrl().catch(()=>null);
+  if(launch?.url)await callback(launch);
+ }
 }
 async function loginGoogle(){
- if(s.busy||!auth)return;s.busy=true;render();
+ if(s.busy||!auth)return;
+ if(s.extra.nativeAuthError){notify('تسجيل Google على Android غير مهيأ في هذه النسخة: '+s.extra.nativeAuthError,true);render();return;}
+ s.busy=true;render();
  try{const p=await auth.providers();if(!p.google)throw Error('Google غير مفعّل على الخادم');
   await auth.signInWithProvider('google');
  }catch(e){s.busy=false;fail(e);render();}
