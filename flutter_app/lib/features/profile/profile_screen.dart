@@ -235,16 +235,26 @@ class _AdminEntry extends StatefulWidget {
 
 class _AdminEntryState extends State<_AdminEntry> {
   late final Future<Map<String,dynamic>> _role=widget.api.authority();
+  late final Future<Map<String,dynamic>> _support=widget.api.supportTicketPage();
+
+  Widget _entry(BuildContext context) => Card(child:ListTile(
+    leading:const Icon(Icons.admin_panel_settings_outlined),
+    title:const Text('مركز الإدارة'),
+    subtitle:const Text('متاح حسب صلاحية الخادم'),
+    onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+      builder:(_)=>AdminScreen(api:widget.api)))));
+
   @override Widget build(BuildContext context)=>FutureBuilder<Map<String,dynamic>>(
     future:_role,builder:(context,snapshot){
       final role=snapshot.data;
-      if(role==null||!canOpenAdmin(role))return const SizedBox.shrink();
-      return Card(child:ListTile(
-        leading:const Icon(Icons.admin_panel_settings_outlined),
-        title:const Text('مركز الإدارة'),
-        subtitle:const Text('متاح حسب صلاحية الخادم'),
-        onTap:()=>Navigator.of(context).push(MaterialPageRoute(
-          builder:(_)=>AdminScreen(api:widget.api)))));
+      if(role==null)return const SizedBox.shrink();
+      if(canOpenAdmin(role))return _entry(context);
+      // A support handler may have no generic admin role. The server verifies
+      // this narrow capability without granting access to other admin pages.
+      return FutureBuilder<Map<String,dynamic>>(
+        future:_support,
+        builder:(context,rights)=>rights.data?['canHandle']==true
+          ?_entry(context):const SizedBox.shrink());
     },
   );
 }
