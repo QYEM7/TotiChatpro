@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import 'host_agency_admin_screen.dart';
 
 bool canOpenAdmin(Map<String,dynamic> a) =>
   a['isOwner']==true || a['isMainPartner']==true ||
@@ -26,7 +27,6 @@ class _AdminScreenState extends State<AdminScreen>{
           final reports=a['canReadReports']==true||owner||partner;
           final catalog=a['canManageCatalogs']==true||owner||partner;
           // Never infer Host Agencies permission from just "super admin" role.
-          final agencies=owner||partner;
           return ListView(padding:const EdgeInsets.all(18),children:[
             const Icon(Icons.admin_panel_settings_rounded,size:54),
             const SizedBox(height:10),
@@ -41,9 +41,11 @@ class _AdminScreenState extends State<AdminScreen>{
             if(catalog)recordCard(context,title:'صلاحية إدارة الكتالوج',
               description:'عرض الصلاحية فقط؛ التعديل غير متاح في هذه الواجهة.',
               icon:Icons.inventory_2_outlined),
-            if(agencies)recordCard(context,title:'إدارة وكالات المضيفين',
-              description:'حصرية للمالك والشريك الرئيسي. إجراءات الإدارة غير مفعّلة بعد.',
-              icon:Icons.business_center_outlined),
+            if(owner)recordCard(context,title:'إدارة وكالات المضيفين',
+              description:'مراجعة طلبات الوكالات المسجلة بالخادم.',
+              icon:Icons.business_center_outlined,
+              onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                builder:(_)=>HostAgencyAdminScreen(api:widget.api)))),
             if(_report!=null)ServerPanel<Map<String,dynamic>>(
               future:_report!,retry:()=>setState(()=>_report=widget.api.report()),
               builder:(context,report)=>Card(child:Padding(
