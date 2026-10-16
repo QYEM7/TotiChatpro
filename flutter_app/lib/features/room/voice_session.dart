@@ -9,6 +9,7 @@ class VoiceSession {
   final TotiChatRepository repository;
   lk.Room? _room;
   bool _publishing = false;
+  bool _serverCanPublish = false;
 
   bool get connected => _room != null;
   bool get publishing => _publishing;
@@ -21,6 +22,7 @@ class VoiceSession {
       await room.connect(grant.url, grant.token);
       _room = room;
       _publishing = false;
+      _serverCanPublish = grant.canPublish;
     } catch (_) {
       await room.disconnect();
       await room.dispose();
@@ -28,10 +30,10 @@ class VoiceSession {
     }
   }
 
-  Future<void> setMicrophone(bool enabled, {required bool canPublish}) async {
+  Future<void> setMicrophone(bool enabled) async {
     final room = _room;
     if (room == null) throw StateError('Join audio first');
-    if (enabled && !canPublish) throw StateError('A real assigned seat is required');
+    if (enabled && !_serverCanPublish) throw StateError('Server did not grant microphone publishing');
     if (enabled) {
       final status = await Permission.microphone.request();
       if (!status.isGranted) throw StateError('Microphone permission was denied');
@@ -44,6 +46,7 @@ class VoiceSession {
     final room = _room;
     _room = null;
     _publishing = false;
+    _serverCanPublish = false;
     if (room != null) {
       try { await room.disconnect(); }
       finally { await room.dispose(); }
