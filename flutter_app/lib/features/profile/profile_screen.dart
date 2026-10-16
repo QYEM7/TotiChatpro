@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../data/notification_models.dart';
 import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
 import '../economy/economy_screen.dart';
 import '../economy/recharge_activity_screen.dart';
 import '../admin/admin_screen.dart';
 import '../agency/charging_agent_screen.dart';
+import '../notifications/notification_center_screen.dart';
 import 'settings_screen.dart';
 import '../../ui/toti_theme.dart';
 
@@ -26,6 +28,7 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   Future<List<Object?>>? _data;
   Future<Map<String,dynamic>>? _vipStatus,_cpStatus;
+  Future<NotificationPage>? _notificationSummary;
 
   @override
   void initState() { super.initState(); _refresh(); }
@@ -35,6 +38,7 @@ class _AccountPageState extends State<AccountPage> {
       final api=TotiChatServices(widget.repository.client);
       _vipStatus=api.vip();
       _cpStatus=api.cpState();
+      _notificationSummary=api.notificationPage(limit: 1);
     }
     setState(() {
       _data = Future.wait<Object?>([
@@ -59,6 +63,40 @@ class _AccountPageState extends State<AccountPage> {
         const SizedBox(width: 12),
         Expanded(child: Text(widget.walletOnly ? 'محفظتي' : 'ملفي',
           style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w800))),
+        if (!widget.walletOnly)
+          FutureBuilder<NotificationPage>(
+            future: _notificationSummary,
+            builder: (context, snapshot) {
+              final unread = snapshot.data?.unreadCount;
+              return IconButton(
+                tooltip: unread == null ? 'Notifications' :
+                  'Notifications, $unread unread',
+                onPressed: () async {
+                  await Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => NotificationCenterScreen(
+                      api: TotiChatServices(widget.repository.client))));
+                  if (mounted) _refresh();
+                },
+                icon: Stack(clipBehavior: Clip.none, children: [
+                  const Icon(Icons.notifications_none_rounded, size: 27),
+                  if (unread != null && unread > 0)
+                    Positioned(
+                      top: -9, right: -12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error,
+                          borderRadius: BorderRadius.circular(20)),
+                        child: Text(unread > 99 ? '99+' : unread.toString(),
+                          style: const TextStyle(
+                            color: Colors.white, fontSize: 10,
+                            fontWeight: FontWeight.w800))),
+                    ),
+                ]),
+              );
+            },
+          ),
         IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
       ]),
       const SizedBox(height: 20),
