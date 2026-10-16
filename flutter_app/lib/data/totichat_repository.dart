@@ -84,7 +84,7 @@ class TotiChatRepository {
         'p_background_path': null,
       });
       if (saved != true) throw StateError('Customization not confirmed');
-      return roomById(created.id);
+      return await roomById(created.id);
     } catch (e) {
       // Never claim complete creation if an upload or customization failed.
       // Preserve the created room for an owner/admin recovery path.
