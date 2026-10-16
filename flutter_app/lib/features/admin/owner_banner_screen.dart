@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
