@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/app_config.dart';
@@ -31,6 +32,8 @@ class TotiChatApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     theme: buildTotiTheme(),
     locale: const Locale('ar', 'IQ'),
+    supportedLocales: const [Locale('ar', 'IQ'), Locale('en', 'US')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     home: configured ? const _AuthGate() : const _SetupScreen(),
   );
 }
