@@ -222,6 +222,85 @@ class TotiChatServices {
     }
   }
 
+  /// Submit a real host agency join or transfer request.
+  Future<String> joinHostAgency({
+    required String agencyId,
+    required String reason,
+    required String requestId,
+  }) async {
+    userId;
+    final clean = reason.trim();
+    if (agencyId.isEmpty || clean.length < 3 || clean.length > 500) {
+      throw ArgumentError('Host join reason and agency are required');
+    }
+    final result = object(await client.rpc('phase4_agency_action', params: {
+      'p_action': 'join',
+      'p_data': {'agency_id': agencyId, 'reason': clean},
+      'p_request_id': requestId,
+    }));
+    if (result['id'] is! String ||
+        !['pending_new', 'pending_old'].contains(result['status'])) {
+      throw StateError('Server did not confirm host join request');
+    }
+    return result['id'] as String;
+  }
+
+  /// The server decides whether the actor is old or new agency owner.
+  Future<String> reviewHostJoin({
+    required String joinId,
+    required String action,
+    required String requestId,
+  }) async {
+    userId;
+    if (joinId.isEmpty ||
+        !['approve_old', 'accept_join', 'reject_join'].contains(action)) {
+      throw ArgumentError('Invalid host join decision');
+    }
+    final result = object(await client.rpc('phase4_agency_action', params: {
+      'p_action': action,
+      'p_data': {'id': joinId},
+      'p_request_id': requestId,
+    }));
+    final expectedStatus = action == 'approve_old'
+        ? 'pending_new'
+        : action == 'accept_join' ? 'completed' : 'rejected';
+    if (result['id']?.toString() != joinId ||
+        result['status'] != expectedStatus) {
+      throw StateError('Host join decision not confirmed');
+    }
+    return expectedStatus;
+  }
+
+  Future<Map<String,dynamic>> hostMonthPreflight(DateTime month) async {
+    userId;
+    final utc = DateTime.utc(month.year, month.month);
+    final data = object(await client.rpc('phase5_host_month_preflight', params: {
+      'p_month': utc.toIso8601String().substring(0, 10),
+      'p_offset': 0,
+      'p_limit': 100,
+    }));
+    if (data['isDraftPreflight'] != true || data['paysSalaries'] != false) {
+      throw StateError('Unexpected host evidence response');
+    }
+    return data;
+  }
+
+  Future<Map<String,dynamic>> hostMonthSnapshot(DateTime month) async {
+    userId;
+    final utc = DateTime.utc(month.year, month.month);
+    final data = object(await client.rpc('phase5_host_month_snapshot_state',
+      params: {
+        'p_month': utc.toIso8601String().substring(0, 10),
+        'p_offset': 0,
+        'p_limit': 100,
+      }));
+    if (data['isAccrualEvidenceOnly'] != true ||
+        data['paysSalaries'] != false) {
+      throw StateError('Unexpected monthly accrual evidence');
+    }
+    return data;
+  }
+
   Future<Map<String,dynamic>> agencyState() async {
     userId;
     return object(await client.rpc('phase4_agency_state'));
@@ -318,6 +397,45 @@ class TotiChatServices {
     return object(await client.rpc('phase4_recharge_state'));
   }
 
+  /// Owner-only issuance/allocation. The backend holds all authority,
+  /// treasury ledgers, idempotency and debit checks.
+  Future<void> ownerTreasuryAction({
+    required String action,
+    required int coins,
+    required String note,
+    required String requestId,
+    String? cashReference,
+    String? agencyId,
+  }) async {
+    userId;
+    final cleanNote = note.trim();
+    if (!['issue', 'allocate'].contains(action) ||
+        coins < 1 || coins > 9007199254740991 ||
+        cleanNote.length < 10 || cleanNote.length > 500 ||
+        (action == 'issue' &&
+          (cashReference == null || cashReference.trim().length < 3 ||
+           cashReference.trim().length > 120)) ||
+        (action == 'allocate' && (agencyId == null || agencyId.isEmpty))) {
+      throw ArgumentError('Owner treasury evidence is incomplete');
+    }
+    final data = <String, dynamic>{
+      'coins': coins,
+      'note': cleanNote,
+      if (action == 'issue') 'cash_reference': cashReference!.trim(),
+      if (action == 'allocate') 'agency_id': agencyId!,
+    };
+    final result = object(await client.rpc('phase4_recharge_action', params: {
+      'p_action': action,
+      'p_data': data,
+      'p_request_id': requestId,
+    }));
+    if (result['id'] is! String ||
+        result['status'] != 'completed' ||
+        (result['coins'] as num?)?.toInt() != coins) {
+      throw StateError('Treasury change not confirmed');
+    }
+  }
+
   Future<void> decideAgentRequest({
     required String operationId, required String action,
     required String note, required String requestId,
@@ -340,7 +458,10 @@ class TotiChatServices {
         },
         'p_request_id':requestId,
       }));
-    if(result['status']!='completed'&&result['id']==null){
+    final expected = action == 'approve' ? 'completed' : 'failed';
+    if (result['id'] is! String ||
+        result['request_id']?.toString() != operationId ||
+        result['status'] != expected) {
       throw StateError('Recharge operation not confirmed');
     }
   }
