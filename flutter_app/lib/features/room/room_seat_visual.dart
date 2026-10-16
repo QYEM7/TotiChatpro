@@ -17,6 +17,9 @@ class RoomSeatVisual extends StatelessWidget {
     final vip=decoration?.vipTier??0;
     final frameName=decoration?.frameName?.trim();
     final hasFrame=frameName!=null && frameName.isNotEmpty;
+    final frameIcon=decoration?.frameIcon?.trim();
+    final shortIcon=frameIcon!=null && frameIcon.isNotEmpty &&
+      frameIcon.length<=8 && !frameIcon.contains('://');
     final avatar=member?.avatarUrl;
     return Container(
       width:double.infinity,
@@ -43,8 +46,10 @@ class RoomSeatVisual extends StatelessWidget {
               size:15,color:TotiColors.gold)),
         if(hasFrame)Positioned(right:1,top:isOwner?17:1,
           child:Tooltip(message:'Equipped frame: $frameName',
-            child:const Icon(Icons.auto_awesome_rounded,
-              size:12,color:TotiColors.gold))),
+            child:shortIcon
+              ?Text(frameIcon,style:const TextStyle(fontSize:12))
+              :const Icon(Icons.auto_awesome_rounded,
+                size:12,color:TotiColors.gold))),
         if(decoration!=null)Positioned(left:1,bottom:1,child:_SeatLabel(
           text:'🎁 ${decoration!.receivedGifts}',
           background:const Color(0xCC201A33))),
