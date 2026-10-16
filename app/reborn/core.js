@@ -88,7 +88,7 @@ function explore(){
  return header('اكتشف الغرف',false,'<button class="icon-btn" data-act="refresh">↻</button>')+
  '<div class="hero"><img src="'+falcon+'" alt=""><div><h1>اكتشف مجتمعك</h1><p>كل الغرف هنا من الخادم الحقيقي.</p></div></div>'+
  '<div style="margin:15px 0"><input class="field" data-input="search" placeholder="ابحث عن غرفة باسمها…" aria-label="ابحث عن غرفة" value="'+esc(s.search)+'"></div>'+
- '<div class="section-head"><h2>الغرف المتاحة</h2><span class="inline-badge">'+found.length+' غرفة</span></div>'+
+ '<div class="section-head"><h2>الغرف المتاحة</h2><button class="secondary" data-act="inviteJoin">🔒 رمز دعوة</button><span class="inline-badge">'+found.length+' غرفة</span></div>'+
  (found.length?roomTiles(found):empty('ماكو نتائج','جرّب بحثاً مختلفاً أو أنشئ غرفة جديدة.'));
 }
 function profile(){
@@ -169,7 +169,7 @@ function render(){
  root.className='shell'+(isAuth?' auth-root':'');
  root.innerHTML=(isAuth?page:'<main class="content">'+page+
  '<p id="global-notice" class="status'+(s.error?' error':'')+'" role="status" '+(!s.notice?'hidden':'')+'>'+esc(s.notice)+'</p></main>'+
- (s.screen==='room'?'':nav()))+
+ (s.screen==='room'?'':nav())+(s.room&&s.screen!=='room'&&!isAuth?'<button class="mini-room" data-nav="room">🎙️ '+esc(s.room.title)+' <span>العودة للغرفة ‹</span></button>':''))+
  (s.sheet?'<div class="sheet-wrap" id="sheet-wrap"><div class="sheet" role="dialog" aria-modal="true" aria-label="خيارات"><div class="row between"><span></span><button class="x" data-act="closeSheet" aria-label="إغلاق">×</button></div>'+
  (s.sheet==='roomMenu'?roomMenu():s.sheet==='roomInfo'?roomInfo():window.TotiRebornFeatures?.sheet?.(s.sheet)||'')+'</div></div>':'');
 }
@@ -210,6 +210,7 @@ async function readAuthority(){
 let polling=null;
 async function enterRoom(id){
  if(s.busy||!validId(id))return;
+ if(s.room&&s.room.id!==id){notify('غادر الغرفة الحالية أولاً حتى لا ينقطع الصوت بشكل غير متوقع',true);return;}
  const found=s.rooms.find(r=>r.id===id);
  s.busy=true;
  try{
@@ -427,6 +428,7 @@ document.addEventListener('click',event=>{
   case 'roomMembers':sheet('roomMembers');break;
   case 'roomInvite':void (async()=>{try{if(!s.room?.is_private||s.room.owner_id!==me())throw Error('الدعوات للغرفة الخاصة بصاحبها فقط');const code=await rpc('phase2_room_invite_create',{p_room_id:s.room.id});s.extra.invite=code;s.sheet='roomInvite';render();}catch(e){fail(e);}})();break;
   case 'gifts':s.sheet='gifts';render();void window.TotiRebornFeatures?.loadSheet?.('gifts');break;
+  case 'inviteJoin':sheet('inviteJoin');break;
   default:if(window.TotiRebornFeatures?.action)void window.TotiRebornFeatures.action(a,target);
  }
 });
