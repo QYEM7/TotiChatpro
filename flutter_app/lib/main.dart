@@ -15,7 +15,7 @@ Future<void> main() async {
   }
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
-    anonKey: AppConfig.publishableKey,
+    publishableKey: AppConfig.publishableKey,
     authOptions: const FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
   );
   runApp(const TotiChatApp(configured: true));
