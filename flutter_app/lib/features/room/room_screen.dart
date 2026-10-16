@@ -467,11 +467,11 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                                       const Icon(Icons.person,color:Colors.white)))
                               :Icon(active ? Icons.person_rounded :
                                   Icons.add_rounded,color:Colors.white70)),
-                            if(active && occupant!.userId == widget.room.ownerId)
+                            if(active && occupant.userId == widget.room.ownerId)
                               const Positioned(left:3,top:3,
                                 child:Icon(Icons.workspace_premium_rounded,
                                   size:15,color:TotiColors.gold)),
-                            if(active && occupant!.isMuted)
+                            if(active && occupant.isMuted)
                               Positioned(right:3,bottom:3,
                                 child:Container(
                                   padding:const EdgeInsets.all(3),
