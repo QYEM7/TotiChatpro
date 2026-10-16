@@ -94,5 +94,6 @@ window.addEventListener('totichat-phase2-auth',()=>{
 });
 window.addEventListener('online',()=>{if(screen==='discoverPreview'&&signed())void load(true);});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&screen==='discoverPreview'&&signed())void load(true);});
+document.body.classList.add('tc-real-mode');
 navIcons();
 })();
