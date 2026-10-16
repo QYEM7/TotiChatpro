@@ -94,7 +94,7 @@ function explore(){
 function profile(){
  const p=myProfile();return header('ملفي',false,'<button class="icon-btn" data-nav="notifications">♧</button>')+
  '<div class="me-hero"><div class="row">'+avatar(p.avatar_url,'xl')+'<div class="grow"><h2 style="margin:0">'+esc(p.display_name||'مستخدم جديد')+'</h2>'+
- '<small>ID الحساب: '+esc((me()||'').slice(0,8).toUpperCase())+'</small><br><span class="vip">TotiChat Member</span></div>'+
+ '<small>ID الخاص: '+esc(s.extra.publicId?.assigned?s.extra.publicId.publicId:'بانتظار منح ID من الإدارة')+'</small><br><span class="vip">TotiChat Member</span></div>'+
  '<button class="icon-btn" data-nav="editProfile">✎</button></div></div>'+
  '<div class="section-head"><h2>حسابك</h2></div><div class="quick">'+
  '<button data-nav="wallet"><span>🪙</span>الرصيد</button><button data-nav="store"><span>◇</span>المتجر</button><button data-nav="vip"><span>♛</span>VIP</button></div>'+
@@ -201,6 +201,15 @@ async function readWallet(){
  const rows=await endpoint('wallets?select=user_id,coins,diamonds,silver&user_id=eq.'+encodeURIComponent(id)+'&limit=1');
  if(id!==me())return;
  s.wallet=Array.isArray(rows)&&rows[0]?.user_id===id?rows[0]:null;if(s.screen==='wallet')render();
+}
+async function readPublicId(){
+ const uid=me();if(!uid)return;
+ try{const result=await rpc('phase5_special_id_status',{p_target:uid});
+  if(uid!==me())return;
+  if(result?.userId===uid&&typeof result.assigned==='boolean'){
+   s.extra.publicId=result;if(s.screen==='me')render();
+  }
+ }catch(_){s.extra.publicId=null;}
 }
 async function readAuthority(){
  try{const role=await rpc('phase3_admin_session',{});
@@ -358,7 +367,7 @@ async function loadRoute(route){
   else if(route==='explore')await readRooms();
   else if(route==='wallet')await readWallet();
   else if(route==='room')await refreshRoom();
-  else if(route==='me')await readAuthority();
+  else if(route==='me')await Promise.allSettled([readAuthority(),readPublicId()]);
   else if(window.TotiRebornFeatures?.load)await window.TotiRebornFeatures.load(route);
  };
  try{await run();}catch(e){fail(e);}
@@ -378,7 +387,7 @@ async function boot(){
  try{await auth.resume();}catch(e){fail(e);}
  s.loading=false;s.userId=me();s.screen=live()?'home':'login';
  bindRealtime();render();
- if(live())void Promise.allSettled([loadRoute('home'),readAuthority(),readWallet()]);
+ if(live())void Promise.allSettled([loadRoute('home'),readAuthority(),readWallet(),readPublicId()]);
  else void checkGoogle();
 }
 async function checkGoogle(){
