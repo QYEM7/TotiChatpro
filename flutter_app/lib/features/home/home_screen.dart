@@ -298,25 +298,6 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
             IconButton(onPressed: _reload, icon: const Icon(Icons.refresh_rounded)),
           ]),
         )),
-        if (!widget.explore) SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(26),
-              gradient: const LinearGradient(colors: [TotiColors.plum, Color(0xFF9C86D8)]),
-            ),
-            child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(Icons.graphic_eq_rounded, size: 42, color: TotiColors.gold),
-              SizedBox(height: 12),
-              Text('كل الأصوات إلها مكان', style: TextStyle(
-                fontSize: 23, color: Colors.white, fontWeight: FontWeight.w800)),
-              SizedBox(height: 5),
-              Text('اكتشف غرفاً حقيقية أو ابدأ جلستك الخاصة.',
-                style: TextStyle(color: Colors.white70)),
-            ]),
-          ),
-        )),
         if (!widget.explore) SliverToBoxAdapter(child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _banners,
           builder: (context, snapshot) {
