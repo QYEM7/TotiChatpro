@@ -9,6 +9,10 @@ on:
       - '.github/workflows/flutter-v1-check.yml'
   workflow_dispatch:
 
+concurrency:
+  group: flutter-v1-\${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
