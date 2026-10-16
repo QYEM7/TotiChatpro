@@ -471,6 +471,35 @@ class TotiChatServices {
     return result['id'] as String;
   }
 
+  Future<List<Map<String,dynamic>>> supportStaff() async {
+    userId;
+    final result=object(await client.rpc('phase5_support_staff_list',
+      params:{'p_offset':0,'p_limit':50}));
+    return rows(result);
+  }
+
+  Future<void> manageSupportStaff({
+    required String targetUserId,
+    required bool enable,
+    required String requestId,
+  }) async {
+    userId;
+    if (targetUserId.isEmpty || targetUserId == userId) {
+      throw ArgumentError('A separate confirmed user is required');
+    }
+    final action=enable?'staff_grant':'staff_revoke';
+    final result=object(await client.rpc('phase5_support_action',params:{
+      'p_action':action,
+      'p_data':{'user_id':targetUserId},
+      'p_request_id':requestId,
+    }));
+    if (result['action']!=action ||
+        result['id']?.toString()!=targetUserId ||
+        result['status']!='completed') {
+      throw StateError('Support staff access change not confirmed');
+    }
+  }
+
   Future<List<Map<String, dynamic>>> adminBanners() async {
     userId;
     final result=object(await client.rpc('phase6_admin_banner_list',
