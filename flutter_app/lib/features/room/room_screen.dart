@@ -233,6 +233,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       builder: (_) => RoomMusicQueueScreen(
         api: TotiChatServices(widget.repository.client),
         roomId: widget.room.id,
+        roomOwnerId: widget.room.ownerId,
       )));
   }
 
