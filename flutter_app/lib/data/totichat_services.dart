@@ -335,6 +335,64 @@ class TotiChatServices {
     return data;
   }
 
+  /// Financial host evidence is read-only. Server explicitly forbids
+  /// payroll approval, salary transfers and diamond zeroing.
+  static Map<String, dynamic> hostConservationParams(
+      DateTime month, {int offset = 0}) {
+    final start = DateTime.utc(month.year, month.month);
+    final current = DateTime.now().toUtc();
+    final nowMonth = DateTime.utc(current.year, current.month);
+    if (start.isBefore(DateTime.utc(2025)) || !start.isBefore(nowMonth) ||
+        offset < 0 || offset > 100000 || offset % 30 != 0) {
+      throw ArgumentError('A closed UTC host month and valid offset are required');
+    }
+    return {
+      'p_month': start.toIso8601String().substring(0, 10),
+      'p_offset': offset,
+      'p_limit': 30,
+    };
+  }
+
+  static void _checkHostAudit(Map<String, dynamic> data) {
+    if (data['isReadOnly'] != true ||
+        data['canApprovePayroll'] != false ||
+        data['canPaySalaries'] != false ||
+        data['canZeroDiamonds'] != false) {
+      throw StateError('Host audit did not confirm disabled payroll actions');
+    }
+  }
+
+  Future<Map<String, dynamic>> hostMonthIntegrity(DateTime month) async {
+    userId;
+    final params = hostConservationParams(month);
+    final data = object(await client.rpc('phase6_host_month_evidence_integrity',
+      params: {'p_month': params['p_month']}));
+    _checkHostAudit(data);
+    if (data['hasEvidenceProblems'] is! bool ||
+        data['snapshotCaptured'] is! bool) {
+      throw StateError('Missing host accrual audit indicators');
+    }
+    return data;
+  }
+
+  Future<Map<String, dynamic>> hostMonthConservation(DateTime month,
+      {int offset = 0}) async {
+    userId;
+    final params = hostConservationParams(month, offset: offset);
+    final data = object(await client.rpc('phase7_host_month_diamond_conservation',
+      params: params));
+    _checkHostAudit(data);
+    if (data['isReadyForFinalClose'] != false ||
+        data['hasPayrollRates'] != false ||
+        data['hasDiscrepancies'] is! bool ||
+        data['hosts'] is! List ||
+        data['pageOffset'] != offset ||
+        data['pageLimit'] != 30) {
+      throw StateError('Invalid or unsafe diamond conservation audit');
+    }
+    return data;
+  }
+
   Future<Map<String,dynamic>> agencyState() async {
     userId;
     return object(await client.rpc('phase4_agency_state'));
