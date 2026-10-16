@@ -9,6 +9,7 @@ on:
       - 'app/phase2-livekit-sdk.mjs'
       - 'scripts/build-reborn-web.mjs'
       - 'tests/reborn-frontend.test.mjs'
+      - 'tests/reborn-release-safety.test.mjs'
       - 'tests/reborn-browser.test.mjs'
       - 'tests/reborn-signedin-browser.test.mjs'
       - 'package.json'
@@ -34,7 +35,7 @@ jobs:
           node --check app/reborn/core.js
           node --check app/reborn/features.js
           node --check app/phase2-auth.js
-          node --test tests/reborn-frontend.test.mjs
+          node --test tests/reborn-frontend.test.mjs tests/reborn-release-safety.test.mjs
       - name: Build fresh Android-ready app
         run: npm run build
       - name: Check actual WebView entry and assets
