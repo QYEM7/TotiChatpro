@@ -119,7 +119,9 @@ function support(){
 function settings(){
  return h('إعدادات الحساب')+api().menuRow('◈','تعديل الملف الشخصي','editProfile')+
  api().menuRow('♧','الإشعارات','notifications')+
- '<div class="card"><h3>الأمان والخصوصية</h3><p class="hint">المصادقة عبر Google حصراً في هذه النسخة. لإلغاء الوصول يمكنك تسجيل الخروج.</p>'+
+ '<div class="card"><h3>الأمان والخصوصية</h3><p class="hint">المصادقة عبر Google حصراً في هذه النسخة. يمكنك تسجيل الخروج أو طلب حذف حسابك والبيانات المرتبطة به.</p>'+
+ '<button class="secondary full" style="margin-bottom:10px" data-act="requestDeletion">طلب حذف حسابي وبياناتي</button>'+
+ '<p class="hint">طلب الحذف يُسجَّل كتذكرة فعلية لحسابك لدى الدعم ويحتاج معالجة آمنة. قد تُحتفظ بسجلات مالية مطلوبة للالتزامات القانونية، وسيتم توضيح ذلك ضمن المراجعة.</p>'+
  '<button class="danger full" data-act="logout">تسجيل الخروج من TotiChat</button></div>';
 }
 function admin(){
@@ -207,6 +209,22 @@ async function loadSheet(name){
 }
 async function action(cmd,target){
  try{
+  if(cmd==='requestDeletion'){
+   const confirmed=confirm('هل تريد إرسال طلب رسمي بحذف حساب TotiChat والبيانات المرتبطة به؟ لا يبدأ الحذف تلقائياً، وسيراجع الدعم الطلب وهويتك قبل تنفيذه.');
+   if(!confirmed)return;
+   const sig='delete-account|'+current();
+   if(!pendingKeys.has(sig))pendingKeys.set(sig,crypto.randomUUID());
+   const result=await rpc('phase5_support_action',{
+    p_action:'create',
+    p_data:{category:'account',subject:'Account and personal data deletion request',
+     message:'I request deletion of my TotiChat account and associated personal data. Please verify identity, handle financial record retention as legally required, and confirm completion.'},
+    p_request_id:pendingKeys.get(sig)
+   });
+   if(!result?.id)throw Error('لم يؤكد الخادم تسجيل طلب الحذف');
+   pendingKeys.delete(sig);
+   api().notify('تم تسجيل طلب حذف الحساب لدى الدعم، رقم الطلب: '+result.id);
+   return;
+  }
   if(cmd==='logout'){await api().disconnectVoice();await A().signOut();api().open('home');return;}
   if(cmd==='avatarUpload'){
    const file=document.getElementById('avatar-file')?.files?.[0];if(!file)throw Error('اختر صورة أولاً');
