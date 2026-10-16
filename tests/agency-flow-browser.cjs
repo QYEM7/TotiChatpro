@@ -54,9 +54,9 @@ const base=process.env.UI_URL||'http://127.0.0.1:8765/app/';
   // Reactualized role and navigation after agency creation.
   await page.evaluate(()=>go('home'));
   assert.ok(await page.$('.royal-home'));
-  await page.waitForFunction(()=>{const el=document.querySelector('.royal-home');return el?.isConnected&&getComputedStyle(el).backgroundImage==='none';},{timeout:3500,polling:100});
+  await page.waitForFunction(()=>{const el=document.querySelector('.royal-home');return el?.isConnected&&getComputedStyle(el).backgroundImage.includes('linear-gradient');},{timeout:3500,polling:100});
   const bg=await page.$eval('.royal-home',el=>getComputedStyle(el).backgroundImage);
-  assert.equal(bg,'none','page-sized wallpaper removed');
+  assert.match(bg,/linear-gradient/, 'Owner-approved light gradient must be present, not the old dark wallpaper');
   assert.deepEqual(errors,[],'no browser runtime errors');
   console.log('PASS agency journey: pack, agents, chat, payment UX, rating, staff hire and approval. '+packs+' pack buttons retained.');
  }finally{await browser.close();}
