@@ -1,0 +1,8 @@
+include: package:flutter_lints/flutter.yaml
+analyzer:
+  errors:
+    invalid_assignment: error
+    missing_required_param: error
+linter:
+  rules:
+    avoid_print: true
