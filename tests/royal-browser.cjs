@@ -111,19 +111,14 @@ async function shot(page,name){
  await page.evaluate(()=>document.querySelector('[data-a="restoreRoom"]')?.click());
  assert.equal(await page.$eval('#app',e=>e.dataset.route),'room');
 
- // Unified X must be part of the room menu, not floating outside.
+ // Owner 2026-10-16: only minimize and leave in the room action overlay.
  await page.evaluate(()=>sheet('roomExitMenu'));
- await page.waitForSelector('.rp-room-menu-head .rp-unified-close');
- assert.ok(await page.$('.rp-room-menu-head .rp-unified-close svg'));
- const closeLocation=await page.$eval('.rp-room-menu-head .rp-unified-close',b=>{
-  const a=b.getBoundingClientRect(),p=b.closest('.room-glass').getBoundingClientRect();
-  return {inside:a.top>=p.top&&a.bottom<=p.bottom&&a.left>=p.left&&a.right<=p.right,w:a.width,h:a.height};
- });
- assert.equal(closeLocation.inside,true,'Room X must be INSIDE dialog');
- assert.equal(closeLocation.w,42);
- assert.equal(closeLocation.h,42);
- await shot(page,'07-room-menu-close');
- await page.click('.rp-room-menu-head .rp-unified-close');
+ await page.waitForSelector('#sheet.room-glass .room-action');
+ const actions=await page.$$eval('#sheet.room-glass .room-action',elements=>elements.map(e=>e.textContent.trim()));
+ assert.deepEqual(actions,['تصغير الغرفة','مغادرة الغرفة']);
+ assert.equal(await page.$('#sheet .room-glass-close'),null,'No X in this room action overlay');
+ await shot(page,'07-room-menu-two-actions');
+ await page.evaluate(()=>closeSheet());
  assert.equal(await page.$eval('#overlay',el=>el.classList.contains('show')),false);
  // Every level has its own generated vector emblem, with 100 selectable levels.
  await page.evaluate(()=>go('level'));
