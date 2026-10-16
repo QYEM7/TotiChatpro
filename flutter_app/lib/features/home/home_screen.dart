@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
@@ -73,34 +74,77 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
   }
 
   Future<void> _createRoom() async {
-    final controller = TextEditingController();
-    bool isPrivate = false;
-    final result = await showDialog<(String, bool)>(
+    final name = TextEditingController();
+    final welcome = TextEditingController();
+    var privateRoom = false;
+    XFile? selected;
+    final draft = await showDialog<({String title, String welcome, bool privateRoom, XFile cover})>(
       context: context,
-      builder: (context) => StatefulBuilder(builder: (context, setDialogState) =>
-        AlertDialog(
-          title: const Text('إنشاء غرفة حقيقية'),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(controller: controller, maxLength: 60,
-              decoration: const InputDecoration(labelText: 'اسم الغرفة (3–60 حرفاً)')),
-            SwitchListTile(
-              title: const Text('غرفة خاصة'), value: isPrivate,
-              onChanged: (v) => setDialogState(() => isPrivate = v),
-            ),
-          ]),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, update) => AlertDialog(
+          title: const Text('إنشاء غرفة جديدة'),
+          content: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              TextField(controller: name, maxLength: 60,
+                decoration: const InputDecoration(labelText: 'اسم الغرفة *')),
+              TextField(controller: welcome, maxLength: 500, maxLines: 3,
+                decoration: const InputDecoration(labelText: 'رسالة الترحيب *')),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  try {
+                    final picked = await ImagePicker().pickImage(
+                      source: ImageSource.gallery, maxWidth: 1600,
+                      maxHeight: 1600, imageQuality: 88,
+                    );
+                    if (picked != null && dialogContext.mounted) {
+                      update(() => selected = picked);
+                    }
+                  } catch (error) {
+                    if (dialogContext.mounted) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        SnackBar(content: Text('تعذر اختيار الصورة: $error')));
+                    }
+                  }
+                },
+                icon: const Icon(Icons.photo_library_outlined),
+                label: Text(selected == null ? 'اختر صورة الغرفة *' : selected!.name),
+              ),
+              SwitchListTile(
+                title: const Text('غرفة خاصة'),
+                value: privateRoom,
+                onChanged: (v) => update(() => privateRoom = v),
+              ),
+            ]),
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context),
+            TextButton(onPressed: () => Navigator.pop(dialogContext),
               child: const Text('إلغاء')),
-            FilledButton(onPressed: () => Navigator.pop(
-              context, (controller.text, isPrivate)), child: const Text('إنشاء')),
+            FilledButton(
+              onPressed: selected == null ||
+                  name.text.trim().length < 3 ||
+                  welcome.text.trim().length < 2 ? null : () {
+                    Navigator.pop(dialogContext, (
+                      title: name.text, welcome: welcome.text,
+                      privateRoom: privateRoom, cover: selected!,
+                    ));
+                  },
+              child: const Text('إنشاء عبر الخادم'),
+            ),
           ],
         ),
       ),
     );
-    controller.dispose();
-    if (result == null || !mounted) return;
+    name.dispose();
+    welcome.dispose();
+    if (draft == null || !mounted) return;
     try {
-      final room = await widget.repository.createRoom(result.$1, isPrivate: result.$2);
+      final room = await widget.repository.createRoomWithCover(
+        title: draft.title,
+        welcome: draft.welcome,
+        image: draft.cover,
+        isPrivate: draft.privateRoom,
+      );
       if (!mounted) return;
       _reload();
       await Navigator.push(context, MaterialPageRoute(
@@ -108,7 +152,8 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
       if (mounted) _reload();
     } catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر إنشاء الغرفة: $error')));
+        SnackBar(content: Text('لم تكتمل عملية الغرفة: $error'),
+          duration: const Duration(seconds: 6)));
     }
   }
 
@@ -245,7 +290,13 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
                           decoration: BoxDecoration(
                             color: TotiColors.lavender,
                             borderRadius: BorderRadius.circular(18)),
-                          child: const Icon(Icons.mic_rounded, color: TotiColors.plum, size: 29)),
+                          child: widget.repository.coverUrl(room) == null ?
+                            const Icon(Icons.mic_rounded, color: TotiColors.plum, size: 29) :
+                            ClipRRect(borderRadius: BorderRadius.circular(18),
+                              child: Image.network(widget.repository.coverUrl(room)!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const Icon(
+                                  Icons.mic_rounded, color: TotiColors.plum))),
                         const SizedBox(width: 13),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
