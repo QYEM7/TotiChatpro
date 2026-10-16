@@ -100,7 +100,29 @@ class TotiChatServices {
     final result = object(await client.rpc('phase5_social_follow', params: {
       'p_target': peer, 'p_follow': enabled, 'p_request_id': requestId,
     }));
-    if (result.isEmpty) throw StateError('Follow operation not confirmed');
+    if (result['followed'] != enabled ||
+        result['targetId']?.toString() != peer) {
+      throw StateError('Follow operation not confirmed by server');
+    }
+  }
+
+  /// Draws are read-only until official probability disclosures are approved.
+  Future<Map<String, dynamic>> luckyReadiness() async {
+    userId;
+    final result = object(await client.rpc('phase5_lucky_gift_readiness'));
+    if (result['approvedOddsPublished'] is! bool ||
+        result['purchasesAllowed'] is! bool ||
+        result['bonusCurrency'] != 'LUCKY_POINTS_NON_REDEEMABLE' ||
+        result['tiers'] is! List) {
+      throw StateError('Lucky Gift policy response is incomplete');
+    }
+    return result;
+  }
+
+  Future<List<Map<String, dynamic>>> luckyHistory() async {
+    userId;
+    return rows(await client.rpc('phase6_lucky_gift_history',
+      params: {'p_limit': 30}));
   }
 
   Future<List<Map<String, dynamic>>> gifts() async {
