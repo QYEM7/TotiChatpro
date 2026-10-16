@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../data/totichat_repository.dart';
+import '../../data/totichat_services.dart';
+import '../community/community_screen.dart';
 import '../../models/room_models.dart';
 import '../../ui/toti_theme.dart';
 import '../room/room_screen.dart';
@@ -22,6 +24,7 @@ class _HomeShellState extends State<HomeShell> {
     final pages = [
       RoomsDirectory(repository: widget.repository, explore: false),
       RoomsDirectory(repository: widget.repository, explore: true),
+      CommunityScreen(api: TotiChatServices(widget.repository.client)),
       AccountPage(repository: widget.repository, walletOnly: true),
       AccountPage(repository: widget.repository, walletOnly: false),
     ];
@@ -35,6 +38,7 @@ class _HomeShellState extends State<HomeShell> {
           destinations: const [
             NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'الرئيسية'),
             NavigationDestination(icon: Icon(Icons.search_rounded), label: 'اكتشف'),
+            NavigationDestination(icon: Icon(Icons.people_outline_rounded), label: 'مجتمع'),
             NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), label: 'محفظتي'),
             NavigationDestination(icon: Icon(Icons.person_outline_rounded), label: 'ملفي'),
           ],
