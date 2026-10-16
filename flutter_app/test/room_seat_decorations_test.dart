@@ -77,7 +77,7 @@ void main() {
     )));
     expect(find.text('VIP 5'), findsOneWidget);
     expect(find.text('🎁 17'), findsOneWidget);
-    expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
+    expect(find.text('✨'), findsOneWidget);
     expect(find.byIcon(Icons.workspace_premium_rounded), findsOneWidget);
     expect(find.byIcon(Icons.mic_off_rounded), findsOneWidget);
   });
