@@ -146,6 +146,8 @@ function sheet(name){
  if(name==='roomMembers')return '<h2>أعضاء الغرفة</h2>'+list(s().members,x=>'<div class="list-item">'+api().avatar(x.avatar_url)+
  '<div class="grow"><b>'+e(x.display_name||'مستخدم')+'</b><br><small>'+e(x.seat_no?'المقعد '+x.seat_no:'عضو مستمع')+'</small></div>'+
  (x.user_id!==current()?'<button class="secondary" data-peer="'+e(x.user_id)+'" data-name="'+e(x.display_name||'مستخدم')+'">مراسلة</button>':'')+'</div>','الغرفة فارغة حالياً.');
+ if(name==='inviteJoin')return '<h2>دخول غرفة خاصة</h2><p class="hint">اكتب رمز الدعوة المستلم من صاحب الغرفة. لا تظهر الغرف الخاصة في القائمة العامة.</p>'+
+ '<form id="invite-join-form" class="stack"><label><span class="label">رمز الدعوة</span><textarea class="field" required name="invite" maxlength="250" placeholder="Room ID:Invitation token"></textarea></label><button class="primary">دخول الغرفة</button></form>';
  if(name==='roomInvite')return '<h2>رمز دعوة خاص</h2><p class="hint">شارك الرمز فقط مع الشخص المقصود.</p><textarea class="field" readonly>'+e(s().extra.invite||'')+'</textarea>'+
  '<button data-act="copyInvite" class="secondary full" style="margin-top:10px">نسخ الرمز</button>';
  if(name==='gifts'){
@@ -244,7 +246,16 @@ async function submit(id,form){
  if(s().busy)return;
  const fd=new FormData(form);s().busy=true;
  try{
-  if(id==='profile-form'){
+  if(id==='invite-join-form'){
+   const raw=String(fd.get('invite')||'').trim();
+   const match=raw.match(/^([0-9a-f]{8}-[0-9a-f-]{27,36}):([a-f0-9]{48,100})$/i);
+   if(!match||!api().validId(match[1]))throw Error('رمز الدعوة غير صالح');
+   const result=await rpc('phase2_room_invite_join',{p_room_id:match[1],p_token:match[2]});
+   if(result!==true)throw Error('لم يؤكد الخادم قبول الدعوة');
+   await api().readRooms();
+   s().sheet='';
+   await api().enterRoom(match[1]);
+  }else if(id==='profile-form'){
    await A().updateProfile({display_name:String(fd.get('name')||''),bio:String(fd.get('bio')||'')});
    api().notify('تم حفظ الملف الشخصي');api().open('me');
   }else if(id==='dm-form'){
