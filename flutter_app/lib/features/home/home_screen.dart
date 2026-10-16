@@ -333,7 +333,7 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
                               child: Image.network(widget.repository.coverUrl(room)!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, _, _) => const Icon(
-                                  Icons.mic_rounded, color: TotiColors.plum))),
+                                  Icons.mic_rounded, color: TotiColors.plum)))),
                         const SizedBox(width: 13),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
