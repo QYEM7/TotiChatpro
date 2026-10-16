@@ -2,16 +2,7 @@ name: TotiChat Owner Staging Debug APK
 # Debug-only, isolated staging build requested by the Owner on 2026-10-16.
 # Never publishes to Google Play, changes production, or signs as a release.
 on:
-  push:
-    branches: [develop/phase-2]
-    paths:
-      - 'app/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'scripts/build-approved-web.mjs'
-      - 'scripts/configure-android-auth.mjs'
-      - 'scripts/configure-firebase-android.mjs'
-      - '.github/workflows/owner-staging-debug-apk.yml'
+  # Run explicitly for QA only. No repeated APK builds on routine UI pushes.
   workflow_dispatch:
 permissions:
   contents: read
