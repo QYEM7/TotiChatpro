@@ -6,6 +6,7 @@ import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
 import '../community/dm_screen.dart';
 import '../economy/gift_sheet.dart';
+import '../economy/real_gift_ticker.dart';
 import '../../models/room_models.dart';
 import '../../ui/toti_theme.dart';
 import 'voice_session.dart';
@@ -303,6 +304,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
               child: Text(_error ?? 'تعذّر دخول الغرفة',
                 style: const TextStyle(color: Colors.white)))) :
             Column(children: [
+              RealGiftTicker(client:widget.repository.client),
               if (_error != null) Container(
                 width: double.infinity, color: Colors.red.shade900,
                 padding: const EdgeInsets.all(8),
