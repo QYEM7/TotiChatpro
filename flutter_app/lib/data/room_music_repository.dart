@@ -27,8 +27,8 @@ class RoomMusicRepository {
     }
     if (reference.isNotEmpty) {
       final uri = Uri.tryParse(reference);
-      if (reference.length > 500 || uri == null ||
-          uri.scheme != 'https' || !uri.hasAuthority ||
+      if (reference.length > 500 || RegExp(r'\\s').hasMatch(reference) ||
+          uri == null || uri.scheme != 'https' || !uri.hasAuthority ||
           uri.host.isEmpty || uri.userInfo.isNotEmpty) {
         throw ArgumentError('Reference must be a valid HTTPS URL under 500 characters');
       }
