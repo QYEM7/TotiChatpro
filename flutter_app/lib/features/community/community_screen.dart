@@ -253,7 +253,13 @@ class _SupportTabState extends State<_SupportTab>{
   @override void dispose(){_subject.dispose();_message.dispose();super.dispose();}
   Future<void> _submit() async {
     if(_sending)return;
-    final signature='$_category|${_subject.text.trim()}|${_message.text.trim()}';
+    final subject=_subject.text.trim(),message=_message.text.trim();
+    if(subject.length<5||subject.length>120||
+       message.length<2||message.length>2500){
+      showApiError(context,'Ticket subject and message are required.');
+      return;
+    }
+    final signature='$_category|$subject|$message';
     if(_pendingSignature!=null && signature!=_pendingSignature){
       showApiError(context,'A previous ticket has an uncertain result. '
         'Retry its original details before creating a different ticket.');
