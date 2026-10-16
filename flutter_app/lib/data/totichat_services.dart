@@ -265,6 +265,38 @@ class TotiChatServices {
     }));
   }
 
+  Future<Map<String,dynamic>> rechargeState() async {
+    userId;
+    return object(await client.rpc('phase4_recharge_state'));
+  }
+
+  Future<void> decideAgentRequest({
+    required String operationId, required String action,
+    required String note, required String requestId,
+    String? cashReference,
+  }) async {
+    userId;
+    if(!['approve','reject'].contains(action)||
+      note.trim().length<3||note.length>500||
+      (action=='approve'&&(cashReference==null||
+         cashReference.trim().length<3||cashReference.length>120))){
+      throw ArgumentError('Documented recharge decision required');
+    }
+    final result=object(await client.rpc('phase4_recharge_action',
+      params:{
+        'p_action':action,
+        'p_data':{
+          'id':operationId,
+          'note':note.trim(),
+          if(action=='approve')'cash_reference':cashReference!.trim(),
+        },
+        'p_request_id':requestId,
+      }));
+    if(result['status']!='completed'&&result['id']==null){
+      throw StateError('Recharge operation not confirmed');
+    }
+  }
+
   Future<Map<String,dynamic>> roomModerationState(String roomId) async {
     userId;
     return object(await client.rpc('phase2_room_moderation_state',
