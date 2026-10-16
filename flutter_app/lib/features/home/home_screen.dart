@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
 import '../community/community_screen.dart';
+import '../economy/real_gift_ticker.dart';
 import '../../models/room_models.dart';
 import '../../ui/toti_theme.dart';
 import '../room/room_screen.dart';
@@ -32,7 +33,10 @@ class _HomeShellState extends State<HomeShell> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        body: SafeArea(child: IndexedStack(index: _tab, children: pages)),
+        body: SafeArea(child: Column(children: [
+          RealGiftTicker(client: widget.repository.client),
+          Expanded(child: IndexedStack(index: _tab, children: pages)),
+        ])),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _tab,
           onDestinationSelected: (index) => setState(() => _tab = index),
