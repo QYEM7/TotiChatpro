@@ -398,11 +398,12 @@ async function checkGoogle(){
 }
 async function bindNativeOAuth(){
  if(!(location.protocol==='https:'&&location.hostname==='localhost'))return;
- const app=window.Capacitor?.Plugins?.App;
- if(!app?.addListener)return;
+ const native=await import('./native-bridge.bundle.js');
+ const app=native.App;
+ if(!app?.addListener||!native.Browser?.open)throw Error('Android Google login bridge unavailable');
  await app.addListener('appUrlOpen',async event=>{
   if(!event?.url||!event.url.startsWith('com.totichat.beta://auth/callback'))return;
-  try{await auth.handleOAuthCallback(event.url);await window.Capacitor?.Plugins?.Browser?.close?.();s.sheet='';s.screen='home';render();await loadRoute('home');}
+  try{await auth.handleOAuthCallback(event.url);await native.Browser.close().catch(()=>{});s.sheet='';s.screen='home';render();await loadRoute('home');}
   catch(e){fail(e);render();}
  });
 }
