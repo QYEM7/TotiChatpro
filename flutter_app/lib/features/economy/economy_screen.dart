@@ -29,7 +29,7 @@ class _StoreTab extends StatefulWidget{
 }
 class _StoreTabState extends State<_StoreTab>{
   late Future<List<Map<String,dynamic>>> _future;
-  bool _busy=false;String? _pendingId,_pendingItem;
+  bool _busy=false;String? _pendingId,_pendingSignature;
   @override void initState(){super.initState();_refresh();}
   void _refresh()=>setState(()=>_future=widget.api.store());
   Future<void> _buy(Map<String,dynamic> item) async{
@@ -44,12 +44,20 @@ class _StoreTabState extends State<_StoreTab>{
           FilledButton(onPressed:()=>Navigator.pop(context,true),
             child:const Text('تأكيد'))]));
     if(confirmed!=true||!mounted)return;
+    final signature=[
+      item['id'], item['price'], item['currency'],
+    ].join('|');
+    if(_pendingId!=null && _pendingSignature!=signature){
+      showApiError(context,'An unresolved purchase must be confirmed '
+        'or retried with identical item, price and currency.');
+      return;
+    }
     setState(()=>_busy=true);
-    if(_pendingItem!=item['id']){_pendingItem=item['id']?.toString();_pendingId=null;}
+    _pendingSignature=signature;
     _pendingId??=TotiChatServices.requestId();
     try{
       await widget.api.buyItem(item,_pendingId!);
-      _pendingId=null;_pendingItem=null;
+      _pendingId=null;_pendingSignature=null;
       if(mounted){
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content:Text('أكد الخادم نجاح الشراء')));
