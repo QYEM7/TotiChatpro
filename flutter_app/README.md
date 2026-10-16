@@ -34,9 +34,11 @@ flutter create --platforms=android --org com.totichat --project-name totichat .
 flutter pub get
 flutter analyze lib test
 flutter test test/architecture_test.dart
-flutter run --dart-define=SUPABASE_PUBLISHABLE_KEY=<STAGING_PUBLIC_KEY>
+flutter run
 ```
 
+The Staging **sb_publishable_** key is preconfigured as a public client key.
+Optionally override it with --dart-define=SUPABASE_PUBLISHABLE_KEY=....
 Use ONLY the **publishable/anon** key from Staging. A public key is client-safe,
 but **service_role, private keys, LiveKit secrets and Admin keys must never
 enter the client**.
