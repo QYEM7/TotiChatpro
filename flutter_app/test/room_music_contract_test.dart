@@ -20,12 +20,12 @@ void main() {
   });
 
   test('rejects invalid metadata before reaching financial or audio services', () {
-    for (final title in ['', 'x', 'x' * 101]) {
+    for (final title in ['', 'x', List.filled(101,'x').join()]) {
       expect(() => RoomMusicRepository.validateBookmark(
         title: title, artist: 'valid'), throwsArgumentError);
     }
     expect(() => RoomMusicRepository.validateBookmark(
-      title: 'Two chars', artist: 'a' * 81), throwsArgumentError);
+      title: 'Two chars', artist: List.filled(81,'a').join()), throwsArgumentError);
     for (final url in [
       'http://example.com/file',
       'javascript:alert(1)',
@@ -33,7 +33,7 @@ void main() {
       'https://',
       'https://host.test/has spaces',
       'https://user:password@host.test/music',
-      'https://host.test/${'a' * 501}',
+      'https://host.test/${List.filled(501,'a').join()}',
     ]) {
       expect(() => RoomMusicRepository.validateBookmark(
         title: 'Valid song title', artist: '', referenceUrl: url),
