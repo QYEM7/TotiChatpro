@@ -86,8 +86,10 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               TextField(controller: name, maxLength: 60,
+                onChanged: (_) => update(() {}),
                 decoration: const InputDecoration(labelText: 'اسم الغرفة *')),
               TextField(controller: welcome, maxLength: 500, maxLines: 3,
+                onChanged: (_) => update(() {}),
                 decoration: const InputDecoration(labelText: 'رسالة الترحيب *')),
               const SizedBox(height: 8),
               OutlinedButton.icon(
