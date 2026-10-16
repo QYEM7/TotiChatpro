@@ -43,3 +43,12 @@ test('rebuild uses staging public backend and original audio SDK source',()=>{
  assert.ok(existsSync('app/phase2-livekit-sdk.mjs'));
  assert.ok(read('scripts/build-reborn-web.mjs').includes('phase2-livekit-sdk.mjs'));
 });
+
+test('old UI deleted from active branch and root loads Reborn',()=>{
+ for(const file of ['app/royal-final.js','app/frontend-finish.js','app/toti-nav-banner-refine.js',
+  'app/official-auth-screen.js','app/phase2-rooms.js','admin-dashboard/index.html'])
+  assert.equal(existsSync(file),false,'Legacy UI still present: '+file);
+ const root=read('index.html');
+ assert.match(root,/reborn\/core\.js/);
+ assert.match(root,/<base href="\.\/app\/">/);
+});
