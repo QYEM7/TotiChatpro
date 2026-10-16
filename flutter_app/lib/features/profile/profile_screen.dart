@@ -140,3 +140,25 @@ class _AccountPageState extends State<AccountPage> {
     OutlinedButton(onPressed: _refresh, child: const Text('إعادة المحاولة')),
   ]);
 }
+
+class _AdminEntry extends StatefulWidget {
+  const _AdminEntry({required this.api});
+  final TotiChatServices api;
+  @override State<_AdminEntry> createState()=>_AdminEntryState();
+}
+
+class _AdminEntryState extends State<_AdminEntry> {
+  late final Future<Map<String,dynamic>> _role=widget.api.authority();
+  @override Widget build(BuildContext context)=>FutureBuilder<Map<String,dynamic>>(
+    future:_role,builder:(context,snapshot){
+      final role=snapshot.data;
+      if(role==null||!canOpenAdmin(role))return const SizedBox.shrink();
+      return Card(child:ListTile(
+        leading:const Icon(Icons.admin_panel_settings_outlined),
+        title:const Text('مركز الإدارة'),
+        subtitle:const Text('متاح حسب صلاحية الخادم'),
+        onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+          builder:(_)=>AdminScreen(api:widget.api)))));
+    },
+  );
+}
