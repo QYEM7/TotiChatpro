@@ -33,7 +33,11 @@ class TotiChatApp extends StatelessWidget {
     theme: buildTotiTheme(),
     locale: const Locale('ar', 'IQ'),
     supportedLocales: const [Locale('ar', 'IQ'), Locale('en', 'US')],
-    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    localizationsDelegates: const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+    ],
     home: configured ? const _AuthGate() : const _SetupScreen(),
   );
 }
