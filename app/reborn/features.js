@@ -110,8 +110,8 @@ function support(){
  '<div class="card"><p class="hint">البلاغات تذهب مباشرة إلى نظام التذاكر. لا يتم التعامل عبر تطبيق خارجي.</p>'+
  '<form id="support-form" class="stack"><label><span class="label">نوع الطلب</span><select class="field" name="category">'+
  [['general','استفسار عام'],['technical','مشكلة تقنية'],['account','الحساب'],['recharge','الشحن'],['host_agency','وكالة مضيفين'],['host_transfer','انتقال مضيف']].map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+
- '</select></label><label><span class="label">عنوان الطلب</span><input name="title" class="field" required minlength="3" maxlength="120"></label>'+
- '<label><span class="label">وصف المشكلة</span><textarea name="message" class="field" required minlength="3" maxlength="2000"></textarea></label>'+
+ '</select></label><label><span class="label">عنوان الطلب</span><input name="subject" class="field" required minlength="5" maxlength="120"></label>'+
+ '<label><span class="label">وصف المشكلة</span><textarea name="message" class="field" required minlength="2" maxlength="2500"></textarea></label>'+
  '<button class="primary">إنشاء تذكرة دعم</button></form></div>'+
  '<div class="section-head"><h2>تذاكري</h2></div>'+
  list(rows,x=>'<div class="card" style="margin-bottom:9px"><b>'+e(x.title||x.category)+'</b><p class="hint">'+e(x.status||'')+'</p></div>','ما عندك تذاكر مفتوحة في النتائج الحالية.');
@@ -179,16 +179,12 @@ async function load(name){
  const uid=current();if(!uid)return;let result;
  if(name==='inbox'){result=await rpc('phase2_dm_inbox',{p_limit:40});if(uid===current()){s().inbox=Array.isArray(result)?result:[];api().render();}}
  else if(name==='thread'&&s().selectedPeer){result=await rpc('phase2_dm_thread',{p_other_user:s().selectedPeer,p_before_id:null,p_limit:100});if(uid===current()){s().thread=Array.isArray(result)?result.slice().reverse():[];api().render();}}
- else if(name==='store'){result=await get('store_catalog?select=id,name,category,price,currency,icon,description,is_active,is_reward,diamond_source_type&is_active=eq.true&limit=100').catch(async err=>{
-  // Store catalog has no diamond_source_type on Staging; use the canonical columns.
-  if(String(err.message).includes('diamond_source_type'))return get('store_catalog?select=id,name,category,price,currency,icon,description,is_active,is_reward&is_active=eq.true&limit=100');
-  throw err;
- });if(uid===current()){s().store=Array.isArray(result)?result:[];api().render();}}
+ else if(name==='store'){result=await get('store_catalog?select=id,name,category,price,currency,icon,description,is_active,is_reward&is_active=eq.true&limit=100');if(uid===current()){s().store=Array.isArray(result)?result:[];api().render();}}
  else if(name==='cp')set('cp',await rpc('phase4_cp_state',{}));
  else if(name==='agencies')set('agencies',await rpc('phase4_agency_state',{}));
  else if(name==='notifications'){
   result=await rpc('phase5_notification_feed',{p_limit:80,p_before:null});
-  set('notifications',Array.isArray(result)?result:Array.isArray(result?.items)?result.items:[]);
+  set('notifications',Array.isArray(result)?result:Array.isArray(result?.rows)?result.rows:Array.isArray(result?.items)?result.items:[]);
  }
  else if(name==='vip')set('vip',await rpc('phase5_vip_status',{p_target:uid}));
  else if(name==='giftHistory'){
@@ -197,7 +193,7 @@ async function load(name){
  }
  else if(name==='support'){
   result=await rpc('phase5_support_list',{p_scope:'mine',p_offset:0,p_limit:40});
-  set('support',Array.isArray(result)?result:Array.isArray(result?.tickets)?result.tickets:[]);
+  set('support',Array.isArray(result)?result:Array.isArray(result?.rows)?result.rows:Array.isArray(result?.tickets)?result.tickets:[]);
  }
  else if(name==='me'){await api().readAuthority();}
 }
