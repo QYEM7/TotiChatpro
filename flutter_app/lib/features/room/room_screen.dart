@@ -240,8 +240,16 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     _refreshTimer?.cancel();
     final live=_liveChannel;
     _liveChannel=null;
-    if(live!=null)await widget.repository.client.removeChannel(live);
     try {
+      // Realtime teardown is best-effort; a failed channel unsubscribe must
+      // never prevent the authoritative room-leave request.
+      if (live != null) {
+        try {
+          await widget.repository.client.removeChannel(live);
+        } catch (_) {
+          // The realtime socket may already be disconnected.
+        }
+      }
       await _voice.disconnect();
       if (_joined) await widget.repository.leaveRoom(widget.room.id);
       _joined = false;
