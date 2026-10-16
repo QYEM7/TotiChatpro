@@ -20,7 +20,7 @@ if(!auth||typeof window.render!=='function'){
 // The visual-review-20261009 identity is now authoritative; legacy paint overrides stay disabled.
 let explicitPreview=false;
 const authScreens=new Set(['loginPreview','signupPreview','verifyAccountPreview','passwordResetPreview']);
-const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview','musicPreview','messages','chatPreview',...authScreens]);
+const allowed=new Set(['home','me','room','wallet','profilePreview','profileEdit','storePreview','rechargePreview','cp','giftsPreview','musicPreview','messages','chatPreview','discoverPreview',...authScreens]);
 const $=(q,root=document)=>root.querySelector(q);
 const $$=(q,root=document)=>Array.from(root.querySelectorAll(q));
 let lastNotice='';
@@ -174,6 +174,7 @@ window.addEventListener('click',e=>{
   const route=item.dataset.v||'';
   const op=item.dataset.a||'';
   const royal=item.dataset.royal||'';
+  if(royal==='search'||(op==='sheet'&&route==='search')){\n    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();\n    go('discoverPreview');return;\n  }
   if(screen==='room'&&op==='sheet'&&route==='roomInfo'){
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
     const info=window.TotiPhase2Rooms?.getRoomSummary?.();
@@ -224,7 +225,7 @@ window.addEventListener('click',e=>{
   if((op==='go'&&!allowed.has(route))||
      (op==='go'&&route==='room'&&!window.TotiPhase2Rooms?.getStatus?.().activeRoomId)||
      (op==='sheet'&&/^(music|game|store|vip|recharge|lucky)/i.test(route))||
-     ['friends','notify','search'].includes(royal)){
+     ['friends','notify'].includes(royal)){
     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
     warn(op==='go'&&route==='room'?'اختر غرفة حقيقية من القائمة أو أنشئ غرفتك أولاً.':undefined);
   }
