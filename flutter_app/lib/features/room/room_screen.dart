@@ -188,6 +188,26 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _showInvite() async {
+    if (!_joined || widget.room.ownerId!=widget.repository.currentUserId) return;
+    try {
+      final code=await widget.repository.privateInvite(widget.room.id);
+      if (!mounted) return;
+      await showDialog<void>(context:context,builder:(ctx)=>AlertDialog(
+        title:const Text('دعوة الغرفة الخاصة'),
+        content:Column(mainAxisSize:MainAxisSize.min,children:[
+          const Text('شارك هذا الرمز خارج التطبيق مع العضو المقصود فقط.'),
+          const SizedBox(height:12),
+          SelectableText(code,textAlign:TextAlign.center),
+        ]),
+        actions:[TextButton(onPressed:()=>Navigator.pop(ctx),
+          child:const Text('تم'))],
+      ));
+    } catch(error) {
+      _show('تعذر إنشاء دعوة حقيقية: $error');
+    }
+  }
+
   Future<void> _openGifts() async {
     if (!_joined || _leaving) return;
     final confirmed = await showModalBottomSheet<bool>(
@@ -269,6 +289,13 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
             leading: IconButton(onPressed: _leaving ? null : _leave,
               icon: const Icon(Icons.exit_to_app_rounded),
               tooltip: 'مغادرة الغرفة'),
+            actions: [
+              if(widget.room.isPrivate &&
+                  widget.room.ownerId==widget.repository.currentUserId)
+                IconButton(onPressed:_showInvite,
+                  icon:const Icon(Icons.person_add_alt_rounded),
+                  tooltip:'دعوة عضو'),
+            ],
           ),
           body: _joining ? const Center(child: CircularProgressIndicator()) :
             !_joined ? Center(child: Padding(
