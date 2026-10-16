@@ -39,7 +39,7 @@ class _PeopleTabState extends State<_PeopleTab>{
   bool _busy=false;
   String? _pendingId;
   void _lookup(){
-    if(_search.text.trim().isEmpty)return;
+    if(_search.text.trim().length<2)return;
     setState(()=>_results=widget.api.socialSearch(_search.text));
   }
   Future<void> _follow(String peer) async{
@@ -65,7 +65,7 @@ class _PeopleTabState extends State<_PeopleTab>{
         retry:_lookup,builder:(context,rows)=>rows.isEmpty?
           const NoRecords('لا يوجد مستخدم مطابق.') :
           ListView.builder(itemCount:rows.length,itemBuilder:(context,i){
-            final p=rows[i],id=p['id']?.toString()??'';
+            final p=rows[i],id=TotiChatServices.verifiedSocialUserId(p);
             return recordCard(context,title:p['display_name']?.toString()??'عضو',
               description:id,
               trailing:PopupMenuButton<String>(
@@ -131,17 +131,17 @@ class _CpTabState extends State<_CpTab>{
         TextField(controller:_query,decoration:const InputDecoration(labelText:'اسم المستخدم')),
         const SizedBox(height:9),
         OutlinedButton.icon(onPressed:(){
-          if(_query.text.trim().isNotEmpty)setState(()=>
+          if(_query.text.trim().length>=2)setState(()=>
             _people=widget.api.socialSearch(_query.text));
         },icon:const Icon(Icons.search),label:const Text('بحث')),
         if(_people!=null)ServerPanel<List<Map<String,dynamic>>>(
           future:_people!,retry:()=>setState(()=>
             _people=widget.api.socialSearch(_query.text)),
           builder:(context,rows)=>DropdownButtonFormField<String>(
-            initialValue:rows.any((p)=>p['id']==_peer)?_peer:null,
+            initialValue:rows.any((p)=>p['user_id']==_peer)?_peer:null,
             hint:const Text('اختر الشخص'),
-            items:rows.where((p)=>p['id']!=widget.api.userId)
-              .map((p)=>DropdownMenuItem(value:p['id'].toString(),
+            items:rows.where((p)=>p['user_id']!=widget.api.userId)
+              .map((p)=>DropdownMenuItem(value:TotiChatServices.verifiedSocialUserId(p),
                 child:Text(p['display_name']?.toString()??'عضو'))).toList(),
             onChanged:(v)=>setState(()=>_peer=v))),
         DropdownButtonFormField<String>(
