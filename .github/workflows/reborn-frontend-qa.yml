@@ -44,6 +44,7 @@ jobs:
           test -s dist/app/reborn/features.js
           test -s dist/app/reborn/styles.css
           test -s dist/app/phase2-livekit-sdk.bundle.js
+          test -s dist/app/reborn/native-bridge.bundle.js
           test -s dist/assets/images/toti_falcon_logo_1790422919580.jpg
           grep -Fq '<base href="./app/">' dist/index.html
           ! grep -Eq 'royal-final|frontend-finish|toti-nav-banner-refine' dist/index.html
