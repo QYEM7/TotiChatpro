@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import '../../data/totichat_services.dart';
+import '../../ui/server_panel.dart';
+
+bool canOpenAdmin(Map<String,dynamic> a) =>
+  a['isOwner']==true || a['isMainPartner']==true ||
+  a['canReadReports']==true || a['canManageCatalogs']==true ||
+  a['role']=='db' || a['role']=='admin' || a['role']=='customer_service';
+
+class AdminScreen extends StatefulWidget{
+  const AdminScreen({super.key,required this.api});final TotiChatServices api;
+  @override State<AdminScreen> createState()=>_AdminScreenState();
+}
+class _AdminScreenState extends State<AdminScreen>{
+  late Future<Map<String,dynamic>> _role;
+  Future<Map<String,dynamic>>? _report;
+  @override void initState(){super.initState();_refresh();}
+  void _refresh()=>setState(()=>_role=widget.api.authority());
+  @override Widget build(BuildContext context)=>Directionality(
+    textDirection:TextDirection.rtl,child:Scaffold(
+      appBar:AppBar(title:const Text('مركز الإدارة')),
+      body:ServerPanel<Map<String,dynamic>>(future:_role,retry:_refresh,
+        builder:(context,a){
+          if(!canOpenAdmin(a))return const NoRecords('ممنوع دخول مركز الإدارة لهذا الحساب.');
+          final owner=a['isOwner']==true,partner=a['isMainPartner']==true;
+          final reports=a['canReadReports']==true||owner||partner;
+          final catalog=a['canManageCatalogs']==true||owner||partner;
+          // Never infer Host Agencies permission from just "super admin" role.
+          final agencies=owner||partner;
+          return ListView(padding:const EdgeInsets.all(18),children:[
+            const Icon(Icons.admin_panel_settings_rounded,size:54),
+            const SizedBox(height:10),
+            Text('صلاحية الحساب: ${a['role']??'admin'}',
+              textAlign:TextAlign.center,style:const TextStyle(
+                fontSize:20,fontWeight:FontWeight.w800)),
+            const SizedBox(height:12),
+            const Text('القوائم حسب صلاحيات الخادم. الإجراءات الحساسة تُفحص خادمياً.'),
+            if(reports)recordCard(context,title:'التقارير المالية والإدارية',
+              icon:Icons.analytics_outlined,
+              onTap:()=>setState(()=>_report=widget.api.report())),
+            if(catalog)recordCard(context,title:'صلاحية إدارة الكتالوج',
+              description:'عرض الصلاحية فقط؛ التعديل غير متاح في هذه الواجهة.',
+              icon:Icons.inventory_2_outlined),
+            if(agencies)recordCard(context,title:'إدارة وكالات المضيفين',
+              description:'حصرية للمالك والشريك الرئيسي. إجراءات الإدارة غير مفعّلة بعد.',
+              icon:Icons.business_center_outlined),
+            if(_report!=null)ServerPanel<Map<String,dynamic>>(
+              future:_report!,retry:()=>setState(()=>_report=widget.api.report()),
+              builder:(context,report)=>Card(child:Padding(
+                padding:const EdgeInsets.all(16),
+                child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+                  const Text('ملخص تقرير الخادم',style:TextStyle(fontWeight:FontWeight.w800)),
+                  const SizedBox(height:12),
+                  ...report.entries.take(12).map((entry)=>Padding(
+                    padding:const EdgeInsets.symmetric(vertical:4),
+                    child:Text('${entry.key}: ${entry.value}',
+                      maxLines:5,overflow:TextOverflow.ellipsis))),
+                ])))),
+          ]);
+        }),
+    ));
+}
