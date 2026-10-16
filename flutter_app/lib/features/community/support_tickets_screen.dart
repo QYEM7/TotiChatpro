@@ -281,7 +281,7 @@ class _SupportTicketThreadScreenState
                       ]),
                   ),
                 )),
-              ]),
+              ],
             )),
             if (status != 'closed')
               SafeArea(top: false, child: Padding(
