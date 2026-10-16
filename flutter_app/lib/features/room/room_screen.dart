@@ -15,9 +15,15 @@ import '../../ui/toti_theme.dart';
 import 'voice_session.dart';
 
 class RoomScreen extends StatefulWidget {
-  const RoomScreen({super.key, required this.repository, required this.room});
+  const RoomScreen({
+    super.key, required this.repository, required this.room,
+    this.minimized = false, this.onExit, this.onMinimize,
+  });
   final TotiChatRepository repository;
   final RoomInfo room;
+  final bool minimized;
+  final VoidCallback? onExit;
+  final VoidCallback? onMinimize;
 
   @override
   State<RoomScreen> createState() => _RoomScreenState();
@@ -205,7 +211,13 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       await _voice.disconnect();
       if (_joined) await widget.repository.leaveRoom(widget.room.id);
       _joined = false;
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        if (widget.onExit != null) {
+          widget.onExit!();
+        } else {
+          Navigator.of(context).pop();
+        }
+      }
     } catch (error) {
       if (mounted) {
         setState(() => _leaving = false);
@@ -228,6 +240,42 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         api:TotiChatServices(widget.repository.client),
         roomId:widget.room.id,members:_members)));
     if(mounted)await _refresh();
+  }
+
+  Future<void> _roomControls() async {
+    if (_leaving || !mounted) return;
+    if (widget.onMinimize == null) {
+      await _leave();
+      return;
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xEE29233E),
+      builder: (sheetContext) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            leading: const Icon(Icons.minimize_rounded,
+              color: Colors.white),
+            title: const Text('Minimize room',
+              style: TextStyle(color: Colors.white)),
+            onTap: _joined ? () {
+              Navigator.pop(sheetContext);
+              widget.onMinimize?.call();
+            } : null,
+          ),
+          ListTile(
+            leading: const Icon(Icons.exit_to_app_rounded,
+              color: Colors.white),
+            title: const Text('Leave room',
+              style: TextStyle(color: Colors.white)),
+            onTap: () {
+              Navigator.pop(sheetContext);
+              _leave();
+            },
+          ),
+        ]),
+      ),
+    );
   }
 
   Future<void> _showInvite() async {
@@ -316,9 +364,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: PopScope(
-        canPop: _leaving,
+        canPop: _leaving || widget.minimized,
         onPopInvokedWithResult: (didPop, result) {
-          if (!didPop) _leave();
+          if (!didPop && !widget.minimized) _leave();
         },
         child: Scaffold(
           backgroundColor: const Color(0xFF29233E),
@@ -331,9 +379,10 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
               Text(_joined ? '${_members.length} أعضاء متصلون' : 'جارٍ الاتصال بالخادم',
                 style: const TextStyle(fontSize: 12, color: Colors.white70)),
             ]),
-            leading: IconButton(onPressed: _leaving ? null : _leave,
-              icon: const Icon(Icons.exit_to_app_rounded),
-              tooltip: 'مغادرة الغرفة'),
+            leading: IconButton(
+              onPressed: _leaving ? null : _roomControls,
+              icon: const Icon(Icons.more_horiz_rounded),
+              tooltip: 'Room controls'),
             actions: [
               IconButton(onPressed:_joined?_openGame:null,
                 icon:const Icon(Icons.videogame_asset_outlined),
