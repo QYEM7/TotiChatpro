@@ -13,9 +13,11 @@ import '../../ui/toti_theme.dart';
 class AccountPage extends StatefulWidget {
   const AccountPage({
     super.key, required this.repository, required this.walletOnly,
+    this.roomActive = false,
   });
   final TotiChatRepository repository;
   final bool walletOnly;
+  final bool roomActive;
 
   @override
   State<AccountPage> createState() => _AccountPageState();
@@ -134,9 +136,12 @@ class _AccountPageState extends State<AccountPage> {
               )),
               const SizedBox(height: 10),
               OutlinedButton.icon(
-                onPressed: () async => Supabase.instance.client.auth.signOut(),
+                onPressed: widget.roomActive ? null :
+                  () async => Supabase.instance.client.auth.signOut(),
                 icon: const Icon(Icons.logout), label: const Text('تسجيل الخروج'),
               ),
+              if (widget.roomActive)
+                const Text('Leave the current room before signing out.'),
             ],
           ]);
         },
