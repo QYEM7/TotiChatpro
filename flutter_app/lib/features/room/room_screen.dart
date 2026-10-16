@@ -23,6 +23,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   List<RoomMessage> _messages = const [];
   bool _joined = false, _joining = true, _sending = false, _leaving = false;
   bool _workingAudio = false;
+  bool _leaveRequested = false;
   bool _active = true;
   String? _error;
   Timer? _refreshTimer;
@@ -51,8 +52,15 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   Future<void> _enter() async {
     try {
       await widget.repository.joinRoom(widget.room.id);
-      if (!mounted) return;
+      if (!mounted) {
+        await widget.repository.leaveRoom(widget.room.id);
+        return;
+      }
       setState(() { _joined = true; _joining = false; });
+      if (_leaveRequested) {
+        await _leave();
+        return;
+      }
       await _refresh();
       _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
         if (_active && _joined && !_leaving) _refresh();
@@ -158,6 +166,10 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
 
   Future<void> _leave() async {
     if (_leaving) return;
+    if (_joining) {
+      _leaveRequested = true;
+      return;
+    }
     setState(() => _leaving = true);
     _refreshTimer?.cancel();
     try {
@@ -188,7 +200,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: PopScope(
-        canPop: false,
+        canPop: _leaving,
         onPopInvokedWithResult: (didPop, result) {
           if (!didPop) _leave();
         },
