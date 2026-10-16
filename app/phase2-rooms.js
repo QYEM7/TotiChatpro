@@ -495,7 +495,8 @@ async function createRoom(){
  const cover=$('#tc-phase2-room-cover')?.files?.[0]||null;
  const background=$('#tc-phase2-room-background')?.files?.[0]||null;
  if(title.length<2||title.length>60){toast('اسم الغرفة يجب أن يكون من حرفين إلى 60');return;}
- if(welcome.length>500){toast('الترحيب يجب ألا يتجاوز 500 حرف');return;}
+ if(welcome.length<2||welcome.length>500){toast('اكتب رسالة ترحيبية من حرفين إلى 500 حرف');return;}
+ if(!cover){toast('اختار صورة للغرفة قبل الإنشاء');return;}
  entering=true;
  try{
   const roomId=await rpc('phase2_room_create',{p_title:title,p_is_private:priv});
@@ -514,8 +515,8 @@ function showCreate(){
  if(typeof showSheet!=='function')return;
  showSheet('<div class="tc-phase2-create tc-room-editor" dir="rtl"><h3>🎙️ إنشاء غرفة TotiChat</h3>'+
   '<label>اسم الغرفة *<input id="tc-phase2-room-title" maxlength="60" required placeholder="اسم غرفتك"></label>'+
-  '<label>صورة الغرفة<input id="tc-phase2-room-cover" type="file" accept="image/png,image/jpeg,image/webp"></label>'+
-  '<label>رسالة ترحيبية للأعضاء<textarea id="tc-phase2-room-welcome" rows="3" maxlength="500" placeholder="أهلاً بيكم بغرفتنا 💜"></textarea></label>'+
+  '<label>صورة الغرفة *<input id="tc-phase2-room-cover" type="file" accept="image/png,image/jpeg,image/webp" required></label>'+
+  '<label>رسالة ترحيبية للأعضاء *<textarea id="tc-phase2-room-welcome" rows="3" minlength="2" maxlength="500" required placeholder="أهلاً بيكم بغرفتنا 💜"></textarea></label>'+
   '<label>خلفية الغرفة (اختيارية)<input id="tc-phase2-room-background" type="file" accept="image/png,image/jpeg,image/webp"></label>'+
   '<label class="tc-phase2-private"><input type="checkbox" id="tc-phase2-room-private"> غرفة خاصة بالدعوات</label>'+
   '<p>الاسم والترحيب والصور تُحفظ على خادم Staging الحقيقي.</p>'+
