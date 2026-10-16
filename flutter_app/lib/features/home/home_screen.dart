@@ -20,33 +20,105 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
+  RoomInfo? _activeRoom;
+  bool _minimized = false;
+
+  /// A single kept-alive room owns its LiveKit session while the user browses.
+  /// Switching to a second room requires leaving the first to avoid ghost seats.
+  void _openRoom(RoomInfo room) {
+    if (_activeRoom != null && _activeRoom!.id != room.id) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Leave your current room before opening another.')));
+      return;
+    }
+    setState(() {
+      _activeRoom = room;
+      _minimized = false;
+    });
+  }
+
+  void _roomEnded() {
+    if (!mounted) return;
+    setState(() {
+      _activeRoom = null;
+      _minimized = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final rooms = _activeRoom;
     final pages = [
-      RoomsDirectory(repository: widget.repository, explore: false),
-      RoomsDirectory(repository: widget.repository, explore: true),
+      RoomsDirectory(repository: widget.repository, explore: false,
+        onOpenRoom: _openRoom),
+      RoomsDirectory(repository: widget.repository, explore: true,
+        onOpenRoom: _openRoom),
       CommunityScreen(api: TotiChatServices(widget.repository.client)),
       AccountPage(repository: widget.repository, walletOnly: true),
       AccountPage(repository: widget.repository, walletOnly: false),
     ];
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: SafeArea(child: Column(children: [
-          RealGiftTicker(client: widget.repository.client),
-          Expanded(child: IndexedStack(index: _tab, children: pages)),
-        ])),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _tab,
-          onDestinationSelected: (index) => setState(() => _tab = index),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'الرئيسية'),
-            NavigationDestination(icon: Icon(Icons.search_rounded), label: 'اكتشف'),
-            NavigationDestination(icon: Icon(Icons.people_outline_rounded), label: 'مجتمع'),
-            NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), label: 'محفظتي'),
-            NavigationDestination(icon: Icon(Icons.person_outline_rounded), label: 'ملفي'),
-          ],
+      child: PopScope(
+        canPop: rooms == null,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop && _activeRoom != null && _minimized) {
+            setState(() => _minimized = false);
+          }
+        },
+        child: Scaffold(
+          body: SafeArea(child: Stack(children: [
+            Positioned.fill(child: Column(children: [
+              RealGiftTicker(client: widget.repository.client),
+              Expanded(child: IndexedStack(index: _tab, children: pages)),
+            ])),
+            if (rooms != null)
+              Positioned.fill(child: Offstage(
+                offstage: _minimized,
+                child: RoomScreen(
+                  key: ValueKey('live-room-' + rooms.id),
+                  repository: widget.repository,
+                  room: rooms,
+                  minimized: _minimized,
+                  onExit: _roomEnded,
+                  onMinimize: () => setState(() => _minimized = true),
+                ),
+              )),
+            if (rooms != null && _minimized)
+              Positioned(
+                bottom: 8, left: 10, right: 10,
+                child: Card(
+                  elevation: 5,
+                  child: ListTile(
+                    leading: const Icon(Icons.graphic_eq_rounded),
+                    title: Text(rooms.title,
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: const Text('Room active in background'),
+                    trailing: const Icon(Icons.open_in_full_rounded),
+                    onTap: () => setState(() => _minimized = false),
+                  ),
+                ),
+              ),
+          ])),
+          bottomNavigationBar: rooms != null && !_minimized ? null :
+            NavigationBar(
+              selectedIndex: _tab,
+              onDestinationSelected: (index) => setState(() => _tab = index),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home_rounded), label: 'الرئيسية'),
+                NavigationDestination(icon: Icon(Icons.search_rounded),
+                  label: 'اكتشف'),
+                NavigationDestination(icon: Icon(Icons.people_outline_rounded),
+                  label: 'مجتمع'),
+                NavigationDestination(
+                  icon: Icon(Icons.account_balance_wallet_outlined),
+                  label: 'محفظتي'),
+                NavigationDestination(icon: Icon(Icons.person_outline_rounded),
+                  label: 'ملفي'),
+              ],
+            ),
         ),
       ),
     );
@@ -54,9 +126,11 @@ class _HomeShellState extends State<HomeShell> {
 }
 
 class RoomsDirectory extends StatefulWidget {
-  const RoomsDirectory({super.key, required this.repository, required this.explore});
+  const RoomsDirectory({super.key, required this.repository, required this.explore,
+    required this.onOpenRoom});
   final TotiChatRepository repository;
   final bool explore;
+  final ValueChanged<RoomInfo> onOpenRoom;
 
   @override
   State<RoomsDirectory> createState() => _RoomsDirectoryState();
@@ -153,9 +227,7 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
       );
       if (!mounted) return;
       _reload();
-      await Navigator.push(context, MaterialPageRoute(
-        builder: (_) => RoomScreen(repository: widget.repository, room: room)));
-      if (mounted) _reload();
+      widget.onOpenRoom(room);
     } catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('لم تكتمل عملية الغرفة: $error'),
@@ -182,19 +254,14 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
     try{
       final room=await widget.repository.acceptInvite(value);
       if(!mounted)return;
-      await Navigator.of(context).push(MaterialPageRoute(
-        builder:(_)=>RoomScreen(repository:widget.repository,room:room)));
+      widget.onOpenRoom(room);
     }catch(error){
       if(mounted)ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content:Text('فشل قبول الدعوة: $error')));
     }
   }
 
-  Future<void> _enter(RoomInfo room) async {
-    await Navigator.push(context, MaterialPageRoute(
-      builder: (_) => RoomScreen(repository: widget.repository, room: room)));
-    if (mounted) _reload();
-  }
+  void _enter(RoomInfo room) => widget.onOpenRoom(room);
 
   @override
   Widget build(BuildContext context) {
