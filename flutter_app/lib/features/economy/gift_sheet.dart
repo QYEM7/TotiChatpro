@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import '../../models/room_models.dart';
 import '../../ui/server_panel.dart';
+import 'lucky_gift_panel.dart';
 
 class GiftSheet extends StatefulWidget {
   const GiftSheet({
@@ -16,7 +17,8 @@ class GiftSheet extends StatefulWidget {
 class _GiftSheetState extends State<GiftSheet>{
   late Future<List<Map<String,dynamic>>> _catalog;
   Map<String,dynamic>? _selected;
-  String? _recipient,_pendingId;
+  String? _recipient,_pendingId,_pendingSignature;
+  bool _showLucky=false;
   int _quantity=1;
   bool _busy=false;
   @override void initState(){super.initState();_catalog=widget.api.gifts();}
@@ -35,12 +37,21 @@ class _GiftSheetState extends State<GiftSheet>{
           FilledButton(onPressed:()=>Navigator.pop(ctx,true),child:const Text('إرسال')),
         ]));
     if(confirmed!=true||!mounted)return;
+    final signature = [
+      widget.roomId, recipient, item['id'], _quantity, price,
+    ].join('|');
+    if(_pendingSignature!=null && _pendingSignature!=signature){
+      showApiError(context,'The earlier gift needs verification before '
+        'changing its recipient, amount or item.');
+      return;
+    }
+    _pendingSignature=signature;
     setState(()=>_busy=true);
     _pendingId??=TotiChatServices.requestId();
     try{
       await widget.api.sendGift(roomId:widget.roomId,recipientId:recipient,
         gift:item,quantity:_quantity,requestId:_pendingId!);
-      _pendingId=null;
+      _pendingId=null;_pendingSignature=null;
       if(mounted)Navigator.pop(context,true);
     }catch(error){if(mounted)showApiError(context,error);}
     finally{if(mounted)setState(()=>_busy=false);}
@@ -52,7 +63,19 @@ class _GiftSheetState extends State<GiftSheet>{
       child:Column(mainAxisSize:MainAxisSize.min,children:[
         const Text('صندوق الهدايا الحقيقية',
           style:TextStyle(fontSize:20,fontWeight:FontWeight.w800)),
-        const SizedBox(height:12),
+        const SizedBox(height:10),
+        Wrap(spacing:8,children:[
+          ChoiceChip(label:const Text('Regular gifts'),
+            selected:!_showLucky,
+            onSelected:_busy?null:(_)=>setState(()=>_showLucky=false)),
+          ChoiceChip(label:const Text('Lucky Gifts'),
+            selected:_showLucky,
+            onSelected:_busy?null:(_)=>setState(()=>_showLucky=true)),
+        ]),
+        const SizedBox(height:10),
+        if(_showLucky)
+          LuckyGiftPanel(api:widget.api)
+        else ...[
         SizedBox(height:165,child:ServerPanel<List<Map<String,dynamic>>>(
           future:_catalog,retry:()=>setState(()=>_catalog=widget.api.gifts()),
           builder:(context,items){
@@ -63,8 +86,8 @@ class _GiftSheetState extends State<GiftSheet>{
               Padding(padding:const EdgeInsets.all(5),
                 child:ChoiceChip(
                   selected:_selected?['id']==g['id'],
-                  onSelected:_busy?null:(_){
-                    setState(() {_selected=g;_pendingId=null;});
+                  onSelected:_busy||_pendingId!=null?null:(_){
+                    setState(() {_selected=g;});
                   },
                   avatar:const Icon(Icons.card_giftcard_rounded),
                   label:Column(mainAxisSize:MainAxisSize.min,children:[
@@ -79,13 +102,13 @@ class _GiftSheetState extends State<GiftSheet>{
             hint:const Text('اختر المستلم من المقاعد'),
             items:participants.map((m)=>DropdownMenuItem(value:m.userId,
               child:Text(m.displayName,maxLines:1))).toList(),
-            onChanged:_busy?null:(v)=>setState((){_recipient=v;_pendingId=null;}),
+            onChanged:_busy||_pendingId!=null?null:(v)=>setState((){_recipient=v;}),
           ),
         const SizedBox(height:8),
         const Text('العدد'),
         Wrap(spacing:8,children:[1,7,17,77,777].map((n)=>
           ChoiceChip(selected:_quantity==n,label:Text('$n'),
-            onSelected:_busy?null:(_)=>setState((){_quantity=n;_pendingId=null;}))).toList()),
+            onSelected:_busy||_pendingId!=null?null:(_)=>setState((){_quantity=n;}))).toList()),
         const SizedBox(height:12),
         FilledButton.icon(
           onPressed:_busy||_selected==null||_recipient==null?null:_send,
@@ -93,6 +116,7 @@ class _GiftSheetState extends State<GiftSheet>{
             const Icon(Icons.send_rounded),
           label:const Text('إرسال بعد موافقة الخادم'),
         ),
+        ],
       ]),
     ));
   }
