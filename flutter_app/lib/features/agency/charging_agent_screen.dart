@@ -48,7 +48,12 @@ class _ChargingAgentScreenState extends State<ChargingAgentScreen>{
       ));
     note.dispose();receipt.dispose();
     if(data==null||!mounted)return;
-    if(_pendingOp!=requestId||_pendingAction!=action){
+    if(_pendingOp!=null&&(_pendingOp!=requestId||_pendingAction!=action)){
+      showApiError(context,'An unresolved earlier operation must be verified '
+        'before changing the request or action.');
+      return;
+    }
+    if(_pendingOp==null){
       _pendingId=null;_pendingOp=requestId;_pendingAction=action;
       _submittedNote=null;_submittedRef=null;
     }
@@ -103,6 +108,10 @@ class _ChargingAgentScreenState extends State<ChargingAgentScreen>{
             const Text('هذه شاشة تشغيل الوكيل وليست واجهة شراء للعملاء. '
               'الصلاحيات والخصومات والتسوية يحسمها Backend.'),
             const SizedBox(height:14),
+            recordCard(context,
+              title:'Verified agency treasury: ${state['treasury']??'Unavailable'}',
+              description:'Balances are read from Staging. No client write access.',
+              icon:Icons.account_balance_wallet_outlined),
             for(final a in agencies)recordCard(context,
               title:a['name']?.toString()??'وكالة شحن',
               description:'الحالة: فعالة'),
