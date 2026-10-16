@@ -8,6 +8,8 @@ import '../../data/totichat_services.dart';
 import '../community/dm_screen.dart';
 import '../economy/gift_sheet.dart';
 import '../economy/real_gift_ticker.dart';
+import 'room_game_screen.dart';
+import 'room_moderation_screen.dart';
 import '../../models/room_models.dart';
 import '../../ui/toti_theme.dart';
 import 'voice_session.dart';
@@ -212,6 +214,22 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _openGame() async {
+    if(!_joined)return;
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder:(_)=>RoomGameScreen(
+        api:TotiChatServices(widget.repository.client),roomId:widget.room.id)));
+  }
+
+  Future<void> _openModeration() async {
+    if(!_joined||widget.room.ownerId!=widget.repository.currentUserId)return;
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder:(_)=>RoomModerationScreen(
+        api:TotiChatServices(widget.repository.client),
+        roomId:widget.room.id,members:_members)));
+    if(mounted)await _refresh();
+  }
+
   Future<void> _showInvite() async {
     if (!_joined || widget.room.ownerId!=widget.repository.currentUserId) return;
     try {
@@ -317,6 +335,13 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
               icon: const Icon(Icons.exit_to_app_rounded),
               tooltip: 'مغادرة الغرفة'),
             actions: [
+              IconButton(onPressed:_joined?_openGame:null,
+                icon:const Icon(Icons.videogame_asset_outlined),
+                tooltip:'لعبة إكس أو الحقيقية'),
+              if(widget.room.ownerId==widget.repository.currentUserId)
+                IconButton(onPressed:_joined?_openModeration:null,
+                  icon:const Icon(Icons.admin_panel_settings_outlined),
+                  tooltip:'إدارة الغرفة'),
               if(widget.room.isPrivate &&
                   widget.room.ownerId==widget.repository.currentUserId)
                 IconButton(onPressed:_showInvite,
