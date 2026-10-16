@@ -35,6 +35,7 @@ jobs:
       - name: Run Reborn tests and build new frontend
         run: |
           npm run test:reborn
+          node --test tests/reborn-release-safety.test.mjs
           node --check app/reborn/core.js
           node --check app/reborn/features.js
           npm run build
@@ -71,6 +72,7 @@ jobs:
               assert 'reborn/core.js' in main
               assert 'royal-final.js' not in main
               assert 'frontend-finish.js' not in main
+              assert 'native-bridge.bundle.js' not in main # imported lazily by Reborn core
           print('PASS: new TotiChat Reborn Android staging APK bytes:',apk.stat().st_size)
           PY
           sha256sum android/app/build/outputs/apk/debug/app-debug.apk
