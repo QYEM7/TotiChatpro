@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: flutter-v1-\${{ github.ref }}
+  group: flutter-v1-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
