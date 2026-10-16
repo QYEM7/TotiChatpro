@@ -361,9 +361,16 @@ class TotiChatServices {
       params:{'p_limit':notificationPageLimit,'p_before':null}));
   }
 
-  Future<void> readNotifications() async {
+  Future<int> readNotifications() async {
     userId;
-    await client.rpc('phase5_notification_mark',params:{'p_ids':null,'p_all':true});
+    // phase3.notification_mark explicitly rejects null p_ids, even for p_all.
+    final response = object(await client.rpc('phase5_notification_mark',
+      params: {'p_ids': <int>[], 'p_all': true}));
+    final changed = response['updated'];
+    if (changed is! num || changed < 0) {
+      throw StateError('Notification acknowledgment was not confirmed');
+    }
+    return changed.toInt();
   }
 
   Future<Map<String, dynamic>> supportTicketPage({
