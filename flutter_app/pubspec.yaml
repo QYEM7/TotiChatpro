@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   supabase_flutter: 2.18.3
   livekit_client: 2.13.1
   permission_handler: 13.0.2
