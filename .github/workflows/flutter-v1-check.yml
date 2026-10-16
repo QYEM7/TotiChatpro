@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           c=Path('flutter_app/lib/core/app_config.dart').read_text()
           assert 'rziaedugbdwefbefcxjt' in c
-          assert "isStaging && publishableKey.isNotEmpty" in c
+          assert "isStaging && publishableKey.startsWith('sb_publishable_')" in c
           m=Path('flutter_app/android/app/src/main/AndroidManifest.xml').read_text()
           assert 'android.permission.RECORD_AUDIO' in m
           assert 'com.totichat.next' in m
