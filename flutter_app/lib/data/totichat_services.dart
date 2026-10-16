@@ -361,11 +361,16 @@ class TotiChatServices {
       params:{'p_limit':notificationPageLimit,'p_before':null}));
   }
 
+  /// The Staging RPC rejects null p_ids even when p_all is true.
+  static Map<String, dynamic> markAllNotificationParams() => {
+    'p_ids': <int>[],
+    'p_all': true,
+  };
+
   Future<int> readNotifications() async {
     userId;
-    // phase3.notification_mark explicitly rejects null p_ids, even for p_all.
     final response = object(await client.rpc('phase5_notification_mark',
-      params: {'p_ids': <int>[], 'p_all': true}));
+      params: markAllNotificationParams()));
     final changed = response['updated'];
     if (changed is! num || changed < 0) {
       throw StateError('Notification acknowledgment was not confirmed');
