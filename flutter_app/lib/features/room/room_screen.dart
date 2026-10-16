@@ -10,6 +10,7 @@ import '../economy/gift_sheet.dart';
 import '../economy/real_gift_ticker.dart';
 import 'room_game_screen.dart';
 import 'room_moderation_screen.dart';
+import 'room_music_queue_screen.dart';
 import '../../models/room_models.dart';
 import '../../ui/toti_theme.dart';
 import 'voice_session.dart';
@@ -226,6 +227,15 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _openMusicQueue() async {
+    if (!_joined || _leaving) return;
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => RoomMusicQueueScreen(
+        api: TotiChatServices(widget.repository.client),
+        roomId: widget.room.id,
+      )));
+  }
+
   Future<void> _openGame() async {
     if(!_joined)return;
     await Navigator.of(context).push(MaterialPageRoute(
@@ -384,6 +394,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
               icon: const Icon(Icons.more_horiz_rounded),
               tooltip: 'Room controls'),
             actions: [
+              IconButton(onPressed:_joined?_openMusicQueue:null,
+                icon:const Icon(Icons.library_music_outlined),
+                tooltip:'Saved room playlist'),
               IconButton(onPressed:_joined?_openGame:null,
                 icon:const Icon(Icons.videogame_asset_outlined),
                 tooltip:'لعبة إكس أو الحقيقية'),
