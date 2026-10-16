@@ -49,19 +49,26 @@ class _DmThreadState extends State<DmThread> {
   late Future<List<Map<String,dynamic>>> _future;
   final _text=TextEditingController();
   bool _sending=false;
-  String? _pendingId;
+  String? _pendingId,_pendingText;
   @override
   void initState(){super.initState();_refresh();}
   void _refresh()=>setState(()=>_future=widget.api.thread(widget.peerId));
 
   Future<void> _send() async {
-    if(_sending||_text.text.trim().isEmpty)return;
+    final value=_text.text.trim();
+    if(_sending||value.isEmpty)return;
+    if(_pendingId!=null && _pendingText!=value){
+      showApiError(context,'An earlier message has an unknown result. '
+        'Retry exactly the same message before sending a new one.');
+      return;
+    }
     setState(()=>_sending=true);
+    _pendingText=value;
     _pendingId??=TotiChatServices.requestId();
     try{
-      await widget.api.sendDm(widget.peerId,_text.text,_pendingId!);
+      await widget.api.sendDm(widget.peerId,value,_pendingId!);
       if(!mounted)return;
-      _pendingId=null;_text.clear();_refresh();
+      _pendingId=null;_pendingText=null;_text.clear();_refresh();
     }catch(e){if(mounted)showApiError(context,e);}
     finally{if(mounted)setState(()=>_sending=false);}
   }
@@ -99,6 +106,7 @@ class _DmThreadState extends State<DmThread> {
         SafeArea(child:Padding(padding:const EdgeInsets.all(10),
           child:Row(children:[
             Expanded(child:TextField(controller:_text,maxLength:2000,
+              readOnly:_sending||_pendingId!=null,
               decoration:const InputDecoration(hintText:'رسالة نصية…',counterText:''))),
             IconButton.filled(onPressed:_sending?null:_send,icon:const Icon(Icons.send))
           ]))),
