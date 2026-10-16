@@ -59,10 +59,6 @@ class _AccountPageState extends State<AccountPage> {
     onRefresh: () async { _refresh(); await _data; },
     child: ListView(padding: const EdgeInsets.all(18), children: [
       Row(children: [
-        const FalconMark(size: 55),
-        const SizedBox(width: 12),
-        Expanded(child: Text(widget.walletOnly ? 'محفظتي' : 'ملفي',
-          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w800))),
         if (!widget.walletOnly)
           FutureBuilder<NotificationPage>(
             future: _notificationSummary,
@@ -97,6 +93,10 @@ class _AccountPageState extends State<AccountPage> {
               );
             },
           ),
+        const FalconMark(size: 55),
+        const SizedBox(width: 12),
+        Expanded(child: Text(widget.walletOnly ? 'محفظتي' : 'ملفي',
+          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w800))),
         IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
       ]),
       const SizedBox(height: 20),
