@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
 import 'host_agency_admin_screen.dart';
+import 'host_month_evidence_screen.dart';
+import 'owner_treasury_screen.dart';
 
 bool canOpenAdmin(Map<String,dynamic> a) =>
   a['isOwner']==true || a['isMainPartner']==true ||
@@ -46,6 +48,18 @@ class _AdminScreenState extends State<AdminScreen>{
               icon:Icons.business_center_outlined,
               onTap:()=>Navigator.of(context).push(MaterialPageRoute(
                 builder:(_)=>HostAgencyAdminScreen(api:widget.api)))),
+            if(owner)recordCard(context,
+              title:'Owner treasury',
+              description:'Documented issuance and agent allocations.',
+              icon:Icons.account_balance_wallet_outlined,
+              onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                builder:(_)=>OwnerTreasuryScreen(api:widget.api)))),
+            if(owner)recordCard(context,
+              title:'Host monthly accrual evidence',
+              description:'Read-only closed-month evidence; no payroll or reset.',
+              icon:Icons.history_edu_outlined,
+              onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                builder:(_)=>HostMonthEvidenceScreen(api:widget.api)))),
             if(_report!=null)ServerPanel<Map<String,dynamic>>(
               future:_report!,retry:()=>setState(()=>_report=widget.api.report()),
               builder:(context,report)=>Card(child:Padding(
