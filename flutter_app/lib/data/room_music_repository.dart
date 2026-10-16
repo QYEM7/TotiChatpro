@@ -192,5 +192,27 @@ class RoomMusicRepository {
     }
   }
 
+  Future<void> deleteSavedTrack(String bookmarkId) async {
+    final uid = userId;
+    if (bookmarkId.isEmpty) throw ArgumentError('Saved track ID required');
+    final deleted = await client.from('user_music_bookmarks')
+      .delete()
+      .eq('id', bookmarkId)
+      .eq('owner_id', uid)
+      .select('id');
+    if (deleted.isEmpty) {
+      final remaining = await client.from('user_music_bookmarks')
+        .select('id')
+        .eq('id', bookmarkId)
+        .eq('owner_id', uid)
+        .limit(1);
+      if (remaining.isNotEmpty) {
+        throw StateError('Saved track deletion not authorized');
+      }
+    } else if (deleted.any((row) => row['id'] != bookmarkId)) {
+      throw StateError('Unexpected saved track deletion response');
+    }
+  }
+
   static String newRequestId() => TotiChatServices.requestId();
 }
