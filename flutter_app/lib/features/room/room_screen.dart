@@ -42,6 +42,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   bool _refreshing = false, _refreshRequestedAgain = false;
   bool _joined = false, _joining = true, _sending = false, _leaving = false;
   bool _workingAudio = false;
+  bool _workingSeat = false;
   bool _leaveRequested = false;
   bool _active = true;
   String? _error;
@@ -157,24 +158,36 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _seat(int seatNumber) async {
+    if (!_joined || _joining || _leaving || _leaveRequested ||
+        _workingSeat || _workingAudio || !mounted) return;
+    if (seatNumber < 1 || seatNumber > 15) return;
     final occupied = _members.where((member) => member.seatNo == seatNumber).toList();
-    if (occupied.isNotEmpty && occupied.first.userId != widget.repository.currentUserId) {
+    if (occupied.isNotEmpty &&
+        occupied.first.userId != widget.repository.currentUserId) {
       return;
     }
+    // Capture before any await: repeated taps must not turn a single
+    // selection into an unintended seat release.
+    final desiredSeat = _mine?.seatNo == seatNumber ? null : seatNumber;
+    setState(() => _workingSeat = true);
     try {
-      // Revoking a seat also revokes local microphone publishing immediately.
-      if (_voice.connected) await _voice.disconnect();
-      await widget.repository.setSeat(
-        widget.room.id, _mine?.seatNo == seatNumber ? null : seatNumber);
+      // Even a still-pending voice token must be cancelled before moving.
+      // The Staging seat RPC also restores server mute=true.
+      await _voice.disconnect();
+      if (!_joined || _leaving || _leaveRequested || !mounted) return;
+      await widget.repository.setSeat(widget.room.id, desiredSeat);
       await _refresh();
       _show('تم تحديث المقعد من الخادم');
     } catch (error) {
       _show('تعذر تحديث المقعد: $error');
+    } finally {
+      if (mounted) setState(() => _workingSeat = false);
     }
   }
 
   Future<void> _connectAudio() async {
-    if (_workingAudio) return;
+    if (_workingAudio || _workingSeat || !_joined ||
+        _leaving || _leaveRequested) return;
     setState(() => _workingAudio = true);
     try {
       await _voice.connect(widget.room.id);
@@ -185,7 +198,8 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _toggleMic() async {
-    if (_workingAudio || !_voice.connected) return;
+    if (_workingAudio || _workingSeat || !_joined ||
+        _leaving || _leaveRequested || !_voice.connected) return;
     setState(() => _workingAudio = true);
     final enabled = !_voice.publishing;
     try {
@@ -493,7 +507,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                     final decoration = occupant == null
                       ? null : _seatDecorations[occupant.userId];
                     return InkWell(
-                      onTap: () => occupant == null ? _seat(seat) : _memberActions(occupant, seat),
+                      onTap: _workingSeat || _workingAudio || _leaving
+                        ? null : () => occupant == null
+                            ? _seat(seat) : _memberActions(occupant, seat),
                       borderRadius: BorderRadius.circular(14),
                       child: Column(children: [
                         Expanded(child: RoomSeatVisual(
@@ -516,8 +532,8 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(children: [
                   Expanded(child: FilledButton.tonalIcon(
-                    onPressed: _workingAudio ? null :
-                      (_voice.connected ? _toggleMic : _connectAudio),
+                    onPressed: _workingAudio || _workingSeat || _leaving
+                      ? null : (_voice.connected ? _toggleMic : _connectAudio),
                     icon: Icon(!_voice.connected ? Icons.headphones_rounded :
                       _voice.publishing ? Icons.mic_rounded : Icons.mic_off_rounded),
                     label: Text(!_voice.connected ? 'الاتصال بالصوت' :
@@ -525,7 +541,8 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   )),
                   const SizedBox(width: 10),
                   IconButton.filledTonal(
-                    onPressed: _workingAudio || !_voice.connected ? null : () async {
+                    onPressed: _workingAudio || _workingSeat ||
+                        !_voice.connected ? null : () async {
                       await _voice.disconnect();
                       if (mounted) setState(() {});
                     }, icon: const Icon(Icons.call_end_rounded)),
