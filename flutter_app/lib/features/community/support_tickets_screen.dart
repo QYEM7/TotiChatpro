@@ -134,6 +134,7 @@ class _SupportTicketThreadScreenState
   final _reply = TextEditingController();
   String? _pendingKey, _pendingId;
   bool _busy = false;
+  int _messageOffset = 0;
 
   @override
   void initState() {
@@ -141,8 +142,21 @@ class _SupportTicketThreadScreenState
     _reload();
   }
 
-  void _reload() => setState(() =>
-    _thread = widget.api.supportThread(widget.ticketId));
+  void _reload({bool newest = false}) => setState(() {
+    if (newest) _messageOffset = 0;
+    _thread = widget.api.supportThread(widget.ticketId,
+      offset: _messageOffset);
+  });
+
+  void _changeMessagePage(int delta) {
+    if (_busy || _pendingId != null) return;
+    final next = _messageOffset + 50 * delta;
+    if (next < 0 || next > 50000) return;
+    setState(() {
+      _messageOffset = next;
+      _thread = widget.api.supportThread(widget.ticketId, offset: next);
+    });
+  }
 
   Future<void> _perform({
     required String key,
@@ -162,9 +176,10 @@ class _SupportTicketThreadScreenState
       await action(_pendingId!);
       _pendingKey = null;
       _pendingId = null;
-      _reply.clear();
+      // A status change must never destroy an unsent draft reply.
+      if (key.startsWith('reply|')) _reply.clear();
       if (mounted) {
-        _reload();
+        _reload(newest: true);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('The server confirmed the support action.')));
       }
@@ -223,7 +238,9 @@ class _SupportTicketThreadScreenState
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
-          IconButton(onPressed: _reload, icon: const Icon(Icons.refresh)),
+          IconButton(onPressed: _busy ? null : () => _reload(newest: true),
+            tooltip: 'Refresh newest messages',
+            icon: const Icon(Icons.refresh)),
         ],
       ),
       body: ServerPanel<Map<String, dynamic>>(
@@ -238,6 +255,7 @@ class _SupportTicketThreadScreenState
               .toList();
           final status = ticket['status']?.toString() ?? '';
           final canHandle = data['canHandle'] == true;
+          final totalMessages = (data['total'] as num).toInt();
           return Column(children: [
             Padding(
               padding: const EdgeInsets.all(10),
@@ -254,9 +272,30 @@ class _SupportTicketThreadScreenState
                         onPressed: _busy || status == option ? null :
                           () => _changeStatus(option)),
                   ]),
-                if ((data['total'] as num?)?.toInt() != null &&
-                    (data['total'] as num).toInt() > 50)
-                  const Text('Showing the latest 50 messages only.'),
+                if (totalMessages > 50) ...[
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Expanded(child: Text(
+                      'Messages ${_messageOffset + 1}–'
+                      '${_messageOffset + messages.length} '
+                      'of $totalMessages',
+                      style: const TextStyle(fontSize: 12))),
+                    TextButton(
+                      onPressed: _busy || _pendingId != null ||
+                          _messageOffset == 0 ? null
+                        : () => _changeMessagePage(-1),
+                      child: const Text('Newer')),
+                    TextButton(
+                      onPressed: _busy || _pendingId != null ||
+                          _messageOffset + messages.length >= totalMessages ||
+                          _messageOffset >= 50000 ? null
+                        : () => _changeMessagePage(1),
+                      child: const Text('Older')),
+                  ]),
+                  if (totalMessages > 50050)
+                    const Text('Server paging is limited to 50,050 '
+                      'messages. Older records may require an export.'),
+                ],
               ]),
             ),
             Expanded(child: ListView(
