@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       horizontal: wide ? 42 : 22, vertical: wide ? 38 : 30,
     ),
     child: SizedBox(
-      height: wide ? 460 : 248,
+      height: wide ? 460 : 292,
       child: Stack(children: [
         const Positioned(top: 0, left: 0,
           child: Icon(Icons.auto_awesome_rounded,
@@ -94,9 +94,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Color(0xFF4285F4), fontWeight: FontWeight.w900,
                   fontSize: 20))),
             const SizedBox(width: 12),
-            Text(_busy ? 'Connecting to Google...' : 'Continue with Google',
+            Flexible(child: Text(
+              _busy ? 'Connecting to Google...' : 'Continue with Google',
+              maxLines: 1, overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w800,
-                fontSize: 15)),
+                fontSize: 15))),
           ]),
         )),
         if (_error != null) Padding(
