@@ -23,6 +23,48 @@ class TotiChatServices {
     return value;
   }
 
+  /// Gift price is an exact Postgres bigint. Never round a decimal or a
+  /// floating-point price into an irreversible wallet debit.
+  static int? giftUnitPrice(Object? raw) {
+    if (raw is! int || raw < 1 || raw > 1000000000000) return null;
+    return raw;
+  }
+
+  /// Return the *exact* confirmed display amount; guard int overflows and
+  /// unsupported quantities before any gift operation reaches the server.
+  static int validatedGiftTotal(
+      Map<String, dynamic> gift, int quantity) {
+    final giftId = gift['id'];
+    final price = giftUnitPrice(gift['price']);
+    if (giftId is! String || giftId.trim().isEmpty ||
+        gift['is_active'] != true ||
+        gift['diamond_source_type'] == 'LUCKY_GIFT' ||
+        ![1, 7, 17, 77, 777].contains(quantity) ||
+        price == null || price > maxSafeCoinAmount ~/ quantity) {
+      throw ArgumentError('Gift or total amount is not valid');
+    }
+    return price * quantity;
+  }
+
+  static void verifyGiftReceipt(Object? response, {
+    required String giftId,
+    required int quantity,
+    required int expectedAmount,
+  }) {
+    final result = object(response);
+    if (result['status'] != 'completed' ||
+        result['id'] is! String ||
+        !isVerifiedUuid(result['id'] as String) ||
+        result['gift_id'] != giftId ||
+        result['quantity'] != quantity ||
+        result['amount'] != expectedAmount ||
+        result['balance'] is! int ||
+        (result['balance'] as int) < 0 ||
+        (result['balance'] as int) > maxSafeCoinAmount) {
+      throw StateError('Gift receipt does not match confirmed purchase');
+    }
+  }
+
   /// Social search returns user_id, not id. Never guess a recipient identity.
   static String verifiedSocialUserId(Map<String, dynamic> person) {
     final id = person['user_id'];
@@ -236,22 +278,21 @@ class TotiChatServices {
     required Map<String, dynamic> gift, required int quantity,
     required String requestId,
   }) async {
-    userId;
-    if (![1,7,17,77,777].contains(quantity) ||
-        gift['is_active'] != true ||
-        gift['diamond_source_type'] == 'LUCKY_GIFT') {
-      throw ArgumentError('Unavailable gift or quantity');
+    final self = userId;
+    final total = validatedGiftTotal(gift, quantity);
+    if (!isVerifiedUuid(roomId) || !isVerifiedUuid(recipientId) ||
+        !isVerifiedUuid(requestId) || self == recipientId) {
+      throw ArgumentError('Invalid room gift recipient or request ID');
     }
-    final price = (gift['price'] as num?)?.toInt();
-    if (price == null || price < 1 || price > 1000000000000) {
-      throw ArgumentError('Invalid catalog price');
-    }
-    final result = object(await client.rpc('phase3_send_gift', params: {
+    final price = giftUnitPrice(gift['price'])!;
+    final giftId = gift['id'] as String;
+    final result = await client.rpc('phase3_send_gift', params: {
       'p_room_id': roomId, 'p_recipient_id': recipientId,
-      'p_gift_id': gift['id'], 'p_quantity': quantity,
+      'p_gift_id': giftId, 'p_quantity': quantity,
       'p_expected_price': price, 'p_request_id': requestId,
-    }));
-    if (result['status'] != 'completed') throw StateError('Gift not confirmed');
+    });
+    verifyGiftReceipt(result, giftId: giftId,
+      quantity: quantity, expectedAmount: total);
   }
 
   Future<List<Map<String, dynamic>>> store() async {
