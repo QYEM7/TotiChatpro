@@ -50,9 +50,58 @@ class _DmThreadState extends State<DmThread> {
   final _text=TextEditingController();
   bool _sending=false;
   String? _pendingId,_pendingText;
+  final List<int?> _cursors = <int?>[null];
+  int _page = 0;
+  int? _lastConfirmedRead;
+  bool _readReceiptError = false;
+
   @override
   void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_future=widget.api.thread(widget.peerId));
+
+  Future<List<Map<String,dynamic>>> _loadPage(int? before) async {
+    final items = await widget.api.thread(widget.peerId, before: before);
+    final lastIncoming = TotiChatServices.lastIncomingDmId(
+      items, widget.peerId);
+    if (lastIncoming != null &&
+        (_lastConfirmedRead == null || lastIncoming > _lastConfirmedRead!)) {
+      try {
+        await widget.api.markDmRead(widget.peerId, lastIncoming);
+        _lastConfirmedRead = lastIncoming;
+        _readReceiptError = false;
+      } catch (_) {
+        // A failed receipt never claims messages were read on the server.
+        _readReceiptError = true;
+      }
+    }
+    return items;
+  }
+
+  void _refresh({bool newest=false}) => setState(() {
+    if (newest) {
+      _page = 0;
+      _cursors..clear()..add(null);
+    }
+    _future = _loadPage(_cursors[_page]);
+  });
+
+  void _older(List<Map<String,dynamic>> currentPage) {
+    if (currentPage.length < TotiChatServices.dmPageLimit) return;
+    final cursor = (currentPage.first['id'] as num).toInt();
+    _cursors.removeRange(_page + 1, _cursors.length);
+    _cursors.add(cursor);
+    setState(() {
+      _page++;
+      _future = _loadPage(cursor);
+    });
+  }
+
+  void _newer() {
+    if (_page == 0) return;
+    setState(() {
+      _page--;
+      _future = _loadPage(_cursors[_page]);
+    });
+  }
 
   Future<void> _send() async {
     final value=_text.text.trim();
@@ -68,7 +117,7 @@ class _DmThreadState extends State<DmThread> {
     try{
       await widget.api.sendDm(widget.peerId,value,_pendingId!);
       if(!mounted)return;
-      _pendingId=null;_pendingText=null;_text.clear();_refresh();
+      _pendingId=null;_pendingText=null;_text.clear();_refresh(newest:true);
     }catch(e){if(mounted)showApiError(context,e);}
     finally{if(mounted)setState(()=>_sending=false);}
   }
@@ -81,27 +130,49 @@ class _DmThreadState extends State<DmThread> {
     textDirection:TextDirection.rtl,
     child:Scaffold(
       appBar:AppBar(title:Text(widget.title),actions:[
-        IconButton(onPressed:_refresh,icon:const Icon(Icons.refresh))]),
+        IconButton(onPressed:()=>_refresh(newest:true),
+          tooltip:'Show newest messages',
+          icon:const Icon(Icons.refresh))]),
       body:Column(children:[
         Expanded(child:ServerPanel<List<Map<String,dynamic>>>(
           future:_future,retry:_refresh,builder:(context,items){
-            if(items.isEmpty)return const NoRecords('المحادثة خالية من الرسائل.');
-            final last=(items.last['id'] as num).toInt();
-            WidgetsBinding.instance.addPostFrameCallback((_){
-              widget.api.markDmRead(widget.peerId,last).catchError((Object _) {});
-            });
-            return ListView.builder(
-              padding:const EdgeInsets.all(14),
-              itemCount:items.length,
-              itemBuilder:(context,i){
-                final msg=items[i],mine=msg['sender_id']==widget.api.userId;
-                return Align(
-                  alignment:mine?Alignment.centerRight:Alignment.centerLeft,
-                  child:Card(color:mine?const Color(0xFFEDE7FA):Colors.white,
-                    child:Padding(padding:const EdgeInsets.all(12),
-                      child:Text(msg['body']?.toString()??''))));
-              },
-            );
+            return Column(children:[
+              Padding(
+                padding:const EdgeInsets.symmetric(horizontal:10,vertical:5),
+                child:Row(children:[
+                  Expanded(child:Text('Messages · page ${_page + 1}',
+                    style:const TextStyle(
+                      fontSize:12,fontWeight:FontWeight.w700))),
+                  TextButton(
+                    onPressed:_page==0?null:_newer,
+                    child:const Text('Newer')),
+                  TextButton(
+                    onPressed:items.length<TotiChatServices.dmPageLimit
+                      ?null:()=>_older(items),
+                    child:const Text('Older 80')),
+                ])),
+              if(_readReceiptError)
+                const Padding(
+                  padding:EdgeInsets.symmetric(horizontal:12),
+                  child:Text('Read status could not be confirmed. '
+                    'Messages remain available.',
+                    style:TextStyle(fontSize:11,color:Colors.deepOrange))),
+              Expanded(child:items.isEmpty
+                ?const NoRecords('لا توجد رسائل في هذه الصفحة.')
+                :ListView.builder(
+                  padding:const EdgeInsets.all(14),
+                  itemCount:items.length,
+                  itemBuilder:(context,i){
+                    final msg=items[i],mine=msg['sender_id']==widget.api.userId;
+                    return Align(
+                      alignment:mine?Alignment.centerRight:Alignment.centerLeft,
+                      child:Card(
+                        color:mine?const Color(0xFFEDE7FA):Colors.white,
+                        child:Padding(padding:const EdgeInsets.all(12),
+                          child:Text(msg['body']?.toString()??''))));
+                  },
+                )),
+            ]);
           })),
         SafeArea(child:Padding(padding:const EdgeInsets.all(10),
           child:Row(children:[
