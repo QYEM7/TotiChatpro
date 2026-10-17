@@ -143,6 +143,26 @@ class TotiChatServices {
     if (result['sent'] != true) throw StateError('Message not confirmed');
   }
 
+  static Map<String, dynamic> dmBlockParams(
+      String peer, {required bool blocked}) {
+    if (peer.trim().isEmpty) {
+      throw ArgumentError('A verified recipient ID is required');
+    }
+    return {'p_other_user': peer, 'p_block': blocked};
+  }
+
+  /// The server applies sender-scoped blocks. These RPC actions are
+  /// idempotent, and are not bypassed by a locally rendered UI state.
+  Future<void> setDmBlocked(String peer, {required bool blocked}) async {
+    final selfId = userId;
+    if (peer == selfId) throw ArgumentError('Cannot block yourself');
+    final response = await client.rpc('phase2_dm_block',
+      params: dmBlockParams(peer, blocked: blocked));
+    if (response != true) {
+      throw StateError('Server did not confirm DM blocking preference');
+    }
+  }
+
   Future<int> markDmRead(String peer, int lastId) async {
     final caller = userId;
     if (peer.isEmpty || peer == caller || lastId < 1) {
