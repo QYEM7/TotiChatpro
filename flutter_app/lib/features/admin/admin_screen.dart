@@ -7,6 +7,7 @@ import 'owner_treasury_screen.dart';
 import 'owner_banner_screen.dart';
 import '../community/support_tickets_screen.dart';
 import 'support_staff_screen.dart';
+import 'admin_rooms_screen.dart';
 
 bool canOpenAdmin(Map<String,dynamic> a) =>
   a['isOwner']==true || a['isMainPartner']==true ||
@@ -113,6 +114,13 @@ class _AdminScreenState extends State<AdminScreen>{
               icon:Icons.history_edu_outlined,
               onTap:()=>Navigator.of(context).push(MaterialPageRoute(
                 builder:(_)=>HostMonthEvidenceScreen(api:widget.api)))),
+            if(owner)recordCard(context,
+              title:'Room directory & moderation',
+              description:'Search real rooms and audit ban/unban of verified '
+                'participants with a documented reason.',
+              icon:Icons.meeting_room_outlined,
+              onTap:()=>Navigator.of(context).push(MaterialPageRoute(
+                builder:(_)=>AdminRoomsScreen(api:widget.api)))),
             if(_report!=null)ServerPanel<Map<String,dynamic>>(
               future:_report!,retry:()=>setState(()=>_report=widget.api.report()),
               builder:(context,report)=>Card(child:Padding(
