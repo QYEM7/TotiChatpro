@@ -75,6 +75,19 @@ void main() {
     }
   });
 
+  test('server-scoped block and unblock requests cannot omit a recipient', () {
+    expect(TotiChatServices.dmBlockParams(peer, blocked: true), {
+      'p_other_user': peer,
+      'p_block': true,
+    });
+    expect(TotiChatServices.dmBlockParams(peer, blocked: false), {
+      'p_other_user': peer,
+      'p_block': false,
+    });
+    expect(() => TotiChatServices.dmBlockParams(' ', blocked: true),
+      throwsArgumentError);
+  });
+
   test('empty DM page is legal and has no invented read receipt', () {
     final result = TotiChatServices.verifyDmPage(
       <Object>[], selfId: self, peerId: peer, before: 100);
