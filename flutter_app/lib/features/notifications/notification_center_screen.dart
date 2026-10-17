@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/notification_models.dart';
 import '../../data/totichat_services.dart';
+import '../community/support_tickets_screen.dart';
 
 /// In-app authenticated server notifications. This does not claim FCM delivery.
 class NotificationCenterScreen extends StatefulWidget {
@@ -116,6 +117,25 @@ class _NotificationCenterScreenState
     }
   }
 
+  Future<void> _openSupportTicket(NotificationEntry event) async {
+    final ticketId = event.supportTicketId;
+    if (ticketId == null || _marking) return;
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => SupportTicketThreadScreen(
+        api: widget.api,
+        ticketId: ticketId,
+        title: 'Official support ticket',
+      ),
+    ));
+    if (!mounted) return;
+    // Mark the original event only after opening a server-authorized thread.
+    if (event.unread) {
+      await _markRead(id: event.id);
+    } else {
+      await _reload();
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Directionality(
     textDirection: TextDirection.rtl,
@@ -202,6 +222,16 @@ class _NotificationCenterScreenState
                                 child: Text(event.displayMessage!,
                                   maxLines: 4,
                                   overflow: TextOverflow.ellipsis)),
+                            if (event.supportTicketId != null)
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton.icon(
+                                  onPressed: _marking ? null
+                                    : () => _openSupportTicket(event),
+                                  icon: const Icon(Icons.support_agent_outlined),
+                                  label: const Text('Open support ticket'),
+                                ),
+                              ),
                             const SizedBox(height: 4),
                             Text(event.createdAt.toLocal()
                               .toString().split('.').first,
