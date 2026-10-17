@@ -89,9 +89,15 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         if (_active && _joined && !_leaving) _refresh();
       });
     } catch (error) {
-      if (mounted) setState(() {
+      if (!mounted) return;
+      setState(() {
         _joining = false; _error = 'Server rejected room entry: $error';
       });
+      // A leave requested during an unsuccessful join must still finish.
+      // No membership was confirmed, so do not send an unverified leave RPC.
+      if (_leaveRequested) {
+        await _leave();
+      }
     }
   }
 
