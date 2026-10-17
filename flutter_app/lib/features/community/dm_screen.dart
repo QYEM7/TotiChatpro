@@ -54,6 +54,8 @@ class _DmThreadState extends State<DmThread> {
   int _page = 0;
   int? _lastConfirmedRead;
   bool _readReceiptError = false;
+  bool _changingBlock = false;
+  bool? _blockedByMe;
 
   @override
   void initState(){super.initState();_refresh();}
@@ -103,9 +105,48 @@ class _DmThreadState extends State<DmThread> {
     });
   }
 
+  Future<void> _changeBlock(bool blocked) async {
+    if (_sending || _changingBlock) return;
+    final allowed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(blocked ? 'Block this account?' : 'Unblock this account?'),
+        content: Text(blocked
+          ? 'Your account will no longer be able to exchange direct '
+            'messages with this user until you unblock them.'
+          : 'Allow direct messages again from your account. The other '
+            'user may still have blocked you.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirm')),
+        ],
+      ),
+    );
+    if (allowed != true || !mounted) return;
+    setState(() => _changingBlock = true);
+    try {
+      await widget.api.setDmBlocked(widget.peerId, blocked: blocked);
+      if (mounted) {
+        setState(() => _blockedByMe = blocked);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(blocked
+            ? 'The server confirmed your block.'
+            : 'The server confirmed your unblock.'),
+        ));
+      }
+    } catch (error) {
+      if (mounted) showApiError(context, error);
+    } finally {
+      if (mounted) setState(() => _changingBlock = false);
+    }
+  }
+
   Future<void> _send() async {
     final value=_text.text.trim();
-    if(_sending||value.isEmpty)return;
+    if(_sending || _changingBlock || _blockedByMe == true ||
+        value.isEmpty)return;
     if(_pendingId!=null && _pendingText!=value){
       showApiError(context,'An earlier message has an unknown result. '
         'Retry exactly the same message before sending a new one.');
@@ -132,7 +173,19 @@ class _DmThreadState extends State<DmThread> {
       appBar:AppBar(title:Text(widget.title),actions:[
         IconButton(onPressed:()=>_refresh(newest:true),
           tooltip:'Show newest messages',
-          icon:const Icon(Icons.refresh))]),
+          icon:const Icon(Icons.refresh)),
+        PopupMenuButton<bool>(
+          enabled: !_changingBlock && !_sending,
+          tooltip: 'Direct message safety options',
+          onSelected: _changeBlock,
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: true,
+              child: Text('Block direct messages')),
+            PopupMenuItem(value: false,
+              child: Text('Unblock direct messages')),
+          ],
+        ),
+      ]),
       body:Column(children:[
         Expanded(child:ServerPanel<List<Map<String,dynamic>>>(
           future:_future,retry:_refresh,builder:(context,items){
@@ -174,12 +227,25 @@ class _DmThreadState extends State<DmThread> {
                 )),
             ]);
           })),
+        if(_blockedByMe == true)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Text(
+              'This account is blocked by you. '
+              'Unblock from the menu to send messages.',
+              style: TextStyle(color: Colors.deepOrange),
+            ),
+          ),
         SafeArea(child:Padding(padding:const EdgeInsets.all(10),
           child:Row(children:[
             Expanded(child:TextField(controller:_text,maxLength:2000,
-              readOnly:_sending||_pendingId!=null,
+              readOnly:_sending||_pendingId!=null||_changingBlock||
+                _blockedByMe==true,
               decoration:const InputDecoration(hintText:'رسالة نصية…',counterText:''))),
-            IconButton.filled(onPressed:_sending?null:_send,icon:const Icon(Icons.send))
+            IconButton.filled(
+              onPressed:_sending||_changingBlock||_blockedByMe==true
+                ?null:_send,
+              icon:const Icon(Icons.send))
           ]))),
       ]),
     ),
