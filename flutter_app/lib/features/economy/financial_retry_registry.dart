@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 /// Tracks unresolved financial commands while this app process is running.
 ///
 /// Each Supabase client has its own journal. Every scope contains the actor's
@@ -26,6 +28,22 @@ class FinancialRetryRegistry {
 
   static FinancialRetryRegistry forClient(Object client) =>
       _byClient[client] ??= FinancialRetryRegistry._();
+
+  /// Distinguish a gift and a store purchase and isolate signed-in accounts.
+  /// A test Fake may not implement auth; that fallback is only a local journal
+  /// namespace, never permission to execute a financial RPC.
+  static String scopeFor(SupabaseClient client, String family) {
+    if (family != 'gift' && family != 'store') {
+      throw ArgumentError('Unsupported financial operation');
+    }
+    String? actor;
+    try {
+      actor = client.auth.currentUser?.id;
+    } catch (_) {
+      // Some pure widget tests deliberately use a client with no auth stack.
+    }
+    return '$family:${actor ?? 'not-signed-in'}';
+  }
 
   final Map<String, FinancialPendingIntent> _pending = {};
 
