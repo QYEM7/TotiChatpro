@@ -31,7 +31,7 @@ class _StoreTabState extends State<_StoreTab>{
   late Future<List<Map<String,dynamic>>> _future;
   bool _busy=false, _confirming=false;String? _pendingId,_pendingSignature;
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_future=widget.api.store());
+  void _refresh()=>setState((){_future=widget.api.store();});
   Future<void> _buy(Map<String,dynamic> item) async{
     if(_busy||_confirming)return;
     late final int exactPrice;
@@ -101,7 +101,7 @@ class _InventoryTab extends StatefulWidget{
 class _InventoryTabState extends State<_InventoryTab>{
   late Future<List<Map<String,dynamic>>> _future;
   @override void initState(){super.initState();_reload();}
-  void _reload()=>setState(()=>_future=widget.api.inventory());
+  void _reload()=>setState((){_future=widget.api.inventory();});
   @override Widget build(BuildContext context)=>ServerPanel<List<Map<String,dynamic>>>(
     future:_future,retry:_reload,builder:(context,rows)=>rows.isEmpty?
       const NoRecords('لا توجد مشتريات أو جوائز مسجلة بحسابك.') :
@@ -122,7 +122,7 @@ class _VipTab extends StatefulWidget{
 class _VipTabState extends State<_VipTab>{
   late Future<Map<String,dynamic>> _future;
   @override void initState(){super.initState();_reload();}
-  void _reload()=>setState(()=>_future=widget.api.vip());
+  void _reload()=>setState((){_future=widget.api.vip();});
   @override Widget build(BuildContext context)=>ServerPanel<Map<String,dynamic>>(
     future:_future,retry:_reload,builder:(context,data){
       final level=(data['tier'] as num?)?.toInt() ??
@@ -149,7 +149,7 @@ class _GiftHistoryTab extends StatefulWidget{
 class _GiftHistoryTabState extends State<_GiftHistoryTab>{
   late Future<List<Map<String,dynamic>>> _future;
   @override void initState(){super.initState();_reload();}
-  void _reload()=>setState(()=>_future=widget.api.giftHistory());
+  void _reload()=>setState((){_future=widget.api.giftHistory();});
   @override Widget build(BuildContext context)=>ServerPanel<List<Map<String,dynamic>>>(
     future:_future,retry:_reload,builder:(context,items)=>items.isEmpty?
       const NoRecords('ماكو هدايا مستلمة حقيقية بحسابك.') :
@@ -169,7 +169,7 @@ class _NotificationsTab extends StatefulWidget{
 class _NotificationsTabState extends State<_NotificationsTab>{
   late Future<List<Map<String,dynamic>>> _future;bool _busy=false;
   @override void initState(){super.initState();_reload();}
-  void _reload()=>setState(()=>_future=widget.api.notifications());
+  void _reload()=>setState((){_future=widget.api.notifications();});
   Future<void> _readAll()async{
     if(_busy)return;setState(()=>_busy=true);
     try{await widget.api.readNotifications();if(mounted)_reload();}
