@@ -20,7 +20,7 @@ class _RoomModerationScreenState extends State<RoomModerationScreen>{
   String? _pendingId,_pendingTarget,_pendingAction;
 
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_state=widget.api.roomModerationState(widget.roomId));
+  void _refresh()=>setState(() { _state=widget.api.roomModerationState(widget.roomId); });
 
   Future<void> _act(String peer,String action)async{
     if(_busy||peer==widget.api.userId)return;

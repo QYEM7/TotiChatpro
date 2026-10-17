@@ -28,8 +28,7 @@ class _OwnerBannerScreenState extends State<OwnerBannerScreen> {
     _refresh();
   }
 
-  void _refresh() => setState(() =>
-    _banners = widget.api.adminBanners());
+  void _refresh() => setState(() { _banners = widget.api.adminBanners(); });
 
   static String? _imagePath(Object? uri) {
     final raw = uri?.toString() ?? '';

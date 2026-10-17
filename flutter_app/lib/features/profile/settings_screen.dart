@@ -14,7 +14,7 @@ class _ProfileSettingsState extends State<ProfileSettings>{
   final _name=TextEditingController(),_bio=TextEditingController();
   bool _seeded=false;
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_profile=widget.repository.ownProfile());
+  void _refresh()=>setState(() { _profile=widget.repository.ownProfile(); });
 
   Future<void> _update() async{
     final name=_name.text.trim(),bio=_bio.text.trim();

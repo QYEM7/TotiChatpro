@@ -23,10 +23,10 @@ class _LuckyGiftPanelState extends State<LuckyGiftPanel> {
     _reload();
   }
 
-  void _reload() => setState(() => _future = Future.wait<Object?>([
+  void _reload() => setState(() { _future = Future.wait<Object?>([
     widget.api.luckyReadiness(),
     widget.api.luckyHistory(),
-  ]));
+  ]); });
 
   @override
   Widget build(BuildContext context) => SizedBox(

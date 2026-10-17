@@ -26,18 +26,18 @@ class _RoomGameScreenState extends State<RoomGameScreen>{
     _watch=Timer.periodic(const Duration(seconds:10),(_)=>_refreshSilently());
   }
 
-  void _refresh()=>setState(()=>_state=widget.api.gameState(widget.roomId));
+  void _refresh()=>setState(() { _state=widget.api.gameState(widget.roomId); });
 
   Future<void> _refreshSilently()async{
     if(_fetching||_busy||!mounted)return;
     _fetching=true;
     try{
       final newState=await widget.api.gameState(widget.roomId);
-      if(mounted)setState(()=>_state=Future.value(newState));
+      if(mounted)setState(() { _state=Future.value(newState); });
     }catch(_){
       // Offline data must not be interpreted as a fresh game result.
-      if(mounted)setState(()=>_state=Future.error(
-        StateError('Game update failed: retry connection')));
+      if(mounted)setState(() { _state=Future.error(
+        StateError('Game update failed: retry connection')); });
     }finally{_fetching=false;}
   }
 
@@ -52,7 +52,7 @@ class _RoomGameScreenState extends State<RoomGameScreen>{
       final result=await widget.api.gameAction(
         widget.roomId,action,cell,_pendingId!);
       _pendingId=null;_pendingAction=null;_pendingCell=null;
-      if(mounted)setState(()=>_state=Future.value(result));
+      if(mounted)setState(() { _state=Future.value(result); });
     }catch(e){if(mounted)showApiError(context,e);}
     finally{if(mounted)setState(()=>_busy=false);}
   }

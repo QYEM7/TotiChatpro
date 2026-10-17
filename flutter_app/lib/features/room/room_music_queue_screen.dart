@@ -33,9 +33,9 @@ class _RoomMusicQueueScreenState extends State<RoomMusicQueueScreen> {
     _refresh();
   }
 
-  void _refresh() => setState(() => _future=Future.wait<Object?>([
+  void _refresh() => setState(() { _future=Future.wait<Object?>([
     _repo.queue(widget.roomId), _repo.savedTracks(),
-  ]));
+  ]); });
 
   Future<void> _execute(String key,
       Future<void> Function(String id) action) async {

@@ -88,7 +88,7 @@ class _GiftSheetState extends State<GiftSheet>{
           LuckyGiftPanel(api:widget.api)
         else ...[
         SizedBox(height:165,child:ServerPanel<List<Map<String,dynamic>>>(
-          future:_catalog,retry:()=>setState(()=>_catalog=widget.api.gifts()),
+          future:_catalog,retry:()=>setState(() { _catalog=widget.api.gifts(); }),
           builder:(context,items){
             final available=items.where((g)=>g['is_active']==true &&
               g['diamond_source_type']!='LUCKY_GIFT').toList();

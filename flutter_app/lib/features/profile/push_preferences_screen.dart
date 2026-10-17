@@ -28,7 +28,7 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
 
   void _reload() {
     if (_busy || !mounted) return;
-    setState(() => _future = widget.api.pushStatus());
+    setState(() { _future = widget.api.pushStatus(); });
   }
 
   Future<void> _changeConsent(bool next) async {
@@ -59,7 +59,7 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
     try {
       final state = await widget.api.setPushConsent(next);
       if (!mounted) return;
-      setState(() => _future = Future.value(state));
+      setState(() { _future = Future.value(state); });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(next
           ? 'Your consent is saved. Background delivery is not active.'
@@ -67,7 +67,7 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
       ));
     } catch (error) {
       if (mounted) {
-        setState(() => _future = widget.api.pushStatus());
+        setState(() { _future = widget.api.pushStatus(); });
         showApiError(context, error);
       }
     } finally {
@@ -100,13 +100,13 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
     try {
       final state = await widget.api.unregisterPushDevice(device.deviceId);
       if (!mounted) return;
-      setState(() => _future = Future.value(state));
+      setState(() { _future = Future.value(state); });
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Device removal confirmed by the server.'),
       ));
     } catch (error) {
       if (mounted) {
-        setState(() => _future = widget.api.pushStatus());
+        setState(() { _future = widget.api.pushStatus(); });
         showApiError(context, error);
       }
     } finally {

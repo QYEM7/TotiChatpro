@@ -24,7 +24,7 @@ class _RechargeActivityScreenState extends State<RechargeActivityScreen> {
     _state = widget.api.rechargeState();
   }
 
-  void _refresh() => setState(() => _state = widget.api.rechargeState());
+  void _refresh() => setState(() { _state = widget.api.rechargeState(); });
 
   static String _status(Object? value) {
     switch (value) {
