@@ -543,21 +543,38 @@ class TotiChatServices {
     return changed.toInt();
   }
 
+  static Map<String, dynamic> verifySupportList(Object? response,
+      {required int offset, required bool staff}) {
+    final result = object(response);
+    final rows = result['rows'];
+    final total = result['total'];
+    if (offset < 0 || offset > 50000 ||
+        rows is! List || rows.length > 50 ||
+        rows.any((r) => r is! Map || r['id'] == null ||
+          r['subject'] is! String || r['status'] is! String) ||
+        total is! num || !total.isFinite ||
+        total != total.toInt() || total < 0 ||
+        (offset < total && rows.length > total - offset) ||
+        (offset >= total && rows.isNotEmpty) ||
+        result['canHandle'] is! bool ||
+        (staff && result['canHandle'] != true)) {
+      throw StateError('Malformed authenticated ticket list');
+    }
+    return result;
+  }
+
   Future<Map<String, dynamic>> supportTicketPage({
     bool staff = false,
     int offset = 0,
   }) async {
     userId;
-    if (offset < 0 || offset > 50000) {
+    if (offset < 0 || offset > 50000 || offset % 50 != 0) {
       throw ArgumentError('Invalid ticket page offset');
     }
-    final result = object(await client.rpc('phase5_support_list',
+    final response = await client.rpc('phase5_support_list',
       params: {'p_scope': staff ? 'all' : 'mine',
-               'p_offset': offset, 'p_limit': 50}));
-    if (result['rows'] is! List || result['canHandle'] is! bool) {
-      throw StateError('Malformed authenticated ticket list');
-    }
-    return result;
+               'p_offset': offset, 'p_limit': 50});
+    return verifySupportList(response, offset: offset, staff: staff);
   }
 
   Future<List<Map<String,dynamic>>> supportTickets() async {
@@ -667,11 +684,36 @@ class TotiChatServices {
     return result['id'] as String;
   }
 
-  Future<List<Map<String,dynamic>>> supportStaff() async {
+  static Map<String, dynamic> verifySupportStaffPage(
+      Object? response, {required int offset}) {
+    final result = object(response);
+    final staff = result['rows'];
+    final total = result['total'];
+    if (offset < 0 || offset > 50000 ||
+        staff is! List || staff.length > 50 ||
+        staff.any((r) => r is! Map || r['user_id'] == null ||
+          r['enabled'] is! bool) ||
+        total is! num || !total.isFinite ||
+        total != total.toInt() || total < 0 ||
+        (offset < total && staff.length > total - offset) ||
+        (offset >= total && staff.isNotEmpty)) {
+      throw StateError('Malformed owner-only support staff list');
+    }
+    return result;
+  }
+
+  Future<Map<String, dynamic>> supportStaffPage({int offset = 0}) async {
     userId;
-    final result=object(await client.rpc('phase5_support_staff_list',
-      params:{'p_offset':0,'p_limit':50}));
-    return rows(result);
+    if (offset < 0 || offset > 50000 || offset % 50 != 0) {
+      throw ArgumentError('Invalid support staff page');
+    }
+    final response=await client.rpc('phase5_support_staff_list',
+      params:{'p_offset':offset,'p_limit':50});
+    return verifySupportStaffPage(response, offset: offset);
+  }
+
+  Future<List<Map<String,dynamic>>> supportStaff() async {
+    return rows(await supportStaffPage());
   }
 
   Future<void> manageSupportStaff({
