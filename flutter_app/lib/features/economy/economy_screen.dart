@@ -34,8 +34,15 @@ class _StoreTabState extends State<_StoreTab>{
   void _refresh()=>setState(()=>_future=widget.api.store());
   Future<void> _buy(Map<String,dynamic> item) async{
     if(_busy)return;
+    late final int exactPrice;
+    try {
+      exactPrice = TotiChatServices.validatedStorePrice(item);
+    } catch (error) {
+      if (mounted) showApiError(context, error);
+      return;
+    }
     final name=item['name']?.toString()??'العنصر';
-    final price=item['price']?.toString()??'—';
+    final price=exactPrice.toString();
     final confirmed=await showDialog<bool>(context:context,builder:(context)=>
       AlertDialog(title:const Text('تأكيد شراء حقيقي'),
         content:Text('شراء $name مقابل $price ${item['currency']??'coin'} من رصيدك؟'),
