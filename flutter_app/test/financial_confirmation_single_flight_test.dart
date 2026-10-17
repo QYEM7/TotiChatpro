@@ -65,7 +65,6 @@ void main() {
 
   testWidgets('two gift taps open one confirmation and initiate one debit',
       (tester) async {
-    await tester.view.physicalSize; // Keep layout determined by the test binding.
     await tester.binding.setSurfaceSize(const Size(900, 1200));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
     final api = _SingleFlightApi();
