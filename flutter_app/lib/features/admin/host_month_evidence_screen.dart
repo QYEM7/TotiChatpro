@@ -18,6 +18,8 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
   late DateTime _month;
   late Future<Map<String, dynamic>> _future;
   int _conservationOffset = 0;
+  int _preflightOffset = 0;
+  int _snapshotOffset = 0;
 
   @override
   void initState() {
@@ -29,8 +31,8 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
 
   Future<Map<String, dynamic>> _readEvidence() async {
     final results = await Future.wait([
-      widget.api.hostMonthPreflight(_month),
-      widget.api.hostMonthSnapshot(_month),
+      widget.api.hostMonthPreflight(_month, offset: _preflightOffset),
+      widget.api.hostMonthSnapshot(_month, offset: _snapshotOffset),
       widget.api.hostMonthIntegrity(_month),
       widget.api.hostMonthConservation(
         _month, offset: _conservationOffset),
@@ -55,6 +57,22 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
     setState(() {
       _month = target;
       _conservationOffset = 0;
+      _preflightOffset = 0;
+      _snapshotOffset = 0;
+      _future = _readEvidence();
+    });
+  }
+
+  void _changeEvidencePage(int delta, {required bool snapshot}) {
+    final old = snapshot ? _snapshotOffset : _preflightOffset;
+    final target = old + delta * 100;
+    if (target < 0 || target > 50000) return;
+    setState(() {
+      if (snapshot) {
+        _snapshotOffset = target;
+      } else {
+        _preflightOffset = target;
+      }
       _future = _readEvidence();
     });
   }
@@ -99,6 +117,8 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
           final capturedItems = (snapshot['items'] as List? ?? [])
               .whereType<Map>().toList();
           final isCaptured = snapshot['captured'] == true;
+          final preflightTotal = (preflight['totalHostEntries'] as num).toInt();
+          final snapshotTotal = (snapshot['entries'] as num).toInt();
           final label = '${_month.year}-' +
             _month.month.toString().padLeft(2, '0');
           final now = DateTime.now().toUtc();
@@ -128,8 +148,9 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
                 child: Text(
                   'Evidence only: no salaries are paid, no diamonds '
                   'are zeroed, and rates are not computed here. '
-                  'The source currently covers at most 100 host entries '
-                  'per page; totals are server-supplied.',
+                  'Each preflight and saved-snapshot page contains at most '
+                  '100 host entries. Conservation pages contain at most 30. '
+                  'All page totals come from the server.',
                 ),
               )),
               recordCard(context,
@@ -232,9 +253,23 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
                     (entry['unredeemedDiamondsNow']?.toString() ?? 'Unknown'),
                 ].join('\n'))),
               const SizedBox(height: 18),
-              const Text('Observed host earnings',
-                style: TextStyle(fontSize: 18,
-                  fontWeight: FontWeight.w800)),
+              Row(children: [
+                Expanded(child: Text(
+                  'Observed host earnings · page ' +
+                    (_preflightOffset ~/ 100 + 1).toString() +
+                    ' · total $preflightTotal',
+                  style: const TextStyle(fontSize: 16,
+                    fontWeight: FontWeight.w800))),
+                OutlinedButton(
+                  onPressed: _preflightOffset == 0 ? null
+                    : () => _changeEvidencePage(-1, snapshot: false),
+                  child: const Text('Previous')),
+                const SizedBox(width: 6),
+                OutlinedButton(
+                  onPressed: _preflightOffset + 100 >= preflightTotal
+                    ? null : () => _changeEvidencePage(1, snapshot: false),
+                  child: const Text('Next')),
+              ]),
               if (entries.isEmpty)
                 const NoRecords('No verified host accrual entries.'),
               ...entries.map((x) => recordCard(context,
@@ -248,11 +283,27 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
                     (x['remaining_diamonds']?.toString() ?? 'Unavailable'),
                 ].join('\n'),
                 icon: Icons.diamond_outlined)),
-              if (capturedItems.isNotEmpty) ...[
+              if (isCaptured) ...[
                 const SizedBox(height: 18),
-                const Text('Saved immutable evidence',
-                  style: TextStyle(fontSize: 18,
-                    fontWeight: FontWeight.w800)),
+                Row(children: [
+                  Expanded(child: Text(
+                    'Saved immutable evidence · page ' +
+                      (_snapshotOffset ~/ 100 + 1).toString() +
+                      ' · total $snapshotTotal',
+                    style: const TextStyle(fontSize: 16,
+                      fontWeight: FontWeight.w800))),
+                  OutlinedButton(
+                    onPressed: _snapshotOffset == 0 ? null
+                      : () => _changeEvidencePage(-1, snapshot: true),
+                    child: const Text('Previous')),
+                  const SizedBox(width: 6),
+                  OutlinedButton(
+                    onPressed: _snapshotOffset + 100 >= snapshotTotal
+                      ? null : () => _changeEvidencePage(1, snapshot: true),
+                    child: const Text('Next')),
+                ]),
+                if (capturedItems.isEmpty)
+                  const NoRecords('No saved records on this page.'),
                 ...capturedItems.map((x) => recordCard(context,
                   title: 'Host: ' +
                     (x['host_id']?.toString() ?? 'Unavailable'),
