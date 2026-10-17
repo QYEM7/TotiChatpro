@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
 
-/// Read-only historical accrual evidence. This is not a salary payout or
-/// month-reset workflow; those actions do not have approved server semantics.
+/// Manual settlement is performed by the authorized administration team.
+/// This screen shows authenticated accrual evidence only. It cannot pay
+/// salaries, approve conversions, or reset monthly diamond balances.
 class HostMonthEvidenceScreen extends StatefulWidget {
   const HostMonthEvidenceScreen({super.key, required this.api});
   final TotiChatServices api;
@@ -146,8 +147,11 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
               const Card(child: Padding(
                 padding: EdgeInsets.all(14),
                 child: Text(
-                  'Evidence only: no salaries are paid, no diamonds '
-                  'are zeroed, and rates are not computed here. '
+                  'Monthly host settlement is handled manually by the '
+                  'authorized administration team. This report presents '
+                  'evidence for review only: it cannot pay salaries, '
+                  'approve conversions, or reset diamond balances. '
+                  'A clear audit is not proof of payment or month closure. '
                   'Each preflight and saved-snapshot page contains at most '
                   '100 host entries. Conservation pages contain at most 30. '
                   'All page totals come from the server.',
