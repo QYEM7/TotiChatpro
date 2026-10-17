@@ -37,6 +37,35 @@ void main() {
       'Your ticket received a response');
   });
 
+  test('support reply links only to a verified server ticket UUID', () {
+    const ticket = '55555555-5555-4555-8555-555555555555';
+    final actual = NotificationEntry.fromJson({
+      'id': 101,
+      'event_type': 'support_staff_replied',
+      'context': {'ticketId': ticket},
+      'created_at': '2026-10-17T07:00:00Z',
+      'read_at': null,
+    });
+    expect(actual.supportTicketId, ticket);
+
+    final untrusted = [
+      {'type': 'other_event', 'id': ticket},
+      {'type': 'support_staff_replied', 'id': '../support'},
+      {'type': 'support_staff_replied', 'id': ''},
+      {'type': 'support_staff_replied', 'id': 3},
+    ];
+    for (final data in untrusted) {
+      final event = NotificationEntry.fromJson({
+        'id': 202,
+        'event_type': data['type'],
+        'context': {'ticketId': data['id']},
+        'created_at': '2026-10-17T07:00:00Z',
+        'read_at': null,
+      });
+      expect(event.supportTicketId, isNull);
+    }
+  });
+
   test('unknown events display their real event type', () {
     final record = NotificationEntry.fromJson({
       'id': 999,
