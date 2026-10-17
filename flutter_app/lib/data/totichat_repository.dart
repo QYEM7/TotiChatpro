@@ -189,11 +189,23 @@ class TotiChatRepository {
     return verifySeatReceipt(result, requested: seatNo);
   }
 
+  /// The server acknowledges the *requested mute state*, not always true:
+  /// unmute returns false and mute returns true. Never mistake a valid
+  /// unmute receipt for a failed RPC, or accept a mismatched response.
+  static bool verifyMicMuteReceipt(Object? response, {
+    required bool requestedMuted,
+  }) {
+    if (response is! bool || response != requestedMuted) {
+      throw StateError('Server did not confirm requested microphone state');
+    }
+    return response;
+  }
+
   Future<void> setMicMuted(String roomId, bool muted) async {
     currentUserId;
     final result = await client.rpc('phase2_room_set_muted',
       params: {'p_room_id': roomId, 'p_muted': muted});
-    if (result != true) throw StateError('Server did not confirm microphone state');
+    verifyMicMuteReceipt(result, requestedMuted: muted);
   }
 
   Future<List<RoomMessage>> messages(String roomId) async {
