@@ -203,6 +203,37 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     finally { if (mounted) setState(() => _workingAudio = false); }
   }
 
+  /// Disconnecting LiveKit alone leaves the server's mic badge stale.
+  /// Always request a server mute, even if local disconnect throws. Do not
+  /// show a successful hangup until the authoritative mute is acknowledged.
+  Future<void> _hangUpAudio() async {
+    if (_workingAudio || _workingSeat || _leaving || _leaveRequested ||
+        !_joined || !_voice.connected) return;
+    setState(() => _workingAudio = true);
+    Object? disconnectError;
+    try {
+      try {
+        await _voice.disconnect();
+      } catch (error) {
+        disconnectError = error;
+      }
+      try {
+        await widget.repository.setMicMuted(widget.room.id, true);
+      } catch (error) {
+        _show('قطع الصوت محلياً، لكن الخادم لم يؤكد كتم المايك: $error');
+        return;
+      }
+      await _refresh();
+      if (disconnectError != null) {
+        _show('تم تأكيد كتم المايك، لكن فصل الصوت تعثّر: $disconnectError');
+      } else {
+        _show('تم قطع الصوت وتأكيد كتم المايك');
+      }
+    } finally {
+      if (mounted) setState(() => _workingAudio = false);
+    }
+  }
+
   Future<void> _toggleMic() async {
     if (_workingAudio || _workingSeat || !_joined ||
         _leaving || _leaveRequested || !_voice.connected) return;
@@ -548,10 +579,8 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   const SizedBox(width: 10),
                   IconButton.filledTonal(
                     onPressed: _workingAudio || _workingSeat ||
-                        !_voice.connected ? null : () async {
-                      await _voice.disconnect();
-                      if (mounted) setState(() {});
-                    }, icon: const Icon(Icons.call_end_rounded)),
+                        !_voice.connected ? null : _hangUpAudio,
+                    icon: const Icon(Icons.call_end_rounded)),
                 ]),
               ),
               Padding(
