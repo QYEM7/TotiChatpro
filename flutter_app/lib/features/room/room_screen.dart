@@ -586,7 +586,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   icon: const Icon(Icons.refresh_rounded),
                   label: const Text('إعادة محاولة الدخول'),
                 ),
-              ])))) :
+              ]))) :
             Column(children: [
               RealGiftTicker(client:widget.repository.client),
               if (_error != null) Container(
