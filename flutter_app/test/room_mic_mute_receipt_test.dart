@@ -40,4 +40,21 @@ void main() {
         'await widget.repository.setMicMuted(widget.room.id, true);')));
     expect(source, contains('!_voice.connected ? null : _hangUpAudio'));
   });
+
+  test('seat changes mute on server before attempting the seat RPC', () {
+    final source = File('lib/features/room/room_screen.dart')
+      .readAsStringSync();
+    final seatStart = source.indexOf('Future<void> _seat(int seatNumber) async {');
+    final seatEnd = source.indexOf('Future<void> _connectAudio() async {');
+    expect(seatStart, greaterThanOrEqualTo(0));
+    expect(seatEnd, greaterThan(seatStart));
+    final seat = source.substring(seatStart, seatEnd);
+    final disconnect = seat.indexOf('await _voice.disconnect();');
+    final mute = seat.indexOf(
+      'await widget.repository.setMicMuted(widget.room.id, true);');
+    final move = seat.indexOf('await widget.repository.setSeat(');
+    expect(disconnect, greaterThanOrEqualTo(0));
+    expect(mute, greaterThan(disconnect));
+    expect(move, greaterThan(mute));
+  });
 }
