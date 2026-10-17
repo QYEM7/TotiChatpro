@@ -29,11 +29,11 @@ class _StoreTab extends StatefulWidget{
 }
 class _StoreTabState extends State<_StoreTab>{
   late Future<List<Map<String,dynamic>>> _future;
-  bool _busy=false;String? _pendingId,_pendingSignature;
+  bool _busy=false, _confirming=false;String? _pendingId,_pendingSignature;
   @override void initState(){super.initState();_refresh();}
   void _refresh()=>setState(()=>_future=widget.api.store());
   Future<void> _buy(Map<String,dynamic> item) async{
-    if(_busy)return;
+    if(_busy||_confirming)return;
     late final int exactPrice;
     try {
       exactPrice = TotiChatServices.validatedStorePrice(item);
@@ -43,13 +43,19 @@ class _StoreTabState extends State<_StoreTab>{
     }
     final name=item['name']?.toString()??'العنصر';
     final price=exactPrice.toString();
-    final confirmed=await showDialog<bool>(context:context,builder:(context)=>
-      AlertDialog(title:const Text('تأكيد شراء حقيقي'),
-        content:Text('شراء $name مقابل $price ${item['currency']??'coin'} من رصيدك؟'),
-        actions:[TextButton(onPressed:()=>Navigator.pop(context,false),
-          child:const Text('إلغاء')),
-          FilledButton(onPressed:()=>Navigator.pop(context,true),
-            child:const Text('تأكيد'))]));
+    setState(()=>_confirming=true);
+    bool? confirmed;
+    try {
+      confirmed=await showDialog<bool>(context:context,builder:(context)=>
+        AlertDialog(title:const Text('تأكيد شراء حقيقي'),
+          content:Text('شراء $name مقابل $price ${item['currency']??'coin'} من رصيدك؟'),
+          actions:[TextButton(onPressed:()=>Navigator.pop(context,false),
+            child:const Text('إلغاء')),
+            FilledButton(onPressed:()=>Navigator.pop(context,true),
+              child:const Text('تأكيد'))]));
+    } finally {
+      if(mounted)setState(()=>_confirming=false);
+    }
     if(confirmed!=true||!mounted)return;
     final signature=[
       item['id'], item['price'], item['currency'],
@@ -82,7 +88,7 @@ class _StoreTabState extends State<_StoreTab>{
           return recordCard(context,
             title:'${item['icon']??'◇'}  ${item['name']??'عنصر'}',
             description:'${item['category']??''}  ·  ${item['price']??'—'} ${item['currency']??'coin'}',
-            trailing:FilledButton.tonal(onPressed:_busy||reward?null:()=>_buy(item),
+            trailing:FilledButton.tonal(onPressed:_busy||_confirming||reward?null:()=>_buy(item),
               child:Text(reward?'مكافأة':'شراء')));
         }),
   );
