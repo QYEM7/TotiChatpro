@@ -42,7 +42,7 @@ class _PeopleTabState extends State<_PeopleTab>{
   String? _pendingId,_pendingPeer;
   void _lookup(){
     if(_search.text.trim().length<2)return;
-    setState(()=>_results=widget.api.socialSearch(_search.text));
+    setState((){_results=widget.api.socialSearch(_search.text);});
   }
   Future<void> _follow(String peer) async{
     if(_busy)return;
