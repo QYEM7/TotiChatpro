@@ -1,13 +1,9 @@
 name: TotiChat Private Staging Android Debug APK
 
-# This one-time push trigger builds only when this specific workflow file is
-# created/changed. Ordinary feature commits do NOT distribute new APKs.
+# The previous APK was visually REJECTED by the owner on 2026-10-17.
+# Never build or distribute another debug APK until the new Flutter UI has
+# explicit visual approval. Kept as a manually re-enableable reference only.
 on:
-  push:
-    branches:
-      - rebuild/flutter-v1
-    paths:
-      - '.github/workflows/totichat-staging-beta-apk.yml'
   workflow_dispatch:
 
 permissions:
@@ -19,7 +15,9 @@ concurrency:
 
 jobs:
   build-private-staging-apk:
-    if: github.ref == 'refs/heads/rebuild/flutter-v1'
+    # Frozen until visual sign-off; removing the freeze requires a fresh,
+    # explicit owner decision about the new screen designs.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
