@@ -1095,13 +1095,12 @@ class TotiChatServices {
       if (row is! Map) {
         throw StateError('Unexpected management record');
       }
-      final id = kind == 'staff' ? row['user_id'] :
-        kind == 'audit' ? row['id'] : row['id'];
+      final id = kind == 'staff' ? row['user_id'] : row['id'];
       final idString = id?.toString();
       if (idString == null || idString.isEmpty ||
           !ids.add(idString) ||
           (kind == 'staff' && (row['role'] is! String ||
-            row['permissions'] is! Map)) ||
+            row['permissions'] is! List)) ||
           ((kind == 'host_agencies' || kind == 'recharge_agencies') &&
             (row['kind'] != (kind == 'host_agencies' ? 'host' : 'recharge') ||
               row['name'] is! String || row['is_active'] is! bool)) ||
