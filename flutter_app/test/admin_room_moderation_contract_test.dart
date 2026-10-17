@@ -20,7 +20,7 @@ void main() {
         offset: offset), throwsArgumentError);
     }
     expect(() => TotiChatServices.adminRoomDirectoryParams(
-      search: 'a' * 61), throwsArgumentError);
+      search: List.filled(61, 'a').join()), throwsArgumentError);
   });
 
   test('Room directory rejects wrong kind, missing UUID or fabricated rows', () {
