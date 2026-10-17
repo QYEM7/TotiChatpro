@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,6 +19,7 @@ import 'room_seat_visual.dart';
 import '../../models/room_models.dart';
 import '../../models/room_seat_decoration.dart';
 import '../../ui/toti_theme.dart';
+import '../../ui/toti_visual_language.dart';
 import 'voice_session.dart';
 
 class RoomScreen extends StatefulWidget {
@@ -422,14 +424,20 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     }
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xEE29233E),
-      builder: (sheetContext) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(27)),
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            color: Colors.white.withValues(alpha: .88),
+            child: SafeArea(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             leading: const Icon(Icons.minimize_rounded,
-              color: Colors.white),
+              color: TotiColors.plum),
             title: const Text('Minimize room',
-              style: TextStyle(color: Colors.white)),
+              style: TextStyle(color: TotiColors.ink)),
             onTap: _joined ? () {
               Navigator.pop(sheetContext);
               widget.onMinimize?.call();
@@ -437,15 +445,18 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app_rounded,
-              color: Colors.white),
+              color: TotiColors.plum),
             title: const Text('Leave room',
-              style: TextStyle(color: Colors.white)),
+              style: TextStyle(color: TotiColors.ink)),
             onTap: () {
               Navigator.pop(sheetContext);
               _leave();
             },
           ),
-        ]),
+              ]),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -543,13 +554,13 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         child: Scaffold(
           backgroundColor: const Color(0xFF29233E),
           appBar: AppBar(
-            backgroundColor: const Color(0xFF29233E),
-            foregroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
+            foregroundColor: TotiColors.ink,
             title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(widget.room.title, maxLines: 1, overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
               Text(_joined ? '${_members.length} أعضاء متصلون' : 'جارٍ الاتصال بالخادم',
-                style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                style: const TextStyle(fontSize: 12, color: TotiColors.muted)),
             ]),
             leading: IconButton(
               onPressed: _leaving ? null : _roomControls,
@@ -573,7 +584,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   tooltip:'دعوة عضو'),
             ],
           ),
-          body: _joining ? const Center(child: CircularProgressIndicator()) :
+          body: TotiAtmosphere(child: _joining ? const Center(child: CircularProgressIndicator()) :
             !_joined ? Center(child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -598,11 +609,11 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(_seatDecorationError!,
                     style: const TextStyle(
-                      color: Colors.amberAccent, fontSize: 11))),
+                      color: TotiColors.plum, fontSize: 11))),
               if (widget.room.welcomeMessage?.isNotEmpty == true)
                 Padding(padding: const EdgeInsets.all(12),
                   child: Text(widget.room.welcomeMessage!,
-                    style: const TextStyle(color: Colors.white70))),
+                    style: const TextStyle(color: TotiColors.muted))),
               const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -671,7 +682,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   ),
                 ]),
               ),
-              const Divider(color: Colors.white24),
+              const Divider(color: TotiColors.outline),
               const Padding(padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Align(alignment: Alignment.centerRight,
                   child: Text('دردشة الغرفة', style: TextStyle(
@@ -711,7 +722,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   ),
                 ]),
               ),
-            ]),
+            ])),
         ),
       ),
     );
