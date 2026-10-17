@@ -15,7 +15,8 @@ class SupportStaffScreen extends StatefulWidget {
 
 class _SupportStaffScreenState extends State<SupportStaffScreen> {
   final _search = TextEditingController();
-  late Future<List<Map<String, dynamic>>> _staff;
+  late Future<Map<String, dynamic>> _staff;
+  int _staffOffset = 0;
   Future<List<Map<String, dynamic>>>? _found;
   String? _pendingKey, _pendingId;
   bool _busy = false;
@@ -26,7 +27,18 @@ class _SupportStaffScreenState extends State<SupportStaffScreen> {
     _refresh();
   }
 
-  void _refresh() => setState(() => _staff = widget.api.supportStaff());
+  void _refresh() => setState(() =>
+    _staff = widget.api.supportStaffPage(offset: _staffOffset));
+
+  void _staffPage(int delta) {
+    if (_busy) return;
+    final target = _staffOffset + delta * 50;
+    if (target < 0 || target > 50000) return;
+    setState(() {
+      _staffOffset = target;
+      _staff = widget.api.supportStaffPage(offset: target);
+    });
+  }
 
   void _find() {
     final text = _search.text.trim();
@@ -80,6 +92,7 @@ class _SupportStaffScreenState extends State<SupportStaffScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Official support access updated on server.')));
+        _staffOffset = 0;
         _refresh();
       }
     } catch (error) {
@@ -117,12 +130,17 @@ class _SupportStaffScreenState extends State<SupportStaffScreen> {
           const Text('Granted or revoked staff',
             style: TextStyle(fontSize: 18,
               fontWeight: FontWeight.w800)),
-          ServerPanel<List<Map<String, dynamic>>>(
+          ServerPanel<Map<String, dynamic>>(
             future: _staff,
             retry: _refresh,
-            builder: (context, rows) => Column(children: [
+            builder: (context, page) {
+              final rows = TotiChatServices.rows(page);
+              final total = (page['total'] as num).toInt();
+              return Column(children: [
+              Text('Showing page ${_staffOffset ~/ 50 + 1} '
+                '· $total historical staff records'),
               if (rows.isEmpty)
-                const NoRecords('No support staff grants are recorded.'),
+                const NoRecords('No support staff records on this page.'),
               ...rows.map((r) {
                 final target = r['user_id']?.toString() ?? '';
                 final enabled = r['enabled'] == true;
@@ -137,7 +155,24 @@ class _SupportStaffScreenState extends State<SupportStaffScreen> {
                   ) : null,
                 );
               }),
-            ]),
+              if (_staffOffset > 0 || _staffOffset + rows.length < total)
+                Row(children: [
+                  OutlinedButton(
+                    onPressed: _busy || _staffOffset == 0 ? null
+                      : () => _staffPage(-1),
+                    child: const Text('Previous 50')),
+                  const SizedBox(width: 8),
+                  FilledButton.tonal(
+                    onPressed: _busy || _staffOffset >= 50000 ||
+                        _staffOffset + rows.length >= total ? null
+                      : () => _staffPage(1),
+                    child: const Text('Next 50')),
+                ]),
+              if (total > 50050)
+                const Text('Only the first 50,050 staff records can '
+                  'be paged using the current server API.'),
+            ]);
+            },
           ),
           const SizedBox(height: 22),
           const Text('Select a verified user to authorize',
