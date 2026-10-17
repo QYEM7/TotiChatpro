@@ -13,6 +13,10 @@ Updated: 2026-10-17 (Asia/Baghdad)
 - Host monthly settlement is performed manually by authorized administrators.
 - Real data only; features not fully functioning must be disabled or plainly labelled.
 
+## Visual acceptance is an independent hard gate
+
+**BLOCKED after Owner's 2026-10-17 rejection** of the Staging Debug APK. The original prototype design documentation is not approval for the new Flutter rebuild. Do not rebuild/distribute a candidate until owner-reviewed screens match the new design and all required screens/overlays. See [VISUAL_REBUILD_GATE.md](VISUAL_REBUILD_GATE.md).
+
 ## P0 release gates
 
 | Gate | What must be demonstrated | Present state |
