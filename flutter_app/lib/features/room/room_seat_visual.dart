@@ -82,7 +82,7 @@ class RoomSeatVisual extends StatelessWidget {
             child: Tooltip(
               message: 'Equipped frame: $frameName',
               child: shortIcon
-                ? Text(frameIcon!,
+                ? Text(frameIcon,
                     style: const TextStyle(fontSize: 15))
                 : const Icon(Icons.auto_awesome_rounded,
                     color: TotiColors.gold, size: 16),
