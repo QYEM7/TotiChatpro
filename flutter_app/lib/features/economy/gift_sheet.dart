@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
+import 'financial_retry_registry.dart';
 import '../../models/room_models.dart';
 import '../../ui/server_panel.dart';
 import 'lucky_gift_panel.dart';
@@ -17,11 +18,17 @@ class GiftSheet extends StatefulWidget {
 class _GiftSheetState extends State<GiftSheet>{
   late Future<List<Map<String,dynamic>>> _catalog;
   Map<String,dynamic>? _selected;
-  String? _recipient,_pendingId,_pendingSignature;
+  String? _recipient;
+  late final FinancialRetryRegistry _retry;
+  String get _retryScope => FinancialRetryRegistry.scopeFor(widget.api.client, 'gift');
   bool _showLucky=false;
   int _quantity=1;
   bool _busy=false, _confirming=false;
-  @override void initState(){super.initState();_catalog=widget.api.gifts();}
+  @override void initState(){
+    super.initState();
+    _retry=FinancialRetryRegistry.forClient(widget.api.client);
+    _catalog=widget.api.gifts();
+  }
 
   Future<void> _send() async{
     final item=_selected,recipient=_recipient;
@@ -51,21 +58,30 @@ class _GiftSheetState extends State<GiftSheet>{
     final signature = [
       widget.roomId, recipient, item['id'], _quantity, price,
     ].join('|');
-    if(_pendingSignature!=null && _pendingSignature!=signature){
-      showApiError(context,'The earlier gift needs verification before '
-        'changing its recipient, amount or item.');
+    // Reuse the same idempotency key even after this sheet is closed and
+    // reopened in the same session. Only a verified receipt releases it.
+    late final FinancialPendingIntent pending;
+    try {
+      pending=_retry.reserve(
+        scope:_retryScope,
+        signature:signature,
+        newRequestId:TotiChatServices.requestId,
+      );
+    } catch(error) {
+      if(mounted)showApiError(context,error);
       return;
     }
-    _pendingSignature=signature;
     setState(()=>_busy=true);
-    _pendingId??=TotiChatServices.requestId();
-    try{
+    try {
       await widget.api.sendGift(roomId:widget.roomId,recipientId:recipient,
-        gift:item,quantity:_quantity,requestId:_pendingId!);
-      _pendingId=null;_pendingSignature=null;
+        gift:item,quantity:_quantity,requestId:pending.requestId);
+      _retry.confirm(scope:_retryScope,requestId:pending.requestId);
       if(mounted)Navigator.pop(context,true);
-    }catch(error){if(mounted)showApiError(context,error);}
-    finally{if(mounted)setState(()=>_busy=false);}
+    } catch(error) {
+      if(mounted)showApiError(context,error);
+    } finally {
+      if(mounted)setState(()=>_busy=false);
+    }
   }
   @override Widget build(BuildContext context){
     final participants=widget.members.where((m)=>m.seatNo!=null).toList();
@@ -97,7 +113,7 @@ class _GiftSheetState extends State<GiftSheet>{
               Padding(padding:const EdgeInsets.all(5),
                 child:ChoiceChip(
                   selected:_selected?['id']==g['id'],
-                  onSelected:_busy||_pendingId!=null?null:(_){
+                  onSelected:_busy?null:(_){
                     setState(() {_selected=g;});
                   },
                   avatar:const Icon(Icons.card_giftcard_rounded),
@@ -113,14 +129,17 @@ class _GiftSheetState extends State<GiftSheet>{
             hint:const Text('اختر المستلم من المقاعد'),
             items:participants.map((m)=>DropdownMenuItem(value:m.userId,
               child:Text(m.displayName,maxLines:1))).toList(),
-            onChanged:_busy||_pendingId!=null?null:(v)=>setState((){_recipient=v;}),
+            onChanged:_busy?null:(v)=>setState((){_recipient=v;}),
           ),
         const SizedBox(height:8),
         const Text('العدد'),
         Wrap(spacing:8,children:[1,7,17,77,777].map((n)=>
           ChoiceChip(selected:_quantity==n,label:Text('$n'),
-            onSelected:_busy||_pendingId!=null?null:(_)=>setState((){_quantity=n;}))).toList()),
+            onSelected:_busy?null:(_)=>setState((){_quantity=n;}))).toList()),
         const SizedBox(height:12),
+        if(_retry.pending(_retryScope)!=null)
+          const Text('طلب هدية سابق غير محسوم. أعد نفس المستلم والهدية والعدد للتحقق، ولا تبدأ عملية مختلفة.',
+            textAlign:TextAlign.center),
         FilledButton.icon(
           onPressed:_busy||_confirming||_selected==null||_recipient==null?null:_send,
           icon:_busy?const SizedBox(height:15,width:15,child:CircularProgressIndicator(strokeWidth:2)):
