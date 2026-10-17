@@ -1,6 +1,6 @@
 # TotiChat Android internal beta — acceptance protocol
 
-As of 2026-10-17 (Asia/Baghdad). Status: **NOT approved for distribution**.
+As of 2026-10-17 (Asia/Baghdad). Status: **PRIVATE STAGING ANDROID DEBUG BUILD APPROVED; wider distribution NOT approved**.
 
 ## Non-negotiable environment and scope
 - Flutter branch: `rebuild/flutter-v1`. No modifications to `main` or production.
@@ -9,7 +9,7 @@ As of 2026-10-17 (Asia/Baghdad). Status: **NOT approved for distribution**.
 - No fabricated rooms, gifts, balance, revenue, banners, agency members or successful transactions.
 - Keep the current LiveKit SDK unchanged. FCM is deferred; in-app notifications remain active.
 - Monthly host/agency payroll and settlements remain manual; evidence screens are read-only.
-- **Do not create, distribute or upload APK/AAB until Owner explicitly approves a test build.**
+- **Owner approved ONE private Staging Android debug APK for two-phone testing on 2026-10-17.** This authorizes building and retaining it as a private GitHub Actions artifact only; no Play Store upload, public release, AAB, production connection or external distribution.
 - Source tests and database inspections do not substitute for tests on physical Android devices.
 
 ## Required test equipment
@@ -46,7 +46,7 @@ As of 2026-10-17 (Asia/Baghdad). Status: **NOT approved for distribution**.
 ## Required execution sequence
 1. Run `flutter analyze lib test --no-fatal-infos` and `flutter test` on the exact candidate SHA.
 2. Review Staging/Auth URLs and Android deep-link registration.
-3. **Only after explicit approval to make a test build**, install a private debug/internal Android build on both phones and execute AUTH/ROOM/VOICE in order.
+3. Build the explicitly approved private Staging debug APK in GitHub Actions; only when that build succeeds, install it on both test phones and execute AUTH/ROOM/VOICE in order. No automatic claim of passing physical tests.
 4. Only after explicit Staging test-funding authorization, exercise ECON cases; record
    journal evidence and never use production wallets or invent deposits.
 5. Run ADMIN with separate authenticated accounts and check both hidden UI and server denials.
@@ -64,5 +64,5 @@ As of 2026-10-17 (Asia/Baghdad). Status: **NOT approved for distribution**.
 Tested commit: ______________________________
 Tester / date: ______________________________
 Open critical defects: ______________________
-Beta test-build authorization: **NOT GIVEN**
+Beta test-build authorization: **GRANTED 2026-10-17 — private Staging debug APK only**
 Go / no-go decision: **NO-GO until physical and finance gates pass**
