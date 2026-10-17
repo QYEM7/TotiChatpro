@@ -284,17 +284,36 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
       },
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-          child: Row(children: [
-            const FalconMark(size: 48),
-            const SizedBox(width: 12),
-            const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('TotiChat', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900, color: TotiColors.ink)),
-                Text('مجتمعك الصوتي', style: TextStyle(color: Colors.black54)),
-              ])),
-            IconButton(onPressed: _reload, icon: const Icon(Icons.refresh_rounded)),
-          ]),
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+          child: TotiGlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Row(children: [
+              const FalconMark(size: 52),
+              const SizedBox(width: 13),
+              const Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('TotiChat', style: TextStyle(
+                    fontSize: 25, fontWeight: FontWeight.w900,
+                    letterSpacing: -.4, color: TotiColors.ink)),
+                  Text('Your voice community',
+                    style: TextStyle(fontSize: 12, color: TotiColors.muted)),
+                ],
+              )),
+              Container(
+                decoration: BoxDecoration(
+                  color: TotiColors.lavender,
+                  borderRadius: BorderRadius.circular(15)),
+                child: IconButton(
+                  key: const ValueKey('toti-refresh-rooms'),
+                  tooltip: 'Refresh live rooms',
+                  onPressed: _reload,
+                  icon: const Icon(Icons.refresh_rounded,
+                    color: TotiColors.plum),
+                ),
+              ),
+            ]),
+          ),
         )),
         if (!widget.explore) SliverToBoxAdapter(child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _banners,
@@ -322,24 +341,55 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
           },
         )),
         SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 10),
           child: Row(children: [
-            Expanded(child: Text(widget.explore ? 'اكتشف الغرف' : 'الغرف العامة',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800))),
-            if(widget.explore)IconButton(
-              onPressed:_joinPrivate,
-              tooltip:'دخول غرفة خاصة',
-              icon:const Icon(Icons.lock_open_rounded)),
-            FilledButton.tonalIcon(onPressed: _createRoom,
-              icon: const Icon(Icons.add), label: const Text('غرفة جديدة')),
+            Container(width: 4, height: 28,
+              decoration: BoxDecoration(
+                gradient: TotiColors.heroGradient,
+                borderRadius: BorderRadius.circular(5))),
+            const SizedBox(width: 9),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.explore ? 'اكتشف الغرف' : 'الغرف الصوتية',
+                  style: const TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.w900,
+                    color: TotiColors.ink)),
+                const Text('Real rooms from the server',
+                  style: TextStyle(fontSize: 11, color: TotiColors.muted)),
+              ],
+            )),
+            IconButton(
+              onPressed: _joinPrivate,
+              tooltip: 'Join private room by invitation',
+              icon: const Icon(Icons.lock_open_rounded,
+                color: TotiColors.plum),
+            ),
+            FilledButton.icon(
+              onPressed: _createRoom,
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('غرفة جديدة'),
+            ),
           ]),
         )),
-        if (widget.explore) SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            onChanged: (value) => setState(() => _filter = value),
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.search), hintText: 'ابحث عن اسم غرفة...'),
+        SliverToBoxAdapter(child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
+          child: TotiGlassCard(
+            padding: const EdgeInsets.all(5),
+            radius: 21,
+            child: TextField(
+              key: const ValueKey('toti-live-room-search'),
+              onChanged: (value) => setState(() => _filter = value),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                filled: false,
+                prefixIcon: Icon(Icons.search_rounded,
+                  color: TotiColors.plum),
+                hintText: 'ابحث عن غرف صوتية حقيقية...',
+              ),
+            ),
           ),
         )),
         FutureBuilder<List<RoomInfo>>(
@@ -375,34 +425,72 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
               itemCount: rooms.length,
               itemBuilder: (context, index) {
                 final room = rooms[index];
+                final coverUrl = widget.repository.coverUrl(room);
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                  child: Card(child: InkWell(
-                    borderRadius: BorderRadius.circular(24),
-                    onTap: () => _enter(room),
-                    child: Padding(padding: const EdgeInsets.all(16),
-                      child: Row(children: [
-                        Container(width: 58, height: 58,
-                          decoration: BoxDecoration(
-                            color: TotiColors.lavender,
-                            borderRadius: BorderRadius.circular(18)),
-                          child: widget.repository.coverUrl(room) == null ?
-                            const Icon(Icons.mic_rounded, color: TotiColors.plum, size: 29) :
-                            ClipRRect(borderRadius: BorderRadius.circular(18),
-                              child: Image.network(widget.repository.coverUrl(room)!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const Icon(
-                                  Icons.mic_rounded, color: TotiColors.plum)))),
-                        const SizedBox(width: 13),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(room.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                            const SizedBox(height: 4),
-                            const Text('غرفة صوتية', style: TextStyle(color: Colors.black54)),
-                          ])),
-                        const Icon(Icons.chevron_left_rounded),
-                      ]))),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 7),
+                  child: TotiGlassCard(
+                    padding: EdgeInsets.zero,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(22),
+                      onTap: () => _enter(room),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(children: [
+                          Container(
+                            height: 75, width: 75,
+                            decoration: BoxDecoration(
+                              color: TotiColors.lavender,
+                              borderRadius: BorderRadius.circular(19),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFECE3FF), Color(0xFFFFE8F3)])),
+                            clipBehavior: Clip.antiAlias,
+                            child: coverUrl == null
+                                ? const Icon(Icons.graphic_eq_rounded,
+                                    color: TotiColors.plum, size: 34)
+                                : Image.network(
+                                    coverUrl, fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => const Icon(
+                                      Icons.graphic_eq_rounded,
+                                      color: TotiColors.plum)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(room.title, maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: TotiColors.ink, fontSize: 16)),
+                              const SizedBox(height: 5),
+                              if (room.welcomeMessage?.isNotEmpty == true)
+                                Text(room.welcomeMessage!, maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 11, color: TotiColors.muted)),
+                              const SizedBox(height: 6),
+                              const Row(children: [
+                                Icon(Icons.mic_none_rounded, size: 13,
+                                  color: TotiColors.plum),
+                                SizedBox(width: 4),
+                                Text('Voice room · 15 seats',
+                                  style: TextStyle(fontSize: 11,
+                                    color: TotiColors.muted)),
+                              ]),
+                            ],
+                          )),
+                          const SizedBox(width: 6),
+                          Container(
+                            width: 31, height: 31,
+                            decoration: const BoxDecoration(
+                              color: TotiColors.lavender,
+                              shape: BoxShape.circle),
+                            child: const Icon(Icons.chevron_left_rounded,
+                              color: TotiColors.plum, size: 21),
+                          ),
+                        ]),
+                      ),
+                    ),
                   ),
                 );
               },
