@@ -429,7 +429,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(27)),
         child: BackdropFilter(
           filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
+          child: Material(
             color: Colors.white.withValues(alpha: .88),
             child: SafeArea(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
