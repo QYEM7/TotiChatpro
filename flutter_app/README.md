@@ -60,3 +60,30 @@ deep-link redirect when packaging a release.
   on the backend.
 - No production migration or branch merge.
 - No user-facing fake data.
+
+
+## Current product scope — October 17, 2026
+
+The Owner has explicitly **deferred Firebase Cloud Messaging (FCM)**. Do
+not schedule, enable, deploy or present device push delivery as part of the
+current release. The experimental server-backed push-consent code is dormant:
+its user-facing entry has been removed. Keep **in-app notifications** working;
+they are not FCM and must not be removed with it.
+
+**Monthly host/agency settlement is manual.** Authorized administration staff
+review the real earnings, gift, and diamond evidence, handle payments and
+month-end reconciliation manually, and retain documented records. The Flutter
+host-month evidence report is read-only and must not claim that an audit is a
+payout receipt. No automatic salary payout, payroll approval, conversion-rate
+assignment, diamond reset or recurring auto-settlement job is in scope.
+
+Any future manual settlement action inside TotiChat that changes money or
+diamonds still needs a separately approved, server-verified and auditable
+workflow, with appropriate role checks, idempotency and confirmed execution.
+Until such a workflow is explicitly designed and tested, keep the client
+read-only and leave balances untouched.
+
+Other permanent development constraints remain: build on
+`rebuild/flutter-v1` and Supabase **Staging** only; do not change production or
+`main`; do not build APK/AAB without the Owner's approval; do not change the
+stable LiveKit audio SDK.
