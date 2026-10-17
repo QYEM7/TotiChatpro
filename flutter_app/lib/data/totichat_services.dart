@@ -305,34 +305,80 @@ class TotiChatServices {
     return expectedStatus;
   }
 
-  Future<Map<String,dynamic>> hostMonthPreflight(DateTime month) async {
-    userId;
-    final utc = DateTime.utc(month.year, month.month);
-    final data = object(await client.rpc('phase5_host_month_preflight', params: {
-      'p_month': utc.toIso8601String().substring(0, 10),
-      'p_offset': 0,
+  /// The source reports at most 100 records per page, not a whole month.
+  /// Limit and offset must match the documented server contract.
+  static Map<String, dynamic> hostEvidencePageParams(
+      DateTime month, {int offset = 0}) {
+    final start = DateTime.utc(month.year, month.month);
+    final now = DateTime.now().toUtc();
+    final currentMonth = DateTime.utc(now.year, now.month);
+    if (start.isBefore(DateTime.utc(2025)) ||
+        !start.isBefore(currentMonth) ||
+        offset < 0 || offset > 50000 || offset % 100 != 0) {
+      throw ArgumentError('Closed UTC host month and 100-entry page required');
+    }
+    return {
+      'p_month': start.toIso8601String().substring(0, 10),
+      'p_offset': offset,
       'p_limit': 100,
-    }));
-    if (data['isDraftPreflight'] != true || data['paysSalaries'] != false) {
-      throw StateError('Unexpected host evidence response');
+    };
+  }
+
+  static Map<String, dynamic> verifyHostPreflight(
+      Object? response, {required int offset}) {
+    final data = object(response);
+    final entries = data['entries'];
+    final total = data['totalHostEntries'];
+    if (data['isDraftPreflight'] != true ||
+        data['paysSalaries'] != false ||
+        data['canZeroDiamonds'] != false ||
+        data['hasPayrollRates'] != false ||
+        data['remainingValuesAreCurrent'] != true ||
+        entries is! List || entries.length > 100 ||
+        total is! num || !total.isFinite ||
+        total != total.toInt() || total < 0 ||
+        offset > total && entries.isNotEmpty ||
+        entries.length > total - offset) {
+      throw StateError('Unexpected or incomplete monthly host preflight');
     }
     return data;
   }
 
-  Future<Map<String,dynamic>> hostMonthSnapshot(DateTime month) async {
-    userId;
-    final utc = DateTime.utc(month.year, month.month);
-    final data = object(await client.rpc('phase5_host_month_snapshot_state',
-      params: {
-        'p_month': utc.toIso8601String().substring(0, 10),
-        'p_offset': 0,
-        'p_limit': 100,
-      }));
+  static Map<String, dynamic> verifyHostSnapshot(
+      Object? response, {required int offset}) {
+    final data = object(response);
+    final items = data['items'];
+    final total = data['entries'];
+    final captured = data['captured'];
     if (data['isAccrualEvidenceOnly'] != true ||
-        data['paysSalaries'] != false) {
-      throw StateError('Unexpected monthly accrual evidence');
+        data['paysSalaries'] != false ||
+        data['canZeroDiamonds'] != false ||
+        data['hasPayrollRates'] != false ||
+        captured is! bool || items is! List || items.length > 100 ||
+        total is! num || !total.isFinite ||
+        total != total.toInt() || total < 0 ||
+        (captured && (data['offset'] != offset || data['limit'] != 100)) ||
+        (!captured && (items.isNotEmpty || total != 0)) ||
+        items.length > total - offset) {
+      throw StateError('Unexpected or incomplete monthly snapshot evidence');
     }
     return data;
+  }
+
+  Future<Map<String, dynamic>> hostMonthPreflight(
+      DateTime month, {int offset = 0}) async {
+    userId;
+    final params = hostEvidencePageParams(month, offset: offset);
+    return verifyHostPreflight(await client.rpc(
+      'phase5_host_month_preflight', params: params), offset: offset);
+  }
+
+  Future<Map<String, dynamic>> hostMonthSnapshot(
+      DateTime month, {int offset = 0}) async {
+    userId;
+    final params = hostEvidencePageParams(month, offset: offset);
+    return verifyHostSnapshot(await client.rpc(
+      'phase5_host_month_snapshot_state', params: params), offset: offset);
   }
 
   /// Financial host evidence is read-only. Server explicitly forbids
