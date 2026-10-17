@@ -1044,6 +1044,163 @@ class TotiChatServices {
     }
   }
 
+  static bool isVerifiedUuid(String input) =>
+      RegExp(r'^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}'
+        r'[0-9a-fA-F]{12}$').hasMatch(input);
+
+  static Map<String, dynamic> adminRoomDirectoryParams({
+    String search = '',
+    int offset = 0,
+  }) {
+    final query = search.trim();
+    if (query.length > 60 || offset < 0 || offset > 99990 ||
+        offset % 30 != 0) {
+      throw ArgumentError('Invalid admin room directory page');
+    }
+    return {
+      'p_kind': 'rooms',
+      'p_query': query,
+      'p_offset': offset,
+      'p_limit': 30,
+    };
+  }
+
+  static Map<String, dynamic> verifyAdminRoomDirectory(
+      Object? response, {required int offset}) {
+    final data = object(response);
+    final items = data['rows'];
+    final total = data['total'];
+    if (data['kind'] != 'rooms' || data['readOnly'] != true ||
+        data['offset'] != offset || data['limit'] != 30 ||
+        items is! List || items.length > 30 ||
+        total is! num || !total.isFinite ||
+        total != total.toInt() || total < 0 ||
+        (offset < total && items.length > total - offset) ||
+        (offset >= total && items.isNotEmpty) ||
+        items.any((x) => x is! Map ||
+          x['id'] is! String || !isVerifiedUuid(x['id'] as String) ||
+          x['owner_id'] is! String ||
+          !isVerifiedUuid(x['owner_id'] as String) ||
+          x['title'] is! String || x['title'].toString().isEmpty)) {
+      throw StateError('Unverified admin room directory');
+    }
+    return data;
+  }
+
+  Future<Map<String, dynamic>> adminRoomDirectory({
+    String search = '',
+    int offset = 0,
+  }) async {
+    userId;
+    final params = adminRoomDirectoryParams(search: search, offset: offset);
+    return verifyAdminRoomDirectory(
+      await client.rpc('phase6_admin_directory', params: params),
+      offset: offset,
+    );
+  }
+
+  static Map<String, dynamic> verifyAdminRoomState(
+      Object? response, {required String roomId}) {
+    final data = object(response);
+    final members = data['members'];
+    final banned = data['banned'];
+    if (!isVerifiedUuid(roomId) || data['roomId'] != roomId ||
+        data['readOnly'] != true ||
+        data['roomOwnerId'] is! String ||
+        !isVerifiedUuid(data['roomOwnerId'] as String) ||
+        members is! List || members.length > 200 ||
+        banned is! List || banned.length > 200 ||
+        members.any((x) => x is! Map ||
+          x['user_id'] is! String ||
+          !isVerifiedUuid(x['user_id'] as String)) ||
+        banned.any((x) => x is! Map ||
+          x['user_id'] is! String ||
+          !isVerifiedUuid(x['user_id'] as String))) {
+      throw StateError('Unverified admin room moderation state');
+    }
+    final memberIds = <String>{};
+    for (final row in members) {
+      if (!memberIds.add((row as Map)['user_id'] as String)) {
+        throw StateError('Duplicate room member in server response');
+      }
+    }
+    final bannedIds = <String>{};
+    for (final row in banned) {
+      if (!bannedIds.add((row as Map)['user_id'] as String)) {
+        throw StateError('Duplicate room ban in server response');
+      }
+    }
+    return data;
+  }
+
+  Future<Map<String, dynamic>> adminRoomState(String roomId) async {
+    userId;
+    if (!isVerifiedUuid(roomId)) throw ArgumentError('Valid room ID required');
+    return verifyAdminRoomState(await client.rpc('phase6_admin_room_state',
+      params: {'p_room_id': roomId}), roomId: roomId);
+  }
+
+  static Map<String, dynamic> adminRoomActionParams({
+    required String roomId,
+    required String targetId,
+    required String action,
+    required String reason,
+    required String requestId,
+  }) {
+    final clean = reason.trim();
+    if (!isVerifiedUuid(roomId) || !isVerifiedUuid(targetId) ||
+        !isVerifiedUuid(requestId) ||
+        !['ban', 'unban'].contains(action) ||
+        clean.length < 10 || clean.length > 300 ||
+        roomId == targetId) {
+      throw ArgumentError('Documented and verified room action required');
+    }
+    return {
+      'p_room_id': roomId,
+      'p_target': targetId,
+      'p_action': action,
+      'p_reason': clean,
+      'p_request_id': requestId,
+    };
+  }
+
+  static void verifyAdminRoomAction(Object? response, {
+    required String roomId,
+    required String targetId,
+    required String action,
+    required String requestId,
+  }) {
+    final data = object(response);
+    if (data['roomId'] != roomId ||
+        data['targetId'] != targetId ||
+        data['action'] != action ||
+        data['requestId'] != requestId ||
+        data['scope'] != 'room_only' ||
+        data['success'] != true) {
+      throw StateError('Admin room action not confirmed by server');
+    }
+  }
+
+  Future<void> adminRoomAction({
+    required String roomId,
+    required String targetId,
+    required String action,
+    required String reason,
+    required String requestId,
+  }) async {
+    final actor = userId;
+    if (targetId == actor) throw ArgumentError('Self-moderation forbidden');
+    final params = adminRoomActionParams(
+      roomId: roomId, targetId: targetId, action: action,
+      reason: reason, requestId: requestId,
+    );
+    verifyAdminRoomAction(
+      await client.rpc('phase6_admin_room_action', params: params),
+      roomId: roomId, targetId: targetId,
+      action: action, requestId: requestId,
+    );
+  }
+
   Future<Map<String,dynamic>> roomModerationState(String roomId) async {
     userId;
     return object(await client.rpc('phase2_room_moderation_state',
