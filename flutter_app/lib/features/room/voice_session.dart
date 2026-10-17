@@ -18,8 +18,13 @@ class VoiceSession {
   bool get publishing => _publishing;
 
   Future<void> connect(String roomId) async {
+    // Capture before awaiting teardown: a second join may begin while the
+    // previous session is still disconnecting.
+    final generation = _generation + 1;
     await disconnect();
-    final generation = _generation;
+    if (generation != _generation) {
+      throw StateError('Room audio connection was superseded');
+    }
     final grant = await repository.requestVoiceToken(roomId);
     if (generation != _generation) {
       throw StateError('Room audio request was cancelled');
