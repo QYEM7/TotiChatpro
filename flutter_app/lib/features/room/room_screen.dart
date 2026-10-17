@@ -8,6 +8,7 @@ import '../../data/totichat_services.dart';
 import '../community/dm_screen.dart';
 import '../economy/gift_sheet.dart';
 import '../economy/real_gift_ticker.dart';
+import 'room_exit_workflow.dart';
 import 'room_game_screen.dart';
 import 'room_moderation_screen.dart';
 import 'room_music_queue_screen.dart';
@@ -294,22 +295,28 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     }
     setState(() => _leaving = true);
     _refreshTimer?.cancel();
-    final live=_liveChannel;
-    _liveChannel=null;
+    _refreshTimer = null;
+    final live = _liveChannel;
+    _liveChannel = null;
     try {
-      // Realtime teardown is best-effort; a failed channel unsubscribe must
-      // never prevent the authoritative room-leave request.
-      if (live != null) {
-        try {
-          await widget.repository.client.removeChannel(live);
-        } catch (_) {
-          // The realtime socket may already be disconnected.
-        }
-      }
-      await _voice.disconnect();
-      if (_joined) await widget.repository.leaveRoom(widget.room.id);
+      // Local socket/audio cleanup is best effort, but an acknowledged server
+      // leave is mandatory. Never skip it if LiveKit teardown throws.
+      final result = await RoomExitWorkflow.run(
+        closeRealtime: () async {
+          if (live != null) {
+            await widget.repository.client.removeChannel(live);
+          }
+        },
+        disconnectAudio: _voice.disconnect,
+        leaveOnServer: () async {
+          if (_joined) await widget.repository.leaveRoom(widget.room.id);
+        },
+      );
       _joined = false;
       if (mounted) {
+        if (result.hadCleanupErrors) {
+          _show('Server confirmed room exit, but local cleanup reported an error.');
+        }
         if (widget.onExit != null) {
           widget.onExit!();
         } else {
@@ -317,10 +324,25 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         }
       }
     } catch (error) {
-      if (mounted) {
-        setState(() => _leaving = false);
-        _show('لم يؤكد الخادم مغادرة الغرفة: $error');
+      if (!mounted) return;
+      // A failed server leave means membership may still exist. Restore
+      // updates and controls so the user can retry instead of getting stuck.
+      setState(() {
+        _leaving = false;
+        _leaveRequested = false;
+      });
+      if (_joined) {
+        try {
+          _subscribeRoomChanges();
+        } catch (_) {
+          // The polling fallback still works if Realtime is disconnected.
+        }
+        _refreshTimer = Timer.periodic(const Duration(seconds: 45), (_) {
+          if (_active && _joined && !_leaving) _refresh();
+        });
+        _refresh();
       }
+      _show('Server did not confirm leaving this room: $error');
     }
   }
 
