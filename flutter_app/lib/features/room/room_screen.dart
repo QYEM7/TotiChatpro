@@ -181,6 +181,11 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       // The Staging seat RPC also restores server mute=true.
       await _voice.disconnect();
       if (!_joined || _leaving || _leaveRequested || !mounted) return;
+      // Seat RPC re-mutes on success, but it may fail after LiveKit has
+      // disconnected. Mute first so a failed seat change cannot leave a
+      // stale unmuted badge or server microphone grant.
+      await widget.repository.setMicMuted(widget.room.id, true);
+      if (!_joined || _leaving || _leaveRequested || !mounted) return;
       await widget.repository.setSeat(widget.room.id, desiredSeat);
       await _refresh();
       _show('تم تحديث المقعد من الخادم');
