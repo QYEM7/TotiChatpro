@@ -93,14 +93,14 @@ void main() {
     final button = find.text('إرسال بعد موافقة الخادم');
     expect(button, findsOneWidget);
     await tester.tap(button);
-    // No pump between taps: the second pointer hits the pre-rebuild widget.
-    await tester.tap(button);
+    // A second pointer may hit the modal barrier instead of the old button.
+    await tester.tap(button, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(api.giftRequests, 0);
 
     await tester.tap(find.text('إرسال').last);
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(api.giftRequests, 1);
     expect(find.byType(AlertDialog), findsNothing);
 
@@ -121,7 +121,7 @@ void main() {
     final button = find.text('شراء');
     expect(button, findsOneWidget);
     await tester.tap(button);
-    await tester.tap(button);
+    await tester.tap(button, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(api.storeRequests, 0);
