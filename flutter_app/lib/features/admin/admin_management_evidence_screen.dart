@@ -130,7 +130,8 @@ class _AdminManagementEvidenceScreenState
                 'changed from this report.'),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: _kind,
+                key: ValueKey(_kind),
+                initialValue: _kind,
                 decoration: const InputDecoration(
                   labelText: 'Records category',
                   border: OutlineInputBorder()),
