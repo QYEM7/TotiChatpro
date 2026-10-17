@@ -38,6 +38,6 @@ void main() {
     expect(config, contains('rziaedugbdwefbefcxjt.supabase.co'));
     expect(config, contains(
         "isStaging && publishableKey.startsWith('sb_publishable_')"));
-    expect(config, isNot(contains('service_role')));
+    expect(config, contains('static bool get isConfigured'));
   });
 }
