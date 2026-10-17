@@ -8,10 +8,11 @@ import 'package:totichat/features/economy/economy_screen.dart';
 import 'package:totichat/features/economy/gift_sheet.dart';
 import 'package:totichat/models/room_models.dart';
 
+/// No real client, socket or heartbeat may be created by a widget test.
+class _UnboundClient extends Fake implements SupabaseClient {}
+
 class _SingleFlightApi extends TotiChatServices {
-  _SingleFlightApi()
-      : super(SupabaseClient('https://example.supabase.co',
-          'release-guard-fixture-public-key'));
+  _SingleFlightApi() : super(_UnboundClient());
 
   int giftRequests = 0;
   int storeRequests = 0;
@@ -58,6 +59,18 @@ class _SingleFlightApi extends TotiChatServices {
     storeRequests++;
     await storeGate.future;
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> inventory() async => [];
+
+  @override
+  Future<Map<String, dynamic>> vip() async => {'tier': 0};
+
+  @override
+  Future<List<Map<String, dynamic>>> giftHistory() async => [];
+
+  @override
+  Future<List<Map<String, dynamic>>> notifications() async => [];
 }
 
 void main() {
