@@ -1048,6 +1048,83 @@ class TotiChatServices {
       RegExp(r'^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}'
         r'[0-9a-fA-F]{12}$').hasMatch(input);
 
+  /// Owner/authorized main-partner management evidence. The server response
+  /// is strictly read-only; never infer authorization from role labels.
+  static const adminManagementKinds = <String>[
+    'staff', 'host_agencies', 'recharge_agencies',
+    'registrations', 'agency_transfers', 'audit',
+  ];
+
+  static Map<String, dynamic> adminManagementParams(
+      String kind, {int offset = 0}) {
+    if (!adminManagementKinds.contains(kind) ||
+        offset < 0 || offset > 49980 || offset % 30 != 0) {
+      throw ArgumentError('Invalid management evidence page');
+    }
+    return {
+      'p_kind': kind,
+      'p_offset': offset,
+      'p_limit': 30,
+    };
+  }
+
+  static Map<String, dynamic> verifyAdminManagementPage(
+      Object? response, {
+      required String kind,
+      required int offset,
+  }) {
+    final data = object(response);
+    final records = data['rows'];
+    final count = data['total'];
+    final time = data['asOf'];
+    if (!adminManagementKinds.contains(kind) ||
+        data['kind'] != kind ||
+        data['readOnly'] != true ||
+        data['offset'] != offset ||
+        data['limit'] != 30 ||
+        records is! List || records.length > 30 ||
+        count is! num || !count.isFinite ||
+        count != count.toInt() || count < 0 ||
+        (offset < count && records.length > count - offset) ||
+        (offset >= count && records.isNotEmpty) ||
+        time is! String || DateTime.tryParse(time) == null) {
+      throw StateError('Invalid authenticated management evidence');
+    }
+    final ids = <String>{};
+    for (final row in records) {
+      if (row is! Map) {
+        throw StateError('Unexpected management record');
+      }
+      final id = kind == 'staff' ? row['user_id'] :
+        kind == 'audit' ? row['id'] : row['id'];
+      final idString = id?.toString();
+      if (idString == null || idString.isEmpty ||
+          !ids.add(idString) ||
+          (kind == 'staff' && (row['role'] is! String ||
+            row['permissions'] is! Map)) ||
+          ((kind == 'host_agencies' || kind == 'recharge_agencies') &&
+            (row['kind'] != (kind == 'host_agencies' ? 'host' : 'recharge') ||
+              row['name'] is! String || row['is_active'] is! bool)) ||
+          (kind == 'registrations' &&
+            (row['name'] is! String || row['status'] is! String)) ||
+          (kind == 'agency_transfers' && row['status'] is! String) ||
+          (kind == 'audit' && row['action'] is! String)) {
+        throw StateError('Unverified management record');
+      }
+    }
+    return data;
+  }
+
+  Future<Map<String, dynamic>> adminManagementPage(
+      String kind, {int offset = 0}) async {
+    userId;
+    final params = adminManagementParams(kind, offset: offset);
+    final response = await client.rpc('phase6_admin_management_page',
+      params: params);
+    return verifyAdminManagementPage(response,
+      kind: kind, offset: offset);
+  }
+
   static Map<String, dynamic> adminRoomDirectoryParams({
     String search = '',
     int offset = 0,
