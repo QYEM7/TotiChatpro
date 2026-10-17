@@ -161,6 +161,24 @@ class TotiChatRepository {
     return RoomSeatDecoration.indexFromResponse(response);
   }
 
+  /// Seat mutations must match the exact integer returned by Staging.
+  /// A missing or malformed acknowledgment must never appear successful.
+  static int? verifySeatReceipt(Object? response, {required int? requested}) {
+    if (requested != null && (requested < 1 || requested > 15)) {
+      throw ArgumentError('Seat must be 1–15');
+    }
+    if (requested == null) {
+      if (response != null) {
+        throw StateError('Server did not confirm leaving the seat');
+      }
+      return null;
+    }
+    if (response is! int || response != requested) {
+      throw StateError('Server did not confirm the requested seat');
+    }
+    return response;
+  }
+
   Future<int?> setSeat(String roomId, int? seatNo) async {
     currentUserId;
     if (seatNo != null && (seatNo < 1 || seatNo > 15)) {
@@ -168,8 +186,7 @@ class TotiChatRepository {
     }
     final result = await client.rpc('phase2_room_take_seat',
       params: {'p_room_id': roomId, 'p_seat': seatNo});
-    if (result == null) return null;
-    return (result as num).toInt();
+    return verifySeatReceipt(result, requested: seatNo);
   }
 
   Future<void> setMicMuted(String roomId, bool muted) async {
