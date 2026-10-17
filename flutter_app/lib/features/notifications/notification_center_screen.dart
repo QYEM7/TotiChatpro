@@ -128,12 +128,9 @@ class _NotificationCenterScreenState
       ),
     ));
     if (!mounted) return;
-    // Mark the original event only after opening a server-authorized thread.
-    if (event.unread) {
-      await _markRead(id: event.id);
-    } else {
-      await _reload();
-    }
+    // Opening a route alone cannot prove its authenticated ticket loaded.
+    // Keep explicit read acknowledgments separate from navigation.
+    await _reload();
   }
 
   @override
