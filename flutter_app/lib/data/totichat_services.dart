@@ -586,7 +586,8 @@ class TotiChatServices {
           row['body'] is! String || row['author_id'] == null) ||
         total is! num || !total.isFinite ||
         total != total.toInt() || total < 0 ||
-        messages.length > total - offset ||
+        (offset < total && messages.length > total - offset) ||
+        (offset >= total && messages.isNotEmpty) ||
         result['canHandle'] is! bool) {
       throw StateError('Malformed authenticated support thread');
     }
