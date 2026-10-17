@@ -31,7 +31,7 @@ class RoomSeatVisual extends StatelessWidget {
     final accent = vip > 0 || hasFrame ? TotiColors.gold : TotiColors.plum;
     return LayoutBuilder(builder: (context, size) {
       final diameter = (size.maxWidth < size.maxHeight
-          ? size.maxWidth : size.maxHeight).clamp(1.0, 80.0);
+          ? size.maxWidth : size.maxHeight).clamp(1.0, 80.0).toDouble();
       return Center(child: SizedBox(
         width: diameter,
         height: diameter,
@@ -82,7 +82,7 @@ class RoomSeatVisual extends StatelessWidget {
             child: Tooltip(
               message: 'Equipped frame: $frameName',
               child: shortIcon
-                ? Text(frameIcon,
+                ? Text(frameIcon!,
                     style: const TextStyle(fontSize: 15))
                 : const Icon(Icons.auto_awesome_rounded,
                     color: TotiColors.gold, size: 16),
