@@ -266,12 +266,17 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
                   child: const Text('Previous')),
                 const SizedBox(width: 6),
                 OutlinedButton(
-                  onPressed: _preflightOffset + 100 >= preflightTotal
+                  onPressed: _preflightOffset >= 50000 ||
+                      _preflightOffset + 100 >= preflightTotal
                     ? null : () => _changeEvidencePage(1, snapshot: false),
                   child: const Text('Next')),
               ]),
+              if (preflightTotal > 50100)
+                const Text('Backend pagination is limited to the first '
+                  '50,100 accrual entries. This view is not a complete '
+                  'export for months above that size.'),
               if (entries.isEmpty)
-                const NoRecords('No verified host accrual entries.'),
+                const NoRecords('No verified host accrual entries on this page.'),
               ...entries.map((x) => recordCard(context,
                 title: 'Host: ' + (x['user_id']?.toString() ?? 'Unavailable'),
                 description: [
@@ -298,10 +303,14 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
                     child: const Text('Previous')),
                   const SizedBox(width: 6),
                   OutlinedButton(
-                    onPressed: _snapshotOffset + 100 >= snapshotTotal
+                    onPressed: _snapshotOffset >= 50000 ||
+                        _snapshotOffset + 100 >= snapshotTotal
                       ? null : () => _changeEvidencePage(1, snapshot: true),
                     child: const Text('Next')),
                 ]),
+                if (snapshotTotal > 50100)
+                  const Text('Backend pagination is limited to the first '
+                    '50,100 captured records; this is not a full export.'),
                 if (capturedItems.isEmpty)
                   const NoRecords('No saved records on this page.'),
                 ...capturedItems.map((x) => recordCard(context,
