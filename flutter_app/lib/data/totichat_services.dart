@@ -57,11 +57,78 @@ class TotiChatServices {
     return rows(await client.rpc('phase2_dm_inbox', params: {'p_limit': 50}));
   }
 
-  Future<List<Map<String, dynamic>>> thread(String peer) async {
-    userId;
-    final result = await client.rpc('phase2_dm_thread',
-      params: {'p_other_user': peer, 'p_before_id': null, 'p_limit': 80});
-    return rows(result).reversed.toList();
+  static const int dmPageLimit = 80;
+
+  static Map<String, dynamic> dmPageParams(
+      String peer, {int? before}) {
+    if (peer.trim().isEmpty || (before != null && before < 1)) {
+      throw ArgumentError('Invalid direct message cursor or peer');
+    }
+    return {
+      'p_other_user': peer,
+      'p_before_id': before,
+      'p_limit': dmPageLimit,
+    };
+  }
+
+  /// The RPC returns descending message IDs, and every row must belong to
+  /// exactly the authenticated pair. Fail closed on malformed/private data.
+  static List<Map<String, dynamic>> verifyDmPage(
+    Object? response, {
+    required String selfId,
+    required String peerId,
+    int? before,
+  }) {
+    final page = rows(response);
+    if (selfId.isEmpty || peerId.isEmpty || selfId == peerId ||
+        page.length > dmPageLimit ||
+        (before != null && before < 1)) {
+      throw StateError('Invalid direct message page');
+    }
+    int? previousId;
+    for (final message in page) {
+      final rawId = message['id'];
+      final sender = message['sender_id'];
+      final recipient = message['recipient_id'];
+      final body = message['body'];
+      if (rawId is! num || !rawId.isFinite ||
+          rawId != rawId.toInt() || rawId < 1 ||
+          (previousId != null && rawId >= previousId) ||
+          (before != null && rawId >= before) ||
+          !((sender == selfId && recipient == peerId) ||
+            (sender == peerId && recipient == selfId)) ||
+          body is! String || body.isEmpty || body.length > 2000) {
+        throw StateError('Unverified direct message contents');
+      }
+      previousId = rawId.toInt();
+    }
+    return page.reversed.toList(growable: false);
+  }
+
+  static int? lastIncomingDmId(
+      List<Map<String, dynamic>> chronological, String peerId) {
+    int? latest;
+    for (final message in chronological) {
+      if (message['sender_id'] == peerId) {
+        final raw = message['id'];
+        if (raw is! num || !raw.isFinite || raw != raw.toInt() || raw < 1) {
+          throw StateError('Unverified inbound message ID');
+        }
+        final candidate = raw.toInt();
+        if (latest == null || candidate > latest) latest = candidate;
+      }
+    }
+    return latest;
+  }
+
+  Future<List<Map<String, dynamic>>> thread(
+      String peer, {int? before}) async {
+    final selfId = userId;
+    if (peer == selfId) throw ArgumentError('Cannot message yourself');
+    final response = await client.rpc('phase2_dm_thread',
+      params: dmPageParams(peer, before: before));
+    return verifyDmPage(response, selfId: selfId,
+      peerId: peer, before: before);
   }
 
   Future<void> sendDm(String peer, String body, String id) async {
@@ -76,10 +143,18 @@ class TotiChatServices {
     if (result['sent'] != true) throw StateError('Message not confirmed');
   }
 
-  Future<void> markDmRead(String peer, int lastId) async {
-    userId;
-    await client.rpc('phase2_dm_mark_read',
+  Future<int> markDmRead(String peer, int lastId) async {
+    final caller = userId;
+    if (peer.isEmpty || peer == caller || lastId < 1) {
+      throw ArgumentError('Invalid direct message read receipt');
+    }
+    final result = await client.rpc('phase2_dm_mark_read',
       params: {'p_other_user': peer, 'p_through_id': lastId});
+    if (result is! num || !result.isFinite ||
+        result != result.toInt() || result < 0) {
+      throw StateError('Direct message read receipt not confirmed');
+    }
+    return result.toInt();
   }
 
   Future<List<Map<String, dynamic>>> socialSearch(String text) async {
