@@ -41,6 +41,20 @@ jobs:
         working-directory: flutter_app
         run: flutter pub get
 
+      - name: Use Android compile SDK 37 required by permission_handler
+        working-directory: flutter_app
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          build = Path('android/app/build.gradle.kts')
+          source = build.read_text()
+          old = 'compileSdk = flutter.compileSdkVersion'
+          if source.count(old) != 1:
+              raise SystemExit('Unexpected Flutter Android compile SDK template')
+          build.write_text(source.replace(old, 'compileSdk = 37'))
+          # compileSdk only; keep Flutter's minSdk and targetSdk unchanged.
+          PY
+
       - name: Verify Staging-only Android settings before build
         run: |
           python3 - <<'PY'
