@@ -20,12 +20,12 @@ class _GiftSheetState extends State<GiftSheet>{
   String? _recipient,_pendingId,_pendingSignature;
   bool _showLucky=false;
   int _quantity=1;
-  bool _busy=false;
+  bool _busy=false, _confirming=false;
   @override void initState(){super.initState();_catalog=widget.api.gifts();}
 
   Future<void> _send() async{
     final item=_selected,recipient=_recipient;
-    if(_busy||item==null||recipient==null)return;
+    if(_busy||_confirming||item==null||recipient==null)return;
     late final int total;
     try {
       total = TotiChatServices.validatedGiftTotal(item, _quantity);
@@ -34,13 +34,19 @@ class _GiftSheetState extends State<GiftSheet>{
       return;
     }
     final price = TotiChatServices.giftUnitPrice(item['price'])!;
-    final confirmed=await showDialog<bool>(context:context,builder:(ctx)=>
-      AlertDialog(title:const Text('تأكيد الهدية'),
-        content:Text('إرسال ${item['name']} × $_quantity بقيمة $total كوين؟'),
-        actions:[
-          TextButton(onPressed:()=>Navigator.pop(ctx,false),child:const Text('إلغاء')),
-          FilledButton(onPressed:()=>Navigator.pop(ctx,true),child:const Text('إرسال')),
-        ]));
+    setState(()=>_confirming=true);
+    bool? confirmed;
+    try {
+      confirmed=await showDialog<bool>(context:context,builder:(ctx)=>
+        AlertDialog(title:const Text('تأكيد الهدية'),
+          content:Text('إرسال ${item['name']} × $_quantity بقيمة $total كوين؟'),
+          actions:[
+            TextButton(onPressed:()=>Navigator.pop(ctx,false),child:const Text('إلغاء')),
+            FilledButton(onPressed:()=>Navigator.pop(ctx,true),child:const Text('إرسال')),
+          ]));
+    } finally {
+      if(mounted)setState(()=>_confirming=false);
+    }
     if(confirmed!=true||!mounted)return;
     final signature = [
       widget.roomId, recipient, item['id'], _quantity, price,
@@ -116,7 +122,7 @@ class _GiftSheetState extends State<GiftSheet>{
             onSelected:_busy||_pendingId!=null?null:(_)=>setState((){_quantity=n;}))).toList()),
         const SizedBox(height:12),
         FilledButton.icon(
-          onPressed:_busy||_selected==null||_recipient==null?null:_send,
+          onPressed:_busy||_confirming||_selected==null||_recipient==null?null:_send,
           icon:_busy?const SizedBox(height:15,width:15,child:CircularProgressIndicator(strokeWidth:2)):
             const Icon(Icons.send_rounded),
           label:const Text('إرسال بعد موافقة الخادم'),
