@@ -552,7 +552,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
           if (!didPop && !widget.minimized) _leave();
         },
         child: Scaffold(
-          backgroundColor: const Color(0xFF29233E),
+          backgroundColor: TotiColors.background,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             foregroundColor: TotiColors.ink,
@@ -590,7 +590,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Text(_error ?? 'تعذّر دخول الغرفة',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white)),
+                  style: const TextStyle(color: TotiColors.ink)),
                 const SizedBox(height: 16),
                 FilledButton.icon(
                   onPressed: _leaving ? null : _retryJoin,
@@ -686,10 +686,10 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
               const Padding(padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Align(alignment: Alignment.centerRight,
                   child: Text('دردشة الغرفة', style: TextStyle(
-                    color: TotiColors.gold, fontWeight: FontWeight.w700)))),
+                    color: TotiColors.plum, fontWeight: FontWeight.w700)))),
               Expanded(child: _messages.isEmpty ?
                 const Center(child: Text('لا توجد رسائل حقيقية بعد',
-                  style: TextStyle(color: Colors.white60))) :
+                  style: TextStyle(color: TotiColors.muted))) :
                 ListView.builder(
                   key: const PageStorageKey('realRoomChat'),
                   itemCount: _messages.length,
@@ -700,9 +700,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                     return ListTile(
                       dense: true,
                       title: Text(name, style: const TextStyle(
-                        color: TotiColors.gold, fontWeight: FontWeight.w700)),
+                        color: TotiColors.plum, fontWeight: FontWeight.w700)),
                       subtitle: Text(message.body,
-                        style: const TextStyle(color: Colors.white)),
+                        style: const TextStyle(color: TotiColors.ink)),
                     );
                   },
                 )),
