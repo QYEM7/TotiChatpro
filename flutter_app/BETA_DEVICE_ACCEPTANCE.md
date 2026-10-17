@@ -1,6 +1,6 @@
 # TotiChat Android internal beta — acceptance protocol
 
-As of 2026-10-17 (Asia/Baghdad). Status: **PRIVATE STAGING ANDROID DEBUG BUILD APPROVED; wider distribution NOT approved**.
+As of 2026-10-17 (Asia/Baghdad). Status: **THE 2026-10-17 PRIVATE APK WAS VISUALLY REJECTED; NO VALID BETA BUILD**.
 
 ## Non-negotiable environment and scope
 - Flutter branch: `rebuild/flutter-v1`. No modifications to `main` or production.
@@ -64,5 +64,9 @@ As of 2026-10-17 (Asia/Baghdad). Status: **PRIVATE STAGING ANDROID DEBUG BUILD A
 Tested commit: ______________________________
 Tester / date: ______________________________
 Open critical defects: ______________________
-Beta test-build authorization: **GRANTED 2026-10-17 — private Staging debug APK only**
-Go / no-go decision: **NO-GO until physical and finance gates pass**
+Beta test-build authorization: **THE SINGLE 2026-10-17 DEBUG BUILD WAS AUTHORIZED BUT REJECTED AFTER REVIEW; NEW BUILDS FROZEN PENDING VISUAL SIGN-OFF**
+Go / no-go decision: **NO-GO. VISUAL REBUILD AND OWNER REVIEW REQUIRED FIRST; THEN physical and finance gates**
+
+## Visual rejection (2026-10-17)
+
+The Owner rejected the private APK completely because it showed an incomplete/legacy-looking UI rather than the agreed Flutter-from-scratch visual experience. This overrides any earlier assumption that a successful Android build was a beta acceptance. See [VISUAL_REBUILD_GATE.md](VISUAL_REBUILD_GATE.md). Do not distribute the rejected APK or authorize another merely because CI passes.
