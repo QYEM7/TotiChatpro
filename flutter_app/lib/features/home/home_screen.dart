@@ -7,6 +7,8 @@ import '../community/community_screen.dart';
 import '../economy/real_gift_ticker.dart';
 import '../../models/room_models.dart';
 import '../../ui/toti_theme.dart';
+import '../../ui/toti_visual_language.dart';
+import '../../ui/toti_bottom_bar.dart';
 import '../room/room_screen.dart';
 import '../profile/profile_screen.dart';
 
@@ -20,6 +22,8 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
+  final GlobalKey<_RoomsDirectoryState> _homeDirectoryKey =
+      GlobalKey<_RoomsDirectoryState>();
   RoomInfo? _activeRoom;
   bool _minimized = false;
 
@@ -49,7 +53,8 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final rooms = _activeRoom;
     final pages = [
-      RoomsDirectory(repository: widget.repository, explore: false,
+      RoomsDirectory(key: _homeDirectoryKey,
+        repository: widget.repository, explore: false,
         onOpenRoom: _openRoom, activeRoomId: rooms?.id),
       RoomsDirectory(repository: widget.repository, explore: true,
         onOpenRoom: _openRoom, activeRoomId: rooms?.id),
@@ -69,7 +74,7 @@ class _HomeShellState extends State<HomeShell> {
           }
         },
         child: Scaffold(
-          body: SafeArea(child: Stack(children: [
+          body: SafeArea(child: TotiAtmosphere(child: Stack(children: [
             Positioned.fill(child: Column(children: [
               RealGiftTicker(client: widget.repository.client),
               Expanded(child: IndexedStack(index: _tab, children: pages)),
@@ -101,25 +106,18 @@ class _HomeShellState extends State<HomeShell> {
                   ),
                 ),
               ),
-          ])),
+          ]))),
           bottomNavigationBar: rooms != null && !_minimized ? null :
-            NavigationBar(
+            TotiBottomBar(
               selectedIndex: _tab,
-              onDestinationSelected: (index) => setState(() => _tab = index),
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_rounded), label: 'الرئيسية'),
-                NavigationDestination(icon: Icon(Icons.search_rounded),
-                  label: 'اكتشف'),
-                NavigationDestination(icon: Icon(Icons.people_outline_rounded),
-                  label: 'مجتمع'),
-                NavigationDestination(
-                  icon: Icon(Icons.account_balance_wallet_outlined),
-                  label: 'محفظتي'),
-                NavigationDestination(icon: Icon(Icons.person_outline_rounded),
-                  label: 'ملفي'),
-              ],
+              onDestinationSelected: (index) =>
+                setState(() => _tab = index),
+              onCreateRoom: () {
+                setState(() => _tab = 0);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _homeDirectoryKey.currentState?._createRoom();
+                });
+              },
             ),
         ),
       ),
