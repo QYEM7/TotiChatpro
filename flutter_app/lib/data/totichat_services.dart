@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import 'notification_models.dart';
+import 'push_preference_models.dart';
 
 /// Real authenticated Staging APIs. Server remains the authority for all money,
 /// permissions, CP, gifts and moderation. No client-side ledger writes.
@@ -567,6 +568,69 @@ class TotiChatServices {
       'p_request_id':requestId,
     }));
     if (result['id']==null) throw StateError('Agency request not confirmed');
+  }
+
+  /// A push opt-in records consent only. FCM installation and delivery are
+  /// separate and are not enabled by this operation.
+  Future<PushPreferenceState> pushStatus() async {
+    final caller = userId;
+    final response = await client.rpc('phase5_push_status');
+    return PushPreferenceState.fromJson(response, expectedUserId: caller);
+  }
+
+  static void verifyPushConsentReceipt(Object? response, {
+    required String userId,
+    required bool enabled,
+  }) {
+    final data = object(response);
+    if (data['userId'] != userId ||
+        data['pushEnabled'] != enabled ||
+        data['deliveryConfigured'] is! bool) {
+      throw StateError('Server did not confirm device notification consent');
+    }
+  }
+
+  Future<PushPreferenceState> setPushConsent(bool enabled) async {
+    final caller = userId;
+    final receipt = await client.rpc('phase5_push_opt_in',
+      params: {'p_enabled': enabled});
+    verifyPushConsentReceipt(receipt, userId: caller, enabled: enabled);
+    final state = await pushStatus();
+    if (state.enabled != enabled) {
+      throw StateError('Device notification consent could not be verified');
+    }
+    return state;
+  }
+
+  static void verifyPushDeviceRemoval(Object? response, {
+    required String userId,
+    required String deviceId,
+  }) {
+    final data = object(response);
+    if (data['userId'] != userId ||
+        data['deviceId'] != deviceId ||
+        data['registered'] != false) {
+      throw StateError('Server did not confirm device revocation');
+    }
+  }
+
+  Future<PushPreferenceState> unregisterPushDevice(String deviceId) async {
+    final caller = userId;
+    if (!RegExp(r'^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}'
+       r'[0-9a-fA-F]{12}$').hasMatch(deviceId)) {
+      throw ArgumentError('Valid registered device ID required');
+    }
+    final receipt = await client.rpc('phase5_push_device_action', params: {
+      'p_action': 'unregister',
+      'p_device_id': deviceId,
+      'p_token': null,
+    });
+    verifyPushDeviceRemoval(receipt, userId: caller, deviceId: deviceId);
+    final state = await pushStatus();
+    if (state.devices.any((d) => d.deviceId == deviceId)) {
+      throw StateError('Device is still registered on the server');
+    }
+    return state;
   }
 
   static Map<String, dynamic> notificationFeedParams({
