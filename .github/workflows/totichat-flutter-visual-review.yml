@@ -1,0 +1,44 @@
+name: TotiChat Flutter Visual Review Screenshots
+
+# Produces real Flutter-rendered PNGs. No APK, production, fake banners,
+# fake transactions, real login or server changes.
+on:
+  push:
+    branches:
+      - rebuild/flutter-v1
+    paths:
+      - '.github/workflows/totichat-flutter-visual-review.yml'
+      - 'flutter_app/tool/visual_review_capture_test.dart'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-flutter-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install Flutter dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+      - name: Render ACTUAL Flutter UI screenshots (visual review only)
+        working-directory: flutter_app
+        run: flutter test --update-goldens tool/visual_review_capture_test.dart
+      - name: Verify both PNG screenshots exist
+        run: |
+          test -s flutter_app/tool/visual_review/new_login_flutter.png
+          test -s flutter_app/tool/visual_review/new_home_empty_flutter.png
+          file flutter_app/tool/visual_review/*.png
+      - name: Upload visual review files only (no Android binaries)
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-new-flutter-visual-review-${{ github.sha }}
+          path: flutter_app/tool/visual_review/*.png
+          if-no-files-found: error
+          retention-days: 7
