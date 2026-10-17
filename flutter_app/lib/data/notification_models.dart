@@ -16,6 +16,20 @@ class NotificationEntry {
 
   bool get unread => readAt == null;
 
+  /// Only the server-known support-reply notification opens a support thread.
+  /// Its destination is validated again by the server when the page loads.
+  String? get supportTicketId {
+    if (eventType != 'support_staff_replied') return null;
+    final raw = context['ticketId'];
+    if (raw is! String ||
+        !RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-'
+            r'[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-'
+            r'[0-9a-fA-F]{12}$').hasMatch(raw)) {
+      return null;
+    }
+    return raw;
+  }
+
   static NotificationEntry fromJson(Object? raw) {
     if (raw is! Map) {
       throw const FormatException('Notification row must be an object');
