@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
-import 'push_preferences_screen.dart';
 
 class ProfileSettings extends StatefulWidget {
   const ProfileSettings({super.key,required this.repository});
@@ -91,17 +90,6 @@ class _ProfileSettingsState extends State<ProfileSettings>{
               style:TextStyle(fontWeight:FontWeight.w800,fontSize:18)),
             const SizedBox(height:12),
             const Text('بإمكانك طلب حذف حسابك وبياناته المرتبطة به عبر تذكرة دعم رسمية.'),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => PushPreferencesScreen(
-                    api: TotiChatServices(widget.repository.client)),
-                ),
-              ),
-              icon: const Icon(Icons.notifications_active_outlined),
-              label: const Text('إشعارات الجهاز والخصوصية'),
-            ),
             const SizedBox(height: 10),
             OutlinedButton.icon(onPressed:_busy?null:_deleteRequest,
               icon:const Icon(Icons.delete_forever_outlined),
