@@ -36,6 +36,22 @@ Future<void> _loadPreviewFont() async {
         ..addFont(Future<ByteData>.value(ByteData.sublistView(
           Uint8List.fromList(font)))))
       .load();
+
+  // The default Flutter test font substitutes Material icons with squares.
+  // Load the real bundled SDK icon font so the screenshots represent the app.
+  final dartExecutable = File(Platform.resolvedExecutable);
+  final sdk = Platform.environment['FLUTTER_ROOT'] ??
+      dartExecutable.parent.parent.parent.parent.parent.path;
+  final materialIcons = File(
+    '$sdk/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  if (!materialIcons.existsSync()) {
+    throw StateError('MaterialIcons font not found in Flutter SDK: $sdk');
+  }
+  final icons = await materialIcons.readAsBytes();
+  await (FontLoader('MaterialIcons')
+        ..addFont(Future<ByteData>.value(ByteData.sublistView(
+          Uint8List.fromList(icons)))))
+      .load();
 }
 
 Future<void> _configureReviewSurface(WidgetTester tester) async {
@@ -62,6 +78,10 @@ void main() {
         child: LoginScreen(),
       ),
     ));
+    await tester.runAsync(() async {
+      await precacheImage(const AssetImage('assets/totichat_falcon.jpg'),
+        tester.element(find.byType(LoginScreen)));
+    });
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(const ValueKey('visual-login-root')),
