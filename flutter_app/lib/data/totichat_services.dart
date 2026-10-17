@@ -564,17 +564,42 @@ class TotiChatServices {
     return rows(await supportTicketPage());
   }
 
-  Future<Map<String, dynamic>> supportThread(String ticketId) async {
-    userId;
-    if (ticketId.isEmpty) throw ArgumentError('Ticket ID required');
-    final result = object(await client.rpc('phase5_support_thread_page',
-      params: {'p_ticket_id': ticketId,
-               'p_offset': 0, 'p_limit': 50}));
-    if (result['ticket'] is! Map || result['messages'] is! List ||
+  static Map<String, dynamic> supportThreadParams(
+      String ticketId, {int offset = 0}) {
+    if (ticketId.isEmpty || offset < 0 || offset > 50000 ||
+        offset % 50 != 0) {
+      throw ArgumentError('Invalid support thread page');
+    }
+    return {'p_ticket_id': ticketId, 'p_offset': offset, 'p_limit': 50};
+  }
+
+  /// Strictly verify the server envelope before displaying private messages.
+  static Map<String, dynamic> verifySupportThread(
+      Object? response, {required String ticketId, required int offset}) {
+    final result = object(response);
+    final ticket = result['ticket'];
+    final messages = result['messages'];
+    final total = result['total'];
+    if (ticket is! Map || ticket['id']?.toString() != ticketId ||
+        messages is! List || messages.length > 50 ||
+        messages.any((row) => row is! Map || row['id'] is! num ||
+          row['body'] is! String || row['author_id'] == null) ||
+        total is! num || !total.isFinite ||
+        total != total.toInt() || total < 0 ||
+        messages.length > total - offset ||
         result['canHandle'] is! bool) {
-      throw StateError('Malformed authenticated ticket thread');
+      throw StateError('Malformed authenticated support thread');
     }
     return result;
+  }
+
+  Future<Map<String, dynamic>> supportThread(
+      String ticketId, {int offset = 0}) async {
+    userId;
+    final params = supportThreadParams(ticketId, offset: offset);
+    final response = await client.rpc(
+      'phase5_support_thread_page', params: params);
+    return verifySupportThread(response, ticketId: ticketId, offset: offset);
   }
 
   Future<void> supportReply({
