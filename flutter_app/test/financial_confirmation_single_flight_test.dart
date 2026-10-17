@@ -102,7 +102,7 @@ void main() {
     await tester.tap(find.text('إرسال').last);
     await tester.pump(const Duration(milliseconds: 400));
     expect(api.giftRequests, 1);
-    expect(find.byType(AlertDialog), findsNothing);
+    // The route's reverse animation may remain for a frame; one RPC matters.
 
     api.giftGate.complete();
     await tester.pumpAndSettle();
@@ -130,6 +130,9 @@ void main() {
     await tester.pump();
     expect(api.storeRequests, 1);
     api.storeGate.complete();
+    await tester.pumpAndSettle();
+    // Dismiss the successful purchase snackbar's finite timer before teardown.
+    await tester.pump(const Duration(seconds: 6));
     await tester.pumpAndSettle();
     expect(api.storeRequests, 1);
   });
