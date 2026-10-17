@@ -8,6 +8,7 @@ import '../../data/totichat_services.dart';
 import '../community/dm_screen.dart';
 import '../economy/gift_sheet.dart';
 import '../economy/real_gift_ticker.dart';
+import 'room_draft_guard.dart';
 import 'room_exit_workflow.dart';
 import 'room_game_screen.dart';
 import 'room_moderation_screen.dart';
@@ -101,6 +102,17 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         await _leave();
       }
     }
+  }
+
+  /// A rejected join must have an in-place retry, not require navigating
+  /// away and recreating the room while the network is recovering.
+  void _retryJoin() {
+    if (!mounted || _joining || _joined || _leaving || _leaveRequested) return;
+    setState(() {
+      _joining = true;
+      _error = null;
+    });
+    _enter();
   }
 
   void _subscribeRoomChanges() {
@@ -295,13 +307,17 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _send() async {
-    final text = _message.text.trim();
-    if (text.isEmpty || _sending) return;
+    final draft = _message.text;
+    final text = draft.trim();
+    if (text.isEmpty || text.length > 500 || _sending || _joining ||
+        !_joined || _leaving || _leaveRequested || !mounted) return;
     setState(() => _sending = true);
     try {
       await widget.repository.sendMessage(widget.room.id, text);
       if (!mounted) return;
-      _message.clear();
+      // A member can continue typing while an RPC is pending. Never clear
+      // their newer draft in response to the earlier message succeeding.
+      RoomDraftGuard.clearSentDraftIfUnchanged(_message, draft);
       await _refresh();
     } catch (error) { _show('تعذر إرسال الرسالة: $error'); }
     finally { if (mounted) setState(() => _sending = false); }
@@ -560,8 +576,17 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
           body: _joining ? const Center(child: CircularProgressIndicator()) :
             !_joined ? Center(child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text(_error ?? 'تعذّر دخول الغرفة',
-                style: const TextStyle(color: Colors.white)))) :
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text(_error ?? 'تعذّر دخول الغرفة',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white)),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _leaving ? null : _retryJoin,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('إعادة محاولة الدخول'),
+                ),
+              ])))) :
             Column(children: [
               RealGiftTicker(client:widget.repository.client),
               if (_error != null) Container(
