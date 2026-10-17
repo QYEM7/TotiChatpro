@@ -11,6 +11,7 @@ import '../economy/real_gift_ticker.dart';
 import 'room_exit_workflow.dart';
 import 'room_game_screen.dart';
 import 'room_moderation_screen.dart';
+import 'room_mic_recovery.dart';
 import 'room_music_queue_screen.dart';
 import 'room_seat_visual.dart';
 import '../../models/room_models.dart';
@@ -191,7 +192,23 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       await _refresh();
       _show('تم تحديث المقعد من الخادم');
     } catch (error) {
-      _show('تعذر تحديث المقعد: $error');
+      // If the local disconnect itself failed, we must still attempt to mute
+      // on the server. A rejected seat RPC must not leave stale mic state.
+      if (_joined && !_leaving && mounted) {
+        final recovery = await RoomMicRecovery.run(
+          disconnectAudio: _voice.disconnect,
+          muteOnServer: () => widget.repository.setMicMuted(widget.room.id, true),
+        );
+        if (!recovery.serverMuteConfirmed) {
+          _show('تعذر تغيير المقعد ولم يؤكد الخادم كتم المايك: $error');
+        } else if (!recovery.disconnectConfirmed) {
+          _show('تعذر تغيير المقعد وتعذر تأكيد فصل الصوت: $error');
+        } else {
+          _show('تعذر تحديث المقعد: $error');
+        }
+      } else {
+        _show('تعذر تحديث المقعد: $error');
+      }
     } finally {
       if (mounted) setState(() => _workingSeat = false);
     }
@@ -261,10 +278,19 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       }
       await _refresh();
     } catch (error) {
-      // Fail closed: never leave a microphone publishing on server error.
-      await _voice.disconnect();
-      try { await widget.repository.setMicMuted(widget.room.id, true); } catch (_) {}
-      _show('تعذر تشغيل المايك: $error');
+      // A failed LiveKit disconnect must not skip the server mute request.
+      // Never report the microphone as safely muted if either cleanup failed.
+      final recovery = await RoomMicRecovery.run(
+        disconnectAudio: _voice.disconnect,
+        muteOnServer: () => widget.repository.setMicMuted(widget.room.id, true),
+      );
+      if (!recovery.serverMuteConfirmed) {
+        _show('فشلت عملية المايك، والخادم لم يؤكد كتمه: $error');
+      } else if (!recovery.disconnectConfirmed) {
+        _show('الخادم أكد الكتم لكن فصل الصوت تعثر: $error');
+      } else {
+        _show('تعذر تشغيل المايك: $error');
+      }
     } finally { if (mounted) setState(() => _workingAudio = false); }
   }
 
