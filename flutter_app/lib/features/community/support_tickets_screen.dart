@@ -29,8 +29,8 @@ class _SupportTicketListScreenState extends State<SupportTicketListScreen> {
   }
 
   void _load() {
-    setState(() => _future =
-      widget.api.supportTicketPage(staff: widget.staff, offset: _offset));
+    setState(() { _future =
+      widget.api.supportTicketPage(staff: widget.staff, offset: _offset); });
   }
 
   @override

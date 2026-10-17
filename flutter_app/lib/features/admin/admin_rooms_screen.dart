@@ -24,8 +24,8 @@ class _AdminRoomsScreenState extends State<AdminRoomsScreen> {
     _reload();
   }
 
-  void _reload() => setState(() => _rooms = widget.api.adminRoomDirectory(
-    search: _currentQuery, offset: _offset));
+  void _reload() => setState(() { _rooms = widget.api.adminRoomDirectory(
+    search: _currentQuery, offset: _offset); });
 
   void _submitSearch() {
     final query = _search.text.trim();
@@ -168,8 +168,7 @@ class _AdminRoomDetailScreenState extends State<AdminRoomDetailScreen> {
     _reload();
   }
 
-  void _reload() => setState(() =>
-    _state = widget.api.adminRoomState(widget.roomId));
+  void _reload() => setState(() { _state = widget.api.adminRoomState(widget.roomId); });
 
   Future<void> _confirm(String target, String action) async {
     if (_busy) return;

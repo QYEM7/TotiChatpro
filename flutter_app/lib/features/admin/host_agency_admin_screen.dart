@@ -24,7 +24,7 @@ class _HostAgencyAdminScreenState extends State<HostAgencyAdminScreen> {
     _future = widget.api.agencyState();
   }
 
-  void _refresh() => setState(() => _future = widget.api.agencyState());
+  void _refresh() => setState(() { _future = widget.api.agencyState(); });
 
   Future<void> _review(Map<dynamic, dynamic> registration, bool approve) async {
     if (_busy) return;

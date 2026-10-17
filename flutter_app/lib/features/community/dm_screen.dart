@@ -13,7 +13,7 @@ class _DmInboxState extends State<DmInbox> {
   late Future<List<Map<String, dynamic>>> _future;
   @override
   void initState() { super.initState(); _refresh(); }
-  void _refresh() => setState(() => _future = widget.api.inbox());
+  void _refresh() => setState(() { _future = widget.api.inbox(); });
 
   @override
   Widget build(BuildContext context) => ServerPanel<List<Map<String,dynamic>>>(

@@ -82,7 +82,7 @@ class _AdminScreenState extends State<AdminScreen>{
                 :const SizedBox.shrink()),
             if(reports)recordCard(context,title:'التقارير المالية والإدارية',
               icon:Icons.analytics_outlined,
-              onTap:()=>setState(()=>_report=widget.api.report())),
+              onTap:()=>setState(() { _report=widget.api.report(); })),
             if(catalog)recordCard(context,title:'صلاحية إدارة الكتالوج',
               description:'عرض الصلاحية فقط؛ التعديل غير متاح في هذه الواجهة.',
               icon:Icons.inventory_2_outlined),
@@ -130,7 +130,7 @@ class _AdminScreenState extends State<AdminScreen>{
               onTap:()=>Navigator.of(context).push(MaterialPageRoute(
                 builder:(_)=>AdminRoomsScreen(api:widget.api)))),
             if(_report!=null)ServerPanel<Map<String,dynamic>>(
-              future:_report!,retry:()=>setState(()=>_report=widget.api.report()),
+              future:_report!,retry:()=>setState(() { _report=widget.api.report(); }),
               builder:(context,report)=>Card(child:Padding(
                 padding:const EdgeInsets.all(16),
                 child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[

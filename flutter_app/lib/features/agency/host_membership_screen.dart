@@ -25,7 +25,7 @@ class _HostAgencyMembershipScreenState
     _refresh();
   }
 
-  void _refresh() => setState(() => _state = widget.api.agencyState());
+  void _refresh() => setState(() { _state = widget.api.agencyState(); });
 
   Future<void> _join(Map agency) async {
     if (_busy) return;

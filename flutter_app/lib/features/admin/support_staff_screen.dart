@@ -46,7 +46,7 @@ class _SupportStaffScreenState extends State<SupportStaffScreen> {
       showApiError(context, 'Search requires 2-40 characters.');
       return;
     }
-    setState(() => _found = widget.api.socialSearch(text));
+    setState(() { _found = widget.api.socialSearch(text); });
   }
 
   Future<void> _decision(String targetId, bool enable) async {

@@ -105,7 +105,7 @@ class _CpTabState extends State<_CpTab>{
   String? _peer,_type,_pendingId,_pendingSignature;
   bool _busy=false;
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_future=widget.api.cpState());
+  void _refresh()=>setState(() { _future=widget.api.cpState(); });
   Future<void> _send(String peer,String type,String action) async{
     if(_busy)return;
     final signature='$peer|$type|$action';
@@ -181,7 +181,7 @@ class _AgencyTab extends StatefulWidget{
 class _AgencyTabState extends State<_AgencyTab>{
   late Future<Map<String,dynamic>> _future;
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_future=widget.api.agencyState());
+  void _refresh()=>setState(() { _future=widget.api.agencyState(); });
   @override Widget build(BuildContext context)=>ServerPanel<Map<String,dynamic>>(
     future:_future,retry:_refresh,builder:(context,data){
       final regs=(data['registrations'] as List? ?? []).whereType<Map>()
@@ -249,7 +249,7 @@ class _SupportTabState extends State<_SupportTab>{
   final _subject=TextEditingController(),_message=TextEditingController();
   String _category='technical';bool _sending=false;String? _pendingId,_pendingSignature;
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_future=widget.api.supportTickets());
+  void _refresh()=>setState(() { _future=widget.api.supportTickets(); });
   @override void dispose(){_subject.dispose();_message.dispose();super.dispose();}
   Future<void> _submit() async {
     if(_sending)return;

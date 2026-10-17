@@ -46,7 +46,7 @@ class _HostMonthEvidenceScreenState extends State<HostMonthEvidenceScreen> {
     };
   }
 
-  void _reload() => setState(() => _future = _readEvidence());
+  void _reload() => setState(() { _future = _readEvidence(); });
 
   void _changeMonth(int delta) {
     final target = DateTime.utc(_month.year, _month.month + delta);

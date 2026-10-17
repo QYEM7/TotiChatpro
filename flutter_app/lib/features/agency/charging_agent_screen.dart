@@ -19,7 +19,7 @@ class _ChargingAgentScreenState extends State<ChargingAgentScreen>{
   String? _submittedNote,_submittedRef;
 
   @override void initState(){super.initState();_refresh();}
-  void _refresh()=>setState(()=>_state=widget.api.rechargeState());
+  void _refresh()=>setState(() { _state=widget.api.rechargeState(); });
 
   Future<void> _decide(String requestId,String action) async {
     if(_busy)return;

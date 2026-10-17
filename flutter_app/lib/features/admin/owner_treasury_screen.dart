@@ -24,7 +24,7 @@ class _OwnerTreasuryScreenState extends State<OwnerTreasuryScreen> {
     _refresh();
   }
 
-  void _refresh() => setState(() => _state = widget.api.rechargeState());
+  void _refresh() => setState(() { _state = widget.api.rechargeState(); });
 
   Future<void> _perform(String action, List<Map> agencies) async {
     if (_busy) return;
