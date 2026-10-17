@@ -26,9 +26,14 @@ class _GiftSheetState extends State<GiftSheet>{
   Future<void> _send() async{
     final item=_selected,recipient=_recipient;
     if(_busy||item==null||recipient==null)return;
-    final price=(item['price'] as num?)?.toInt();
-    if(price==null||price<1)return;
-    final total=price*_quantity;
+    late final int total;
+    try {
+      total = TotiChatServices.validatedGiftTotal(item, _quantity);
+    } catch (error) {
+      if (mounted) showApiError(context, error);
+      return;
+    }
+    final price = TotiChatServices.giftUnitPrice(item['price'])!;
     final confirmed=await showDialog<bool>(context:context,builder:(ctx)=>
       AlertDialog(title:const Text('تأكيد الهدية'),
         content:Text('إرسال ${item['name']} × $_quantity بقيمة $total كوين؟'),
