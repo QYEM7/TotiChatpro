@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
+import 'financial_retry_registry.dart';
 import '../../ui/server_panel.dart';
 
 class EconomyScreen extends StatelessWidget {
@@ -29,8 +30,14 @@ class _StoreTab extends StatefulWidget{
 }
 class _StoreTabState extends State<_StoreTab>{
   late Future<List<Map<String,dynamic>>> _future;
-  bool _busy=false, _confirming=false;String? _pendingId,_pendingSignature;
-  @override void initState(){super.initState();_refresh();}
+  bool _busy=false, _confirming=false;
+  late final FinancialRetryRegistry _retry;
+  String get _retryScope => FinancialRetryRegistry.scopeFor(widget.api.client, 'store');
+  @override void initState(){
+    super.initState();
+    _retry=FinancialRetryRegistry.forClient(widget.api.client);
+    _refresh();
+  }
   void _refresh()=>setState((){_future=widget.api.store();});
   Future<void> _buy(Map<String,dynamic> item) async{
     if(_busy||_confirming)return;
@@ -60,17 +67,24 @@ class _StoreTabState extends State<_StoreTab>{
     final signature=[
       item['id'], item['price'], item['currency'],
     ].join('|');
-    if(_pendingId!=null && _pendingSignature!=signature){
-      showApiError(context,'An unresolved purchase must be confirmed '
-        'or retried with identical item, price and currency.');
+    // The same account and purchase family retain one unresolved request
+    // across tab/screen disposal. A different selection cannot silently
+    // create a second debit while the earlier outcome is uncertain.
+    late final FinancialPendingIntent pending;
+    try {
+      pending=_retry.reserve(
+        scope:_retryScope,
+        signature:signature,
+        newRequestId:TotiChatServices.requestId,
+      );
+    } catch(error) {
+      if(mounted)showApiError(context,error);
       return;
     }
     setState(()=>_busy=true);
-    _pendingSignature=signature;
-    _pendingId??=TotiChatServices.requestId();
-    try{
-      await widget.api.buyItem(item,_pendingId!);
-      _pendingId=null;_pendingSignature=null;
+    try {
+      await widget.api.buyItem(item,pending.requestId);
+      _retry.confirm(scope:_retryScope,requestId:pending.requestId);
       if(mounted){
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content:Text('أكد الخادم نجاح الشراء')));
