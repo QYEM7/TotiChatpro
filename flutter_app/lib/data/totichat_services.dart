@@ -312,18 +312,48 @@ class TotiChatServices {
     return rows.map((x) => Map<String, dynamic>.from(x)).toList();
   }
 
+  static int validatedStorePrice(Map<String, dynamic> item) {
+    final price = item['price'];
+    final id = item['id'];
+    final currency = item['currency'];
+    if (item['is_active'] != true || item['is_reward'] == true ||
+        id is! String || id.trim().isEmpty ||
+        price is! int || price < 1 || price > maxSafeCoinAmount ||
+        !['gold', 'silver'].contains(currency)) {
+      throw ArgumentError('Invalid store item, currency or exact price');
+    }
+    return price;
+  }
+
+  static void verifyStoreReceipt(Object? response, {
+    required String itemId,
+    required int expectedPrice,
+    required String expectedCurrency,
+  }) {
+    final data = object(response);
+    if (data['status'] != 'completed' ||
+        data['id'] is! String || !isVerifiedUuid(data['id'] as String) ||
+        data['item_id'] != itemId ||
+        data['price'] != expectedPrice ||
+        data['currency'] != expectedCurrency) {
+      throw StateError('Store purchase receipt does not match selection');
+    }
+  }
+
   Future<void> buyItem(Map<String, dynamic> item, String requestId) async {
     userId;
-    if (item['is_active'] != true || item['is_reward'] == true) {
-      throw ArgumentError('Item not purchasable');
+    final price = validatedStorePrice(item);
+    if (!isVerifiedUuid(requestId)) {
+      throw ArgumentError('A valid idempotency request ID is required');
     }
-    final price = (item['price'] as num?)?.toInt();
-    if (price == null || price <= 0) throw ArgumentError('Invalid price');
-    final result = object(await client.rpc('phase3_purchase_store', params: {
-      'p_item_id': item['id'], 'p_request_id': requestId,
-      'p_expected_price': price, 'p_expected_currency': item['currency'],
-    }));
-    if (result['status'] != 'completed') throw StateError('Purchase not confirmed');
+    final itemId = item['id'] as String;
+    final currency = item['currency'] as String;
+    final result = await client.rpc('phase3_purchase_store', params: {
+      'p_item_id': itemId, 'p_request_id': requestId,
+      'p_expected_price': price, 'p_expected_currency': currency,
+    });
+    verifyStoreReceipt(result, itemId: itemId,
+      expectedPrice: price, expectedCurrency: currency);
   }
 
   Future<List<Map<String, dynamic>>> giftHistory() async {
