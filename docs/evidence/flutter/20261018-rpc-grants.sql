@@ -1,0 +1,72 @@
+-- Read-only endpoint/grant audit. Run ONLY on Staging rziaedugbdwefbefcxjt.
+-- Missing endpoints and incorrect grants appear in failures; no user data read.
+with expected(name) as (select unnest(array[
+  'phase2_dm_block',
+  'phase2_dm_inbox',
+  'phase2_dm_mark_read',
+  'phase2_dm_send',
+  'phase2_dm_thread',
+  'phase2_room_create',
+  'phase2_room_customize',
+  'phase2_room_invite_create',
+  'phase2_room_invite_join',
+  'phase2_room_join',
+  'phase2_room_leave',
+  'phase2_room_members_visual',
+  'phase2_room_moderate',
+  'phase2_room_moderation_state',
+  'phase2_room_send_message',
+  'phase2_room_set_muted',
+  'phase2_room_take_seat',
+  'phase3_admin_session',
+  'phase3_purchase_store',
+  'phase3_send_gift',
+  'phase4_admin_report',
+  'phase4_agency_action',
+  'phase4_agency_state',
+  'phase4_cp_action',
+  'phase4_cp_state',
+  'phase4_recharge_action',
+  'phase4_recharge_state',
+  'phase5_gift_history',
+  'phase5_host_month_preflight',
+  'phase5_host_month_snapshot_state',
+  'phase5_lucky_gift_readiness',
+  'phase5_notification_feed',
+  'phase5_notification_mark',
+  'phase5_push_device_action',
+  'phase5_push_opt_in',
+  'phase5_push_status',
+  'phase5_room_game_action',
+  'phase5_room_game_state',
+  'phase5_social_follow',
+  'phase5_social_search',
+  'phase5_special_id_status',
+  'phase5_support_action',
+  'phase5_support_list',
+  'phase5_support_staff_list',
+  'phase5_support_thread_page',
+  'phase5_vip_status',
+  'phase6_admin_banner_action',
+  'phase6_admin_banner_list',
+  'phase6_admin_directory',
+  'phase6_admin_management_page',
+  'phase6_admin_room_action',
+  'phase6_admin_room_state',
+  'phase6_host_month_evidence_integrity',
+  'phase6_lucky_gift_history',
+  'phase6_room_mic_decorations',
+  'phase7_host_month_diamond_conservation'
+]::text[])), checks as (
+ select e.name,p.oid,
+ has_function_privilege('authenticated',p.oid,'execute') as signed_in,
+ has_function_privilege('anon',p.oid,'execute') as anonymous
+ from expected e left join
+ (pg_proc p join pg_namespace n on n.oid=p.pronamespace and n.nspname='public')
+ on p.proname=e.name
+)
+select count(*) as checked,
+ count(*) filter (where oid is not null and signed_in and not anonymous) as passed,
+ coalesce(jsonb_agg(name) filter
+ (where oid is null or not signed_in or anonymous),'[]') as failures
+from checks;
