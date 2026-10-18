@@ -22,6 +22,9 @@ jobs:
       - name: Generate Android scaffolding (no APK build)
         working-directory: flutter_app
         run: flutter create --platforms=android --project-name totichat --org com.totichat .
+      - name: Remove generated Flutter demo test (MyApp is not our app)
+        working-directory: flutter_app
+        run: rm -f test/widget_test.dart
       - name: Resolve Dart dependencies
         working-directory: flutter_app
         run: flutter pub get
