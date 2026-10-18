@@ -1,0 +1,16 @@
+{
+  "project": "TotiChat",
+  "projectNumber": "01",
+  "stage": "backend-only-awaiting-approved-ui-repository",
+  "previousFrontend": "deprecated-not-approved",
+  "uiSource": "pending-user-repository",
+  "supabaseStaging": "rziaedugbdwefbefcxjt",
+  "protectedBranches": [
+    "main"
+  ],
+  "backupBranch": "backup/pre-backend-only-20261019",
+  "apkBuildAllowed": false,
+  "productionModified": false,
+  "stagingModified": false,
+  "oldExternalDeploymentsStatus": "not-yet-verified-disabled"
+}

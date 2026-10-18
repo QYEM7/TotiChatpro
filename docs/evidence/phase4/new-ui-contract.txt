@@ -1,1 +1,0 @@
-PASS browser contract: CP request, exact redemption quote and one mutation, actual WAV playback after click, permission-gated SQL report, XLSX, agency registration/admin review and mobile width. Not live E2E.
