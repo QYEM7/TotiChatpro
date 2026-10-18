@@ -6,8 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:totichat/data/totichat_repository.dart';
+import 'package:totichat/data/totichat_services.dart';
 import 'package:totichat/features/auth/login_screen.dart';
 import 'package:totichat/features/home/home_screen.dart';
+import 'package:totichat/features/economy/gift_sheet.dart';
 import 'package:totichat/models/room_models.dart';
 import 'package:totichat/ui/toti_bottom_bar.dart';
 import 'package:totichat/ui/toti_theme.dart';
@@ -24,6 +26,14 @@ class _NoActivityRepository extends TotiChatRepository {
 
   @override
   Future<List<Map<String, dynamic>>> activeBanners() async => const [];
+}
+
+/// Explicitly empty API response: the preview never depicts invented gifts.
+class _NoGiftsApi extends TotiChatServices {
+  _NoGiftsApi() : super(_UnboundClient());
+
+  @override
+  Future<List<Map<String, dynamic>>> gifts() async => const [];
 }
 
 Future<void> _loadPreviewFont() async {
@@ -125,4 +135,33 @@ void main() {
       matchesGoldenFile('visual_review/new_home_empty_flutter.png'),
     );
   });
+  testWidgets('Flutter gift sheet with no fabricated items or members',
+      (tester) async {
+    await _configureReviewSurface(tester);
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+      tester.view.resetDevicePixelRatio();
+    });
+    await tester.pumpWidget(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: buildTotiTheme(),
+      home: RepaintBoundary(
+        key: const ValueKey('visual-gifts-root'),
+        child: Scaffold(
+          backgroundColor: TotiColors.background,
+          body: GiftSheet(
+            api: _NoGiftsApi(),
+            roomId: '00000000-0000-4000-8000-000000000219',
+            members: const [],
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(const ValueKey('visual-gifts-root')),
+      matchesGoldenFile('visual_review/new_gift_sheet_empty_flutter.png'),
+    );
+  });
+
 }
