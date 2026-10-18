@@ -48,3 +48,14 @@ Approved design source: https://github.com/mrbalmain11-star/-
 - Actual Flutter asset and APK builds remain separate from runtime acceptance checks.
 - Backend has `room_music_queue` and `user_music_bookmarks` tables, but **no verified public music RPC exists** in the current Staging catalog. Music synchronization is not ready.
 - No full end-to-end signed-in user journey, purchase ledger verification, or two-device LiveKit voice session was run.
+
+
+## Room image integration added to Flutter
+- Photo and welcome message are now required in the create-room dialog; private/public selection is maintained.
+- Selected photos are converted to WebP and size-checked on device.
+- The app uploads to the existing `totichat-room-images` bucket at `{roomId}/cover.webp` (maximum 2 MiB) using room-owner RLS; the existing server RPC validates and saves the path.
+- Room directory cards display real uploaded covers; the owner can retry changing the cover from inside their room if the upload fails.
+- The app does not write any placeholder image or generate synthetic room data. Existing backend and production branches remain unchanged.
+- Caveat: a server-created room could remain without a cover after a network failure; the owner retry control exists, and real Android slow-network acceptance is still required.
+- WebP header/size tests were added to `flutter_app/test/room_cover_test.dart`; the latest CI result must be checked before treating the change as verified.
+
