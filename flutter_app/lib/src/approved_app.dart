@@ -216,7 +216,21 @@ class _ApprovedAppState extends State<ApprovedApp> {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.white)),
             leading: const Icon(Icons.keyboard_voice, color: ApprovedPalette.mint),
-            trailing: const Icon(Icons.open_in_full, color: ApprovedPalette.gold),
+            trailing: IconButton(
+              tooltip: 'مغادرة الغرفة المصغرة',
+              icon: const Icon(Icons.logout, color: ApprovedPalette.gold),
+              onPressed: () async {
+                final room = minimizedRoom;
+                if (room == null) return;
+                try {
+                  await VoiceSession.instance.disconnect();
+                  await repo.leaveRoom(room.id);
+                  if (mounted) setState(() => minimizedRoom = null);
+                } catch (error) {
+                  if (mounted) showProblem(context, error);
+                }
+              },
+            ),
             onTap: () {
               final room = minimizedRoom;
               if (room != null) openRoom(room, joined: true);
@@ -406,7 +420,14 @@ class _ApprovedAppState extends State<ApprovedApp> {
             icon: const Icon(Icons.logout),
             label: const Text('تسجيل الخروج'),
             onPressed: () async {
-              try { await VoiceSession.instance.disconnect(); await Supabase.instance.client.auth.signOut(); }
+              try {
+                final member = minimizedRoom;
+                await VoiceSession.instance.disconnect();
+                if (member != null) {
+                  await repo.leaveRoom(member.id);
+                }
+                await Supabase.instance.client.auth.signOut();
+              }
               catch (e) { if (context.mounted) showProblem(context, e); }
             },
           )),

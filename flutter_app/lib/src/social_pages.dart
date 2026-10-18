@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -43,8 +45,36 @@ class ConversationsPage extends StatefulWidget {
 
 class _ConversationsPageState extends State<ConversationsPage> {
   late Future<List<Map<String, dynamic>>> inbox;
+  RealtimeChannel? _inboxUpdates;
   @override
-  void initState() { super.initState(); _reload(); }
+  void initState() {
+    super.initState();
+    _reload();
+    final me = Supabase.instance.client.auth.currentUser?.id;
+    if (me != null) {
+      _inboxUpdates = Supabase.instance.client
+        .channel('dm-inbox-$me')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'direct_messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'recipient_id',
+            value: me,
+          ),
+          callback: (_) { if (mounted) setState(_reload); },
+        ).subscribe();
+    }
+  }
+  @override
+  void dispose() {
+    final channel = _inboxUpdates;
+    if (channel != null) {
+      unawaited(Supabase.instance.client.removeChannel(channel));
+    }
+    super.dispose();
+  }
   void _reload() { inbox = features.inbox(); }
 
   Future<void> _findPerson() async {
@@ -117,17 +147,47 @@ class ConversationPage extends StatefulWidget {
 class _ConversationPageState extends State<ConversationPage> {
   final field = TextEditingController();
   late Future<List<Map<String, dynamic>>> messages;
+  RealtimeChannel? _messageUpdates;
   bool sending = false;
   String? requestId;
   @override
-  void initState() { super.initState(); _reload(); }
+  void initState() {
+    super.initState();
+    _reload();
+    final me = Supabase.instance.client.auth.currentUser?.id;
+    if (me != null) {
+      _messageUpdates = Supabase.instance.client
+        .channel('dm-thread-$me-${widget.otherId}')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'direct_messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'recipient_id',
+            value: me,
+          ),
+          callback: (payload) {
+            if (!mounted || payload.newRecord['sender_id'] != widget.otherId) return;
+            setState(_reload);
+          },
+        ).subscribe();
+    }
+  }
   void _reload() {
     messages = features.thread(widget.otherId);
     // Read status is authoritative and scoped to this exact conversation.
     features.markDmRead(widget.otherId).catchError((Object _) {});
   }
   @override
-  void dispose() { field.dispose(); super.dispose(); }
+  void dispose() {
+    final channel = _messageUpdates;
+    if (channel != null) {
+      unawaited(Supabase.instance.client.removeChannel(channel));
+    }
+    field.dispose();
+    super.dispose();
+  }
 
   Future<void> _send() async {
     if (sending || field.text.trim().isEmpty) return;
@@ -252,8 +312,36 @@ class NotificationsPage extends StatefulWidget {
 }
 class _NotificationsPageState extends State<NotificationsPage> {
   late Future<Map<String, dynamic>> feed;
+  RealtimeChannel? _notificationsUpdates;
   @override
-  void initState() { super.initState(); _reload(); }
+  void initState() {
+    super.initState();
+    _reload();
+    final me = Supabase.instance.client.auth.currentUser?.id;
+    if (me != null) {
+      _notificationsUpdates = Supabase.instance.client
+        .channel('notifications-$me')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'user_notifications',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'recipient_id',
+            value: me,
+          ),
+          callback: (_) { if (mounted) setState(_reload); },
+        ).subscribe();
+    }
+  }
+  @override
+  void dispose() {
+    final channel = _notificationsUpdates;
+    if (channel != null) {
+      unawaited(Supabase.instance.client.removeChannel(channel));
+    }
+    super.dispose();
+  }
   void _reload() { feed = features.notifications(); }
   Future<void> _markAll() async {
     try { await features.markAllNotifications(); if (mounted) setState(_reload); }
