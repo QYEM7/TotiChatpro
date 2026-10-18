@@ -12,6 +12,7 @@ import 'social_pages.dart';
 import 'voice_session.dart';
 import 'gift_announcement_strip.dart';
 import 'music_pages.dart';
+import 'room_cover_upload.dart';
 
 class ApprovedRoomView extends StatefulWidget {
   final VoiceRoom room;
@@ -27,6 +28,9 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   List<RoomMessage> messages = [];
   bool loading = true;
   bool sendingMessage = false;
+  bool coverBusy = false;
+  String? _coverPath;
+  int _coverRevision = 0;
   String? issue;
   RealtimeChannel? roomChannel;
   bool _allowPop = false;
@@ -35,6 +39,7 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   @override
   void initState() {
     super.initState();
+    _coverPath = widget.room.coverPath;
     refresh();
     // Realtime changes are still validated by RLS. Refresh canonical state
     // rather than trusting event payloads to mutate seat ownership locally.
@@ -169,6 +174,27 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
       if (mounted) setState(() => voiceBusy = false);
     }
   }
+  Future<void> updateRoomCover() async {
+    if (coverBusy || widget.room.ownerId != repo.currentUserId) return;
+    setState(() => coverBusy = true);
+    try {
+      final encoded = await RoomCoverUpload.selectAndEncode();
+      if (encoded == null) return;
+      final path = await RoomCoverUpload.upload(
+        Supabase.instance.client, widget.room.id, encoded);
+      if (mounted) {
+        setState(() {
+          _coverPath = path;
+          _coverRevision = DateTime.now().millisecondsSinceEpoch;
+        });
+      }
+    } catch (error) {
+      if (mounted) _error(error);
+    } finally {
+      if (mounted) setState(() => coverBusy = false);
+    }
+  }
+
   Future<void> sharePrivateInvite() async {
     try {
       final value = await repo.createPrivateInvitation(widget.room.id);
@@ -263,6 +289,22 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
             child: Row(children: [
+              if (_coverPath != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      RoomCoverUpload.imageUrl(
+                        Supabase.instance.client, _coverPath!) +
+                        '?v=$_coverRevision',
+                      width: 38, height: 38, fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) =>
+                        const Icon(Icons.image_not_supported,
+                          color: Colors.white54),
+                    ),
+                  ),
+                ),
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -278,6 +320,13 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
                   onPressed: voiceBusy ? null : retryVoice,
                   tooltip: 'إعادة اتصال الصوت',
                   icon: const Icon(Icons.wifi_tethering, color: ApprovedPalette.gold)),
+              if (widget.room.ownerId == repo.currentUserId)
+                IconButton(
+                  tooltip: 'تغيير غلاف الغرفة',
+                  onPressed: coverBusy ? null : updateRoomCover,
+                  icon: const Icon(Icons.add_photo_alternate_outlined,
+                    color: ApprovedPalette.mint),
+                ),
               if (widget.room.isPrivate &&
                   widget.room.ownerId == repo.currentUserId)
                 IconButton(onPressed: sharePrivateInvite,
