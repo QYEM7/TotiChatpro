@@ -486,7 +486,9 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0x660E1020),
+      showDragHandle: false,
       builder: (context) => GiftSheet(
         api: TotiChatServices(widget.repository.client),
         roomId: widget.room.id,
@@ -614,43 +616,73 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                 Padding(padding: const EdgeInsets.all(12),
                   child: Text(widget.room.welcomeMessage!,
                     style: const TextStyle(color: TotiColors.muted))),
-              const SizedBox(height: 12),
+              const SizedBox(height: 9),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 5, mainAxisSpacing: 12,
-                    crossAxisSpacing: 7, childAspectRatio: .72),
-                  itemCount: 15,
-                  itemBuilder: (context, i) {
-                    final seat = i + 1;
-                    RoomMember? occupant;
-                    for (final member in _members) {
-                      if (member.seatNo == seat) occupant = member;
-                    }
-                    final decoration = occupant == null
-                      ? null : _seatDecorations[occupant.userId];
-                    return InkWell(
-                      onTap: _workingSeat || _workingAudio || _leaving
-                        ? null : () => occupant == null
-                            ? _seat(seat) : _memberActions(occupant, seat),
-                      borderRadius: BorderRadius.circular(14),
-                      child: Column(children: [
-                        Expanded(child: RoomSeatVisual(
-                          member: occupant,
-                          isOwner: occupant?.userId == widget.room.ownerId,
-                          decoration: decoration,
-                        )),
-                        const SizedBox(height: 5),
-                        Text(occupant?.displayName ?? '$seat',
-                          textAlign: TextAlign.center, maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 10, color: Colors.white)),
-                      ]),
-                    );
-                  },
+                padding: const EdgeInsets.symmetric(horizontal: 11),
+                child: TotiGlassCard(
+                  radius: 25,
+                  padding: const EdgeInsets.fromLTRB(9, 10, 9, 11),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Row(children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          gradient: TotiColors.heroGradient,
+                          borderRadius: BorderRadius.circular(10)),
+                        child: const Icon(Icons.graphic_eq_rounded,
+                          color: Colors.white, size: 17)),
+                      const SizedBox(width: 8),
+                      const Expanded(child: Text('المقاعد الصوتية',
+                        style: TextStyle(fontWeight: FontWeight.w900,
+                          fontSize: 13, color: TotiColors.ink))),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: TotiColors.lavender,
+                          borderRadius: BorderRadius.circular(20)),
+                        child: const Text('15 مقعد',
+                          style: TextStyle(color: TotiColors.plum,
+                            fontWeight: FontWeight.w800, fontSize: 11))),
+                    ]),
+                    const SizedBox(height: 10),
+                    GridView.builder(
+                                      shrinkWrap: true,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 5, mainAxisSpacing: 10,
+                                        crossAxisSpacing: 5, childAspectRatio: .77),
+                                      itemCount: 15,
+                                      itemBuilder: (context, i) {
+                                        final seat = i + 1;
+                                        RoomMember? occupant;
+                                        for (final member in _members) {
+                                          if (member.seatNo == seat) occupant = member;
+                                        }
+                                        final decoration = occupant == null
+                                          ? null : _seatDecorations[occupant.userId];
+                                        return InkWell(
+                                          onTap: _workingSeat || _workingAudio || _leaving
+                                            ? null : () => occupant == null
+                                                ? _seat(seat) : _memberActions(occupant, seat),
+                                          borderRadius: BorderRadius.circular(14),
+                                          child: Column(children: [
+                                            Expanded(child: RoomSeatVisual(
+                                              member: occupant,
+                                              isOwner: occupant?.userId == widget.room.ownerId,
+                                              decoration: decoration,
+                                            )),
+                                            const SizedBox(height: 4),
+                                            Text(occupant?.displayName ?? '$seat',
+                                              textAlign: TextAlign.center, maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontSize: 10, color: TotiColors.ink,
+                                                fontWeight: FontWeight.w700)),
+                                          ]),
+                                        );
+                                      },
+                                    ),,
+                  ]),
                 ),
               ),
               const SizedBox(height: 8),
