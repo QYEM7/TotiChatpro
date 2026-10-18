@@ -13,6 +13,10 @@ import 'package:totichat/features/economy/gift_sheet.dart';
 import 'package:totichat/models/room_models.dart';
 import 'package:totichat/ui/toti_bottom_bar.dart';
 import 'package:totichat/ui/toti_theme.dart';
+import 'package:totichat/ui/toti_visual_language.dart';
+import 'package:totichat/ui/extracted_room_backdrop.dart';
+import 'package:totichat/ui/extracted_premium_panels.dart';
+import 'package:totichat/features/room/room_seat_visual.dart';
 
 /// Genuine Flutter-rendered screenshots for OWNER VISUAL REVIEW only.
 /// No financial data, users, rooms, banners or server success is invented.
@@ -161,6 +165,88 @@ void main() {
     await expectLater(
       find.byKey(const ValueKey('visual-gifts-root')),
       matchesGoldenFile('visual_review/new_gift_sheet_empty_flutter.png'),
+    );
+  });
+
+
+  testWidgets('Flutter premium room seats, layout-only without fake occupants',
+      (tester) async {
+    await _configureReviewSurface(tester);
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: buildTotiTheme(),
+      home: RepaintBoundary(
+        key: const ValueKey('visual-room-empty-root'),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            body: TotiAtmosphere(
+              child: TotiRoomBackdrop(
+                child: SafeArea(child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(children: [
+                    const TotiRoyalTopBanner(
+                      title: 'المقاعد الصوتية',
+                      subtitle: 'معاينة شكل 15 مقعداً فارغاً — بدون أعضاء تجريبيين',
+                      icon: Icons.graphic_eq_rounded,
+                    ),
+                    const SizedBox(height: 20),
+                    TotiGlassCard(
+                      child: Column(children: [
+                        const TotiRoyalSectionHeading(
+                          title: 'مقاعد الغرفة',
+                          subtitle: 'جميعها فارغة في هذه المعاينة',
+                          icon: Icons.mic_none_rounded,
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 310,
+                          child: GridView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 5,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 7,
+                                childAspectRatio: .76,
+                              ),
+                            itemCount: 15,
+                            itemBuilder: (context, index) => Column(children: [
+                              const Expanded(child: RoomSeatVisual(
+                                member: null, isOwner: false,
+                              )),
+                              Text('${index + 1}',
+                                style: const TextStyle(
+                                  color: TotiColors.ink, fontSize: 10)),
+                            ]),
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ]),
+                )),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.runAsync(() async {
+      await precacheImage(
+        const AssetImage('assets/room_royal_background.jpg'),
+        tester.element(find.byType(TotiRoomBackdrop)),
+      );
+    });
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(const ValueKey('visual-room-empty-root')),
+      matchesGoldenFile('visual_review/new_room_empty_seats_flutter.png'),
     );
   });
 
