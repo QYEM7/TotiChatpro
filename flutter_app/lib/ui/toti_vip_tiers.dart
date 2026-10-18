@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'toti_theme.dart';
 
 /// Ten distinct VIP palettes. A tier is never displayed unless it is
 /// returned by the verified server-backed entitlement.
@@ -19,7 +20,7 @@ abstract final class TotiVipTierStyle {
   static Color colorFor(int tier) =>
       tier >= 1 && tier <= _colors.length
           ? _colors[tier - 1]
-          : const Color(0xFF198269);
+          : TotiColors.plum;
 
   static LinearGradient gradientFor(int tier) {
     final center = colorFor(tier);
