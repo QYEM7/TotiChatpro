@@ -6,7 +6,6 @@ import 'domain.dart';
 import 'staging_repository.dart';
 import 'visual.dart';
 import 'room_view.dart';
-import 'connected_features.dart';
 import 'social_pages.dart';
 import 'commerce_pages.dart';
 
