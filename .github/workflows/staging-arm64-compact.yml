@@ -5,6 +5,10 @@ on:
     paths:
       - '.github/workflows/staging-arm64-compact.yml'
   workflow_dispatch:
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
 permissions:
   contents: read
 jobs:

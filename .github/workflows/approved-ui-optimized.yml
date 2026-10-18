@@ -6,6 +6,10 @@ on:
       - 'flutter_app/**'
       - '.github/workflows/approved-ui-optimized.yml'
   workflow_dispatch:
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
 permissions:
   contents: read
 env:
