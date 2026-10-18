@@ -30,6 +30,7 @@ void main() {
     expect(room, contains('itemCount: 15'));
     expect(room, contains('NeverScrollableScrollPhysics()'));
     expect(room, contains('RealGiftTicker('));
+    expect(room, contains('TotiRoomBackdrop('));
     expect(room, contains('RoomSeatVisual('));
     expect(room, contains('_toggleMic'));
     expect(gifts, contains('[1, 7, 17, 77, 777]'));
