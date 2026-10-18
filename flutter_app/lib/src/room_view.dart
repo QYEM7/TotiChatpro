@@ -160,7 +160,7 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
       backgroundColor: ApprovedPalette.room,
       body: SafeArea(child: Stack(children: [
         Positioned.fill(child: ApprovedNetworkImage(
-          url: approvedAsset('public/galaxy-room-bg.jpg'))),
+          url: approvedAsset('assets/images/galaxy_room_bg_1792054675831.jpg'))),
         Positioned.fill(child: Container(color: const Color(0xAA120729))),
         Column(children: [
           Padding(

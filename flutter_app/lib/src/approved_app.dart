@@ -58,7 +58,7 @@ class _ApprovedLoginScreenState extends State<ApprovedLoginScreen> {
               boxShadow: const [BoxShadow(color: Color(0x77FFCC33), blurRadius: 35)],
             ),
             clipBehavior: Clip.antiAlias,
-            child: ApprovedNetworkImage(url: approvedAsset('public/toti-login-bg.jpg')),
+            child: ApprovedNetworkImage(url: approvedAsset('assets/images/toti_crowned_falcon_login_1790386323252.jpg')),
           ),
           const SizedBox(height: 20),
           const Text('Toti Chat', style: TextStyle(
