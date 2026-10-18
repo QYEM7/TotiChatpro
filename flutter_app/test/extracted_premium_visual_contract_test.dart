@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:totichat/models/room_models.dart';
 import 'package:totichat/ui/extracted_premium_panels.dart';
 import 'package:totichat/ui/toti_theme.dart';
 import 'package:totichat/ui/toti_vip_tiers.dart';
