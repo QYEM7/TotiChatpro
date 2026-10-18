@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'voice_session.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'domain.dart';
 import 'staging_repository.dart';
@@ -27,7 +29,7 @@ class _ApprovedLoginScreenState extends State<ApprovedLoginScreen> {
     setState(() => working = true);
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
-          OAuthProvider.google, redirectTo: loginRedirect);
+          OAuthProvider.google, redirectTo: kIsWeb ? Uri.base.toString() : loginRedirect);
       // Never assert logged-in here. SessionGate observes server auth events.
     } catch (e) {
       if (mounted) showProblem(context, e);
@@ -317,7 +319,7 @@ class _ApprovedAppState extends State<ApprovedApp> {
             icon: const Icon(Icons.logout),
             label: const Text('تسجيل الخروج'),
             onPressed: () async {
-              try { await Supabase.instance.client.auth.signOut(); }
+              try { await VoiceSession.instance.disconnect(); await Supabase.instance.client.auth.signOut(); }
               catch (e) { if (context.mounted) showProblem(context, e); }
             },
           )),

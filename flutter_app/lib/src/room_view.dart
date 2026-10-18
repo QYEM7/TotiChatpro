@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'domain.dart';
 import 'staging_repository.dart';
 import 'visual.dart';
+import 'voice_session.dart';
 
 class ApprovedRoomView extends StatefulWidget {
   final VoiceRoom room;
@@ -25,7 +26,14 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   void initState() {
     super.initState();
     refresh();
+    VoiceSession.instance.connect(widget.room.id).then((_) {
+      if (mounted) setState(() => voiceReady = true);
+    }).catchError((Object error) {
+      if (mounted) _error(error);
+    });
   }
+  bool voiceReady = false;
+  bool voiceBusy = false;
   @override
   void dispose() {
     messageField.dispose();
@@ -78,8 +86,28 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('تعذر إكمال العملية: ' + error.toString())));
   }
+  Future<void> toggleMic() async {
+    if (voiceBusy) return;
+    setState(() => voiceBusy = true);
+    try {
+      await VoiceSession.instance.setMicrophone(
+        roomId: widget.room.id,
+        enabled: !VoiceSession.instance.publishing,
+        repository: repo,
+      );
+      if (mounted) {
+        setState(() => voiceReady = VoiceSession.instance.connected);
+        await refresh();
+      }
+    } catch (error) {
+      if (mounted) _error(error);
+    } finally {
+      if (mounted) setState(() => voiceBusy = false);
+    }
+  }
   Future<void> exitRoom() async {
     try {
+      await VoiceSession.instance.disconnect();
       await repo.leaveRoom(widget.room.id);
       if (mounted) Navigator.pop(context, false);
     } catch (error) { if (mounted) _error(error); }
@@ -205,9 +233,14 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
               IconButton(
                 onPressed: openGifts,
                 icon: const Icon(Icons.card_giftcard, color: ApprovedPalette.gold)),
-              const Tooltip(
-                message: 'الميكروفون الحقيقي ينتظر تكامل LiveKit والتحقق الصوتي',
-                child: Icon(Icons.mic_off, color: Colors.white54)),
+              IconButton(
+                tooltip: voiceReady ? 'تشغيل أو إيقاف الميكروفون' : 'الاتصال بالصوت',
+                onPressed: voiceBusy || !voiceReady ? null : toggleMic,
+                icon: Icon(VoiceSession.instance.publishing
+                  ? Icons.mic : Icons.mic_off,
+                  color: VoiceSession.instance.publishing
+                    ? ApprovedPalette.mint : Colors.white70),
+              ),
             ]),
           ),
         ]),

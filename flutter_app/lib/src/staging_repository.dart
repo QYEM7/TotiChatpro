@@ -47,6 +47,13 @@ class StagingRepository {
     await client.rpc('phase2_room_leave', params: {'p_room_id': roomId});
   }
 
+  Future<void> setMuted(String roomId, bool muted) async {
+    await client.rpc('phase2_room_set_muted', params: {
+      'p_room_id': roomId,
+      'p_muted': muted,
+    });
+  }
+
   Future<void> takeSeat(String roomId, int? seat) async {
     if (seat != null && (seat < 1 || seat > 15)) {
       throw ArgumentError.value(seat, 'seat', 'Allowed seats: 1..15');
