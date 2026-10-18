@@ -117,8 +117,18 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
             const SnackBar(content: Text('هذا المقعد مشغول')));
         return;
       }
-      await repo.takeSeat(widget.room.id,
-          mine.isNotEmpty && mine.first.seat == seatNumber ? null : seatNumber);
+      final currentSeat = mine.isEmpty ? null : mine.first.seat;
+      final targetSeat = currentSeat == seatNumber ? null : seatNumber;
+      // Stop client transmission before any seat change or release.
+      // If mute fails, do not change seats while the mic may still be live.
+      if (VoiceSession.instance.publishing) {
+        await VoiceSession.instance.setMicrophone(
+          roomId: widget.room.id,
+          enabled: false,
+          repository: repo,
+        );
+      }
+      await repo.takeSeat(widget.room.id, targetSeat);
       await refresh();
     } catch (error) { if (mounted) _error(error); }
   }
