@@ -164,6 +164,45 @@ class ConnectedFeatures {
     });
   }
 
+  Future<Map<String, dynamic>> listAllSupportTickets() async =>
+      object(await client.rpc('phase5_support_list', params: {
+        'p_scope': 'all',
+        'p_offset': 0,
+        'p_limit': 50,
+      }));
+
+  Future<Map<String, dynamic>> supportThread(String ticketId) async =>
+      object(await client.rpc('phase5_support_thread',
+        params: {'p_ticket_id': ticketId}));
+
+  Future<void> replySupportTicket(
+    String ticketId, String message, {required String requestId}
+  ) async {
+    final body = message.trim();
+    if (body.length < 2 || body.length > 2500) {
+      throw ArgumentError('Support reply must be 2 to 2500 characters');
+    }
+    await client.rpc('phase5_support_action', params: {
+      'p_action': 'reply',
+      'p_data': {'ticket_id': ticketId, 'message': body},
+      'p_request_id': requestId,
+    });
+  }
+
+  Future<void> updateSupportStatus(
+    String ticketId, String status, {required String requestId}
+  ) async {
+    if (!const ['open', 'in_progress', 'resolved', 'closed']
+        .contains(status)) {
+      throw ArgumentError('Invalid support status');
+    }
+    await client.rpc('phase5_support_action', params: {
+      'p_action': 'status',
+      'p_data': {'ticket_id': ticketId, 'status': status},
+      'p_request_id': requestId,
+    });
+  }
+
   Future<Map<String, dynamic>> rechargeState() async =>
       object(await client.rpc('phase4_recharge_state'));
 

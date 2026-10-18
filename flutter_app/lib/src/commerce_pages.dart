@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'connected_features.dart';
 import 'social_pages.dart';
+import 'support_pages.dart';
 import 'visual.dart';
 
 class AgenciesPage extends StatefulWidget {
@@ -339,6 +340,14 @@ class _UserSupportState extends State<UserNotificationsAndSupportPage> {
             Card(child: ListTile(
               title: Text(item['subject']?.toString() ?? ''),
               subtitle: Text(item['status']?.toString() ?? ''),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () async {
+                await Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => SupportTicketPage(
+                    ticketId: item['id'] as String),
+                ));
+                if (context.mounted) setState(reload);
+              },
             )),
         ]);
       },
@@ -370,6 +379,22 @@ class AdminCenterPage extends StatelessWidget {
           ),
           ListTile(title: const Text('الرتبة'),
             trailing: Text(role)),
+          FutureBuilder<Map<String, dynamic>>(
+            future: features.adminSupportAccess(),
+            builder: (context, access) {
+              if (access.data?['canHandle'] != true) {
+                return const SizedBox.shrink();
+              }
+              return ListTile(
+                leading: const Icon(Icons.support_agent_outlined),
+                title: const Text('صندوق تذاكر الدعم'),
+                subtitle: const Text('للموظفين المخوّلين من الخادم فقط'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const SupportInboxPage())),
+              );
+            },
+          ),
           if (admin['canManageCatalogs'] == true)
             const ListTile(leading: Icon(Icons.inventory),
               title: Text('صلاحية إدارة الكتالوج'),
