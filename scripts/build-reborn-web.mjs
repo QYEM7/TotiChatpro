@@ -1,8 +1,11 @@
+import {assertLegacyClient} from './assert-legacy-client.mjs';
 /* Reborn TotiChat: pack clean app shell and preserve vetted Auth + LiveKit bridge. */
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
+// Fail before deleting or writing any legacy output.
+assertLegacyClient(root);
 const output=join(root,'dist');
 const source=join(root,'app','index.html');
 const html=await readFile(source,'utf8');

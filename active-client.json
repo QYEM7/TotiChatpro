@@ -1,0 +1,9 @@
+{
+  "application": "TotiChat",
+  "framework": "flutter",
+  "sourceDirectory": "flutter_app",
+  "developmentBranch": "rebuild/flutter-v1",
+  "stagingProject": "rziaedugbdwefbefcxjt",
+  "apkBuildAllowed": false,
+  "figmaDesignUrl": null
+}

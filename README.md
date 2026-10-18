@@ -1,3 +1,24 @@
+# TotiChat — active Flutter rebuild
+
+The active client is **`flutter_app/` on `rebuild/flutter-v1`**.
+`main`, root `index.html`, `app/`, Capacitor and historical preview branches are
+not the new Flutter application. Root `npm run build` is intentionally blocked
+on this rebuild to prevent packaging the old client.
+
+- Source identity: [`active-client.json`](active-client.json).
+- Backend: **Staging `rziaedugbdwefbefcxjt` only**.
+- Do not modify `main` or production. No APK/AAB builds or deployment.
+- Run client checks: `cd flutter_app && flutter pub get && flutter analyze lib test --no-fatal-infos && flutter test`.
+- Run packaging regression: `node --test tests/active-client-packaging.test.mjs`.
+- GitHub QA: `.github/workflows/flutter-v1-check.yml`.
+- Visual reference must be linked and reviewed before claiming Figma fidelity.
+  No Figma URL was found in repository Markdown/JSON during the 2026-10-18 audit.
+
+The historical documentation below describes the former web prototype, not
+current Flutter approval, deployment or readiness.
+
+---
+
 # TotiChatpro
 
 **TotiChat** — approved interactive visual prototype (UI/UX master).
