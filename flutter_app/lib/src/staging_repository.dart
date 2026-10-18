@@ -38,6 +38,16 @@ class StagingRepository {
     return result as String;
   }
 
+  Future<void> customizeRoomWelcome(String roomId, String welcome) async {
+    if (welcome.length > 500) throw ArgumentError('Welcome message too long');
+    await client.rpc('phase2_room_customize', params: {
+      'p_room_id': roomId,
+      'p_welcome_message': welcome,
+      'p_cover_path': null,
+      'p_background_path': null,
+    });
+  }
+
   Future<void> joinRoom(String roomId) async {
     await client.rpc('phase2_room_join', params: {'p_room_id': roomId});
   }

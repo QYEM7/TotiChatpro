@@ -127,22 +127,33 @@ class _ApprovedAppState extends State<ApprovedApp> {
   }
   Future<void> createRoom() async {
     final field = TextEditingController();
+    final welcome = TextEditingController();
     final title = await showDialog<String>(context: context, builder: (ctx) => AlertDialog(
       title: const Text('إنشاء غرفة'),
-      content: TextField(controller: field, maxLength: 60,
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: field, maxLength: 60,
           decoration: const InputDecoration(hintText: 'اسم الغرفة')),
+        TextField(controller: welcome, maxLength: 500, maxLines: 2,
+          decoration: const InputDecoration(hintText: 'رسالة الترحيب')),
+      ]),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
         FilledButton(onPressed: () => Navigator.pop(ctx, field.text), child: const Text('إنشاء')),
       ],
     ));
+    final welcomeValue = welcome.text.trim();
     field.dispose();
+    welcome.dispose();
     if (title == null || title.trim().length < 2) return;
     try {
       final id = await repo.createRoom(title);
+      if (welcomeValue.isNotEmpty) {
+        await repo.customizeRoomWelcome(id, welcomeValue);
+      }
       if (!mounted) return;
       await openRoom(VoiceRoom(id: id, title: title.trim(),
-        ownerId: repo.currentUserId ?? '', isPrivate: false), joined: true);
+        ownerId: repo.currentUserId ?? '', isPrivate: false,
+        welcomeMessage: welcomeValue), joined: true);
     } catch (error) {
       if (mounted) showProblem(context, error);
     }

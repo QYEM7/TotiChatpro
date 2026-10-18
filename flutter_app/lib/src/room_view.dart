@@ -66,6 +66,19 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   }
   bool voiceReady = false;
   bool voiceBusy = false;
+
+  Future<void> retryVoice() async {
+    if (voiceBusy) return;
+    setState(() => voiceBusy = true);
+    try {
+      await VoiceSession.instance.connect(widget.room.id);
+      if (mounted) setState(() => voiceReady = VoiceSession.instance.connected);
+    } catch (error) {
+      if (mounted) _error(error);
+    } finally {
+      if (mounted) setState(() => voiceBusy = false);
+    }
+  }
   @override
   void dispose() {
     final channel = roomChannel;
@@ -210,6 +223,11 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
                     style: const TextStyle(color: ApprovedPalette.mint, fontSize: 11)),
                 ],
               )),
+              if (!voiceReady)
+                IconButton(
+                  onPressed: voiceBusy ? null : retryVoice,
+                  tooltip: 'إعادة اتصال الصوت',
+                  icon: const Icon(Icons.wifi_tethering, color: ApprovedPalette.gold)),
               IconButton(onPressed: refresh, tooltip: 'تحديث',
                 icon: const Icon(Icons.refresh, color: Colors.white)),
               IconButton(onPressed: menu, tooltip: 'إدارة الخروج',
