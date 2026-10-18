@@ -1,7 +1,7 @@
 {
   "project": "TotiChat",
   "projectNumber": "01",
-  "stage": "approved-ui-flutter-staging-alpha-integration",
+  "stage": "staging-alpha-extended-realtime-and-support",
   "previousFrontend": "deprecated-not-approved",
   "uiSource": "https://github.com/mrbalmain11-star/-",
   "uiSourceBranch": "main",
@@ -29,5 +29,25 @@
   "deployedToProduction": false,
   "lastKnownPassingFlutterQaSha": "3d78bd6bf32f61e3bb7948c1c9caceda48242ef3",
   "currentQAVerification": "pending on latest branch changes",
-  "launchGate": "blocked-until-device-auth-voice-finance-and-visual-testing"
+  "launchGate": "blocked-until-device-auth-voice-finance-and-visual-testing",
+  "currentClientCommit": "1fa48a3a68026ad5aa6159a2d34c35d8ee073713",
+  "latestQaPassed": true,
+  "latestQaRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39173501166",
+  "newConnectedFeatures": [
+    "Private-room one-time invitations",
+    "Room seat and text realtime",
+    "Private DM, inbox and notification realtime",
+    "DM block and unblock",
+    "Staff-authorized support inbox, replies and ticket status",
+    "Server-backed gift announcement strip for 7000+ coins",
+    "Microphone disabled before seat release",
+    "Minimized room logout cleanup"
+  ],
+  "unsupportedClaims": [
+    "Perfect UI match",
+    "Production-ready",
+    "Two-device voice verified",
+    "Music synchronized",
+    "Store payments fully tested"
+  ]
 }
