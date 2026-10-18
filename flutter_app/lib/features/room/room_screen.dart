@@ -11,6 +11,7 @@ import '../economy/gift_sheet.dart';
 import '../economy/real_gift_ticker.dart';
 import 'room_draft_guard.dart';
 import 'room_exit_workflow.dart';
+import 'room_identity_header.dart';
 import 'room_game_screen.dart';
 import 'room_moderation_screen.dart';
 import 'room_mic_recovery.dart';
@@ -612,11 +613,13 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   child: Text(_seatDecorationError!,
                     style: const TextStyle(
                       color: TotiColors.plum, fontSize: 11))),
-              if (widget.room.welcomeMessage?.isNotEmpty == true)
-                Padding(padding: const EdgeInsets.all(12),
-                  child: Text(widget.room.welcomeMessage!,
-                    style: const TextStyle(color: TotiColors.muted))),
-              const SizedBox(height: 9),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(17, 12, 17, 9),
+                child: RoomIdentityHeader(
+                  title: widget.room.title,
+                  welcomeMessage: widget.room.welcomeMessage,
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 11),
                 child: TotiGlassCard(
