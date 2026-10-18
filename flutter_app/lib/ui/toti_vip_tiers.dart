@@ -32,3 +32,81 @@ abstract final class TotiVipTierStyle {
     );
   }
 }
+
+
+/// A visual catalogue, NOT a list of owned or activated VIP entitlements.
+class TotiVipTierGallery extends StatelessWidget {
+  const TotiVipTierGallery({super.key, required this.currentTier});
+
+  final int currentTier;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const Text('تصاميم مستويات VIP العشرة',
+        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900,
+          color: TotiColors.ink)),
+      const SizedBox(height: 4),
+      const Text('معرض الشارات فقط، العضوية المفعّلة تحددها بيانات الخادم.',
+        style: TextStyle(fontSize: 11, color: TotiColors.muted)),
+      const SizedBox(height: 12),
+      LayoutBuilder(builder: (context, constraints) {
+        final itemWidth = (constraints.maxWidth - 12) / 2;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: List.generate(10, (index) {
+            final tier = index + 1;
+            final selected = currentTier == tier;
+            final tint = TotiVipTierStyle.colorFor(tier);
+            return Container(
+              width: itemWidth,
+              height: 88,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [const Color(0xFFFFFAED), tint.withValues(alpha: .14)],
+                ),
+                borderRadius: BorderRadius.circular(17),
+                border: Border.all(color: tint,
+                  width: selected ? 2.6 : 1.3),
+              ),
+              child: Row(children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: TotiVipTierStyle.gradientFor(tier),
+                    border: Border.all(color: tint, width: 2),
+                  ),
+                  child: const Icon(Icons.workspace_premium_rounded,
+                    color: Colors.white, size: 28),
+                ),
+                const SizedBox(width: 7),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('VIP $tier', maxLines: 1,
+                      style: const TextStyle(fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: TotiColors.ink)),
+                    Text(selected ? 'مفعّل' : 'معاينة',
+                      style: TextStyle(fontSize: 10,
+                        fontWeight: selected
+                          ? FontWeight.w900 : FontWeight.w500,
+                        color: selected ? tint : TotiColors.muted)),
+                  ],
+                )),
+              ]),
+            );
+          }),
+        );
+      }),
+    ],
+  );
+}
