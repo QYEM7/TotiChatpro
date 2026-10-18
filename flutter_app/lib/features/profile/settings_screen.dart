@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_repository.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 
 class ProfileSettings extends StatefulWidget {
   const ProfileSettings({super.key,required this.repository});
@@ -78,6 +79,12 @@ class _ProfileSettingsState extends State<ProfileSettings>{
             _bio.text=profile['bio']?.toString()??'';
           }
           return ListView(padding:const EdgeInsets.all(18),children:[
+            const TotiRoyalTopBanner(
+              title:'إعدادات ملفي',
+              subtitle:'تعديل البيانات الشخصية عبر الخادم فقط',
+              icon:Icons.manage_accounts_outlined,
+            ),
+            const SizedBox(height:18),
             const Text('ملفي الشخصي',style:TextStyle(fontSize:20,fontWeight:FontWeight.w800)),
             const SizedBox(height:12),
             TextField(controller:_name,maxLength:60,
