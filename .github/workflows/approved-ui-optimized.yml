@@ -2,7 +2,9 @@ name: TotiChat Lightweight ARM64 Alpha (Staging)
 on:
   push:
     branches: [feature/approved-ui-flutter-v1]
-    paths: ['.github/workflows/approved-ui-optimized.yml']
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/approved-ui-optimized.yml'
   workflow_dispatch:
 permissions:
   contents: read
