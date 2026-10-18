@@ -6,6 +6,7 @@ import 'domain.dart';
 import 'staging_repository.dart';
 import 'visual.dart';
 import 'room_view.dart';
+import 'gift_announcement_strip.dart';
 import 'social_pages.dart';
 import 'commerce_pages.dart';
 
@@ -280,6 +281,7 @@ class _ApprovedAppState extends State<ApprovedApp> {
           icon: const Icon(Icons.add_home_work_outlined, color: Colors.white)),
       ]),
     ),
+    const GlobalGiftAnnouncementStrip(),
     Expanded(child: RefreshIndicator(onRefresh: refresh, child: ListView(children: [
       FutureBuilder<List<BannerItem>>(future: banners, builder: (ctx, snap) {
         final entries = snap.data ?? const <BannerItem>[];

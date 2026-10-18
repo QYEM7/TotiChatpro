@@ -10,6 +10,7 @@ import 'staging_repository.dart';
 import 'visual.dart';
 import 'social_pages.dart';
 import 'voice_session.dart';
+import 'gift_announcement_strip.dart';
 
 class ApprovedRoomView extends StatefulWidget {
   final VoiceRoom room;
@@ -273,6 +274,7 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
                 icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white)),
             ]),
           ),
+          const GlobalGiftAnnouncementStrip(),
           if (loading) const LinearProgressIndicator(minHeight: 2),
           if (issue != null) Padding(
             padding: const EdgeInsets.all(6),
