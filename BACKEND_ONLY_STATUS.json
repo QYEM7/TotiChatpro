@@ -1,13 +1,13 @@
 {
   "project": "TotiChat",
   "projectNumber": "01",
-  "stage": "backend-only-approved-ui-source-received",
+  "stage": "backend-preserved-flutter-client-slice-01-in-progress",
   "previousFrontend": "deprecated-not-approved",
   "uiSource": "https://github.com/mrbalmain11-star/-",
   "uiSourceBranch": "main",
   "uiReference": "src/ (React/TypeScript UI visual reference), with android/ as non-authoritative demo needing reconciliation",
   "mobileImplementationTarget": "Flutter/Dart",
-  "uiIntegrationStatus": "source-audited-not-yet-ported-or-connected",
+  "uiIntegrationStatus": "flutter-auth-home-room-source-written-no-native-build-or-live-client-test",
   "uiSourcePushAccess": false,
   "backendSource": "QYEM7/TotiChatpro",
   "backendBranch": "rebuild/flutter-v1",
@@ -20,5 +20,12 @@
   "productionModified": false,
   "stagingModified": false,
   "oldExternalDeploymentsStatus": "not-yet-verified-disabled",
-  "auditDocument": "docs/APPROVED_UI_REPOSITORY_INTAKE_20261019.md"
+  "auditDocument": "docs/FLUTTER_BETA_SLICE_01_20261019.md",
+  "flutterProjectPath": "flutter_app/",
+  "flutterSourceCodePresent": true,
+  "stagingReadOnlySchemaAndRpcChecked": true,
+  "flutterAnalyzeRun": false,
+  "flutterTestsRun": false,
+  "realGoogleAndroidOAuthVerified": false,
+  "realAudioTwoDevicesVerified": false
 }
