@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -23,11 +25,39 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   bool loading = true;
   bool sendingMessage = false;
   String? issue;
+  RealtimeChannel? roomChannel;
 
   @override
   void initState() {
     super.initState();
     refresh();
+    // Realtime changes are still validated by RLS. Refresh canonical state
+    // rather than trusting event payloads to mutate seat ownership locally.
+    roomChannel = Supabase.instance.client
+      .channel('room-live-${widget.room.id}')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'room_members',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'room_id',
+          value: widget.room.id,
+        ),
+        callback: (_) { if (mounted) unawaited(refresh()); },
+      )
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'room_messages',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'room_id',
+          value: widget.room.id,
+        ),
+        callback: (_) { if (mounted) unawaited(refresh()); },
+      )
+      .subscribe();
     VoiceSession.instance.connect(widget.room.id).then((_) {
       if (mounted) setState(() => voiceReady = true);
     }).catchError((Object error) {
@@ -38,6 +68,10 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   bool voiceBusy = false;
   @override
   void dispose() {
+    final channel = roomChannel;
+    if (channel != null) {
+      unawaited(Supabase.instance.client.removeChannel(channel));
+    }
     messageField.dispose();
     super.dispose();
   }
