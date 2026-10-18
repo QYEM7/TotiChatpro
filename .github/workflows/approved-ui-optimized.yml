@@ -1,0 +1,55 @@
+name: TotiChat Lightweight ARM64 Alpha (Staging)
+on:
+  push:
+    branches: [feature/approved-ui-flutter-v1]
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/approved-ui-optimized.yml'
+  workflow_dispatch:
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+env:
+  STAGING_PUBLIC_KEY: sb_publishable_vVYku5VtyohuiGgehC3EdA_rSDGOUKB
+jobs:
+  android-arm64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android scaffolding
+        working-directory: flutter_app
+        run: flutter create --platforms=android --project-name totichat --org com.totichat .
+      - name: Remove generated sample test
+        working-directory: flutter_app
+        run: rm -f test/widget_test.dart
+      - name: Restore dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+      - name: Analyze approved UI and tests
+        working-directory: flutter_app
+        run: |
+          flutter analyze lib test --no-fatal-infos
+          flutter test
+      - name: Build optimized ARM64 alpha APK
+        working-directory: flutter_app
+        run: |
+          flutter build apk --release --split-per-abi --target-platform android-arm64             --dart-define=SUPABASE_PUBLISHABLE_KEY="$STAGING_PUBLIC_KEY"
+      - name: Upload test-only ARM64 version
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-approved-ARM64-Staging-Alpha
+          path: flutter_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          retention-days: 14
+          if-no-files-found: error

@@ -1,0 +1,48 @@
+name: Approved TotiChat Flutter UI QA
+on:
+  push:
+    branches:
+      - feature/approved-ui-flutter-v1
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/approved-ui-flutter-check.yml'
+  workflow_dispatch:
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+jobs:
+  flutter-analysis-and-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android scaffolding (no APK build)
+        working-directory: flutter_app
+        run: flutter create --platforms=android --project-name totichat --org com.totichat .
+      - name: Remove generated Flutter demo test (MyApp is not our app)
+        working-directory: flutter_app
+        run: rm -f test/widget_test.dart
+      - name: Resolve Dart dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+      - name: Format in runner
+        working-directory: flutter_app
+        run: dart format lib test
+      - name: Analyze Flutter source
+        working-directory: flutter_app
+        run: flutter analyze lib test --no-fatal-infos
+      - name: Run Dart and widget tests
+        working-directory: flutter_app
+        run: flutter test
+      - name: Ensure no release or compiled APK exists
+        run: |
+          if find flutter_app -type f \( -name '*.apk' -o -name '*.aab' \) | grep -q .; then
+            echo 'APK/AAB creation is not authorized' >&2; exit 1
+          fi
