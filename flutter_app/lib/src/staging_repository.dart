@@ -118,6 +118,8 @@ class StagingRepository {
     required String recipientId,
     required String giftId,
     required int quantity,
+    required int expectedPrice,
+    required String requestId,
   }) async {
     if (!const [1, 7, 17, 77, 777].contains(quantity)) {
       throw ArgumentError.value(quantity, 'quantity', 'Invalid quantity');
@@ -126,13 +128,15 @@ class StagingRepository {
     if (self == null || self == recipientId) {
       throw StateError('A different authenticated recipient is required');
     }
-    // Server-authoritative atomic ledger; idempotency key unique per action.
+    if (expectedPrice <= 0) throw ArgumentError.value(expectedPrice, 'expectedPrice');
+    // The backend checks price and atomically commits the operation.
     await client.rpc('phase3_send_gift', params: {
       'p_room_id': roomId,
       'p_recipient_id': recipientId,
       'p_gift_id': giftId,
       'p_quantity': quantity,
-      'p_request_id': const Uuid().v4(),
+      'p_request_id': requestId,
+      'p_expected_price': expectedPrice,
     });
   }
 

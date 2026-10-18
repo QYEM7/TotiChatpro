@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import 'domain.dart';
 import 'staging_repository.dart';
@@ -290,6 +291,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
   String? recipient;
   int quantity = 1;
   bool busy = false;
+  String? requestId;
   @override
   void initState() {
     super.initState();
@@ -300,23 +302,46 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
   }
   Future<void> send() async {
     if (busy || selected == null || recipient == null) return;
-    setState(() => busy = true);
+    final item = selected!;
+    final selectedRecipient = recipient!;
+    final total = item.price * quantity;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('تأكيد إرسال الهدية'),
+        content: Text('سيتم خصم ' + total.toString() +
+          ' عملة مقابل ' + quantity.toString() +
+          ' من ' + item.name + '.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('إلغاء')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('تأكيد الخصم')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() { busy = true; requestId ??= const Uuid().v4(); });
     try {
       await repo.sendGift(
         roomId: widget.roomId,
-        recipientId: recipient!,
-        giftId: selected!.id,
+        recipientId: selectedRecipient,
+        giftId: item.id,
         quantity: quantity,
+        expectedPrice: item.price,
+        requestId: requestId!,
       );
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم إرسال الهدية وتأكيد العملية على الخادم')));
-      }
-    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم تأكيد الهدية من الخادم')));
+      Navigator.pop(context);
+    } catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر إرسال الهدية: ' + e.toString())));
-    } finally { if (mounted) setState(() => busy = false); }
+        SnackBar(content: Text('لم يتم تأكيد العملية: ' + error.toString())));
+      // Preserve same key if network timed out after a server commit.
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -339,7 +364,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
               DropdownMenuItem(value: m.userId,
                 child: Text(m.name, style: const TextStyle(color: Colors.white))),
           ],
-          onChanged: (id) => setState(() => recipient = id),
+          onChanged: (id) => setState(() { recipient = id; requestId = null; }),
         ),
         SizedBox(height: 225, child: FutureBuilder<List<GiftItem>>(
           future: gifts,
@@ -358,7 +383,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
               itemBuilder: (context, i) {
                 final gift = list[i];
                 return InkWell(
-                  onTap: () => setState(() => selected = gift),
+                  onTap: () => setState(() { selected = gift; requestId = null; }),
                   child: Container(
                     margin: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -396,7 +421,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
               DropdownMenuItem(value: q,
                 child: Text(q.toString(), style: const TextStyle(color: Colors.white)))).toList(),
             // Display selected quantity in a separate text; avoid fake quantities.
-            onChanged: (q) => setState(() => quantity = q ?? 1),
+            onChanged: (q) => setState(() { quantity = q ?? 1; requestId = null; }),
           ),
           Text(quantity.toString(),
             style: const TextStyle(color: ApprovedPalette.gold)),
