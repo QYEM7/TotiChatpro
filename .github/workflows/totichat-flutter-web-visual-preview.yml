@@ -1,0 +1,88 @@
+name: TotiChat Flutter Web Visual Preview
+on:
+  push:
+    branches:
+      - preview/totichat-visual-20261018
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/totichat-flutter-web-visual-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: totichat-flutter-web-visual-20261018
+  cancel-in-progress: true
+
+jobs:
+  build-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate web support without touching real Flutter entrypoint
+        working-directory: flutter_app
+        run: flutter create --platforms=web --org com.totichat --project-name totichat .
+      - name: Install dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+      - name: Verify visual review has no live authentication or fake account data
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          c = Path('flutter_app/lib/visual_review_main.dart').read_text()
+          assert 'void main() => runApp(const TotiVisualReviewApp());' in c
+          assert "publicRooms() async => const []" in c
+          assert "activeBanners() async => const []" in c
+          assert "gifts() async => const []" in c
+          assert "Supabase.initialize(" not in c
+          assert "VoiceSession(" not in c
+          assert "signInWithOAuth(" not in c
+          PY
+      - name: Analyze preview entrypoint
+        working-directory: flutter_app
+        run: flutter analyze lib/visual_review_main.dart --no-fatal-infos
+      - name: Build running Flutter web preview (no APK)
+        working-directory: flutter_app
+        run: flutter build web --release --target lib/visual_review_main.dart --base-href /
+      - name: Verify web bundle and no Android APK
+        run: |
+          test -s flutter_app/build/web/index.html
+          test -s flutter_app/build/web/main.dart.js
+          test -z "$(find flutter_app -type f -name '*.apk' -print -quit)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: totichat-flutter-web-visual-only
+          path: flutter_app/build/web/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish static Flutter web bundle to isolated preview branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cp -r flutter_app/build/web /tmp/totichat-web-bundle
+          cd /tmp/totichat-web-bundle
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b preview/totichat-web-output-20261018
+          git add -A
+          git commit -m "build: isolated TotiChat Flutter web visual preview"
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          cat >/tmp/totichat-git-askpass.sh <<'EOF'
+          #!/bin/sh
+          case "$1" in
+            *Username*) echo "x-access-token" ;;
+            *) echo "$GITHUB_TOKEN" ;;
+          esac
+          EOF
+          chmod 700 /tmp/totichat-git-askpass.sh
+          GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=/tmp/totichat-git-askpass.sh git push --force origin HEAD:refs/heads/preview/totichat-web-output-20261018
