@@ -299,7 +299,7 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
                         Supabase.instance.client, _coverPath!) +
                         '?v=$_coverRevision',
                       width: 38, height: 38, fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
+                      errorBuilder: (context, error, stack) =>
                         const Icon(Icons.image_not_supported,
                           color: Colors.white54),
                     ),
