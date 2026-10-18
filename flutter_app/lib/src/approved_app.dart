@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'voice_session.dart';
@@ -6,6 +8,7 @@ import 'domain.dart';
 import 'staging_repository.dart';
 import 'visual.dart';
 import 'room_view.dart';
+import 'room_cover_upload.dart';
 import 'gift_announcement_strip.dart';
 import 'social_pages.dart';
 import 'commerce_pages.dart';
@@ -160,38 +163,107 @@ class _ApprovedAppState extends State<ApprovedApp> {
     final field = TextEditingController();
     final welcome = TextEditingController();
     bool privateRoom = false;
-    final title = await showDialog<String>(context: context,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, update) => AlertDialog(
-      title: const Text('إنشاء غرفة'),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(controller: field, maxLength: 60,
-          decoration: const InputDecoration(hintText: 'اسم الغرفة')),
-        TextField(controller: welcome, maxLength: 500, maxLines: 2,
-          decoration: const InputDecoration(hintText: 'رسالة الترحيب')),
-        SwitchListTile(
-          value: privateRoom,
-          title: const Text('غرفة خاصة'),
-          onChanged: (value) => update(() => privateRoom = value),
+    bool selecting = false;
+    Uint8List? coverWebp;
+    final title = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, update) => AlertDialog(
+          title: const Text('إنشاء غرفة'),
+          content: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              TextField(
+                controller: field,
+                maxLength: 60,
+                onChanged: (_) => update(() {}),
+                decoration: const InputDecoration(labelText: 'اسم الغرفة'),
+              ),
+              TextField(
+                controller: welcome,
+                maxLength: 500,
+                maxLines: 2,
+                onChanged: (_) => update(() {}),
+                decoration: const InputDecoration(labelText: 'رسالة الترحيب'),
+              ),
+              const SizedBox(height: 8),
+              if (coverWebp != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(coverWebp!,
+                    width: 92, height: 92, fit: BoxFit.cover),
+                ),
+              TextButton.icon(
+                onPressed: selecting ? null : () async {
+                  update(() => selecting = true);
+                  try {
+                    final image = await RoomCoverUpload.selectAndEncode();
+                    if (dialogContext.mounted && image != null) {
+                      update(() => coverWebp = image);
+                    }
+                  } catch (error) {
+                    if (dialogContext.mounted) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        SnackBar(content: Text('تعذر تجهيز الصورة: $error')),
+                      );
+                    }
+                  } finally {
+                    if (dialogContext.mounted) update(() => selecting = false);
+                  }
+                },
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: Text(selecting ? 'جاري تجهيز الصورة...' :
+                  coverWebp == null ? 'اختيار صورة الغرفة' : 'تغيير صورة الغرفة'),
+              ),
+              SwitchListTile(
+                value: privateRoom,
+                title: const Text('غرفة خاصة'),
+                onChanged: (value) => update(() => privateRoom = value),
+              ),
+            ]),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('إلغاء')),
+            FilledButton(
+              onPressed: selecting || coverWebp == null ||
+                  field.text.trim().length < 2 || welcome.text.trim().isEmpty
+                ? null
+                : () => Navigator.pop(dialogContext, field.text.trim()),
+              child: const Text('إنشاء'),
+            ),
+          ],
         ),
-      ]),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
-        FilledButton(onPressed: () => Navigator.pop(ctx, field.text), child: const Text('إنشاء')),
-      ],
-    )));
-    final welcomeValue = welcome.text.trim();
+      ),
+    );
+    final greeting = welcome.text.trim();
     field.dispose();
     welcome.dispose();
-    if (title == null || title.trim().length < 2) return;
+    if (title == null || !mounted || coverWebp == null) return;
     try {
       final id = await repo.createRoom(title, isPrivate: privateRoom);
-      if (welcomeValue.isNotEmpty) {
-        await repo.customizeRoomWelcome(id, welcomeValue);
+      String? coverPath;
+      try {
+        coverPath = await RoomCoverUpload.upload(
+          Supabase.instance.client, id, coverWebp!);
+      } catch (error) {
+        if (mounted) {
+          showProblem(context,
+            'تم إنشاء الغرفة، لكن فشل رفع الغلاف. يمكنك إعادة رفعه من الغرفة: $error');
+        }
+      }
+      if (greeting.isNotEmpty) {
+        await repo.customizeRoomWelcome(id, greeting);
       }
       if (!mounted) return;
-      await openRoom(VoiceRoom(id: id, title: title.trim(),
-        ownerId: repo.currentUserId ?? '', isPrivate: privateRoom,
-        welcomeMessage: welcomeValue), joined: true);
+      await openRoom(VoiceRoom(
+        id: id,
+        title: title,
+        ownerId: repo.currentUserId ?? '',
+        isPrivate: privateRoom,
+        coverPath: coverPath,
+        welcomeMessage: greeting,
+      ), joined: true);
     } catch (error) {
       if (mounted) showProblem(context, error);
     }
@@ -358,10 +430,23 @@ class _ApprovedAppState extends State<ApprovedApp> {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: const Color(0xFFE4DDCB))),
                     child: Row(children: [
-                      Container(width: 66, height: 66,
-                        decoration: BoxDecoration(color: ApprovedPalette.emeraldDeep,
-                          borderRadius: BorderRadius.circular(13)),
-                        child: const Icon(Icons.graphic_eq, color: Colors.white, size: 32)),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(13),
+                        child: room.coverPath != null
+                          ? Image.network(
+                              RoomCoverUpload.imageUrl(
+                                Supabase.instance.client, room.coverPath!),
+                              width: 66, height: 66, fit: BoxFit.cover,
+                              errorBuilder: (ctx, err, stack) =>
+                                const SizedBox(width: 66, height: 66,
+                                  child: Icon(Icons.graphic_eq)),
+                            )
+                          : Container(
+                              width: 66, height: 66,
+                              color: ApprovedPalette.emeraldDeep,
+                              child: const Icon(Icons.graphic_eq,
+                                color: Colors.white, size: 32)),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(child: Text(room.title, style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 16))),
