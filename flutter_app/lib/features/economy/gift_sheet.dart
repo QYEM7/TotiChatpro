@@ -6,6 +6,7 @@ import 'financial_retry_registry.dart';
 import '../../models/room_models.dart';
 import '../../ui/server_panel.dart';
 import '../../ui/toti_theme.dart';
+import '../../ui/extracted_premium_panels.dart';
 import '../../ui/toti_visual_language.dart';
 import 'lucky_gift_panel.dart';
 
@@ -100,11 +101,11 @@ class _GiftSheetState extends State<GiftSheet>{
           filter: ui.ImageFilter.blur(sigmaX: 17, sigmaY: 17),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .94),
+              color: TotiRoyalPalette.parchment.withValues(alpha: .96),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(30)),
               border: const Border(
-                top: BorderSide(color: TotiColors.outline),
+                top: BorderSide(color: TotiRoyalPalette.gold, width: 1.3),
               ),
             ),
             child: ConstrainedBox(
@@ -130,10 +131,10 @@ class _GiftSheetState extends State<GiftSheet>{
                       Container(
                         width: 48, height: 48,
                         decoration: BoxDecoration(
-                          gradient: TotiColors.heroGradient,
+                          gradient: TotiRoyalPalette.goldGradient,
                           borderRadius: BorderRadius.circular(17)),
                         child: const Icon(Icons.card_giftcard_rounded,
-                          size: 27, color: Colors.white),
+                          size: 27, color: TotiRoyalPalette.deepEmerald),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(child: Column(
@@ -156,7 +157,7 @@ class _GiftSheetState extends State<GiftSheet>{
                           size: 16),
                         label: const Text('Regular gifts'),
                         selected: !_showLucky,
-                        selectedColor: TotiColors.lavender,
+                        selectedColor: const Color(0xFFF8E8C8),
                         onSelected: _busy ? null :
                           (_) => setState(() => _showLucky = false),
                       ),
