@@ -15,6 +15,9 @@ void main() {
     for (var level = 1; level <= 10; level++) {
       expect(TotiVipTierStyle.gradientFor(level).colors.length, 3);
     }
+    final economy = File('lib/features/economy/economy_screen.dart')
+        .readAsStringSync();
+    expect(economy, contains('TotiVipTierGallery(currentTier: level)'));
   });
 
   test('room and gift flows keep real-only, safe operations', () {
