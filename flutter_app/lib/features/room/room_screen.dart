@@ -21,6 +21,7 @@ import '../../models/room_seat_decoration.dart';
 import '../../ui/toti_theme.dart';
 import '../../ui/toti_visual_language.dart';
 import '../../ui/extracted_premium_panels.dart';
+import '../../ui/extracted_room_backdrop.dart';
 import 'voice_session.dart';
 
 class RoomScreen extends StatefulWidget {
@@ -587,7 +588,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   tooltip:'دعوة عضو'),
             ],
           ),
-          body: TotiAtmosphere(child: _joining ? const Center(child: CircularProgressIndicator()) :
+          body: TotiAtmosphere(child: TotiRoomBackdrop(child: _joining ? const Center(child: CircularProgressIndicator()) :
             !_joined ? Center(child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -756,7 +757,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   ),
                 ]),
               ),
-            ])),
+            ]))),
         ),
       ),
     );
