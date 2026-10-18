@@ -1,19 +1,22 @@
-# TotiChat — Backend Only (Project 01)
+# TotiChat — Project 01 (Backend preserved + new Flutter beta client)
 
-This branch intentionally contains **only server-side resources and backend validation materials**. All previous Flutter, Web, Capacitor, preview UI, themes, fonts, visual assets, layout templates, and frontend deployment workflows have been excluded.
+This is the active `rebuild/flutter-v1` development branch.
 
-## Retained
-- Supabase SQL migrations, functions, tests, reference catalogs in `supabase/`.
-- Backend-related scripts, tests and technical reference docs.
-- Staging Supabase project ID: `rziaedugbdwefbefcxjt`.
+## Status
+- Supabase server SQL/functions/tests retained under `supabase/`.
+- A **new** Flutter/Dart beta scaffold was added under `flutter_app/` on 2026-10-19, based only on the user's approved external visual source: https://github.com/mrbalmain11-star/- (main).
+- The previous Web, Capacitor, Flutter, Kotlin-demo and historical UI assets remain deprecated and are **not** the visual authority.
+- Current client code implements a preliminary real-auth / real-room vertical slice, **not a working signed-off Android beta**.
+- Evidence and limitations: [Slice 01 status](docs/FLUTTER_BETA_SLICE_01_20261019.md), [scope and gates](docs/BETA_FIRST_EXECUTION_PLAN_20261019.md), [Flutter setup](flutter_app/README.md).
 
-## Not included
-- `flutter_app/`, `app/`, `assets/`, `site/`, `reference/`, `e2e/`, root web entry, Capacitor config, frontend NPM packaging, legacy UI CI/deploy workflows.
+## Safety boundaries
+- Supabase Staging only: `rziaedugbdwefbefcxjt`; no remote migrations or production writes.
+- Never point the Flutter client at production; initialization fails closed for any URL other than Staging.
+- Never expose a Supabase service-role/secret key to a client.
+- Do **not** build an APK/AAB or deploy to stores without owner's explicit approval.
+- Previous full-repository recovery branch: `backup/pre-backend-only-20261019`.
+- Previous external preview sites are not automatically disabled by this Git change; disable/protect them separately when access is available.
+- No simulated user, wallet, gift, advertisement or presence state is permitted in LIVE mode.
 
-## Rules
-- Do **not** deploy or run schema migrations automatically. The existing remote Supabase Staging and production databases are unchanged by this repository commit.
-- Do not build an APK/AAB.
-- The new approved interface will arrive from a separate user-supplied repository. Only that source may determine the UI/UX and visual identity.
-- Never infer that legacy deployments are disabled: web hosts must be separately deactivated or protected, and historical Git branches still exist.
-- This branch was constructed from `rebuild/flutter-v1` commit `4bafebd67b598c0fc4eb3558fa0e5bf5e9d8bdda`. Recovery branch: `backup/pre-backend-only-20261019`.
-- Backend scripts are retained as reference; their dependencies and runtime behavior must be checked before execution.
+## Pending
+Flutter SDK/analyzer/tests, platform host files and OAuth deep links, real-account/device QA, 15-seat interactions and voice, realtime chat, wallet/gifts, admin controls and exact design parity.
