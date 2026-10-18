@@ -24,7 +24,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: StagingConfig.configuredUrl,
-    anonKey: StagingConfig.publishableKey,
+    publishableKey: StagingConfig.publishableKey,
   );
   runApp(const TotiChatApp());
 }
@@ -69,6 +69,14 @@ class _AuthGateState extends State<AuthGate> {
     super.initState();
     _subscription = Supabase.instance.client.auth.onAuthStateChange.listen(
       (_) => _verifySession(),
+      onError: (Object error, StackTrace stackTrace) {
+        if (!mounted) return;
+        setState(() {
+          _checking = false;
+          _verified = false;
+          _error = UiText.get('auth_failed');
+        });
+      },
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _verifySession());
   }
