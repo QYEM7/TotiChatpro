@@ -98,13 +98,14 @@ void main() {
 
     await tester.tap(find.text('Red Rose'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('اختر المستلم من المقاعد'));
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Member A').last);
     await tester.pumpAndSettle();
 
-    final button = find.text('إرسال بعد موافقة الخادم');
+    final button = find.widgetWithText(FilledButton, 'إرسال بعد موافقة الخادم');
     expect(button, findsOneWidget);
+    await tester.ensureVisible(button);
     await tester.tap(button);
     // A second pointer may hit the modal barrier instead of the old button.
     await tester.tap(button, warnIfMissed: false);
