@@ -1,9 +1,16 @@
 {
   "project": "TotiChat",
   "projectNumber": "01",
-  "stage": "backend-only-awaiting-approved-ui-repository",
+  "stage": "backend-only-approved-ui-source-received",
   "previousFrontend": "deprecated-not-approved",
-  "uiSource": "pending-user-repository",
+  "uiSource": "https://github.com/mrbalmain11-star/-",
+  "uiSourceBranch": "main",
+  "uiReference": "src/ (React/TypeScript UI visual reference), with android/ as non-authoritative demo needing reconciliation",
+  "mobileImplementationTarget": "Flutter/Dart",
+  "uiIntegrationStatus": "source-audited-not-yet-ported-or-connected",
+  "uiSourcePushAccess": false,
+  "backendSource": "QYEM7/TotiChatpro",
+  "backendBranch": "rebuild/flutter-v1",
   "supabaseStaging": "rziaedugbdwefbefcxjt",
   "protectedBranches": [
     "main"
@@ -12,5 +19,6 @@
   "apkBuildAllowed": false,
   "productionModified": false,
   "stagingModified": false,
-  "oldExternalDeploymentsStatus": "not-yet-verified-disabled"
+  "oldExternalDeploymentsStatus": "not-yet-verified-disabled",
+  "auditDocument": "docs/APPROVED_UI_REPOSITORY_INTAKE_20261019.md"
 }
