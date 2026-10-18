@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -154,6 +155,29 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
       if (mounted) setState(() => voiceBusy = false);
     }
   }
+  Future<void> sharePrivateInvite() async {
+    try {
+      final value = await repo.createPrivateInvitation(widget.room.id);
+      if (!mounted) return;
+      await showDialog<void>(context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('دعوة خاصة لمرة واحدة'),
+          content: SelectableText(value),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx),
+              child: const Text('إغلاق')),
+            FilledButton(
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: value));
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              child: const Text('نسخ الدعوة'),
+            ),
+          ],
+        ));
+    } catch (error) { if (mounted) _error(error); }
+  }
+
   Future<void> exitRoom() async {
     try {
       await VoiceSession.instance.disconnect();
@@ -228,6 +252,11 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
                   onPressed: voiceBusy ? null : retryVoice,
                   tooltip: 'إعادة اتصال الصوت',
                   icon: const Icon(Icons.wifi_tethering, color: ApprovedPalette.gold)),
+              if (widget.room.isPrivate &&
+                  widget.room.ownerId == repo.currentUserId)
+                IconButton(onPressed: sharePrivateInvite,
+                  tooltip: 'دعوة خاصة لمرة واحدة',
+                  icon: const Icon(Icons.share_outlined, color: ApprovedPalette.gold)),
               IconButton(onPressed: refresh, tooltip: 'تحديث',
                 icon: const Icon(Icons.refresh, color: Colors.white)),
               IconButton(onPressed: menu, tooltip: 'إدارة الخروج',

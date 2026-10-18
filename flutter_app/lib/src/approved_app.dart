@@ -128,36 +128,67 @@ class _ApprovedAppState extends State<ApprovedApp> {
   Future<void> createRoom() async {
     final field = TextEditingController();
     final welcome = TextEditingController();
-    final title = await showDialog<String>(context: context, builder: (ctx) => AlertDialog(
+    bool privateRoom = false;
+    final title = await showDialog<String>(context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, update) => AlertDialog(
       title: const Text('إنشاء غرفة'),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(controller: field, maxLength: 60,
           decoration: const InputDecoration(hintText: 'اسم الغرفة')),
         TextField(controller: welcome, maxLength: 500, maxLines: 2,
           decoration: const InputDecoration(hintText: 'رسالة الترحيب')),
+        SwitchListTile(
+          value: privateRoom,
+          title: const Text('غرفة خاصة'),
+          onChanged: (value) => update(() => privateRoom = value),
+        ),
       ]),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
         FilledButton(onPressed: () => Navigator.pop(ctx, field.text), child: const Text('إنشاء')),
       ],
-    ));
+    )));
     final welcomeValue = welcome.text.trim();
     field.dispose();
     welcome.dispose();
     if (title == null || title.trim().length < 2) return;
     try {
-      final id = await repo.createRoom(title);
+      final id = await repo.createRoom(title, isPrivate: privateRoom);
       if (welcomeValue.isNotEmpty) {
         await repo.customizeRoomWelcome(id, welcomeValue);
       }
       if (!mounted) return;
       await openRoom(VoiceRoom(id: id, title: title.trim(),
-        ownerId: repo.currentUserId ?? '', isPrivate: false,
+        ownerId: repo.currentUserId ?? '', isPrivate: privateRoom,
         welcomeMessage: welcomeValue), joined: true);
     } catch (error) {
       if (mounted) showProblem(context, error);
     }
   }
+  Future<void> joinPrivateRoom() async {
+    final invitation = TextEditingController();
+    try {
+      final value = await showDialog<String>(context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('رمز دعوة الغرفة الخاصة'),
+          content: TextField(controller: invitation,
+            decoration: const InputDecoration(
+              hintText: 'الصق رمز الدعوة الكامل')),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx),
+              child: const Text('إلغاء')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, invitation.text),
+              child: const Text('انضمام')),
+          ],
+        ));
+      if (value == null || !mounted) return;
+      final room = await repo.joinPrivateInvitation(value);
+      if (mounted) await openRoom(room, joined: true);
+    } catch (error) {
+      if (mounted) showProblem(context, error);
+    } finally { invitation.dispose(); }
+  }
+
   Future<void> searchRooms() async {
     final field = TextEditingController(text: search);
     final value = await showDialog<String>(context: context, builder: (ctx) => AlertDialog(
@@ -228,6 +259,9 @@ class _ApprovedAppState extends State<ApprovedApp> {
         const Spacer(),
         IconButton(onPressed: searchRooms,
           icon: const Icon(Icons.search, color: Colors.white)),
+        IconButton(onPressed: joinPrivateRoom,
+          tooltip: 'دخول غرفة خاصة',
+          icon: const Icon(Icons.key_outlined, color: Colors.white)),
         IconButton(onPressed: createRoom,
           icon: const Icon(Icons.add_home_work_outlined, color: Colors.white)),
       ]),
