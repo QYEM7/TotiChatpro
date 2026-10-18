@@ -242,7 +242,7 @@ class _RoomMusicQueuePageState extends State<RoomMusicQueuePage> {
               ListTile(
                 title: Text(item['title']?.toString() ?? ''),
                 subtitle: Text(item['artist']?.toString() ?? ''),
-                trailing: Wrap(mainAxisSize: MainAxisSize.min, children: [
+                trailing: Wrap(children: [
                   if (isOwner)
                     IconButton(
                       onPressed: busy ? null : () => addToRoom(item),
