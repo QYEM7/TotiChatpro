@@ -3,6 +3,7 @@ import '../../data/totichat_services.dart';
 import 'financial_retry_registry.dart';
 import '../../ui/server_panel.dart';
 import '../../ui/extracted_premium_panels.dart';
+import '../../ui/toti_vip_tiers.dart';
 
 class EconomyScreen extends StatelessWidget {
   const EconomyScreen({super.key,required this.api});
@@ -151,7 +152,8 @@ class _VipTabState extends State<_VipTab>{
         const SizedBox(height:12),
         if(data['expiresAt']!=null)Text('انتهاء العضوية: ${data['expiresAt']}',
           textAlign:TextAlign.center),
-        const NoRecords('هذه العضوية تُقرأ من استحقاقات الخادم. لا نعرض مستويات تجريبية.'),
+        const SizedBox(height: 24),
+        TotiVipTierGallery(currentTier: level),
       ]);
     },
   );
