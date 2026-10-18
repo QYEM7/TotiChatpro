@@ -10,6 +10,8 @@ import 'package:totichat/data/totichat_services.dart';
 import 'package:totichat/features/auth/login_screen.dart';
 import 'package:totichat/features/home/home_screen.dart';
 import 'package:totichat/features/economy/gift_sheet.dart';
+import 'package:totichat/features/room/room_identity_header.dart';
+import 'package:totichat/features/room/room_seat_visual.dart';
 import 'package:totichat/models/room_models.dart';
 import 'package:totichat/ui/toti_bottom_bar.dart';
 import 'package:totichat/ui/toti_theme.dart';
@@ -164,4 +166,156 @@ void main() {
     );
   });
 
+
+  testWidgets('Real Flutter voice-room empty-state design review',
+      (tester) async {
+    await _configureReviewSurface(tester);
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+      tester.view.resetDevicePixelRatio();
+    });
+    await tester.pumpWidget(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: buildTotiTheme(),
+      home: RepaintBoundary(
+        key: const ValueKey('visual-room-root'),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            backgroundColor: TotiColors.background,
+            body: SafeArea(child: Column(children: [
+              SizedBox(height: 90, child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 21),
+                child: Row(children: [
+                  const FalconMark(size: 43),
+                  const Spacer(),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: const [
+                      Text('TotiChat', style: TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w900,
+                        color: TotiColors.ink)),
+                      Text('VOICE ROOM / REVIEW ONLY',
+                        style: TextStyle(fontSize: 9,
+                          color: TotiColors.muted)),
+                    ],
+                  ),
+                ]),
+              )),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(17, 3, 17, 10),
+                child: RoomIdentityHeader(title: 'Room name'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(10, 11, 10, 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(color: TotiColors.outline),
+                  ),
+                  child: Column(children: [
+                    const Row(children: [
+                      Text('15 seats', style: TextStyle(color: TotiColors.plum,
+                        fontSize: 11, fontWeight: FontWeight.w800)),
+                      Spacer(),
+                      Text('Voice seats', style: TextStyle(color: TotiColors.ink,
+                        fontSize: 14, fontWeight: FontWeight.w800)),
+                    ]),
+                    const Divider(height: 21, color: TotiColors.outline),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5, mainAxisSpacing: 11,
+                        crossAxisSpacing: 6, childAspectRatio: .75),
+                      itemCount: 15,
+                      itemBuilder: (context, i) => Column(children: [
+                        const Expanded(child: RoomSeatVisual(
+                          member: null, isOwner: false)),
+                        const SizedBox(height: 3),
+                        Text('${i + 1}', style: const TextStyle(
+                          fontSize: 10, color: TotiColors.muted)),
+                      ]),
+                    ),
+                  ]),
+                ),
+              ),
+              const SizedBox(height: 9),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: TotiColors.outline)),
+                  child: const Row(children: [
+                    SizedBox(width: 14),
+                    Icon(Icons.mic_off_rounded, color: TotiColors.plum),
+                    Spacer(),
+                    Text('Audio not connected', style: TextStyle(
+                      color: TotiColors.ink, fontWeight: FontWeight.w700)),
+                    SizedBox(width: 16),
+                  ]),
+                ),
+              ),
+              const SizedBox(height: 9),
+              Expanded(child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(21),
+                    border: Border.all(color: TotiColors.outline)),
+                  child: const Column(children: [
+                    Align(alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Text('Room chat', style: TextStyle(
+                          fontWeight: FontWeight.w800, color: TotiColors.ink)))),
+                    Expanded(child: Center(
+                      child: Text('No real messages yet',
+                        style: TextStyle(color: TotiColors.muted)))),
+                  ]),
+                ),
+              )),
+              const SizedBox(height: 9),
+              Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Row(children: [
+                  const Icon(Icons.card_giftcard_rounded, size: 29,
+                    color: TotiColors.plum),
+                  const SizedBox(width: 13),
+                  Expanded(child: Container(
+                    height: 43,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: TotiColors.lavender,
+                      borderRadius: BorderRadius.circular(23)),
+                    child: const Text('Message unavailable in design review',
+                      style: TextStyle(fontSize: 10,
+                        color: TotiColors.muted)),
+                  )),
+                  const SizedBox(width: 12),
+                  const Icon(Icons.send_rounded, color: TotiColors.plum),
+                ])),
+            ])),
+          ),
+        ),
+      ),
+    ));
+    await tester.runAsync(() async {
+      await precacheImage(const AssetImage('assets/totichat_falcon.jpg'),
+        tester.element(find.byType(FalconMark)));
+    });
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomSeatVisual), findsNWidgets(15));
+    expect(tester.takeException(), isNull);
+    await expectLater(
+      find.byKey(const ValueKey('visual-room-root')),
+      matchesGoldenFile('visual_review/new_room_empty_flutter.png'),
+    );
+  });
 }
