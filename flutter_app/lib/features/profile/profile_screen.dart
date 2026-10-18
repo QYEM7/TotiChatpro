@@ -12,7 +12,6 @@ import '../notifications/notification_center_screen.dart';
 import 'settings_screen.dart';
 import '../../ui/toti_theme.dart';
 import '../../ui/toti_vip_tiers.dart';
-import '../../ui/extracted_premium_panels.dart';
 import '../../ui/toti_visual_language.dart';
 
 class AccountPage extends StatefulWidget {
