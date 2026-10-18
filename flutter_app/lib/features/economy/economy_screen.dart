@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import 'financial_retry_registry.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 
 class EconomyScreen extends StatelessWidget {
   const EconomyScreen({super.key,required this.api});
@@ -142,11 +143,11 @@ class _VipTabState extends State<_VipTab>{
       final level=(data['tier'] as num?)?.toInt() ??
         (data['level'] as num?)?.toInt() ?? 0;
       return ListView(padding:const EdgeInsets.all(20),children:[
-        const Icon(Icons.workspace_premium_rounded,size:68,color:Color(0xFFB78A45)),
-        const SizedBox(height:18),
-        Text(level>0?'VIP المستوى $level':'لا توجد عضوية VIP مفعّلة',
-          style:const TextStyle(fontSize:22,fontWeight:FontWeight.w800),
-          textAlign:TextAlign.center),
+        TotiRoyalTopBanner(
+          title: level>0 ? 'VIP المستوى $level' : 'نادي VIP',
+          subtitle: level>0 ? 'عضويتك مؤكدة من الخادم' :
+            'لا توجد عضوية VIP مفعّلة حالياً',
+        ),
         const SizedBox(height:12),
         if(data['expiresAt']!=null)Text('انتهاء العضوية: ${data['expiresAt']}',
           textAlign:TextAlign.center),
