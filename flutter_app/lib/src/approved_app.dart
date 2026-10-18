@@ -6,6 +6,9 @@ import 'domain.dart';
 import 'staging_repository.dart';
 import 'visual.dart';
 import 'room_view.dart';
+import 'connected_features.dart';
+import 'social_pages.dart';
+import 'commerce_pages.dart';
 
 StagingRepository get repo => StagingRepository(Supabase.instance.client);
 const loginRedirect = String.fromEnvironment('TOTICHAT_OAUTH_REDIRECT',
@@ -92,11 +95,13 @@ class _ApprovedAppState extends State<ApprovedApp> {
   String search = '';
   late Future<List<VoiceRoom>> rooms;
   late Future<List<BannerItem>> banners;
+  late Future<Map<String, dynamic>> adminStatus;
 
   @override
   void initState() {
     super.initState();
     reload();
+    adminStatus = features.adminSession();
   }
   void reload() {
     rooms = repo.publicRooms();
@@ -278,10 +283,10 @@ class _ApprovedAppState extends State<ApprovedApp> {
       }),
     ]))),
   ]);
-  Widget messages() => Column(children: [
-    const _Header('الرسائل'),
-    Expanded(child: emptyState('لا توجد محادثات مرتبطة بالخادم للعرض حالياً')),
-  ]);
+  Widget messages() => const ConversationsPage();
+  void openPage(Widget page) => Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => page));
+
   Widget profile() => FutureBuilder<Map<String, dynamic>>(
     future: repo.myProfile(),
     builder: (ctx, snap) {
@@ -308,11 +313,49 @@ class _ApprovedAppState extends State<ApprovedApp> {
             title: const Text('الرصيد الحقيقي'),
             trailing: Text(balance.hasData ? balance.data.toString() : 'غير متاح'),
           )),
-        const ListTile(
-          leading: Icon(Icons.admin_panel_settings_outlined),
-          enabled: false,
-          title: Text('مركز الإدارة'),
-          subtitle: Text('يُفعّل فقط بعد التحقق من الصلاحيات على الخادم'),
+        ListTile(
+          leading: const Icon(Icons.notifications_outlined),
+          title: const Text('الإشعارات'),
+          onTap: () => openPage(const NotificationsPage())),
+        ListTile(
+          leading: const Icon(Icons.favorite_border),
+          title: const Text('علاقات CP'),
+          onTap: () => openPage(const CpPage())),
+        ListTile(
+          leading: const Icon(Icons.groups_outlined),
+          title: const Text('الوكالات'),
+          onTap: () => openPage(const AgenciesPage())),
+        ListTile(
+          leading: const Icon(Icons.storefront_outlined),
+          title: const Text('المتجر والمخزن'),
+          onTap: () => openPage(const ShopPage())),
+        ListTile(
+          leading: const Icon(Icons.workspace_premium_outlined),
+          title: const Text('VIP'),
+          onTap: () => openPage(const VipPage())),
+        ListTile(
+          leading: const Icon(Icons.diamond_outlined),
+          title: const Text('المحفظة والتسوية'),
+          onTap: () => openPage(const WalletInfoPage())),
+        ListTile(
+          leading: const Icon(Icons.support_agent_outlined),
+          title: const Text('الدعم الفني'),
+          onTap: () => openPage(const UserNotificationsAndSupportPage())),
+        FutureBuilder<Map<String, dynamic>>(
+          future: adminStatus,
+          builder: (context, status) {
+            final role = status.data?['role']?.toString() ?? 'user';
+            final authorized = status.data?['isOwner'] == true ||
+              status.data?['isMainPartner'] == true || role != 'user';
+            if (!authorized || status.hasError) {
+              return const SizedBox.shrink();
+            }
+            return ListTile(
+              leading: const Icon(Icons.admin_panel_settings_outlined),
+              title: const Text('مركز الإدارة'),
+              onTap: () => openPage(const AdminCenterPage()),
+            );
+          },
         ),
         Padding(padding: const EdgeInsets.all(18),
           child: OutlinedButton.icon(

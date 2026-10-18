@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'domain.dart';
 import 'staging_repository.dart';
 import 'visual.dart';
+import 'social_pages.dart';
 import 'voice_session.dart';
 
 class ApprovedRoomView extends StatefulWidget {
@@ -253,6 +254,11 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
     final found = members.where((m) => m.seat == seatNumber).toList();
     final seated = found.isEmpty ? null : found.first;
     return InkWell(
+      onLongPress: seated != null && seated.userId != repo.currentUserId
+        ? () => Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (_) => ConversationPage(
+              otherId: seated.userId, otherName: seated.name)))
+        : null,
       onTap: () => selectSeat(seatNumber),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(
