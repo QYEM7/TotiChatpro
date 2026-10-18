@@ -11,6 +11,7 @@ import '../agency/charging_agent_screen.dart';
 import '../notifications/notification_center_screen.dart';
 import 'settings_screen.dart';
 import '../../ui/toti_theme.dart';
+import '../../ui/toti_vip_tiers.dart';
 import '../../ui/toti_visual_language.dart';
 
 class AccountPage extends StatefulWidget {
@@ -143,10 +144,7 @@ class _AccountPageState extends State<AccountPage> {
                   future:_vipStatus,
                   builder:(context,vipSnapshot){
                     final level=(vipSnapshot.data?['tier'] as num?)?.toInt()??0;
-                    final ring=level<=3
-                      ?TotiColors.sky
-                      :level<=6?TotiColors.plum
-                      :TotiColors.gold;
+                    final ring=TotiVipTierStyle.colorFor(level);
                     return Column(children:[
                       Container(
                         padding:EdgeInsets.all(level>0?4:0),
@@ -161,8 +159,11 @@ class _AccountPageState extends State<AccountPage> {
                           child:profile?['avatar_url']==null
                             ?const Icon(Icons.person,size:34):null)),
                       if(level>0)Padding(padding:const EdgeInsets.only(top:7),
-                        child:Chip(avatar:const Icon(Icons.workspace_premium,
-                          size:17),label:Text('VIP $level'))),
+                        child:Chip(
+                          backgroundColor: const Color(0xFFF9EDD5),
+                          side: BorderSide(color: ring),
+                          avatar:Icon(Icons.workspace_premium,
+                            size:17,color:ring),label:Text('VIP $level'))),
                       if(vipSnapshot.hasError)const Text(
                         'VIP status unavailable',
                         style:TextStyle(fontSize:12,color:Colors.black54)),
@@ -196,7 +197,9 @@ class _AccountPageState extends State<AccountPage> {
                           final elapsed=started==null?null:
                             DateTime.now().difference(started).inDays+1;
                           return Chip(
-                            avatar:const Icon(Icons.favorite,size:17),
+                            backgroundColor: const Color(0xFFFFF0EE),
+                            avatar:const Icon(Icons.favorite,size:17,
+                              color: Color(0xFFBD5467)),
                             label:Text(
                               '${rel['type_label']??'CP'} · '
                               '${partner['display_name']??'Member'}'

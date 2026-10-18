@@ -20,6 +20,8 @@ import '../../models/room_models.dart';
 import '../../models/room_seat_decoration.dart';
 import '../../ui/toti_theme.dart';
 import '../../ui/toti_visual_language.dart';
+import '../../ui/extracted_premium_panels.dart';
+import '../../ui/extracted_room_backdrop.dart';
 import 'voice_session.dart';
 
 class RoomScreen extends StatefulWidget {
@@ -554,7 +556,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
           if (!didPop && !widget.minimized) _leave();
         },
         child: Scaffold(
-          backgroundColor: TotiColors.background,
+          backgroundColor: TotiRoyalPalette.parchment,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             foregroundColor: TotiColors.ink,
@@ -586,7 +588,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   tooltip:'دعوة عضو'),
             ],
           ),
-          body: TotiAtmosphere(child: _joining ? const Center(child: CircularProgressIndicator()) :
+          body: TotiAtmosphere(child: TotiRoomBackdrop(child: _joining ? const Center(child: CircularProgressIndicator()) :
             !_joined ? Center(child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -627,10 +629,10 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          gradient: TotiColors.heroGradient,
+                          gradient: TotiRoyalPalette.goldGradient,
                           borderRadius: BorderRadius.circular(10)),
                         child: const Icon(Icons.graphic_eq_rounded,
-                          color: Colors.white, size: 17)),
+                          color: TotiRoyalPalette.deepEmerald, size: 17)),
                       const SizedBox(width: 8),
                       const Expanded(child: Text('المقاعد الصوتية',
                         style: TextStyle(fontWeight: FontWeight.w900,
@@ -639,12 +641,13 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                         padding: const EdgeInsets.symmetric(
                           horizontal: 9, vertical: 5),
                         decoration: BoxDecoration(
-                          color: TotiColors.lavender,
+                          color: const Color(0xFFF8EACB),
                           borderRadius: BorderRadius.circular(20)),
                         child: const Text('15 مقعد',
-                          style: TextStyle(color: TotiColors.plum,
+                          style: TextStyle(color: TotiRoyalPalette.deepEmerald,
                             fontWeight: FontWeight.w800, fontSize: 11))),
                     ]),
+                    const Divider(color: TotiRoyalPalette.mutedGold),
                     const SizedBox(height: 10),
                     GridView.builder(
                                       shrinkWrap: true,
@@ -754,7 +757,7 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                   ),
                 ]),
               ),
-            ])),
+            ]))),
         ),
       ),
     );

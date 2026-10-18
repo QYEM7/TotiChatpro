@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 
 /// Host agency membership and transfer requests are always committed by RPC.
 class HostAgencyMembershipScreen extends StatefulWidget {
@@ -125,7 +126,7 @@ class _HostAgencyMembershipScreenState
     textDirection: TextDirection.rtl,
     child: Scaffold(
       appBar: AppBar(
-        title: const Text('Host agencies'),
+        title: const Text('وكالات المضيفين'),
         actions: [
           IconButton(onPressed: _refresh,
             icon: const Icon(Icons.refresh)),
@@ -160,6 +161,15 @@ class _HostAgencyMembershipScreenState
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               children: [
+                const TotiRoyalTopBanner(
+                  title: 'وكالات TotiChat',
+                  subtitle: 'عضويتك وطلبات الانضمام من سجلات الخادم',
+                  icon: Icons.groups_rounded,
+                ),
+                const SizedBox(height: 14),
+                const TotiRoyalSectionHeading(
+                  title: 'عضويتي', icon: Icons.verified_user_outlined,
+                ),
                 const Text('My membership',
                   style: TextStyle(fontSize: 19,
                     fontWeight: FontWeight.w800)),
@@ -171,9 +181,9 @@ class _HostAgencyMembershipScreenState
                     (m['agency_id']?.toString() ?? 'Unavailable'),
                   icon: Icons.verified_user_outlined)),
                 const SizedBox(height: 20),
-                const Text('Available host agencies',
-                  style: TextStyle(fontSize: 19,
-                    fontWeight: FontWeight.w800)),
+                const TotiRoyalSectionHeading(
+                  title: 'الوكالات المتاحة', icon: Icons.corporate_fare_rounded,
+                ),
                 if (available.isEmpty)
                   const NoRecords('No active host agencies yet.'),
                 ...available.map((a) => recordCard(context,
@@ -183,9 +193,9 @@ class _HostAgencyMembershipScreenState
                     onPressed: _busy ? null : () => _join(a),
                     child: const Text('Request to join')))),
                 const SizedBox(height: 20),
-                const Text('Membership requests',
-                  style: TextStyle(fontSize: 19,
-                    fontWeight: FontWeight.w800)),
+                const TotiRoyalSectionHeading(
+                  title: 'طلبات العضوية', icon: Icons.assignment_outlined,
+                ),
                 if (requests.isEmpty)
                   const NoRecords('No real requests have been registered.'),
                 ...requests.map((r) {

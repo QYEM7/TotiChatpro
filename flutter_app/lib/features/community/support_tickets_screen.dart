@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 
 /// Staff access is decided by phase3.support_handler() on the server.
 class SupportTicketListScreen extends StatefulWidget {
@@ -55,6 +56,12 @@ class _SupportTicketListScreenState extends State<SupportTicketListScreen> {
           return ListView(
             padding: const EdgeInsets.all(14),
             children: [
+              TotiRoyalTopBanner(
+                title:widget.staff ? 'صندوق الدعم الرسمي' : 'طلباتي',
+                subtitle:'تذاكر حقيقية من سجلات خدمة العملاء',
+                icon:Icons.support_agent_outlined,
+              ),
+              const SizedBox(height:14),
               if (tickets.isEmpty)
                 const NoRecords('No authenticated support tickets found.'),
               for (final ticket in tickets)

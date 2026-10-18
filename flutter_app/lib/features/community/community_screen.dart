@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 import 'dm_screen.dart';
 import 'support_tickets_screen.dart';
 import '../agency/host_membership_screen.dart';
@@ -13,12 +14,12 @@ class CommunityScreen extends StatelessWidget {
   Widget build(BuildContext context)=>DefaultTabController(
     length:5,
     child:Column(children:[
-      const Padding(padding:EdgeInsets.all(16),
-        child:Row(children:[
-          Icon(Icons.groups_rounded,size:30),
-          SizedBox(width:10),
-          Text('مجتمع TotiChat',style:TextStyle(fontSize:22,fontWeight:FontWeight.w800)),
-        ])),
+      const Padding(padding:EdgeInsets.symmetric(horizontal:16,vertical:9),
+        child:TotiRoyalSectionHeading(
+          title:'مجتمع TotiChat',
+          subtitle:'الرسائل، علاقات CP، الوكالات والدعم',
+          icon:Icons.groups_rounded,
+        )),
       const TabBar(isScrollable:true,tabs:[
         Tab(text:'الرسائل'),Tab(text:'الأصدقاء'),
         Tab(text:'علاقات CP'),Tab(text:'الوكالات'),Tab(text:'الدعم'),

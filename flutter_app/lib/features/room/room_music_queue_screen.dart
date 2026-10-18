@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/room_music_repository.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 
 /// Shows only actual persisted bookmarks and queue metadata, not audio.
 class RoomMusicQueueScreen extends StatefulWidget {
@@ -170,6 +171,11 @@ class _RoomMusicQueueScreenState extends State<RoomMusicQueueScreen> {
             child:ListView(
               physics:const AlwaysScrollableScrollPhysics(),
               padding:const EdgeInsets.all(14),children:[
+                const TotiRoyalSectionHeading(
+                  title:'قائمة الموسيقى المحفوظة',
+                  subtitle:'المراجع محفوظة في الخادم، التشغيل المشترك لم يُفعّل بعد',
+                  icon:Icons.queue_music_rounded,
+                ),
                 const Card(child:Padding(padding:EdgeInsets.all(12),
                   child:Text('This stores server-backed music references, '
                     'not playable tracks. Synchronized playback and '

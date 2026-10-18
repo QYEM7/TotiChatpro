@@ -3,20 +3,20 @@ import 'package:flutter/material.dart';
 /// Flutter rebuild palette. The retained field names keep existing connected
 /// screens compatible while they are restyled one by one.
 class TotiColors {
-  static const ink = Color(0xFF282444);
-  static const plum = Color(0xFF7162C3);
-  static const lavender = Color(0xFFF0EAFF);
-  static const pink = Color(0xFFED8CC6);
-  static const sky = Color(0xFF94C8F1);
-  static const muted = Color(0xFF817D9C);
-  static const gold = Color(0xFFE6B36A);
-  static const outline = Color(0xFFEAE6F4);
-  static const background = Color(0xFFFCFAFF);
+  static const ink = Color(0xFF18352D);
+  static const plum = Color(0xFF16866A);
+  static const lavender = Color(0xFFE6F3EC);
+  static const pink = Color(0xFFE6B47B);
+  static const sky = Color(0xFF93C2C0);
+  static const muted = Color(0xFF70847C);
+  static const gold = Color(0xFFB8893A);
+  static const outline = Color(0xFFE9DEC9);
+  static const background = Color(0xFFFFFCF8);
 
   static const heroGradient = LinearGradient(
     begin: Alignment.topRight,
     end: Alignment.bottomLeft,
-    colors: [Color(0xFF8276D6), Color(0xFFBA85D8), Color(0xFFF0A2CD)],
+    colors: [Color(0xFF0C594C), Color(0xFF1B9977), Color(0xFFCCA35C)],
     stops: [0.0, .56, 1.0],
   );
 }
@@ -47,7 +47,7 @@ ThemeData buildTotiTheme() {
     ),
     cardTheme: CardThemeData(
       color: Colors.white,
-      shadowColor: const Color(0x1A514F83),
+      shadowColor: const Color(0x1A7E6533),
       elevation: 2,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(

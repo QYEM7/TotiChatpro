@@ -27,3 +27,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/totichat_falcon.jpg
+    - assets/room_royal_background.jpg

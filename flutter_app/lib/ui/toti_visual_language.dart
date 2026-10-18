@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'toti_theme.dart';
+import 'extracted_premium_panels.dart';
 
 /// Shared light visual language for the new Flutter-only TotiChat screens.
 /// Decorative shapes never pretend to be banners, users or live activity.
@@ -13,11 +14,11 @@ class TotiAtmosphere extends StatelessWidget {
     child: Stack(children: [
       const Positioned.fill(child: ColoredBox(color: TotiColors.background)),
       const Positioned(top: -120, left: -130,
-        child: _Glow(diameter: 330, color: Color(0x33758BFF))),
+        child: _Glow(diameter: 330, color: Color(0x221B9977))),
       const Positioned(top: 105, right: -115,
-        child: _Glow(diameter: 275, color: Color(0x30F28BC7))),
+        child: _Glow(diameter: 275, color: Color(0x30E9CA81))),
       const Positioned(bottom: -130, left: -105,
-        child: _Glow(diameter: 310, color: Color(0x27A6D5F9))),
+        child: _Glow(diameter: 310, color: Color(0x2715B590))),
       Positioned.fill(child: child),
     ]),
   );
@@ -90,11 +91,15 @@ class TotiGlassCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: padding,
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: .90),
+      gradient: const LinearGradient(
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+        colors: [Color(0xFFFFFFFF), Color(0xFFFFFCF7)],
+      ),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: TotiColors.outline),
+      border: Border.all(color: TotiRoyalPalette.mutedGold.withValues(alpha: .65)),
       boxShadow: const [
-        BoxShadow(color: Color(0x0D514F83), blurRadius: 21, offset: Offset(0, 7)),
+        BoxShadow(color: Color(0x108A6A42), blurRadius: 21, offset: Offset(0, 7)),
       ],
     ),
     child: child,

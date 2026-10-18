@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 
 /// Agent operations only. End users are never steered to external payment
 /// inside the Google Play client. Every operation is reauthorized by server.
@@ -102,6 +103,12 @@ class _ChargingAgentScreenState extends State<ChargingAgentScreen>{
               .where((r)=>agencyIds.contains(r['agency_id'].toString()))
               .toList();
           return ListView(padding:const EdgeInsets.all(15),children:[
+            const TotiRoyalTopBanner(
+              title:'إدارة وكيل الشحن',
+              subtitle:'إجراءات موثقة وصلاحيات يتحقق منها الخادم',
+              icon:Icons.account_balance_wallet_outlined,
+            ),
+            const SizedBox(height:18),
             const Text('لوحة الشحن — عمليات موثقة',
               style:TextStyle(fontSize:21,fontWeight:FontWeight.w800)),
             const SizedBox(height:10),

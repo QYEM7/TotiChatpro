@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/totichat_services.dart';
 import '../../ui/server_panel.dart';
+import '../../ui/extracted_premium_panels.dart';
 import 'host_agency_admin_screen.dart';
 import 'host_month_evidence_screen.dart';
 import 'owner_treasury_screen.dart';
@@ -41,6 +42,12 @@ class _AdminScreenState extends State<AdminScreen>{
               retry:_refresh,
               builder:(context,rights) => rights['canHandle']==true
                 ?ListView(padding:const EdgeInsets.all(18),children:[
+                    const TotiRoyalTopBanner(
+                      title:'خدمة العملاء',
+                      subtitle:'إجراءات الدعم المسموح بها من الخادم فقط',
+                      icon:Icons.support_agent_outlined,
+                    ),
+                    const SizedBox(height:14),
                     const Text('Official support desk',
                       style:TextStyle(fontSize:21,
                         fontWeight:FontWeight.w800)),
@@ -62,6 +69,12 @@ class _AdminScreenState extends State<AdminScreen>{
           final catalog=a['canManageCatalogs']==true||owner||partner;
           // Never infer Host Agencies permission from just "super admin" role.
           return ListView(padding:const EdgeInsets.all(18),children:[
+            const TotiRoyalTopBanner(
+              title:'مركز إدارة TotiChat',
+              subtitle:'إدارة موحّدة داخل التطبيق بصلاحيات خادمية',
+              icon:Icons.admin_panel_settings_rounded,
+            ),
+            const SizedBox(height:12),
             const Icon(Icons.admin_panel_settings_rounded,size:54),
             const SizedBox(height:10),
             Text('صلاحية الحساب: ${a['role']??'admin'}',
