@@ -135,6 +135,27 @@ class ConnectedFeatures {
         'p_limit': 30,
       }));
 
+  Future<void> createSupportTicket({
+    required String category,
+    required String subject,
+    required String message,
+    required String requestId,
+  }) async {
+    if (!const ['general', 'technical', 'account',
+      'recharge', 'host_agency', 'host_transfer'].contains(category)) {
+      throw ArgumentError('Invalid ticket category');
+    }
+    await client.rpc('phase5_support_action', params: {
+      'p_action': 'create',
+      'p_data': {
+        'category': category,
+        'subject': subject.trim(),
+        'message': message.trim(),
+      },
+      'p_request_id': requestId,
+    });
+  }
+
   Future<Map<String, dynamic>> rechargeState() async =>
       object(await client.rpc('phase4_recharge_state'));
 

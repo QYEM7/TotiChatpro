@@ -262,25 +262,85 @@ class VipPage extends StatelessWidget {
   );
 }
 
-class UserNotificationsAndSupportPage extends StatelessWidget {
+class UserNotificationsAndSupportPage extends StatefulWidget {
   const UserNotificationsAndSupportPage({super.key});
+  @override
+  State<UserNotificationsAndSupportPage> createState() => _UserSupportState();
+}
+class _UserSupportState extends State<UserNotificationsAndSupportPage> {
+  late Future<Map<String, dynamic>> tickets;
+  @override
+  void initState() { super.initState(); reload(); }
+  void reload() { tickets = features.myTickets(); }
+
+  Future<void> createTicket() async {
+    final subject = TextEditingController();
+    final body = TextEditingController();
+    String category = 'technical';
+    try {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => StatefulBuilder(builder: (ctx, change) => AlertDialog(
+          title: const Text('إنشاء طلب دعم'),
+          content: SingleChildScrollView(child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButton<String>(
+                isExpanded: true,
+                value: category,
+                items: const [
+                  DropdownMenuItem(value: 'technical', child: Text('مشكلة تقنية')),
+                  DropdownMenuItem(value: 'account', child: Text('الحساب')),
+                  DropdownMenuItem(value: 'recharge', child: Text('الشحن')),
+                  DropdownMenuItem(value: 'host_agency', child: Text('وكالة مضيفين')),
+                  DropdownMenuItem(value: 'host_transfer', child: Text('نقل مضيف')),
+                  DropdownMenuItem(value: 'general', child: Text('عام')),
+                ],
+                onChanged: (v) => change(() => category = v ?? category)),
+              TextField(controller: subject, maxLength: 120,
+                decoration: const InputDecoration(labelText: 'الموضوع')),
+              TextField(controller: body, maxLines: 4, maxLength: 2500,
+                decoration: const InputDecoration(labelText: 'التفاصيل')),
+            ],
+          )),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('إلغاء')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('إرسال')),
+          ],
+        )),
+      );
+      if (confirmed != true || !mounted) return;
+      await features.createSupportTicket(
+        category: category, subject: subject.text, message: body.text,
+        requestId: features.newRequestId());
+      if (mounted) setState(reload);
+    } catch (error) { if (mounted) _agencyError(context, error); }
+    finally { subject.dispose(); body.dispose(); }
+  }
+
   @override
   Widget build(BuildContext context) => FeatureScaffold(
     title: 'الدعم الفني',
     body: FutureBuilder<Map<String, dynamic>>(
-      future: features.myTickets(),
+      future: tickets,
       builder: (context, snapshot) {
         if (snapshot.hasError) return _stateError('تعذر عرض طلبات الدعم');
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
         final items = ConnectedFeatures.collection(snapshot.data!['rows'] ?? []);
-        return items.isEmpty ? _stateError('لا توجد طلبات دعم مسجلة')
-          : ListView(children: [
-            for (final item in items)
-              Card(child: ListTile(
-                title: Text(item['subject']?.toString() ?? ''),
-                subtitle: Text(item['status']?.toString() ?? ''),
-              )),
-          ]);
+        return ListView(children: [
+          Padding(padding: const EdgeInsets.all(12),
+            child: FilledButton.icon(
+              onPressed: createTicket, icon: const Icon(Icons.support_agent),
+              label: const Text('إنشاء طلب دعم جديد'))),
+          if (items.isEmpty) _stateError('لا توجد طلبات دعم مسجلة'),
+          for (final item in items)
+            Card(child: ListTile(
+              title: Text(item['subject']?.toString() ?? ''),
+              subtitle: Text(item['status']?.toString() ?? ''),
+            )),
+        ]);
       },
     ),
   );
