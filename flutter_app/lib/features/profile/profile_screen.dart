@@ -11,6 +11,7 @@ import '../agency/charging_agent_screen.dart';
 import '../notifications/notification_center_screen.dart';
 import 'settings_screen.dart';
 import '../../ui/toti_theme.dart';
+import '../../ui/toti_visual_language.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({
@@ -57,8 +58,8 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) => RefreshIndicator(
     onRefresh: () async { _refresh(); await _data; },
-    child: ListView(padding: const EdgeInsets.all(18), children: [
-      Row(children: [
+    child: ListView(padding: const EdgeInsets.all(16), children: [
+      TotiGlassCard(padding: const EdgeInsets.all(12), child: Row(children: [
         if (!widget.walletOnly)
           FutureBuilder<NotificationPage>(
             future: _notificationSummary,
@@ -98,7 +99,27 @@ class _AccountPageState extends State<AccountPage> {
         Expanded(child: Text(widget.walletOnly ? 'محفظتي' : 'ملفي',
           style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w800))),
         IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
-      ]),
+      ])),
+      const SizedBox(height: 14),
+      if (!widget.walletOnly) TotiGradientPanel(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        child: const Row(children: [
+          Icon(Icons.auto_awesome_rounded,
+            size: 31, color: Colors.white),
+          SizedBox(width: 13),
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('هويتك في TotiChat', style: TextStyle(
+                fontSize: 19, color: Colors.white,
+                fontWeight: FontWeight.w900)),
+              Text('ملفك الحقيقي، شاراتك وعلاقاتك',
+                style: TextStyle(color: Colors.white,
+                  fontSize: 12)),
+            ],
+          )),
+        ]),
+      ),
       const SizedBox(height: 20),
       FutureBuilder<List<Object?>>(
         future: _data,
@@ -114,17 +135,18 @@ class _AccountPageState extends State<AccountPage> {
           final publicId = id?['assigned'] == true ?
             (id?['publicId']?.toString() ?? '—') : 'بانتظار منح ID من الإدارة';
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            if (!widget.walletOnly) Card(child: Padding(
-              padding: const EdgeInsets.all(22),
+            if (!widget.walletOnly) TotiGlassCard(
+              radius: 27,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
               child: Column(children: [
                 FutureBuilder<Map<String,dynamic>>(
                   future:_vipStatus,
                   builder:(context,vipSnapshot){
                     final level=(vipSnapshot.data?['tier'] as num?)?.toInt()??0;
                     final ring=level<=3
-                      ?const Color(0xFF55A5AD)
-                      :level<=6?const Color(0xFF8C6CD1)
-                      :const Color(0xFFC89A43);
+                      ?TotiColors.sky
+                      :level<=6?TotiColors.plum
+                      :TotiColors.gold;
                     return Column(children:[
                       Container(
                         padding:EdgeInsets.all(level>0?4:0),
@@ -189,7 +211,7 @@ class _AccountPageState extends State<AccountPage> {
                   Text(profile!['bio'].toString(), textAlign: TextAlign.center),
                 ],
               ]),
-            )),
+            ),
             const SizedBox(height: 16),
             const Text('الرصيد الحقيقي', style: TextStyle(
               fontWeight: FontWeight.w800, fontSize: 19)),
@@ -249,14 +271,26 @@ class _AccountPageState extends State<AccountPage> {
     ]),
   );
 
-  Widget _metric(String title, String value, IconData icon) => Card(
-    child: Padding(padding: const EdgeInsets.all(12),
+  Widget _metric(String title, String value, IconData icon) =>
+    TotiGlassCard(
+      radius: 21,
+      padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 5),
       child: Column(children: [
-        Icon(icon, color: TotiColors.plum),
-        const SizedBox(height: 7),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 17)),
-        Text(title, style: const TextStyle(color: Colors.black54, fontSize: 12)),
-      ])));
+        Container(
+          width: 39, height: 39,
+          decoration: BoxDecoration(
+            color: TotiColors.lavender,
+            borderRadius: BorderRadius.circular(13)),
+          child: Icon(icon, color: TotiColors.plum, size: 22),
+        ),
+        const SizedBox(height: 9),
+        Text(value, maxLines: 1, overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w900,
+            color: TotiColors.ink, fontSize: 16)),
+        Text(title, style: const TextStyle(
+          color: TotiColors.muted, fontSize: 11)),
+      ]),
+    );
 
   Widget _error(String message) => Column(children: [
     Text(message, textAlign: TextAlign.center),
