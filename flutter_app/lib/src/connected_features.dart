@@ -49,6 +49,14 @@ class ConnectedFeatures {
     });
   }
 
+  Future<void> setDmBlocked(String otherId, bool blocked) async {
+    if (otherId == ownId) throw ArgumentError('Cannot block your own profile');
+    await client.rpc('phase2_dm_block', params: {
+      'p_other_user': otherId,
+      'p_block': blocked,
+    });
+  }
+
   Future<List<Map<String, dynamic>>> searchPeople(String prefix) async {
     final value = prefix.trim();
     if (value.length < 2 || value.length > 40) {

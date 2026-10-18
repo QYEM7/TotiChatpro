@@ -189,6 +189,39 @@ class _ConversationPageState extends State<ConversationPage> {
     super.dispose();
   }
 
+  Future<void> _changeBlocked(bool blocked) async {
+    if (blocked) {
+      final answer = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('حظر المحادثة'),
+          content: const Text('لن تتمكن من تبادل الرسائل مع هذا الحساب حتى رفع الحظر.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('إلغاء')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('حظر')),
+          ],
+        ),
+      );
+      if (answer != true || !mounted) return;
+    }
+    try {
+      await features.setDmBlocked(widget.otherId, blocked);
+      if (!mounted) return;
+      if (blocked) {
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم رفع الحظر من الخادم')),
+        );
+        setState(_reload);
+      }
+    } catch (error) {
+      if (mounted) _problem(context, error);
+    }
+  }
+
   Future<void> _send() async {
     if (sending || field.text.trim().isEmpty) return;
     setState(() { sending = true; requestId ??= features.newRequestId(); });
@@ -205,6 +238,18 @@ class _ConversationPageState extends State<ConversationPage> {
   Widget build(BuildContext context) => FeatureScaffold(
     title: widget.otherName,
     body: Column(children: [
+      Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: PopupMenuButton<bool>(
+          tooltip: 'خصوصية المحادثة',
+          icon: const Icon(Icons.shield_outlined),
+          onSelected: _changeBlocked,
+          itemBuilder: (context) => const [
+            PopupMenuItem(value: true, child: Text('حظر المستخدم')),
+            PopupMenuItem(value: false, child: Text('رفع الحظر')),
+          ],
+        ),
+      ),
       Expanded(child: FutureBuilder<List<Map<String, dynamic>>>(
         future: messages,
         builder: (context, result) {
