@@ -183,7 +183,18 @@ class TotiChatServices {
     final result = object(await client.rpc('phase2_dm_send', params: {
       'p_recipient_id': peer, 'p_body': text, 'p_request_id': id,
     }));
-    if (result['sent'] != true) throw StateError('Message not confirmed');
+    verifyDmSendReceipt(result);
+  }
+
+  /// Both fresh and replayed Staging receipts contain a positive message ID.
+  /// A generic success flag must not clear the pending draft/request.
+  static void verifyDmSendReceipt(Object? response) {
+    final receipt = object(response);
+    final messageId = receipt['id'];
+    if (receipt['sent'] != true || messageId is! int || messageId < 1 ||
+        messageId > maxSafeCoinAmount || receipt['replayed'] is! bool) {
+      throw StateError('Message receipt is incomplete or invalid');
+    }
   }
 
   static Map<String, dynamic> dmBlockParams(

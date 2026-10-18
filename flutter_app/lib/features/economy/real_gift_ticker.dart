@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../models/gift_announcement.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,10 +25,7 @@ class _RealGiftTickerState extends State<RealGiftTicker> {
         table:'gift_global_announcements',
         callback:(payload){
           final row=Map<String,dynamic>.from(payload.newRecord);
-          final total=(row['total_coins'] as num?)?.toInt()??0;
-          final created=DateTime.tryParse(row['created_at']?.toString()??'');
-          if(total<7000||created==null||
-              DateTime.now().toUtc().difference(created.toUtc()).inSeconds>30){
+          if (!GiftAnnouncement.isDisplayable(row, DateTime.now().toUtc())) {
             return;
           }
           if(!mounted)return;
