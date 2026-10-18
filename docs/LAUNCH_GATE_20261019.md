@@ -37,3 +37,14 @@ Approved design source: https://github.com/mrbalmain11-star/-
 - Do not merge this branch into `main`, redirect existing production clients, fund agent wallets or open production registrations yet.
 - Build testing APKs only from this branch and label every download **Staging Alpha**.
 - Never state `ready for final release` until the critical real-world checks above are completed.
+
+## Latest implementation check (code commit `1fa48a3`)
+- Flutter QA passed: https://github.com/QYEM7/TotiChatpro/actions/runs/39173501166
+- Realtime inbox, DMs and user notifications now subscribe to RLS-approved tables.
+- Users can block/unblock other DM accounts through server RPC with confirmation.
+- Real support ticket threads, replies and authorized staff-only ticket statuses are exposed in Flutter.
+- The global 7000+ coin announcement strip listens to actual server-created events and auto-expires after 12 seconds. Backend staging threshold was confirmed enabled at 7000.
+- Audio publishing is stopped before moving or releasing the speaking seat, and minimized room membership is cleaned up on logout.
+- Actual Flutter asset and APK builds remain separate from runtime acceptance checks.
+- Backend has `room_music_queue` and `user_music_bookmarks` tables, but **no verified public music RPC exists** in the current Staging catalog. Music synchronization is not ready.
+- No full end-to-end signed-in user journey, purchase ledger verification, or two-device LiveKit voice session was run.
