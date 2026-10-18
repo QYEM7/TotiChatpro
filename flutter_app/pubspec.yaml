@@ -1,0 +1,21 @@
+name: totichat
+description: TotiChat approved UI source port with real staging contracts.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: 2.10.3
+  uuid: 4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 5.0.0
+
+flutter:
+  uses-material-design: true
