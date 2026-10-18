@@ -46,9 +46,29 @@ class StagingRepository {
 
   Future<VoiceRoom> joinPrivateInvitation(String invite) async {
     final parts = invite.trim().split(':');
-    if (parts.length != 2 ||
-        !RegExp(r'^[0-9a-fA-F-]{36}
-    if (welcome.length > 500) throw ArgumentError('Welcome message too long');
+    final roomIdValid = parts.length == 2 &&
+        parts[0].length == 36 &&
+        RegExp(r'^[0-9a-fA-F-]{36}').hasMatch(parts[0]);
+    final tokenValid = parts.length == 2 &&
+        parts[1].length == 48 &&
+        RegExp(r'^[0-9a-fA-F]{48}').hasMatch(parts[1]);
+    if (!roomIdValid || !tokenValid) {
+      throw ArgumentError('Invalid private room invitation');
+    }
+    await client.rpc('phase2_room_invite_join', params: {
+      'p_room_id': parts[0],
+      'p_token': parts[1],
+    });
+    final row = await client.from('rooms')
+      .select('id,title,owner_id,is_private,cover_path,welcome_message')
+      .eq('id', parts[0]).single();
+    return VoiceRoom.fromJson(Map<String, dynamic>.from(row));
+  }
+
+  Future<void> customizeRoomWelcome(String roomId, String welcome) async {
+    if (welcome.length > 500) {
+      throw ArgumentError('Welcome message too long');
+    }
     await client.rpc('phase2_room_customize', params: {
       'p_room_id': roomId,
       'p_welcome_message': welcome,
