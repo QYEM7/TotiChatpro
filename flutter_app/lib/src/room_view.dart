@@ -11,6 +11,7 @@ import 'visual.dart';
 import 'social_pages.dart';
 import 'voice_session.dart';
 import 'gift_announcement_strip.dart';
+import 'music_pages.dart';
 
 class ApprovedRoomView extends StatefulWidget {
   final VoiceRoom room;
@@ -282,6 +283,16 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
                 IconButton(onPressed: sharePrivateInvite,
                   tooltip: 'دعوة خاصة لمرة واحدة',
                   icon: const Icon(Icons.share_outlined, color: ApprovedPalette.gold)),
+              IconButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => RoomMusicQueuePage(room: widget.room),
+                  ),
+                ),
+                tooltip: 'قائمة الموسيقى',
+                icon: const Icon(Icons.library_music_outlined,
+                  color: ApprovedPalette.gold),
+              ),
               IconButton(onPressed: refresh, tooltip: 'تحديث',
                 icon: const Icon(Icons.refresh, color: Colors.white)),
               IconButton(onPressed: menu, tooltip: 'إدارة الخروج',
