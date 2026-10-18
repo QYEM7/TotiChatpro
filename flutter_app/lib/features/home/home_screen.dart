@@ -277,7 +277,9 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
+    return ColoredBox(
+      color: const Color(0xFFFDFBF7),
+      child: RefreshIndicator(
       onRefresh: () async {
         _reload();
         await _rooms;
@@ -419,6 +421,6 @@ class _RoomsDirectoryState extends State<RoomsDirectory> {
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 28)),
       ]),
-    );
+    ));
   }
 }
