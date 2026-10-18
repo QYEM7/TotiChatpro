@@ -28,6 +28,8 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   bool sendingMessage = false;
   String? issue;
   RealtimeChannel? roomChannel;
+  bool _allowPop = false;
+  bool _menuVisible = false;
 
   @override
   void initState() {
@@ -193,10 +195,15 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
     try {
       await VoiceSession.instance.disconnect();
       await repo.leaveRoom(widget.room.id);
-      if (mounted) Navigator.pop(context, false);
+      if (mounted) {
+        setState(() => _allowPop = true);
+        Navigator.pop(context, false);
+      }
     } catch (error) { if (mounted) _error(error); }
   }
   Future<void> menu() async {
+    if (_menuVisible) return;
+    _menuVisible = true;
     final result = await showModalBottomSheet<String>(
       context: context, backgroundColor: const Color(0xFF211540),
       builder: (ctx) => SafeArea(child: Column(
@@ -215,10 +222,12 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
         ],
       )),
     );
+    _menuVisible = false;
     if (!mounted) return;
     if (result == 'leave') {
       await exitRoom();
     } else if (result == 'minimize') {
+      setState(() => _allowPop = true);
       Navigator.pop(context, true);
     }
   }
@@ -238,7 +247,12 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
   @override
   Widget build(BuildContext context) => Directionality(
     textDirection: TextDirection.rtl,
-    child: Scaffold(
+    child: PopScope<bool>(
+      canPop: _allowPop,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && !_menuVisible) unawaited(menu());
+      },
+      child: Scaffold(
       backgroundColor: ApprovedPalette.room,
       body: SafeArea(child: Stack(children: [
         Positioned.fill(child: ApprovedNetworkImage(
@@ -340,6 +354,7 @@ class _ApprovedRoomViewState extends State<ApprovedRoomView> {
           ),
         ]),
       ])),
+      ),
     ),
   );
 

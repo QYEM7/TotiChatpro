@@ -113,6 +113,36 @@ class _ApprovedAppState extends State<ApprovedApp> {
   }
   Future<void> openRoom(VoiceRoom room, {bool joined = false}) async {
     try {
+      final old = minimizedRoom;
+      if (old != null && old.id != room.id) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('غرفة صوتية نشطة'),
+            content: Text('تريد مغادرة ' + old.title +
+              ' والدخول إلى الغرفة الجديدة؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('إلغاء'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('مغادرة والدخول'),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true || !mounted) {
+          if (joined) await repo.leaveRoom(room.id);
+          return;
+        }
+        // Disconnect first to make sure the old microphone cannot keep
+        // transmitting after switching rooms.
+        await VoiceSession.instance.disconnect();
+        await repo.leaveRoom(old.id);
+        if (mounted) setState(() => minimizedRoom = null);
+      }
       if (!joined) await repo.joinRoom(room.id);
       if (!mounted) return;
       final minimized = await Navigator.of(context).push<bool>(
