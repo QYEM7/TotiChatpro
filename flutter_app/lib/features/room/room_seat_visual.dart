@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/room_models.dart';
 import '../../models/room_seat_decoration.dart';
 import '../../ui/toti_theme.dart';
+import '../../ui/toti_vip_tiers.dart';
 
 /// Premium avatar seat without invented cosmetics. VIP, frame, gift count and
 /// mic badges are displayed only when confirmed by the Staging server.
@@ -28,7 +29,8 @@ class RoomSeatVisual extends StatelessWidget {
         frameIcon.length <= 8 && !frameIcon.contains('://');
     final avatar = member?.avatarUrl;
 
-    final accent = vip > 0 || hasFrame ? TotiColors.gold : TotiColors.plum;
+    final accent = vip > 0 ? TotiVipTierStyle.colorFor(vip) :
+      hasFrame ? TotiColors.gold : TotiColors.plum;
     return LayoutBuilder(builder: (context, size) {
       final diameter = (size.maxWidth < size.maxHeight
           ? size.maxWidth : size.maxHeight).clamp(1.0, 80.0).toDouble();
@@ -40,11 +42,8 @@ class RoomSeatVisual extends StatelessWidget {
             padding: EdgeInsets.all(occupied ? 3 : 2),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: occupied ? const LinearGradient(
-                begin: Alignment.topRight, end: Alignment.bottomLeft,
-                colors: [Color(0xFFF6B7D9), Color(0xFF8E7DE2),
-                  Color(0xFFE8C690)],
-              ) : const LinearGradient(
+              gradient: occupied ? TotiVipTierStyle.gradientFor(vip)
+                : const LinearGradient(
                 colors: [Color(0xFFE8E0FF), Color(0xFFFCE9F3)],
               ),
               border: Border.all(
@@ -70,7 +69,7 @@ class RoomSeatVisual extends StatelessWidget {
           if (vip > 0) Positioned(
             left: -4, top: -5,
             child: _SeatLabel(
-              text: 'VIP $vip', background: const Color(0xFF56418B)),
+              text: 'VIP $vip', background: TotiVipTierStyle.colorFor(vip)),
           ),
           if (occupied && isOwner) const Positioned(
             right: -2, top: -6,
