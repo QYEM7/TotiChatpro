@@ -85,6 +85,7 @@ class ApprovedApp extends StatefulWidget {
 }
 class _ApprovedAppState extends State<ApprovedApp> {
   int tab = 0;
+  VoiceRoom? minimizedRoom;
   String subtab = 'party';
   String search = '';
   late Future<List<VoiceRoom>> rooms;
@@ -107,8 +108,11 @@ class _ApprovedAppState extends State<ApprovedApp> {
     try {
       if (!joined) await repo.joinRoom(room.id);
       if (!mounted) return;
-      await Navigator.of(context).push(MaterialPageRoute<void>(
-          builder: (_) => ApprovedRoomView(room: room)));
+      final minimized = await Navigator.of(context).push<bool>(
+        MaterialPageRoute<bool>(builder: (_) => ApprovedRoomView(room: room)));
+      if (mounted) {
+        setState(() => minimizedRoom = minimized == true ? room : null);
+      }
     } catch (error) {
       if (mounted) showProblem(context, error);
     } finally {
@@ -157,7 +161,20 @@ class _ApprovedAppState extends State<ApprovedApp> {
     child: Scaffold(
       backgroundColor: ApprovedPalette.cream,
       body: SafeArea(child: tab == 0 ? home() : tab == 1 ? messages() : profile()),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: Column(mainAxisSize: MainAxisSize.min, children: [
+        if (minimizedRoom != null)
+          Material(color: ApprovedPalette.violet, child: ListTile(
+            title: Text(minimizedRoom!.title, maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white)),
+            leading: const Icon(Icons.keyboard_voice, color: ApprovedPalette.mint),
+            trailing: const Icon(Icons.open_in_full, color: ApprovedPalette.gold),
+            onTap: () {
+              final room = minimizedRoom;
+              if (room != null) openRoom(room, joined: true);
+            },
+          )),
+        NavigationBar(
         backgroundColor: Colors.white,
         selectedIndex: tab,
         indicatorColor: const Color(0x3326C096),
@@ -167,7 +184,8 @@ class _ApprovedAppState extends State<ApprovedApp> {
           NavigationDestination(icon: Icon(Icons.chat_bubble_outline), label: 'الرسائل'),
           NavigationDestination(icon: Icon(Icons.person_outline), label: 'أنا'),
         ],
-      ),
+        ),
+      ]),
     ),
   );
   Widget home() => Column(children: [
