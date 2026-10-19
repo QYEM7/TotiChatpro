@@ -34,8 +34,20 @@ if 'android:scheme="com.totichat.beta"' not in text:
     if "</activity>" not in text:
         raise SystemExit("MainActivity not found; Android template may have changed")
     text = text.replace("</activity>", callback + "        </activity>", 1)
+# Work around devices whose Vulkan/Impeller startup shows only a white
+# surface. This is a QA compatibility setting; it does not change LiveKit.
+# Keep within <application>, never next to <uses-permission> in <manifest>.
+if 'io.flutter.embedding.android.EnableImpeller' not in text:
+    import re
+    match = re.search(r'<application\\b[^>]*>', text, flags=re.S)
+    if match is None:
+        raise SystemExit("Cannot locate generated Android application element")
+    text = (text[:match.end()] +
+        '\n        <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="false" />' +
+        text[match.end():])
 manifest.write_text(text, encoding="utf-8")
 
+assert 'io.flutter.embedding.android.EnableImpeller' in text
 assert 'android:scheme="com.totichat.beta"' in text
 assert 'android:host="auth"' in text
 assert 'android:pathPrefix="/callback"' in text
