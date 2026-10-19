@@ -55,7 +55,17 @@
     "gift idempotency key retained for unchanged financial request payload"
   ],
   "latestReliabilityDocument": "docs/BETA_RELIABILITY_FIXES_20261019.md",
-  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39188427349",
+  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39248954242",
   "latestReliabilityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39247640294",
-  "latestReliabilityCiVerified": false
+  "latestReliabilityCiVerified": true,
+  "latestFinancialSafety": {
+    "version": "durable-uuid-before-rpc",
+    "devicePersistence": "shared_preferences_async-2.5.5",
+    "quoteAndRecipientConfirmation": true,
+    "crossRestartSafeRetriesSourceImplemented": true,
+    "unitTestsPassed": true,
+    "deviceFinancialE2eVerified": false
+  },
+  "stagingAdminAccessConfigured": false,
+  "latestFinancialAuditDocument": "docs/BETA_FINANCIAL_RETRY_HARDENING_20261019.md"
 }
