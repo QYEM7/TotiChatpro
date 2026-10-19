@@ -269,7 +269,92 @@ class _RoomScreenState extends State<RoomScreen> {
                                   return _seat(number, seatMap[number]);
                                 },
                               ),
-                              const Spacer(),
+                              const SizedBox(height: 10),
+                              Expanded(
+                                child: StreamBuilder<List<RoomTextMessage>>(
+                                  stream: _messagesStream,
+                                  builder: (context, messageSnapshot) {
+                                    if (messageSnapshot.hasError) {
+                                      return Center(
+                                        child: Text(
+                                          UiText.get('chat_load_failed'),
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                      );
+                                    }
+                                    if (!messageSnapshot.hasData) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    }
+                                    final messages = messageSnapshot.requireData;
+                                    if (messages.isEmpty) {
+                                      return Center(
+                                        child: Text(
+                                          UiText.get('chat_empty'),
+                                          style: const TextStyle(color: Colors.white70),
+                                        ),
+                                      );
+                                    }
+                                    final names = {
+                                      for (final member in members)
+                                        member.userId: member.displayName,
+                                    };
+                                    final me = Supabase.instance.client.auth.currentUser?.id;
+                                    return ListView.builder(
+                                      reverse: true,
+                                      itemCount: messages.length,
+                                      itemBuilder: (context, index) {
+                                        final msg = messages[messages.length - 1 - index];
+                                        final sender = msg.senderId == me
+                                            ? UiText.get('chat_me')
+                                            : (names[msg.senderId] ?? msg.senderId.substring(0, 8));
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 4,
+                                          ),
+                                          child: Text(
+                                            '${sender}: ${msg.body}',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 4, 8, 2),
+                                child: Row(children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _composer,
+                                      textInputAction: TextInputAction.send,
+                                      onSubmitted: (_) => _sendMessage(),
+                                      maxLines: 1,
+                                      style: const TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                        hintText: UiText.get('chat_hint'),
+                                        hintStyle: const TextStyle(color: Colors.white54),
+                                        filled: true,
+                                        fillColor: const Color(0xBB100724),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(24),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: _sending ? null : _sendMessage,
+                                    icon: const Icon(Icons.send, color: Color(0xFFFBBF24)),
+                                    tooltip: UiText.get('chat_send'),
+                                  ),
+                                ]),
+                              ),
                               Container(
                                 margin: const EdgeInsets.all(14),
                                 padding: const EdgeInsets.all(12),
