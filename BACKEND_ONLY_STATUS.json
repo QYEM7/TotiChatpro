@@ -55,7 +55,7 @@
     "gift idempotency key retained for unchanged financial request payload"
   ],
   "latestReliabilityDocument": "docs/BETA_RELIABILITY_FIXES_20261019.md",
-  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39315053498",
+  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39317157664",
   "latestReliabilityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39247640294",
   "latestReliabilityCiVerified": true,
   "latestFinancialSafety": {
@@ -104,5 +104,17 @@
     "sourceCiPassed": true,
     "twoDeviceVoiceVerificationPassed": false,
     "financialRealWorldE2eVerified": false
+  },
+  "latestVoiceModerationReview": {
+    "date": "2026-10-19",
+    "document": "docs/BETA_VOICE_MODERATION_REVIEW_20261019.md",
+    "sourceFixApplied": true,
+    "voiceAffectingModerationUsesEdgeRelay": true,
+    "allowsMicAsDbPermissionOnly": true,
+    "sourceTestsPassed": true,
+    "sourceCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39317157664",
+    "backendAuthenticatedDirectRpcBypassStillOpen": true,
+    "physicalTwoDeviceVerification": false,
+    "releaseBlocked": true
   }
 }
