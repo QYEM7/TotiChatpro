@@ -44,6 +44,27 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Install Flutter-required Android NDK with clean retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          ndk_dir="$ANDROID_HOME/ndk/28.2.13676358"
+          for attempt in 1 2 3; do
+            if test -s "$ndk_dir/source.properties"; then
+              echo "Android NDK 28.2.13676358 ready"
+              exit 0
+            fi
+            echo "Installing NDK 28.2.13676358, attempt $attempt"
+            rm -rf "$ndk_dir"
+            if "$sdkmanager" --install "ndk;28.2.13676358" </dev/null; then
+              test -s "$ndk_dir/source.properties" && exit 0
+            fi
+            sleep 5
+          done
+          echo "NDK download failed repeatedly; app runtime not reached"
+          exit 1
+
       - name: Compile debug Android app for x86-64 Android 14 emulator
         working-directory: flutter_app
         run: |
