@@ -1,0 +1,60 @@
+name: Verified room seat gift totals
+
+on:
+  push:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - 'supabase/patches/room_seat_verified_gift_totals_candidate.sql'
+      - 'supabase/tests/room_seat_gift_totals_ephemeral_*.sql'
+      - '.github/workflows/room-seat-gift-totals.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-room-seat-gift-totals:
+    name: Verify member-only seat gift values with actual PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: totichat_seat_gifts_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd=pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Checkout development branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Check SQL and cross-room membership guards on disposable database
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGDATABASE: totichat_seat_gifts_ci
+          PGUSER: postgres
+          PGPASSWORD: disposable_ci_only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/verified_room_gift_chat_ephemeral_fixture.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/room_seat_gift_totals_ephemeral_setup.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/patches/room_seat_verified_gift_totals_candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/room_seat_gift_totals_ephemeral_acceptance.sql
+      - name: No remote deployment
+        run: echo 'Synthetic SQL tests only, no production or Staging writes.'
