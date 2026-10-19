@@ -1,12 +1,8 @@
 name: TotiChat staging Android debug APK
 
+# Test APK builds require an intentional manual workflow dispatch.
+# Ordinary development pushes run flutter-beta-checks.yml instead.
 on:
-  push:
-    branches:
-      - 'rebuild/flutter-v1'
-    paths:
-      - 'flutter_app/**'
-      - '.github/workflows/flutter-beta-apk-staging.yml'
   workflow_dispatch:
 
 permissions:
