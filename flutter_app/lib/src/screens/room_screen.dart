@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -5,7 +7,7 @@ import '../core/ui_text.dart';
 import '../data/room_repository.dart';
 
 /// The first vertical slice: real room membership and real seat visibility.
-/// Audio, gifts, moderation and chat will be added only with working services.
+/// Seats and text chat use real authenticated server data; audio remains separate.
 class RoomScreen extends StatefulWidget {
   const RoomScreen({
     super.key,
@@ -22,6 +24,11 @@ class RoomScreen extends StatefulWidget {
 
 class _RoomScreenState extends State<RoomScreen> {
   late Future<List<RoomSeatMember>> _members;
+  late Stream<List<RoomTextMessage>> _messagesStream;
+  final TextEditingController _composer = TextEditingController();
+  Timer? _refreshTimer;
+  bool _savingSeat = false;
+  bool _sending = false;
   bool _leaving = false;
   bool _canPop = false;
 
@@ -32,6 +39,63 @@ class _RoomScreenState extends State<RoomScreen> {
   void initState() {
     super.initState();
     _members = widget.repository.members(widget.room.id);
+    _messagesStream = widget.repository.watchMessages(widget.room.id);
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (mounted && !_leaving && !_canPop) _reload();
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _composer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _chooseSeat(int number, RoomSeatMember? occupant) async {
+    if (_savingSeat || _leaving) return;
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (occupant != null && occupant.userId != userId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(UiText.get('seat_busy'))),
+      );
+      return;
+    }
+    setState(() => _savingSeat = true);
+    try {
+      if (occupant?.userId == userId) {
+        await widget.repository.releaseSeat(widget.room.id);
+      } else {
+        await widget.repository.takeSeat(widget.room.id, number);
+      }
+      if (mounted) _reload();
+    } catch (_) {
+      if (!mounted) return;
+      _reload();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(UiText.get('seat_error'))),
+      );
+    } finally {
+      if (mounted) setState(() => _savingSeat = false);
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    if (_sending || _leaving) return;
+    final message = _composer.text.trim();
+    if (message.isEmpty) return;
+    setState(() => _sending = true);
+    try {
+      await widget.repository.sendMessage(widget.room.id, message);
+      if (mounted) _composer.clear();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(UiText.get('chat_send_failed'))),
+      );
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
   }
 
   void _reload() {
@@ -242,8 +306,12 @@ class _RoomScreenState extends State<RoomScreen> {
   Widget _seat(int index, RoomSeatMember? member) {
     final occupied = member != null;
     final avatar = member?.avatarUrl;
-    return Column(
-      children: [
+    return InkWell(
+      key: Key('room-seat-$index'),
+      onTap: _savingSeat ? null : () => _chooseSeat(index, member),
+      borderRadius: BorderRadius.circular(30),
+      child: Column(
+        children: [
         Expanded(
           child: Container(
             width: double.infinity,
@@ -282,10 +350,11 @@ class _RoomScreenState extends State<RoomScreen> {
           style: const TextStyle(color: Colors.white, fontSize: 9),
         ),
         Text(
-          '${index.toString().padLeft(2, '0')}',
+          index.toString().padLeft(2, '0'),
           style: const TextStyle(color: Color(0xFFE9D5FF), fontSize: 9),
         ),
-      ],
+        ],
+      ),
     );
   }
 }
