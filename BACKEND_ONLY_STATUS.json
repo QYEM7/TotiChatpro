@@ -122,13 +122,14 @@
     "sqlCandidate": "supabase/patches/voice_moderation_relay_acl_candidate.sql",
     "edgeSource": "supabase/functions/phase2-voice-moderate/index.ts",
     "cutoverRunbook": "docs/STAGING_VOICE_RELAY_CUTOVER_20261020.md",
-    "securityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39325212067",
+    "securityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39325376323",
     "securityCiPassed": true,
     "stagingApplied": false,
     "edgeDeployed": false,
     "authenticatedDirectRpcBypassConfirmedOpen": true,
     "sqlDisposableDbCompiled": false,
     "twoPhoneVoiceVerified": false,
-    "releaseBlocked": true
+    "releaseBlocked": true,
+    "edgeDenoTypeCheckPassed": true
   }
 }
