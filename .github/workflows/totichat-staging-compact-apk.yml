@@ -34,6 +34,8 @@ jobs:
           grep -Fq 'configuredUrl == url' lib/src/core/staging_config.dart
           grep -Fq 'sb_publishable_' lib/src/core/staging_config.dart
           grep -Fq 'runApp(StartupGate(' lib/main.dart
+          grep -Fq 'TotiChat could not start' lib/main.dart
+          test -f test/startup_gate_test.dart
           grep -Fq 'io.flutter.embedding.android.EnableImpeller' scripts/prepare_android.sh
           if grep -REn 'sb_secret_|service_role' lib/; then exit 1; fi
 
