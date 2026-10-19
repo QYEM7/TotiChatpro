@@ -19,10 +19,14 @@ class RoomScreen extends StatefulWidget {
     super.key,
     required this.room,
     required this.repository,
+    this.onLeave,
+    this.onMinimize,
   });
 
   final RoomSummary room;
   final RoomRepository repository;
+  final VoidCallback? onLeave;
+  final VoidCallback? onMinimize;
 
   @override
   State<RoomScreen> createState() => _RoomScreenState();
@@ -333,7 +337,11 @@ class _RoomScreenState extends State<RoomScreen> {
       await widget.repository.leave(widget.room.id);
       if (!mounted) return;
       setState(() => _canPop = true);
-      Navigator.of(context).pop();
+      if (widget.onLeave != null) {
+        widget.onLeave!();
+      } else {
+        Navigator.of(context).pop();
+      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -347,9 +355,9 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: _canPop,
+      canPop: widget.onLeave != null || _canPop,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) _leave();
+        if (!didPop && widget.onLeave == null) _leave();
       },
       child: Scaffold(
         backgroundColor: const Color(0xFF0D0426),
@@ -402,6 +410,13 @@ class _RoomScreenState extends State<RoomScreen> {
                         tooltip: UiText.get('refresh'),
                         icon: const Icon(Icons.refresh, color: Colors.white),
                       ),
+                      if (widget.onMinimize != null)
+                        IconButton(
+                          onPressed: widget.onMinimize,
+                          tooltip: UiText.get('room_minimize'),
+                          icon: const Icon(Icons.keyboard_arrow_down,
+                              color: Colors.white),
+                        ),
                       IconButton(
                         onPressed: _leaving ? null : _leave,
                         tooltip: UiText.get('room_leave'),
