@@ -41,6 +41,11 @@ test('edge authenticates both user and current session before privileged call',(
  assert.match(edge,/claims\['role'\]!=='authenticated'/);
  assert.match(edge,/SUPABASE_SERVICE_ROLE_KEY/);
  assert.match(edge,/if\(!backendUrl\|\|!backendKey\|\|!privilegedKey\)/);
+ assert.match(edge,/role:claims\['role'\]/);
+ assert.match(edge,/sub:claims\['sub'\]/);
+ assert.match(edge,/session_id:claims\['session_id'\]/);
+ assert.match(edge,/aal:claims\['aal'\]/);
+ assert.doesNotMatch(edge,/p_verified_user_claims:\s*userToken/);
  assert.doesNotMatch(edge,/supabase\.rpc\('phase2_room_moderate',/);
 });
 
