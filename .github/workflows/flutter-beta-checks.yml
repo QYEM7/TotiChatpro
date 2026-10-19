@@ -1,0 +1,48 @@
+name: Flutter beta source checks
+
+on:
+  push:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/flutter-beta-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  flutter-source-checks:
+    name: Analyze and test Flutter (no APK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out only the active branch
+        uses: actions/checkout@v4
+      - name: Install stable Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Show compiler version
+        run: |
+          flutter --version
+          dart --version
+      - name: Resolve Dart dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+      - name: Analyze Flutter source and tests
+        working-directory: flutter_app
+        run: flutter analyze lib test
+      - name: Run Dart and Flutter tests
+        working-directory: flutter_app
+        run: flutter test
+      - name: Confirm no release outputs were produced
+        working-directory: flutter_app
+        run: |
+          if find . -type f \( -name '*.apk' -o -name '*.aab' \) | grep -q .; then
+            echo 'ERROR: No APK/AAB may be generated in this workflow.'
+            exit 1
+          fi
+          echo 'Source checks only. No APK, database migrations or deployment.'
