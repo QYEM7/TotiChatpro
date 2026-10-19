@@ -20,6 +20,13 @@ Only use `rebuild/flutter-v1`, staging `rziaedugbdwefbefcxjt`, new Flutter clien
 - [x] Admin Center entry is Profile-only and derived from `phase3_admin_session`; only authorized read-only beta capabilities shown, no fake administrative success.
 - [x] CI workflow installs Flutter SDK, resolves dependencies, analyzes, runs tests, prepares Android host source, checks OAuth intent and prevents APK/AAB generation.
 
+## Latest Flutter CI — VERIFIED
+- [Successful GitHub Actions run 39188427349](https://github.com/QYEM7/TotiChatpro/actions/runs/39188427349).
+- `flutter pub get` succeeded; `flutter analyze lib test` reported **No issues found**.
+- All Flutter unit/widget tests passed.
+- Android host source and OAuth intent filter generated and verified; no Android application built.
+- Exact source SHA-approved public JPG assets copied into `flutter_app/assets/images/` (login falcon + galaxy room background). UI code now uses `Image.asset` instead of network hotlinks for those assets.
+
 ## Staging read-only checks observed
 - Project active and relevant tables/RPCs present.
 - All nine sensitive exposed tables checked (rooms, room_members, room_messages, direct_messages, wallets, gift_catalog, gift_events, gift_global_announcements, home_banners) had RLS enabled; authenticated users have SELECT but **no direct INSERT, UPDATE or DELETE grants** on those tables. Write operations go through RPCs.
@@ -29,7 +36,7 @@ Only use `rebuild/flutter-v1`, staging `rziaedugbdwefbefcxjt`, new Flutter clien
 ## Acceptance gates — precise evidence
 | Gate | Required | Current evidence | Status |
 | --- | --- | --- | --- |
-| G0 | Contracts, Flutter compiler and approved UI inspection | Schema/RLS/permissions checked read-only; source CI needs most recent final pass | PARTIAL |
+| G0 | Contracts, Flutter compiler and approved UI inspection | RLS/permissions checked read-only; Flutter analyzer/tests and Android source preparation PASSED (run 39188427349); visual parity not signed off | PARTIAL |
 | G1 | Real Google sign in/out and session restore on Android, including callback | Auth code and generated manifest only | NOT VERIFIED |
 | G2 | Two real accounts create, join, leave and reserve 15 seats; state stays synced | RPC availability verified, client code written | NOT VERIFIED |
 | G3 | Two physical devices transmit/receive audio, mute, rejoin, avoid echo, enforce moderation | LiveKit code + Edge Function status only, secrets not confirmed | NOT VERIFIED |
@@ -47,4 +54,4 @@ Only use `rebuild/flutter-v1`, staging `rziaedugbdwefbefcxjt`, new Flutter clien
 - Admin permissions, user reports, legal privacy terms and minimal release security review.
 - Release signing and Play Store policy check (no paid plans required now).
 
-No remote staging writes, migrations, production changes, APK/AAB builds or external deployment were performed in this iteration.
+No remote staging writes, migrations, production changes, APK/AAB builds or external deployment were performed in this iteration. The source CI success is **not** device/runtime acceptance and is **not** evidence of 90% release readiness.
