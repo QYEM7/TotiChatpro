@@ -11,7 +11,9 @@ dependencies:
     sdk: flutter
   supabase_flutter: ^2.18.2
   livekit_client: ^2.13.1
-  permission_handler: ^13.0.2
+  # Android build on Flutter 3.47/AGP 9.1 uses compileSdk 36;
+  # v13 pulls Android plugin 14.x and requires unavailable compileSdk 37.
+  permission_handler: 12.0.3
   image_picker: ^1.2.4
   flutter_image_compress: ^2.5.1
   uuid: ^4.5.1
