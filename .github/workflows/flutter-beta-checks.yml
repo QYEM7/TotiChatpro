@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: flutter-beta-source-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   flutter-source-checks:
     name: Analyze and test Flutter (no APK)
