@@ -21,7 +21,7 @@ Do **not** insert a gift-like chat message from Flutter after a request returns:
 ## Validation
 
 - [Isolated PostgreSQL 17 settlement/chat tests](https://github.com/QYEM7/TotiChatpro/actions/runs/39333385132): **PASS**. Includes a completed gift with ledger inserted *after* the gift event but before COMMIT, no-ledger/one-sided-ledger/failed-operation denial, idempotent replay, chat defaults, and insert/trigger execution grants.
-- [Flutter analyzer and widget tests](https://github.com/QYEM7/TotiChatpro/actions/runs/39333350045): pending final confirmation.
+- [Flutter analyzer and widget tests](https://github.com/QYEM7/TotiChatpro/actions/runs/39333350045): **PASS**, including model tests for verified gift message kinds, Android host OAuth source check, and no-APK guard.
 - Both tests use fixture data only and never write to Staging or production.
 
 ## Still required to ship
