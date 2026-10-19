@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Image.network(
                                 'https://raw.githubusercontent.com/mrbalmain11-star/-/main/public/toti-login-bg.jpg',
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const ColoredBox(
+                                errorBuilder: (context, error, stackTrace) => const ColoredBox(
                                   color: Color(0xFF180A28),
                                   child: Icon(Icons.shield_outlined,
                                       size: 110, color: gold),
