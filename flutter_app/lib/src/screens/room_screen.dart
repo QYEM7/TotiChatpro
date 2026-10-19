@@ -8,6 +8,7 @@ import '../data/room_repository.dart';
 import '../data/voice_bridge.dart';
 import '../data/gift_repository.dart';
 import '../data/global_gift_feed.dart';
+import '../data/room_moderation_repository.dart';
 import 'gift_sheet.dart';
 import 'direct_chat_sheet.dart';
 
@@ -173,6 +174,69 @@ class _RoomScreenState extends State<RoomScreen> {
       SnackBar(content: Text(UiText.get('gift_confirmed'))),
     );
     _reload();
+  }
+
+  Future<void> _moderateMember(RoomSeatMember member) async {
+    if (!_isOwner || _leaving) return;
+    final actions = <String, String>{
+      'mute': UiText.get('room_moderate_mute'),
+      'allow_mic': UiText.get('room_moderate_allow'),
+      'release_seat': UiText.get('room_moderate_release'),
+      'kick': UiText.get('room_moderate_kick'),
+    };
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(member.displayName),
+              subtitle: Text(UiText.get('room_moderate_title')),
+            ),
+            ...actions.entries.map((entry) => ListTile(
+                  title: Text(entry.value),
+                  onTap: () => Navigator.pop(sheetContext, entry.key),
+                )),
+          ],
+        ),
+      ),
+    );
+    if (selected == null || !mounted) return;
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        content: Text(UiText.get('room_moderate_confirm')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(UiText.get('cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(UiText.get('confirm')),
+          ),
+        ],
+      ),
+    );
+    if (accepted != true || !mounted) return;
+    try {
+      await RoomModerationRepository(Supabase.instance.client).act(
+        roomId: widget.room.id,
+        targetUserId: member.userId,
+        action: selected,
+      );
+      if (!mounted) return;
+      _reload();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(UiText.get('room_moderate_done'))),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(UiText.get('room_moderate_failed'))),
+      );
+    }
   }
 
   Future<void> _chooseSeat(int number, RoomSeatMember? occupant) async {
@@ -557,6 +621,11 @@ class _RoomScreenState extends State<RoomScreen> {
     return InkWell(
       key: Key('room-seat-$index'),
       onTap: _savingSeat ? null : () => _chooseSeat(index, member),
+      onLongPress: _isOwner &&
+              member != null &&
+              member.userId != Supabase.instance.client.auth.currentUser?.id
+          ? () => _moderateMember(member)
+          : null,
       borderRadius: BorderRadius.circular(30),
       child: Column(
         children: [
