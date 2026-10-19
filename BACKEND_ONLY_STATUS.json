@@ -1,7 +1,7 @@
 {
   "project": "TotiChat",
   "projectNumber": "01",
-  "stage": "flutter-beta-functional-source-compiled-tested-no-device-acceptance",
+  "stage": "flutter-beta-source-tested-staging-gift-and-voice-security-applied-device-acceptance-pending",
   "previousFrontend": "deprecated-not-approved",
   "uiSource": "https://github.com/mrbalmain11-star/-",
   "uiSourceBranch": "main",
@@ -18,7 +18,7 @@
   "backupBranch": "backup/pre-backend-only-20261019",
   "apkBuildAllowed": true,
   "productionModified": false,
-  "stagingModified": false,
+  "stagingModified": true,
   "oldExternalDeploymentsStatus": "not-yet-verified-disabled",
   "auditDocument": "docs/BETA_RELEASE_READINESS_EVIDENCE_20261019.md",
   "flutterProjectPath": "flutter_app/",
@@ -120,9 +120,10 @@
     "allowsMicAsDbPermissionOnly": true,
     "sourceTestsPassed": true,
     "sourceCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39317157664",
-    "backendAuthenticatedDirectRpcBypassStillOpen": true,
+    "backendAuthenticatedDirectRpcBypassStillOpen": false,
     "physicalTwoDeviceVerification": false,
-    "releaseBlocked": true
+    "releaseBlocked": true,
+    "stagingSecurityCutoverApplied": true
   },
   "latestVoiceModerationSecurityCandidate": {
     "date": "2026-10-20",
@@ -131,18 +132,25 @@
     "cutoverRunbook": "docs/STAGING_VOICE_RELAY_CUTOVER_20261020.md",
     "securityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39325376323",
     "securityCiPassed": true,
-    "stagingApplied": false,
-    "edgeDeployed": false,
-    "authenticatedDirectRpcBypassConfirmedOpen": true,
+    "stagingApplied": true,
+    "edgeDeployed": true,
+    "authenticatedDirectRpcBypassConfirmedOpen": false,
     "sqlDisposableDbCompiled": true,
     "twoPhoneVoiceVerified": false,
     "releaseBlocked": true,
     "edgeDenoTypeCheckPassed": true,
     "sqlDisposableDbAclTestsPassed": true,
-    "sqlIntegrationCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39331576815",
+    "sqlIntegrationCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39334961764",
     "edgeMinimumClaimsOnly": true,
     "candidateTestFixture": "supabase/tests/voice_relay_ephemeral_fixture.sql",
-    "candidateTestAcceptance": "supabase/tests/voice_relay_ephemeral_acceptance.sql"
+    "candidateTestAcceptance": "supabase/tests/voice_relay_ephemeral_acceptance.sql",
+    "edgeVersion": 2,
+    "verifiedJwtEnabled": true,
+    "dbPublicModerationSecurityInvoker": true,
+    "stagingMigration": "20261019222504_staging_verified_sfu_moderation_relay_acl_v1",
+    "stagingFollowupMigration": "20261019222702_staging_public_room_moderation_invoker_v2",
+    "serverAclVerifiedLive": true,
+    "physicalVoiceVerified": false
   },
   "latestFinancialSafetyDocument": "docs/BETA_GIFT_CONCURRENT_RETRY_20261020.md",
   "stagingGlobalGiftPolicyReadOnlyObserved": {
@@ -164,11 +172,14 @@
     "postgresCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333385132",
     "flutterCiPassed": true,
     "flutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333350045",
-    "deployedToStaging": false,
+    "deployedToStaging": true,
     "twoDeviceSettlementRealtimeVerified": false,
     "seatGiftCountersImplemented": false,
     "document": "docs/BETA_VERIFIED_ROOM_GIFT_CHAT_20261020.md",
-    "productionModified": false
+    "productionModified": false,
+    "stagingMigration": "20261019222311_staging_verified_room_gift_chat_v1",
+    "stagingPermissionsVerified": true,
+    "stagingTriggerVerified": true
   },
   "latestSeatGiftCounter": {
     "date": "2026-10-20",
@@ -185,9 +196,19 @@
     "flutterAnalyzeAndTestsPassed": true,
     "postgresCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39334064037",
     "postgresAclAndSettlementTestsPassed": true,
-    "stagingDeployed": false,
+    "stagingDeployed": true,
     "realDeviceGiftCountersVerified": false,
     "productionModified": false,
-    "report": "docs/BETA_VERIFIED_SEAT_GIFT_TOTALS_20261020.md"
-  }
+    "report": "docs/BETA_VERIFIED_SEAT_GIFT_TOTALS_20261020.md",
+    "stagingMigration": "20261019222338_staging_verified_room_seat_gift_totals_v1",
+    "stagingRpcVerified": true,
+    "stagingGuestDenyVerified": true
+  },
+  "stagingSecurityAdvisor": {
+    "date": "2026-10-20",
+    "authenticatedPublicSecurityDefinerWarningPresent": false,
+    "remainingWarning": "auth_leaked_password_protection",
+    "authMethodForBeta": "Google OAuth only"
+  },
+  "latestStagingCutoverReport": "docs/BETA_STAGING_CUTOVER_20261020.md"
 }
