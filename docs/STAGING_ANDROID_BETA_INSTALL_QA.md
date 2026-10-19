@@ -7,6 +7,14 @@ Package ID **`com.totichat.beta`**, Android launcher label **TotiChat Beta**; no
 
 **Debug APK**: signed by the CI runner's ephemeral Android debug certificate. It is *only* for manual testing. A later CI run may produce a different debug key; if updates fail, uninstall the previous beta package (doing so erases this beta's local state). Do not distribute as a production release.
 
+## Compact download options (verified 2026-10-19)
+- [Compact successful run 39252587822](https://github.com/QYEM7/TotiChatpro/actions/runs/39252587822).
+- **ARM64**: artifact `TotiChat-Staging-Beta-ARM64-APK`, direct APK filename `TotiChat-Staging-Beta-arm64.apk` (21,723,342 bytes; SHA-256 `090b5b9ec66d3db844f864adf4d6aafa6ffe062058a1d201e1620339add5d071`).
+- **ARM32**: artifact `TotiChat-Staging-Beta-ARM32-APK`, direct APK filename `TotiChat-Staging-Beta-arm32.apk` (19,312,278 bytes; SHA-256 `bcf9427c59cddc8e95891555453e5b7be0fd6076a85ccb44a82b101a555bbd0c`).
+- Compact APKs are AOT release-*compiled* but **signed with a disposable Android debug key** and locked to Staging. They are not an app-store release. If Android rejects an update due to mismatched signing keys, uninstall the old **TotiChat Beta** package and install just one variant.
+- The earlier universal debug APK run is [39251533431](https://github.com/QYEM7/TotiChatpro/actions/runs/39251533431), 164,487,070 bytes; it is much larger and not preferred on slow Internet.
+- All three APKs were unzipped and matched their GitHub SHA-256 manifests, with architecture-specific `libapp.so` and `libflutter.so` found in compact APKs. No phones have been tested yet.
+
 ## Installation (Android, no computer required)
 1. Open the successful [GitHub Actions APK workflow](https://github.com/QYEM7/TotiChatpro/actions/workflows/totichat-staging-apk.yml) on your phone, select the successful run on `rebuild/flutter-v1`, then download artifact **`TotiChat-Staging-Beta-Android-APK`**. GitHub may require a signed-in account.
 2. Open the downloaded ZIP with Android Files, extract `TotiChat-Staging-Beta.apk`, and tap it. If prompted, allow installation from **that trusted files/browser app**; keep the device's general protections enabled. Do not install APKs offered by unrelated third parties.
