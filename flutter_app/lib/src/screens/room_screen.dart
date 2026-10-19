@@ -29,10 +29,10 @@ class RoomScreen extends StatefulWidget {
   final VoidCallback? onMinimize;
 
   @override
-  State<RoomScreen> createState() => _RoomScreenState();
+  State<RoomScreen> createState() => RoomScreenState();
 }
 
-class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
+class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   late Future<List<RoomSeatMember>> _members;
   late Stream<List<RoomTextMessage>> _messagesStream;
   late Stream<List<GlobalGiftAnnouncement>> _globalGiftStream;
@@ -366,27 +366,39 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         ],
       ),
     );
-    if (confirmed != true || !mounted) return;
+    if (confirmed == true && mounted) {
+      await closeWithoutPrompt();
+    }
+  }
+
+  /// Ends the server membership and voice before removing the screen.
+  /// Used by the user-confirmed room exit and by account sign-out.
+  /// A failed server operation prevents the UI from claiming the room closed.
+  Future<bool> closeWithoutPrompt() async {
+    if (_leaving || _canPop || !mounted) return false;
     setState(() => _leaving = true);
     try {
       try {
         await _voice.disconnect(widget.room.id);
       } catch (_) {
-        // Membership must be closed even if the audio transport is unreachable.
+        // Attempt membership cleanup even when media transport is unavailable.
       }
       await widget.repository.leave(widget.room.id);
-      if (!mounted) return;
+      if (!mounted) return true;
       setState(() => _canPop = true);
       if (widget.onLeave != null) {
         widget.onLeave!();
       } else {
         Navigator.of(context).pop();
       }
+      return true;
     } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(UiText.get('room_exit_failed'))),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(UiText.get('room_exit_failed'))),
+        );
+      }
+      return false;
     } finally {
       if (mounted) setState(() => _leaving = false);
     }
