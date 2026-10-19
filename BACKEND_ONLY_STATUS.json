@@ -1,13 +1,13 @@
 {
   "project": "TotiChat",
   "projectNumber": "01",
-  "stage": "new-flutter-client-source-tested-backend-preserved",
+  "stage": "flutter-client-auth-rooms-seats-chat-voice-source-passing-ci",
   "previousFrontend": "deprecated-not-approved",
   "uiSource": "https://github.com/mrbalmain11-star/-",
   "uiSourceBranch": "main",
   "uiReference": "src/ (React/TypeScript UI visual reference), with android/ as non-authoritative demo needing reconciliation",
   "mobileImplementationTarget": "Flutter/Dart",
-  "uiIntegrationStatus": "flutter-auth-home-room-seat-chat-source-wired-no-real-device-e2e",
+  "uiIntegrationStatus": "flutter-google-auth-home-room-seat-chat-and-livekit-voice-source-connected-no-real-device-qa",
   "uiSourcePushAccess": false,
   "backendSource": "QYEM7/TotiChatpro",
   "backendBranch": "rebuild/flutter-v1",
@@ -20,7 +20,7 @@
   "productionModified": false,
   "stagingModified": false,
   "oldExternalDeploymentsStatus": "not-yet-verified-disabled",
-  "auditDocument": "docs/FLUTTER_BETA_SLICE_02_20261019.md",
+  "auditDocument": "docs/FLUTTER_BETA_SLICE_03_VOICE_20261019.md",
   "flutterProjectPath": "flutter_app/",
   "flutterSourceCodePresent": true,
   "stagingReadOnlySchemaAndRpcChecked": true,
@@ -32,8 +32,11 @@
   "flutterTestsPass": true,
   "androidHostSourceGeneratedInCi": true,
   "androidHostSourceArtifact": "flutter-android-host-source",
-  "androidHostCiRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/39181633594",
+  "androidHostCiRunUrl": "https://github.com/QYEM7/TotiChatpro/actions/runs/39181891672",
   "flutterRuntimeOnRealPhoneVerified": false,
   "livekitVoiceVerified": false,
-  "approvedUIVisualParityVerified": false
+  "approvedUIVisualParityVerified": false,
+  "livekitFlutterSourceConnected": true,
+  "livekitEdgeServiceChanged": false,
+  "livekitStagingSecretsVerified": false
 }
