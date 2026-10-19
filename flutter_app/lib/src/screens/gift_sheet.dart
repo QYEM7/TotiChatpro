@@ -58,6 +58,14 @@ class _GiftSheetState extends State<GiftSheet> {
       return;
     }
     final senderId = Supabase.instance.client.auth.currentUser?.id;
+    final matchingRecipients = widget.members.where(
+      (member) => member.userId == recipient && member.userId != senderId,
+    );
+    if (matchingRecipients.isEmpty) {
+      setState(() => _error = UiText.get('gift_select_recipient'));
+      return;
+    }
+    final recipientName = matchingRecipients.first.displayName;
     if (senderId == null) {
       setState(() => _error = UiText.get('gift_failed'));
       return;
@@ -78,6 +86,7 @@ class _GiftSheetState extends State<GiftSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(gift.name),
+            Text('${UiText.get('gift_select_recipient')}: $recipientName'),
             Text('${UiText.get('gift_confirm_quantity')}: $_quantity'),
             Text('${UiText.get('gift_confirm_total')}: $total'),
           ],
