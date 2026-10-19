@@ -8,6 +8,7 @@ import '../data/room_repository.dart';
 import '../data/voice_bridge.dart';
 import '../data/gift_repository.dart';
 import 'gift_sheet.dart';
+import 'direct_chat_sheet.dart';
 
 /// The first vertical slice: real room membership and real seat visibility.
 /// Server-authorized seats, text and LiveKit audio; device QA still required.
@@ -175,8 +176,14 @@ class _RoomScreenState extends State<RoomScreen> {
     if (_savingSeat || _leaving) return;
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (occupant != null && occupant.userId != userId) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(UiText.get('seat_busy'))),
+      await showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (_) => DirectChatSheet(
+          otherUserId: occupant.userId,
+          otherDisplayName: occupant.displayName,
+        ),
       );
       return;
     }
