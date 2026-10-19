@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/ui_text.dart';
 import '../data/room_repository.dart';
 import '../data/voice_bridge.dart';
+import '../data/gift_repository.dart';
+import 'gift_sheet.dart';
 
 /// The first vertical slice: real room membership and real seat visibility.
 /// Server-authorized seats, text and LiveKit audio; device QA still required.
@@ -149,6 +151,24 @@ class _RoomScreenState extends State<RoomScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _openGifts(List<RoomSeatMember> members) async {
+    final receipt = await showModalBottomSheet<GiftReceipt>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0x66000000),
+      isScrollControlled: true,
+      builder: (_) => GiftSheet(
+        roomId: widget.room.id,
+        members: members,
+      ),
+    );
+    if (!mounted || receipt == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(UiText.get('gift_confirmed'))),
+    );
+    _reload();
   }
 
   Future<void> _chooseSeat(int number, RoomSeatMember? occupant) async {
@@ -376,6 +396,20 @@ class _RoomScreenState extends State<RoomScreen> {
                                   final number = index + 1;
                                   return _seat(number, seatMap[number]);
                                 },
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _openGifts(members),
+                                    icon: const Icon(Icons.card_giftcard),
+                                    label: Text(UiText.get('gift')),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xFFFBBF24),
+                                    ),
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 10),
                               Expanded(
