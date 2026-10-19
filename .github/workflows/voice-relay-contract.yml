@@ -8,6 +8,7 @@ on:
       - 'supabase/patches/voice_moderation_relay_acl_candidate.sql'
       - 'supabase/functions/phase2-voice-moderate/**'
       - 'tests/voice-relay-privilege-gate.test.mjs'
+      - 'supabase/tests/voice_relay_ephemeral_*.sql'
       - '.github/workflows/voice-relay-contract.yml'
   workflow_dispatch:
 
@@ -18,7 +19,21 @@ jobs:
   voice-relay-static-contract:
     name: Verify fail-closed voice relay source
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: voice_relay_qa
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ephemeral_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd 'pg_isready -U postgres'
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,5 +49,21 @@ jobs:
       - name: Type check the Edge relay
         working-directory: supabase/functions/phase2-voice-moderate
         run: deno check index.ts
+      - name: Test candidate SQL in disposable PostgreSQL 17
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: ephemeral_only
+          PGDATABASE: voice_relay_qa
+        run: |
+          set -euo pipefail
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/voice_relay_ephemeral_fixture.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/patches/voice_moderation_relay_acl_candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/voice_relay_ephemeral_acceptance.sql
       - name: Assert no automatic staging deploy
         run: echo 'Source tests and type check only; database SQL and Edge relay are not deployed.'
