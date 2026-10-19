@@ -16,7 +16,7 @@
     "main"
   ],
   "backupBranch": "backup/pre-backend-only-20261019",
-  "apkBuildAllowed": false,
+  "apkBuildAllowed": true,
   "productionModified": false,
   "stagingModified": false,
   "oldExternalDeploymentsStatus": "not-yet-verified-disabled",
@@ -67,5 +67,15 @@
     "deviceFinancialE2eVerified": false
   },
   "stagingAdminAccessConfigured": false,
-  "latestFinancialAuditDocument": "docs/BETA_FINANCIAL_RETRY_HARDENING_20261019.md"
+  "latestFinancialAuditDocument": "docs/BETA_FINANCIAL_RETRY_HARDENING_20261019.md",
+  "apkStagingDebugBuilt": true,
+  "apkStagingDebugBuildRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39251533431",
+  "apkStagingDebugArtifactId": 12185817926,
+  "apkStagingDebugArtifactName": "TotiChat-Staging-Beta-Android-APK",
+  "apkStagingDebugSha256": "09a90692b90111e06092c39e6255b17152f7fdd57d50ccc636a21a648618ac00",
+  "apkStagingDebugBytes": 164487070,
+  "apkSigning": "ephemeral-debug-for-testing",
+  "androidApplicationId": "com.totichat.beta",
+  "deviceInstallVerified": false,
+  "compactApkBuildRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39252587822"
 }
