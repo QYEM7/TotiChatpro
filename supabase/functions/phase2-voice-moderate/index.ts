@@ -23,6 +23,18 @@ function publishable(){
  if(value)try{return String(JSON.parse(value).default||'');}catch(_){}
  return env('SUPABASE_ANON_KEY');
 }
+// Claims are decoded only AFTER Supabase Auth validates this exact bearer
+// token and the verified-session RPC checks its session + MFA state.
+function userClaims(jwt:string):Record<string,unknown>|null{
+ try{
+  const payload=jwt.split('.')[1];
+  if(!payload||payload.length>5000)return null;
+  const raw=atob(payload.replace(/-/g,'+').replace(/_/g,'/'));
+  const value=JSON.parse(raw);
+  return value && typeof value==='object' && !Array.isArray(value)
+   ? value as Record<string,unknown> : null;
+ }catch(_){return null;}
+}
 function livekitConfig(){
  const url=env('LIVEKIT_URL'),apiKey=env('LIVEKIT_API_KEY'),
   secret=env('LIVEKIT_API_SECRET');
@@ -58,8 +70,10 @@ Deno.serve(async req=>{
   typeof action!=='string'||!enabled.has(action)||
   (reason!==null&&(typeof reason!=='string'||reason.length>300)))
   return reply(400,{error:'INVALID_MODERATION_REQUEST'});
- const backendUrl=env('SUPABASE_URL'),backendKey=publishable();
- if(!backendUrl||!backendKey)return reply(503,{error:'BACKEND_NOT_CONFIGURED'});
+ const backendUrl=env('SUPABASE_URL'),backendKey=publishable(),
+  privilegedKey=env('SUPABASE_SERVICE_ROLE_KEY');
+ if(!backendUrl||!backendKey||!privilegedKey)
+  return reply(503,{error:'BACKEND_NOT_CONFIGURED'});
  // Fail CLOSED before the DB commits a voice-impacting action if no SFU exists.
  const lk=mutatingVoice.has(action)?livekitConfig():null;
  if(!lk)return reply(503,{error:'LIVEKIT_NOT_CONFIGURED',databaseCommitted:false});
@@ -73,9 +87,22 @@ Deno.serve(async req=>{
   if(authError||!auth.user)return reply(401,{error:'INVALID_SESSION'});
   if(!auth.user.email_confirmed_at&&!auth.user.phone_confirmed_at)
    return reply(403,{error:'ACCOUNT_NOT_VERIFIED'});
-  // Explicitly pass a *user* JWT to the security-invoker moderation RPC.
-  // Backend always validates the real active session and owner/mod permissions.
-  const {data,error}=await supabase.rpc('phase2_room_moderate',{
+  const {data:verifiedActor,error:sessionError}=
+   await supabase.rpc('phase4_verified_session');
+  if(sessionError||String(verifiedActor)!==auth.user.id)
+   return reply(403,{error:'SESSION_NOT_VERIFIED',databaseCommitted:false});
+  const claims=userClaims(userToken);
+  if(!claims||claims['role']!=='authenticated'||
+     claims['sub']!==auth.user.id||
+     typeof claims['session_id']!=='string')
+   return reply(401,{error:'INVALID_SESSION_CLAIMS',databaseCommitted:false});
+  // The service role is NEVER sent to the Flutter client. A privileged RPC
+  // revalidates these exact session claims via phase3.actor() and room ACLs.
+  const trusted=createClient(backendUrl,privilegedKey,{
+   auth:{persistSession:false,autoRefreshToken:false}
+  });
+  const {data,error}=await trusted.rpc('phase2_room_moderate_voice_relay',{
+   p_verified_user_claims:claims,
    p_room_id:roomId,p_target:targetId,p_action:action,
    p_request_id:requestId,p_reason:reason
   });
