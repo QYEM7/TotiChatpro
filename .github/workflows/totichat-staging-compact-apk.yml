@@ -73,6 +73,8 @@ jobs:
         working-directory: flutter_app
         run: |
           bash scripts/prepare_android.sh
+          test -s android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+          grep -iq 'sharedpreferences' android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
           grep -Fq 'applicationId = "com.totichat.beta"' android/app/build.gradle.kts
           grep -Fq 'android:label="TotiChat Beta"' android/app/src/main/AndroidManifest.xml
           grep -Fq 'android:name="io.flutter.embedding.android.EnableImpeller" android:value="false"' android/app/src/main/AndroidManifest.xml
@@ -98,10 +100,13 @@ jobs:
             src="build/app/outputs/flutter-apk/app-${abi}-release.apk"
             test -s "$src"
             unzip -t "$src" > /dev/null
-            cp "$src" "dist/$folder/TotiChat-Staging-Beta-StartupFix-$folder.apk"
+            # Supabase auth persistence uses shared_preferences JNI; absence
+            # caused the real device white-screen failure.
+            unzip -Z1 "$src" | grep -Fq "lib/${abi}/libdartjni.so"
+            cp "$src" "dist/$folder/TotiChat-Staging-Beta-PluginFix-$folder.apk"
             (
               cd "dist/$folder"
-              sha256sum "TotiChat-Staging-Beta-StartupFix-$folder.apk" > SHA256SUMS.txt
+              sha256sum "TotiChat-Staging-Beta-PluginFix-$folder.apk" > SHA256SUMS.txt
               cat SHA256SUMS.txt
             )
           done
@@ -110,7 +115,7 @@ jobs:
       - name: Upload ARM64 test APK
         uses: actions/upload-artifact@v4
         with:
-          name: TotiChat-Staging-Beta-StartupFix-ARM64-APK
+          name: TotiChat-Staging-Beta-PluginFix-ARM64-APK
           path: flutter_app/dist/arm64/
           if-no-files-found: error
           compression-level: 0
@@ -119,7 +124,7 @@ jobs:
       - name: Upload ARM32 test APK
         uses: actions/upload-artifact@v4
         with:
-          name: TotiChat-Staging-Beta-StartupFix-ARM32-APK
+          name: TotiChat-Staging-Beta-PluginFix-ARM32-APK
           path: flutter_app/dist/arm32/
           if-no-files-found: error
           compression-level: 0
