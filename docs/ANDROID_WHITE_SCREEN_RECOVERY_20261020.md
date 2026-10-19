@@ -1,3 +1,5 @@
+> **Build verification update — 2026-10-20:** [StartupFix GitHub Actions run 39338065156](https://github.com/QYEM7/TotiChatpro/actions/runs/39338065156) finished **SUCCESS**. Both APK ZIP packages and embedded APK ZIP structures passed integrity checks, the manifest binaries contain the disabled-Impeller setting, and SHA-256 matched the workflow checksum file. ARM64: `TotiChat-Staging-Beta-StartupFix-arm64.apk` (21,723,402 bytes; `b4f933e0ee302da67fb295cf67208dcd9dc9f79ae0833df420744a7f01ec6da3`); ARM32: `TotiChat-Staging-Beta-StartupFix-arm32.apk` (19,328,726 bytes; `df12a9ff36d78892f7af5b9e8e6350c548c792aadf53ffbfdf08a8770d74c753`). Artifacts IDs: ARM64 `12228186544`, ARM32 `12227732054`. The original reported white-screen failure is **not yet verified fixed on the physical phone**.
+
 # TotiChat Android Beta — white screen / launch freeze recovery
 
 Date: 2026-10-20. Branch: `rebuild/flutter-v1`. Staging only.
