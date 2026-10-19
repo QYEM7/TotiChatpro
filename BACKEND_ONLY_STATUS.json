@@ -240,6 +240,34 @@
       "archiveVerified": true,
       "apkZipVerified": true
     },
-    "deviceQaChecklist": "docs/BETA_TWO_PHONE_ACCEPTANCE_20261020.md"
+    "deviceQaChecklist": "docs/BETA_TWO_PHONE_ACCEPTANCE_20261020.md",
+    "deviceUserReportedWhiteScreen": true,
+    "runtimeAcceptance": "failed_on_user_phone_report",
+    "doNotUseForDeviceQa": true
+  },
+  "latestStartupFixStagingApkBuild": {
+    "workflowRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39338065156",
+    "branch": "rebuild/flutter-v1",
+    "sourceCommit": "017e44aa39edfe37124cf798f58af837bda173b7",
+    "workflowConclusion": "success",
+    "flutterAnalysisAndTestsPassed": true,
+    "startupGateTestsPassed": true,
+    "androidRendererOptOutVerifiedInBothBinaries": true,
+    "repairedStartupDoesNotAwaitBeforeFirstFrame": true,
+    "stagingOnly": true,
+    "debugSignedReleaseBuild": true,
+    "arm64": {
+      "artifactId": 12228186544,
+      "byteSize": 21723435,
+      "sha256": "b4f933e0ee302da67fb295cf67208dcd9dc9f79ae0833df420744a7f01ec6da3"
+    },
+    "arm32": {
+      "artifactId": 12227732054,
+      "byteSize": 19328759,
+      "sha256": "df12a9ff36d78892f7af5b9e8e6350c548c792aadf53ffbfdf08a8770d74c753"
+    },
+    "deviceRuntimeConfirmed": false,
+    "report": "docs/ANDROID_WHITE_SCREEN_RECOVERY_20261020.md",
+    "releaseAllowed": false
   }
 }
