@@ -1,0 +1,66 @@
+name: Verified room gift chat contract
+
+on:
+  push:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - 'supabase/patches/verified_room_gift_chat_candidate.sql'
+      - 'supabase/tests/verified_room_gift_chat_ephemeral_*.sql'
+      - '.github/workflows/verified-room-gift-chat.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verified-gift-chat-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  settlement-only-room-chat:
+    name: Verify room gift chat in disposable PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: totichat_gift_chat_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd=pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Checkout development source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install PostgreSQL CLI only if missing
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+
+      - name: Verify deferred gift chat publication in an isolated DB
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGDATABASE: totichat_gift_chat_test
+          PGUSER: postgres
+          PGPASSWORD: disposable_ci_only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/verified_room_gift_chat_ephemeral_fixture.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/patches/verified_room_gift_chat_candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/verified_room_gift_chat_ephemeral_acceptance.sql
+
+      - name: Confirm no Staging schema or user funds were changed
+        run: echo 'Disposable PostgreSQL service only, with synthetic gift and ledger records; no deploy.'
