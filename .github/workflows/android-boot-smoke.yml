@@ -74,6 +74,8 @@ jobs:
           bash scripts/prepare_android.sh
           flutter build apk --debug --no-pub --dart-define=SUPABASE_URL=https://rziaedugbdwefbefcxjt.supabase.co
           test -s build/app/outputs/flutter-apk/app-debug.apk
+          test -s android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+          unzip -Z1 build/app/outputs/flutter-apk/app-debug.apk | grep -Fq 'lib/x86_64/libdartjni.so'
           mkdir -p ../android-smoke
           cp build/app/outputs/flutter-apk/app-debug.apk ../android-smoke/boot-smoke-debug.apk
 
@@ -111,15 +113,31 @@ jobs:
             adb pull /sdcard/totichat-first-frame.png android-smoke/screenshot.png
             adb shell uiautomator dump /sdcard/totichat-ui.xml || true
             adb pull /sdcard/totichat-ui.xml android-smoke/ui.xml || true
-            if ! grep -qE '^([0-9]+)$' android-smoke/pid.txt; then
-              echo 'Boot failure: TotiChat process is not alive'
-              exit 1
-            fi
-            if grep -qE 'FATAL EXCEPTION: main|Unable to instantiate activity|Could not resolve activity' android-smoke/logcat.txt; then
-              echo 'Detected Android launcher crash; inspect uploaded logcat'
-              exit 1
-            fi
-            echo 'Process alive; inspect screenshot to assert first Flutter frame.'
+            # android-emulator-runner invokes each line under /bin/sh -c, so
+            # all assertions must be one-line shell commands.
+            grep -qE '^[0-9]+
+
+      - name: Publish startup evidence even when emulator fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-android14-startup-evidence
+          path: |
+            android-smoke/screenshot.png
+            android-smoke/logcat.txt
+            android-smoke/ui.xml
+            android-smoke/pid.txt
+            android-smoke/activity-launch.txt
+            android-smoke/activity-dumpsys.txt
+          if-no-files-found: warn
+          retention-days: 7
+ android-smoke/pid.txt
+            ! grep -qE 'FATAL EXCEPTION: main|Unable to instantiate activity|Could not resolve activity' android-smoke/logcat.txt
+            ! grep -q 'Failed to load dynamic library at path: libdartjni.so' android-smoke/logcat.txt
+            ! grep -q 'GeneratedPluginRegistrant' android-smoke/logcat.txt
+            ! grep -q 'could not start' android-smoke/ui.xml
+            grep -q 'Toti Chat' android-smoke/ui.xml
+            echo 'PASS: Android 14 reached actual TotiChat Google login screen.'
 
       - name: Publish startup evidence even when emulator fails
         if: always()
