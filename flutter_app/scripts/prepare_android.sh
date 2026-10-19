@@ -10,6 +10,15 @@ from pathlib import Path
 
 manifest = Path("android/app/src/main/AndroidManifest.xml")
 text = manifest.read_text(encoding="utf-8")
+# Flutter release manifest must explicitly authorize network access.
+for permission in ["android.permission.INTERNET",
+                   "android.permission.RECORD_AUDIO",
+                   "android.permission.MODIFY_AUDIO_SETTINGS"]:
+    item = f'<uses-permission android:name="{permission}" />'
+    if item not in text:
+        if "<application" not in text:
+            raise SystemExit("Android application element missing")
+        text = text.replace("<application", item + "\\n    <application", 1)
 if 'android:scheme="com.totichat.beta"' not in text:
     callback = """
             <!-- Supabase Staging Google OAuth return route. -->
