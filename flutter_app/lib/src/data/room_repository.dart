@@ -73,12 +73,16 @@ class RoomTextMessage {
     required this.senderId,
     required this.body,
     required this.createdAt,
+    this.eventKind = 'chat',
   });
 
   final int id;
   final String senderId;
   final String body;
   final DateTime createdAt;
+  /// Comes only from the server. Legacy Staging rows without this column
+  /// remain normal chat until the verified-gift schema is deployed.
+  final String eventKind;
 
   factory RoomTextMessage.fromJson(Map<String, dynamic> data) =>
       RoomTextMessage(
@@ -86,6 +90,7 @@ class RoomTextMessage {
         senderId: data['sender_id'] as String,
         body: data['body'] as String,
         createdAt: DateTime.parse(data['created_at'] as String),
+        eventKind: data['event_kind'] == 'gift' ? 'gift' : 'chat',
       );
 }
 
