@@ -627,16 +627,22 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                                         final sender = msg.senderId == me
                                             ? UiText.get('chat_me')
                                             : (names[msg.senderId] ?? msg.senderId.substring(0, 8));
+                                        final verifiedGift = msg.eventKind == 'gift';
                                         return Padding(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 12,
                                             vertical: 4,
                                           ),
                                           child: Text(
-                                            '$sender: ${msg.body}',
-                                            style: const TextStyle(
+                                            verifiedGift ? msg.body : '$sender: ${msg.body}',
+                                            style: TextStyle(
                                               fontSize: 12,
-                                              color: Colors.white,
+                                              fontWeight: verifiedGift
+                                                  ? FontWeight.w700
+                                                  : FontWeight.normal,
+                                              color: verifiedGift
+                                                  ? const Color(0xFFFBBF24)
+                                                  : Colors.white,
                                             ),
                                           ),
                                         );
