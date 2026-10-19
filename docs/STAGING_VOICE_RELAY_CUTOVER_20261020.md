@@ -7,7 +7,7 @@ Date: 2026-10-20. Branch: `rebuild/flutter-v1`.
 - The existing public moderation RPC and private `phase3.room_moderation_action` were callable by `authenticated` in Staging on the read-only inspection.
 - The Flutter client now uses `phase2-voice-moderate` for `mute`, `release_seat` and `kick`, but an authenticated caller with room moderator privileges could bypass that client and change the DB directly without an SFU disconnect.
 - Source fix prepared: [privileged RPC candidate](../supabase/patches/voice_moderation_relay_acl_candidate.sql) + [matching Edge implementation](../supabase/functions/phase2-voice-moderate/index.ts).
-- [Security contract CI 39325212067](https://github.com/QYEM7/TotiChatpro/actions/runs/39325212067) passed. This is static validation, NOT a deployed database integration or device test.
+- [Security contract CI 39325212067](https://github.com/QYEM7/TotiChatpro/actions/runs/39325212067) passed. [Follow-up Deno type check + Node security contract CI 39325376323](https://github.com/QYEM7/TotiChatpro/actions/runs/39325376323) passed. These are source checks, NOT deployed database integration or device tests.
 
 ## Proposed design
 
