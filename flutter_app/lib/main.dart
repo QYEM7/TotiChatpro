@@ -8,25 +8,135 @@ import 'src/core/ui_text.dart';
 import 'src/screens/login_screen.dart';
 import 'src/screens/home_screen.dart';
 
-Future<void> main() async {
+// Render the first Flutter frame immediately. A slow native-plugin or local
+// credential-store initialization must never leave Android on its blank
+// launch theme with no visible diagnostic state.
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await UiText.load();
+  ErrorWidget.builder = (details) => const Material(
+        color: Color(0xFFFDFBF7),
+        child: Center(child: Text('TotiChat screen failed to load')),
+      );
+  runApp(StartupGate(
+    initialize: initializeStagingBackend,
+    ready: const TotiChatApp(),
+  ));
+}
 
+Future<void> initializeStagingBackend() async {
   if (!StagingConfig.valid) {
-    runApp(MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(child: Text(UiText.get('app_config_error'))),
-      ),
-    ));
-    return;
+    throw StateError('Invalid beta configuration');
   }
-
+  await UiText.load().timeout(const Duration(seconds: 8));
+  // This is the public Staging key. Never embed a service_role token.
   await Supabase.initialize(
     url: StagingConfig.configuredUrl,
     publishableKey: StagingConfig.publishableKey,
-  );
-  runApp(const TotiChatApp());
+  ).timeout(const Duration(seconds: 15));
+}
+
+/// The first frame is visible before any storage, asset or Auth SDK await.
+/// It shows an explicit failure instead of an indefinitely blank splash.
+class StartupGate extends StatefulWidget {
+  const StartupGate({
+    super.key,
+    required this.initialize,
+    required this.ready,
+  });
+
+  final Future<void> Function() initialize;
+  final Widget ready;
+
+  @override
+  State<StartupGate> createState() => _StartupGateState();
+}
+
+class _StartupGateState extends State<StartupGate> {
+  late Future<void> _initialization;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialization = Future<void>.sync(widget.initialize);
+  }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'TotiChat Beta',
+        home: FutureBuilder<void>(
+          future: _initialization,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const _BootstrapScreen(
+                message: 'Starting TotiChat Beta...',
+                loading: true,
+              );
+            }
+            if (snapshot.hasError) {
+              return const _BootstrapScreen(
+                message:
+                    'TotiChat could not start. Check connection and restart the app.',
+                loading: false,
+              );
+            }
+            return widget.ready;
+          },
+        ),
+      );
+}
+
+class _BootstrapScreen extends StatelessWidget {
+  const _BootstrapScreen({
+    required this.message,
+    required this.loading,
+  });
+
+  final String message;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: const Color(0xFFFDFBF7),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.headphones,
+                    size: 56,
+                    color: Color(0xFF26C096),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'TotiChat Beta',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                      color: Color(0xFF064E3B),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  if (loading) ...[
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 18),
+                  ] else ...[
+                    const Icon(
+                      Icons.error_outline,
+                      color: Color(0xFFB91C1C),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  Text(message, textAlign: TextAlign.center),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class TotiChatApp extends StatelessWidget {
