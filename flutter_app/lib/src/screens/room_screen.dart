@@ -7,6 +7,7 @@ import '../core/ui_text.dart';
 import '../data/room_repository.dart';
 import '../data/voice_bridge.dart';
 import '../data/gift_repository.dart';
+import '../data/global_gift_feed.dart';
 import 'gift_sheet.dart';
 import 'direct_chat_sheet.dart';
 
@@ -29,6 +30,7 @@ class RoomScreen extends StatefulWidget {
 class _RoomScreenState extends State<RoomScreen> {
   late Future<List<RoomSeatMember>> _members;
   late Stream<List<RoomTextMessage>> _messagesStream;
+  late Stream<List<GlobalGiftAnnouncement>> _globalGiftStream;
   late final VoiceBridge _voice;
   bool _voiceBusy = false;
   String? _voiceError;
@@ -48,6 +50,7 @@ class _RoomScreenState extends State<RoomScreen> {
     _voice = VoiceBridge(Supabase.instance.client);
     _members = widget.repository.members(widget.room.id);
     _messagesStream = widget.repository.watchMessages(widget.room.id);
+    _globalGiftStream = GlobalGiftFeed(Supabase.instance.client).watch();
     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       if (mounted && !_leaving && !_canPop) _reload();
     });
@@ -356,6 +359,34 @@ class _RoomScreenState extends State<RoomScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                  StreamBuilder<List<GlobalGiftAnnouncement>>(
+                    stream: _globalGiftStream,
+                    builder: (context, snapshot) {
+                      final announcements = snapshot.data;
+                      if (announcements == null || announcements.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final gift = announcements.first;
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 12),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xDD432273),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          '${gift.giftIcon} ${gift.senderName} → ${gift.recipientName}  ${gift.giftName} ×${gift.quantity}',
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFFFDE68A), fontSize: 12,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   Expanded(
                     child: FutureBuilder<List<RoomSeatMember>>(
                       future: _members,
