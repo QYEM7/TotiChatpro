@@ -5,6 +5,9 @@ import {readFileSync} from 'node:fs';
 const sql=readFileSync(
  new URL('../supabase/patches/voice_moderation_relay_acl_candidate.sql',import.meta.url),'utf8'
 );
+const invokerSql=readFileSync(
+ new URL('../supabase/patches/room_moderation_public_invoker_candidate.sql',import.meta.url),'utf8'
+);
 const edge=readFileSync(
  new URL('../supabase/functions/phase2-voice-moderate/index.ts',import.meta.url),'utf8'
 );
@@ -62,4 +65,15 @@ test('patch does not touch treasury or wallet or production',()=>{
  assert.doesNotMatch(sql,/\b(?:drop|truncate)\s+table\b|update public\.wallets|insert into public\.gift_events/i);
  assert.doesNotMatch(sql,/\b(?:commit\s+prepared|create extension)\b/i);
  assert.match(sql,/begin;[\s\S]*commit;/);
+});
+
+test('public moderation wrapper is invoker-only after the follow-up cutover',()=>{
+ assert.match(invokerSql,/create or replace function public\.phase2_room_moderate\(/);
+ assert.match(invokerSql,/language sql security invoker set search_path=''/);
+ assert.match(invokerSql,/phase3\.room_moderation_nonvoice\(/);
+ assert.match(invokerSql,/create or replace function phase3\.room_moderation_nonvoice\(/);
+ assert.match(invokerSql,/language plpgsql security definer set search_path=''/);
+ assert.match(invokerSql,/p_action not in \('allow_mic','grant_moderator','revoke_moderator','unban'\)/);
+ assert.match(invokerSql,/revoke all on function phase3\.room_moderation_action\(/);
+ assert.doesNotMatch(invokerSql,/grant execute on function phase3\.room_moderation_action[\s\S]*?to authenticated;/);
 });
