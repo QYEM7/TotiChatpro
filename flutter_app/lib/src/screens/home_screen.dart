@@ -28,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<_HomeData> _future;
   int _tab = 0;
   bool _joining = false;
+  bool _signingOut = false;
+  final _roomKey = GlobalKey<RoomScreenState>();
   RoomSummary? _activeRoom;
   bool _roomMinimized = false;
 
@@ -93,6 +95,28 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } finally {
       if (mounted) setState(() => _joining = false);
+    }
+  }
+
+  Future<void> _signOutSafely() async {
+    if (_signingOut) return;
+    setState(() => _signingOut = true);
+    try {
+      if (_activeRoom != null) {
+        final state = _roomKey.currentState;
+        if (state == null || !await state.closeWithoutPrompt()) {
+          throw StateError('Could not close current room before sign out');
+        }
+      }
+      await Supabase.instance.client.auth.signOut();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(UiText.get('sign_out_failed'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
     }
   }
 
@@ -176,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: switch (_tab) {
                 0 => _homeBody(),
                 1 => const DirectInboxView(),
-                _ => const _ProfileView(),
+                _ => _ProfileView(onSignOut: _signOutSafely),
               },
             ),
           ],
@@ -214,6 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Offstage(
                 offstage: _roomMinimized,
                 child: RoomScreen(
+                  key: _roomKey,
                   room: _activeRoom!,
                   repository: _repository,
                   onLeave: _onRoomLeave,
@@ -362,7 +387,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _ProfileView extends StatefulWidget {
-  const _ProfileView();
+  const _ProfileView({required this.onSignOut});
+
+  final Future<void> Function() onSignOut;
 
   @override
   State<_ProfileView> createState() => _ProfileViewState();
@@ -466,7 +493,7 @@ class _ProfileViewState extends State<_ProfileView> {
                 ),
               const SizedBox(height: 34),
               OutlinedButton(
-                onPressed: () => Supabase.instance.client.auth.signOut(),
+                onPressed: widget.onSignOut,
                 child: Text(UiText.get('sign_out')),
               ),
             ],
