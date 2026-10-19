@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
 import '../data/gift_repository.dart';
+import '../data/pending_gift_requests.dart';
 import '../data/room_repository.dart';
 
 class GiftSheet extends StatefulWidget {
@@ -26,9 +27,10 @@ class _GiftSheetState extends State<GiftSheet> {
   late Future<_GiftData> _data = _load();
   GiftItem? _selected;
   String? _recipient;
-  // A retry of the same financial payload must retain its request identity,
-  // even if the user temporarily switches gift/recipient/quantity in the sheet.
-  final Map<(String, String, String, int), String> _requestIds = {};
+  late final PendingGiftRequests _pendingRequests = PendingGiftRequests(
+    storage: DevicePendingGiftStore(),
+    newRequestId: _repo.newRequestId,
+  );
   int _quantity = 1;
   bool _sending = false;
   String? _error;
@@ -55,16 +57,25 @@ class _GiftSheetState extends State<GiftSheet> {
       setState(() => _error = UiText.get('gift_select_recipient'));
       return;
     }
-    final requestKey = (widget.roomId, recipient, gift.id, _quantity);
-    final requestId = _requestIds.putIfAbsent(
-      requestKey,
-      _repo.newRequestId,
-    );
+    final senderId = Supabase.instance.client.auth.currentUser?.id;
+    if (senderId == null) {
+      setState(() => _error = UiText.get('gift_failed'));
+      return;
+    }
     setState(() {
       _sending = true;
       _error = null;
     });
     try {
+      final requestKey = PendingGiftRequests.payloadKey(
+        senderId: senderId,
+        roomId: widget.roomId,
+        recipientId: recipient,
+        giftId: gift.id,
+        quantity: _quantity,
+      );
+      // Persist *before* calling the financial RPC, including on slow devices.
+      final requestId = await _pendingRequests.acquire(requestKey);
       final receipt = await _repo.send(
         roomId: widget.roomId,
         recipientId: recipient,
@@ -72,12 +83,20 @@ class _GiftSheetState extends State<GiftSheet> {
         quantity: _quantity,
         requestId: requestId,
       );
+      // The server confirmed settlement, so any retry of this gift should
+      // become a *new* intentional send if local cleanup succeeds.
+      try {
+        await _pendingRequests.confirmed(requestKey);
+      } catch (_) {
+        // Preserve the pending identity (safe replays, no second debit).
+        // The receipt is already real; do not claim the gift failed.
+      }
       if (!mounted) return;
       Navigator.of(context).pop<GiftReceipt>(receipt);
     } catch (_) {
       if (!mounted) return;
-      // Retain the same key on retry to avoid a second debit when a response
-      // was lost after a successful first financial settlement.
+      // The persisted key prevents double charges if the RPC succeeded but
+      // the response was lost (including across future sheet reopenings).
       setState(() => _error = UiText.get('gift_failed'));
     } finally {
       if (mounted) setState(() => _sending = false);
