@@ -88,7 +88,7 @@ class PendingGiftRequests {
         _inFlightAcquires.remove(key);
       }
     }
-    current.then((_) => release(), onError: (Object _, StackTrace __) {
+    current.then((_) => release(), onError: (Object _, StackTrace _) {
       release();
     });
     return current;
