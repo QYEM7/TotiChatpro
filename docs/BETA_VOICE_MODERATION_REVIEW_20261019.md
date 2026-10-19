@@ -40,3 +40,10 @@ Also unverified: a participant absent from LiveKit may cause `removeParticipant`
 7. Close the server API bypass before release. Repeat both honest-client and direct-RPC security tests after the fix.
 
 No Staging schema/data mutation or Edge Function deployment was made in this work. No production branch or production app was changed; this is not device acceptance and not 90% release readiness.
+
+
+## Verified source CI
+
+- [Flutter beta source checks — run 39317157664](https://github.com/QYEM7/TotiChatpro/actions/runs/39317157664) **SUCCESS** on source commit `d515a8b734230523ab42dcc66b9ba8ccbf273f38`.
+- Flutter analyzer, Flutter/Dart tests (including the seven new moderation response tests), generated Android OAuth host-source validation, and no-APK guard all passed.
+- This is a source-level test, **not** evidence that an actual remote moderator mute/LiveKit SFU disconnect works on Android.
