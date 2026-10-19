@@ -103,8 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                             child: ClipOval(
-                              child: Image.network(
-                                'https://raw.githubusercontent.com/mrbalmain11-star/-/main/public/toti-login-bg.jpg',
+                              child: Image.asset(
+                                'assets/images/toti-login-bg.jpg',
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) => const ColoredBox(
                                   color: Color(0xFF180A28),
