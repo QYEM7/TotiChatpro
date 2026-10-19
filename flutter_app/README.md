@@ -1,49 +1,42 @@
-# TotiChat Flutter Beta — implementation slice 01
+# TotiChat Flutter — Beta-first client
 
-**Status: source code only, NOT ready for APK or device acceptance.**
+**Status:** Dart analyzer, unit tests and Android **source** generation passed in [GitHub Actions run 39181633594](https://github.com/QYEM7/TotiChatpro/actions/runs/39181633594) on 2026-10-19. **No APK/AAB or real device test has been performed.**
 
-This is the NEW Dart/Flutter client. It does not import the retired visual UI or any mocked wallet, user, room, gifts, or follower data. Its reference for the first screens is the **owner-approved** [mrbalmain11-star/-](https://github.com/mrbalmain11-star/-) `main` branch. Supabase server contracts come from this repository's `supabase/migrations/`, and schema existence was read-verified on Staging on 2026-10-19.
+## What is genuinely connected in source
+- Google-only Supabase OAuth; authenticated session verified through `phase4_verified_session` RPC.
+- Live public rooms, real published banners, room membership and 15-seat visuals (no fake listeners).
+- Seat reservation/release through the protected `phase2_room_take_seat` RPC.
+- Room text messages through `phase2_room_send_message` and member-scoped realtime stream.
+- Real account display name and an owner-assigned public ID status (no random visible ID).
+- Safe errors/empty states; never display mock room, chat, banner, coin, gift or wallet data.
 
-## Implemented in this slice
-- Staging-only environment guard (wrong project URL fails closed).
-- Google-only Supabase OAuth initiation with `com.totichat.beta://auth/callback`; no simulated authentication.
-- Session restore through Supabase Flutter plus `phase4_verified_session` RPC before entering Home.
-- Public-room list, real published banners, room join RPC, membership/15 occupied-seat display, and room exit RPC.
-- Profile name and `phase5_special_id_status` RPC; unassigned IDs are never fabricated.
-- Real RLS errors result in an error/empty-state, never mock content.
+Only the **new approved visual repo** `mrbalmain11-star/-` (`main`) is used as a presentation reference. Screen-by-screen visual parity is **not signed off**.
 
-## Not yet implemented
-Android Flutter host files, deep-link intent filter, local Flutter compilation, OAuth callback test, room creation/upload, seat claim/mute, LiveKit voice, realtime updates, text chat/DM, gifts, wallet, moderation, VIP, CP and admin functions. Only the basic login/Home/room structure references approved visuals; screenshot parity **has not** been verified.
+## Generate Android host source without building an APK
+A current stable Flutter SDK with Dart 3.9+ is required.
 
-Images for the login and room background temporarily reference **the exact approved public repository**. In a subsequent asset-porting step, bundle those images in the app to avoid a network dependency. No deprecated design imagery is used.
+```sh
+cd flutter_app
+flutter pub get
+flutter analyze lib test
+flutter test
+bash scripts/prepare_android.sh
+```
 
-## Setup in a Flutter development environment
-1. Install a current stable Flutter SDK with Dart 3.8+, then generate missing Android host files without overwriting Dart source:
+The final command generates `android/` native files and injects the dedicated Staging OAuth return intent filter plus required Internet/microphone permissions. It is **not** a build command and does **not** test a phone.
 
-   ```sh
-   cd flutter_app
-   flutter create --platforms=android --org=com.totichat --project-name=totichat .
-   flutter pub get
-   flutter analyze
-   flutter test
-   ```
+A zipped Android host **source-only** artifact is available from the successful GitHub Actions run above, subject to its artifact retention period. Do not confuse that artifact with an installable Android application.
 
-2. The generated `android/app/src/main/AndroidManifest.xml` still requires this OAuth intent filter **inside the MainActivity activity** before any real device test:
+## Staging configuration
+The client is restricted to `https://rziaedugbdwefbefcxjt.supabase.co`. The project supplies an intentionally **public publishable** key (not `service_role` or `sb_secret`) so no hidden configuration is needed for basic source initialization. A different `SUPABASE_URL` supplied at build-time fails closed; the publishable key can be overridden safely using `SUPABASE_PUBLISHABLE_KEY` at development time. Never expose a secret server key in client code.
 
-   ```xml
-   <intent-filter>
-     <action android:name="android.intent.action.VIEW" />
-     <category android:name="android.intent.category.DEFAULT" />
-     <category android:name="android.intent.category.BROWSABLE" />
-     <data android:scheme="com.totichat.beta"
-           android:host="auth"
-           android:pathPrefix="/callback" />
-   </intent-filter>
-   ```
+The Google Auth provider and `com.totichat.beta://auth/callback` allowlisted Redirect URL must still be verified against the live Staging configuration, followed by actual consent and deep-link tests on a device.
 
-3. Confirm **only** `com.totichat.beta://auth/callback` is allowlisted as an additional Redirect URL in **Supabase Staging**. Do not change production Site URL; keep the existing Google provider configuration.
-4. Supply a **Staging publishable** client key in the local environment via `--dart-define=SUPABASE_PUBLISHABLE_KEY=...` and `--dart-define=SUPABASE_URL=https://rziaedugbdwefbefcxjt.supabase.co`. Never use the service_role/secret key. Do not commit environment keys.
-5. This branch must **not** build an APK/AAB, deploy, run database migrations, or access production without a new explicit owner authorization. The commands above are for source analysis/tests only.
+## Not yet functional/verified
+- Android real-account login/restore, RLS under two different accounts, joined-room/seat/message integration.
+- Room creation including image upload + welcome form.
+- Flutter LiveKit audio engine and real-device two-way voice/mute/reconnect.
+- DM, gifting, wallet, admin actions, VIP/CP and visual parity with the approved source.
+- Release/security gate acceptance and owner-authorized APK build.
 
-## Verification boundary
-Schema existence read-only checks are not equivalent to authenticated integration QA. G1 real Google mobile callback, G2 multi-account room tests and G3 two-phone audio remain blocked/unverified; do not label the beta finished.
+**Rules:** no production DB or GitHub `main` changes, no direct client service-role access, no APK/AAB or production publication before explicit owner approval.
