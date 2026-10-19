@@ -168,7 +168,7 @@ class RoomRepository {
         .from('room_messages')
         .stream(primaryKey: ['id'])
         .eq('room_id', roomId)
-        .order('id', ascending: true)
+        .order('id', ascending: false)
         .limit(50)
         .map(
           (rows) => rows
