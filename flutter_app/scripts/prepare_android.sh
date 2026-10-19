@@ -39,7 +39,7 @@ if 'android:scheme="com.totichat.beta"' not in text:
 # Keep within <application>, never next to <uses-permission> in <manifest>.
 if 'io.flutter.embedding.android.EnableImpeller' not in text:
     import re
-    match = re.search(r'<application\\b[^>]*>', text, flags=re.S)
+    match = re.search(r'<application\b[^>]*>', text, flags=re.S)
     if match is None:
         raise SystemExit("Cannot locate generated Android application element")
     text = (text[:match.end()] +
