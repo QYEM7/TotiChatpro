@@ -127,9 +127,14 @@
     "stagingApplied": false,
     "edgeDeployed": false,
     "authenticatedDirectRpcBypassConfirmedOpen": true,
-    "sqlDisposableDbCompiled": false,
+    "sqlDisposableDbCompiled": true,
     "twoPhoneVoiceVerified": false,
     "releaseBlocked": true,
-    "edgeDenoTypeCheckPassed": true
+    "edgeDenoTypeCheckPassed": true,
+    "sqlDisposableDbAclTestsPassed": true,
+    "sqlIntegrationCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39331576815",
+    "edgeMinimumClaimsOnly": true,
+    "candidateTestFixture": "supabase/tests/voice_relay_ephemeral_fixture.sql",
+    "candidateTestAcceptance": "supabase/tests/voice_relay_ephemeral_acceptance.sql"
   }
 }
