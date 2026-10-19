@@ -5,6 +5,7 @@ on:
     branches:
       - 'rebuild/flutter-v1'
     paths:
+      - 'flutter_app/**'
       - '.github/workflows/flutter-beta-apk-staging.yml'
   workflow_dispatch:
 
