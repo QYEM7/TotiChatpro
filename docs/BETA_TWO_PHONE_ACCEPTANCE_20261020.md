@@ -1,3 +1,7 @@
+> **APK BUILD VERIFIED — 2026-10-20:** GitHub Actions [run 39335237130](https://github.com/QYEM7/TotiChatpro/actions/runs/39335237130) finished **SUCCESS**, and published both direct-install test APKs. These files were downloaded, extracted and independently SHA-256 verified. **ARM64:** `TotiChat-Staging-Beta-arm64.apk`, 21,723,342 bytes, SHA256 `192900c183a32b79622573db7afd57201aa2ae91b9ea49d05832ccd064fe1f88`. **ARM32:** `TotiChat-Staging-Beta-arm32.apk`, 19,328,662 bytes, SHA256 `0454bf014b7a29ed01f36a3a56ee90b43f0e3ed15b912c69461b6b232d0c7fda`. Artifacts: ARM64 ID 12227035170, ARM32 ID 12225973370. Build source commit `7591904549efc35cd35b8aa355a6e3d1a078bfce`. **None of the physical-device acceptance tests below are yet completed.**
+
+> **Install note:** Beta artifacts use disposable debug signing. A beta already installed under the same package ID but a different test signing certificate might need to be uninstalled before reinstalling. Do not uninstall during any unresolved financial request, because the app stores durable retry IDs locally. APK is for private QA only.
+
 # TotiChat Beta — Two real Android phones acceptance checklist
 
 Source: `rebuild/flutter-v1`. Backend: Supabase Staging `rziaedugbdwefbefcxjt` only.
