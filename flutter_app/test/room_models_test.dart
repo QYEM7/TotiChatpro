@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:totichat/src/data/room_repository.dart';
+import 'package:totichat/src/core/staging_config.dart';
 
 void main() {
   group('RoomSummary', () {
@@ -43,6 +44,35 @@ void main() {
         'is_muted': true,
       });
       expect(member.seatNumber, isNull);
+    });
+  });
+
+  group('RoomTextMessage', () {
+    test('maps actual server rows without fabricating message state', () {
+      final message = RoomTextMessage.fromJson({
+        'id': 42,
+        'sender_id': 'sender-uuid',
+        'body': 'Test fixture',
+        'created_at': '2026-10-19T00:00:00Z',
+      });
+      expect(message.id, 42);
+      expect(message.senderId, 'sender-uuid');
+      expect(message.body, 'Test fixture');
+      expect(message.createdAt.isUtc, isTrue);
+    });
+  });
+
+  group('StagingConfig', () {
+    test('has a fixed Staging URL and a nonempty publishable key', () {
+      expect(
+        StagingConfig.url,
+        'https://rziaedugbdwefbefcxjt.supabase.co',
+      );
+      expect(StagingConfig.valid, isTrue);
+      expect(
+        StagingConfig.publishableKey.startsWith('sb_publishable_'),
+        isTrue,
+      );
     });
   });
 
