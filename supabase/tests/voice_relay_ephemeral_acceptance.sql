@@ -29,6 +29,26 @@ begin
  ) then raise exception 'BENIGN_PUBLIC_RPC_REVOKED';end if;
 end $test$;
 
+-- SQL structure, not just source string: exposed public RPC is now
+-- SECURITY INVOKER, while the guarded allowlist lives in private phase3.
+do $test$
+begin
+ if (select p.prosecdef from pg_proc p
+    where p.oid='public.phase2_room_moderate(uuid,uuid,text,uuid,text)'::regprocedure)
+ then raise exception 'PUBLIC_MODERATION_STILL_DEFINER';end if;
+ if not (select p.prosecdef from pg_proc p
+    where p.oid='phase3.room_moderation_nonvoice(uuid,uuid,text,uuid,text)'::regprocedure)
+ then raise exception 'PRIVATE_MODERATION_NOT_GUARDED';end if;
+ if not has_function_privilege(
+   'authenticated',
+   'phase3.room_moderation_nonvoice(uuid,uuid,text,uuid,text)','EXECUTE'
+ ) then raise exception 'BENIGN_GUARD_UNAVAILABLE';end if;
+ if has_function_privilege(
+   'anon',
+   'phase3.room_moderation_nonvoice(uuid,uuid,text,uuid,text)','EXECUTE'
+ ) then raise exception 'ANON_PRIVILEGE_ESCALATION';end if;
+end $test$;
+
 -- No service-role claims can be accepted from an ordinary authenticated
 -- database user. The SQL role and JWT are both restricted by the API.
 set role authenticated;
