@@ -28,5 +28,10 @@ jobs:
           node-version: '22'
       - name: Run source security contract
         run: node --test tests/voice-relay-privilege-gate.test.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type check the Edge relay
+        run: deno check supabase/functions/phase2-voice-moderate/index.ts
       - name: Assert no automatic staging deploy
-        run: echo 'Static source tests only; database SQL and Edge relay are not deployed.'
+        run: echo 'Source tests and type check only; database SQL and Edge relay are not deployed.'
