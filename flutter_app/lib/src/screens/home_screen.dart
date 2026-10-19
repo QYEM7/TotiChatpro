@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/session_exit.dart';
 import '../data/room_repository.dart';
 import '../data/gift_repository.dart';
 import '../data/admin_session_repository.dart';
@@ -102,13 +103,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_signingOut) return;
     setState(() => _signingOut = true);
     try {
-      if (_activeRoom != null) {
-        final state = _roomKey.currentState;
-        if (state == null || !await state.closeWithoutPrompt()) {
-          throw StateError('Could not close current room before sign out');
-        }
-      }
-      await Supabase.instance.client.auth.signOut();
+      await SessionExit.run(
+        hasRoom: _activeRoom != null,
+        closeRoom: () async {
+          final state = _roomKey.currentState;
+          return state != null && await state.closeWithoutPrompt();
+        },
+        signOut: () => Supabase.instance.client.auth.signOut(),
+      );
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
