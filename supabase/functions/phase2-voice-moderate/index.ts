@@ -91,7 +91,13 @@ Deno.serve(async req=>{
    // Fail closed: drop all currently published tracks and prevent a stale
    // participant from continuing to talk after kick, ban or moderator mute.
    // LiveKit Cloud revokes the active token on participant removal.
-   await api.removeParticipant(roomId,targetId);
+   // Suppress a false 404 for an already-offline participant while revoking
+   // stale tokens as supported by LiveKit Cloud. The SDK expects bigint
+   // Unix seconds; LiveKit requires the cutoff within 60s of server time.
+   // No optimistic success is returned if the SFU API itself fails.
+   await api.removeParticipant(roomId,targetId,{
+    revokeTokenTs: BigInt(Math.floor(Date.now()/1000))
+   });
   }catch(err){
    console.error('TotiChat LiveKit moderation disconnect unconfirmed',
     err instanceof Error?err.name:'UNKNOWN');
