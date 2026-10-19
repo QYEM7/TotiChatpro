@@ -28,6 +28,23 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<_HomeData> _future;
   int _tab = 0;
   bool _joining = false;
+  RoomSummary? _activeRoom;
+  bool _roomMinimized = false;
+
+  void _openRoom(RoomSummary room) {
+    setState(() {
+      _activeRoom = room;
+      _roomMinimized = false;
+    });
+  }
+
+  void _onRoomLeave() {
+    setState(() {
+      _activeRoom = null;
+      _roomMinimized = false;
+    });
+    _refresh();
+  }
 
   @override
   void initState() {
@@ -54,19 +71,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _enter(RoomSummary room) async {
     if (_joining) return;
+    if (_activeRoom != null) {
+      if (_activeRoom!.id == room.id) {
+        setState(() => _roomMinimized = false);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(UiText.get('room_leave_first'))),
+        );
+      }
+      return;
+    }
     setState(() => _joining = true);
     try {
       await _repository.join(room.id);
       if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => Directionality(
-            textDirection: TextDirection.rtl,
-            child: RoomScreen(room: room, repository: _repository),
-          ),
-        ),
-      );
-      if (mounted) await _refresh();
+      _openRoom(room);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -79,6 +98,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _createRoom() async {
     if (_joining) return;
+    if (_activeRoom != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(UiText.get('room_leave_first'))),
+      );
+      return;
+    }
     final created = await Navigator.of(context).push<RoomSummary>(
       MaterialPageRoute<RoomSummary>(
         builder: (_) => const Directionality(
@@ -88,21 +113,22 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     if (created == null || !mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => Directionality(
-          textDirection: TextDirection.rtl,
-          child: RoomScreen(room: created, repository: _repository),
-        ),
-      ),
-    );
-    if (mounted) await _refresh();
+    _openRoom(created);
   }
 
   @override
   Widget build(BuildContext context) {
     const mint = Color(0xFF26C096);
-    return Scaffold(
+    return PopScope(
+      canPop: _activeRoom == null,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _activeRoom != null && !_roomMinimized) {
+          setState(() => _roomMinimized = true);
+        }
+      },
+      child: Stack(
+        children: [
+          Scaffold(
       backgroundColor: const Color(0xFFFDFBF7),
       body: SafeArea(
         child: Column(
@@ -180,6 +206,32 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.person_outline),
             label: UiText.get('profile'),
           ),
+        ],
+      ),
+          if (_activeRoom != null)
+            Positioned.fill(
+              child: Offstage(
+                offstage: _roomMinimized,
+                child: RoomScreen(
+                  room: _activeRoom!,
+                  repository: _repository,
+                  onLeave: _onRoomLeave,
+                  onMinimize: () => setState(() => _roomMinimized = true),
+                ),
+              ),
+            ),
+          if (_activeRoom != null && _roomMinimized)
+            Positioned(
+              left: 16,
+              bottom: 96,
+              child: FloatingActionButton.extended(
+                heroTag: 'room-restore',
+                onPressed: () => setState(() => _roomMinimized = false),
+                icon: const Icon(Icons.headset),
+                label: Text(_activeRoom!.title,
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ),
         ],
       ),
     );
