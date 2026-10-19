@@ -32,6 +32,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Type check the Edge relay
-        run: deno check supabase/functions/phase2-voice-moderate/index.ts
+        working-directory: supabase/functions/phase2-voice-moderate
+        run: deno check index.ts
       - name: Assert no automatic staging deploy
         run: echo 'Source tests and type check only; database SQL and Edge relay are not deployed.'
