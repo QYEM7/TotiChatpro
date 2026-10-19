@@ -1,21 +1,25 @@
-# TotiChat Flutter — Beta-first client
+# TotiChat Flutter beta — Project 01
 
-**Status:** Dart analyzer, unit tests and Android **source** generation passed in [GitHub Actions run 39181633594](https://github.com/QYEM7/TotiChatpro/actions/runs/39181633594) on 2026-10-19. **No APK/AAB or real device test has been performed.**
+**Only the newly approved visual source**: [mrbalmain11-star/-](https://github.com/mrbalmain11-star/-) (main). Historic UI/Web/Kotlin demo sources are rejected. Flutter/Dart is the native client; production backend and GitHub `main` are untouched.
 
-## What is genuinely connected in source
-- Google-only Supabase OAuth; authenticated session verified through `phase4_verified_session` RPC.
-- Live public rooms, real published banners, room membership and 15-seat visuals (no fake listeners).
-- Seat reservation/release through the protected `phase2_room_take_seat` RPC.
-- Room text messages through `phase2_room_send_message` and member-scoped realtime stream.
-- Real account display name and an owner-assigned public ID status (no random visible ID).
-- Safe errors/empty states; never display mock room, chat, banner, coin, gift or wallet data.
+## Source-level beta functionality
+- Google-only Supabase OAuth and verified-session RPC gate; mobile OAuth callback has not been tested.
+- RLS-scoped Home, published banners (hidden when absent), public room directory.
+- Real create-room form (room name, welcome text, owner WebP cover) with server RPC, verified upload and cleanup.
+- Join/leave room, fixed 15 seats, seat claim/release, member refresh, room minimize/resume using an Offstage-preserved RoomScreen state. Room audio does not intentionally disconnect when minimized inside the app.
+- Existing server-authorized LiveKit voice-token contract connected through Flutter LiveKit SDK; seat+mic authorization checked, local audio disconnected on exit/revoked seat/background transition.
+- Room realtime messages, private DM overlay/inbox, wallet RLS read, real gift catalog and server-authoritative gift send (expected unit price and idempotency UUID).
+- Real, settled global gift feed only for unit price >= 7000; empty if Staging contains none.
+- Owner-only room moderation UI with backend-confirmed mute/release/kick.
+- Profile-only server-gated read-only admin entry. Advanced admin actions are intentionally not exposed.
+- UI text kept separately in `assets/i18n/ar.json`, no Arabic embedded in Dart business logic.
 
-Only the **new approved visual repo** `mrbalmain11-star/-` (`main`) is used as a presentation reference. Screen-by-screen visual parity is **not signed off**.
+## Flutter source checks (no installable application)
+GitHub Actions workflow [flutter-beta-checks.yml](../.github/workflows/flutter-beta-checks.yml) installs Flutter, runs `flutter pub get`, `flutter analyze lib test`, `flutter test`, generates Android source, validates OAuth callback and permission markers, archives Android **source only**, then asserts no APK/AAB was generated.
 
-## Generate Android host source without building an APK
-A current stable Flutter SDK with Dart 3.9+ is required.
+In a current stable Flutter environment:
 
-```sh
+```bash
 cd flutter_app
 flutter pub get
 flutter analyze lib test
@@ -23,20 +27,11 @@ flutter test
 bash scripts/prepare_android.sh
 ```
 
-The final command generates `android/` native files and injects the dedicated Staging OAuth return intent filter plus required Internet/microphone permissions. It is **not** a build command and does **not** test a phone.
+The script generates `android/` and registers `com.totichat.beta://auth/callback`, Internet/RECORD_AUDIO/MODIFY_AUDIO_SETTINGS permissions and minSdk 24. It does not build an APK.
 
-A zipped Android host **source-only** artifact is available from the successful GitHub Actions run above, subject to its artifact retention period. Do not confuse that artifact with an installable Android application.
+The only allowed backend in this beta branch is Staging `rziaedugbdwefbefcxjt`. Client uses its public publishable key, **never** a service role/secret key. Client initialization fails closed if a different Supabase URL is supplied.
 
-## Staging configuration
-The client is restricted to `https://rziaedugbdwefbefcxjt.supabase.co`. The project supplies an intentionally **public publishable** key (not `service_role` or `sb_secret`) so no hidden configuration is needed for basic source initialization. A different `SUPABASE_URL` supplied at build-time fails closed; the publishable key can be overridden safely using `SUPABASE_PUBLISHABLE_KEY` at development time. Never expose a secret server key in client code.
+## Do not claim release readiness
+Important missing device and acceptance gates: real Google login/deep link, multi-account join/seat/DM, two-phone audio, Staging LiveKit credentials and moderator SFU revocation, genuine gift/wallet concurrent tests, precise approved UI screenshot parity, minimum operational admin safety and user's explicit APK/release approval. Source compilation is NOT a measure of release readiness.
 
-The Google Auth provider and `com.totichat.beta://auth/callback` allowlisted Redirect URL must still be verified against the live Staging configuration, followed by actual consent and deep-link tests on a device.
-
-## Not yet functional/verified
-- Android real-account login/restore, RLS under two different accounts, joined-room/seat/message integration.
-- Room creation including image upload + welcome form.
-- Flutter LiveKit audio engine and real-device two-way voice/mute/reconnect.
-- DM, gifting, wallet, admin actions, VIP/CP and visual parity with the approved source.
-- Release/security gate acceptance and owner-authorized APK build.
-
-**Rules:** no production DB or GitHub `main` changes, no direct client service-role access, no APK/AAB or production publication before explicit owner approval.
+See [release readiness evidence](../docs/BETA_RELEASE_READINESS_EVIDENCE_20261019.md) for G0–G6 status. No APK/AAB and no staging writes in this ChatGPT execution.
