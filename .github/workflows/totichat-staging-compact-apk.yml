@@ -35,6 +35,19 @@ jobs:
           grep -Fq 'sb_publishable_' lib/src/core/staging_config.dart
           if grep -REn 'sb_secret_|service_role' lib/; then exit 1; fi
 
+      - name: Verify this beta build includes latest Staging voice and gift integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "seatGiftTotals" flutter_app/lib/src/screens/room_screen.dart
+          grep -Fq "phase2-voice-moderate" flutter_app/lib/src/data/room_moderation_repository.dart
+          grep -Fq "event_kind" flutter_app/lib/src/data/room_repository.dart
+          test -f supabase/migrations/20261019222311_staging_verified_room_gift_chat_v1.sql
+          test -f supabase/migrations/20261019222338_staging_verified_room_seat_gift_totals_v1.sql
+          test -f supabase/migrations/20261019222504_staging_verified_sfu_moderation_relay_acl_v1.sql
+          test -f supabase/migrations/20261019222702_staging_public_room_moderation_invoker_v2.sql
+          echo 'Build commit contains beta gift and voice integration source.'
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
