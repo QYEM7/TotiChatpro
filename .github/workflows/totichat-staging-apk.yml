@@ -1,0 +1,117 @@
+name: Build TotiChat Staging Beta APK
+
+on:
+  push:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - '.github/workflows/totichat-staging-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-beta-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-apk:
+    name: Build installable staging-only debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FLUTTER_SUPPRESS_ANALYTICS: "true"
+    steps:
+      - name: Checkout approved development branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Assert approved branch and Staging-only config
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = 'rebuild/flutter-v1'
+          grep -Fq "https://rziaedugbdwefbefcxjt.supabase.co" lib/src/core/staging_config.dart
+          grep -Fq "configuredUrl == url" lib/src/core/staging_config.dart
+          grep -Fq "com.totichat.beta://auth/callback" lib/src/core/staging_config.dart
+          grep -Fq "sb_publishable_" lib/src/core/staging_config.dart
+          if grep -REn 'sb_secret_|service_role' lib/; then
+            echo 'ERROR: Secret service key reference found in Flutter source'
+            exit 1
+          fi
+          echo 'Building Staging-only, permission-scoped test APK'
+
+      - name: Install Java 17 for Android Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+
+      - name: Verify Dart source and tests
+        working-directory: flutter_app
+        run: |
+          flutter analyze lib test
+          flutter test
+
+      - name: Generate isolated Android beta host and OAuth callback
+        working-directory: flutter_app
+        run: bash scripts/prepare_android.sh
+
+      - name: Verify package name and callback in generated host
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'applicationId = "com.totichat.beta"' android/app/build.gradle.kts
+          grep -Fq 'android:label="TotiChat Beta"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:scheme="com.totichat.beta"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:host="auth"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:pathPrefix="/callback"' android/app/src/main/AndroidManifest.xml
+
+      - name: Build Android APK for physical-device testing only
+        working-directory: flutter_app
+        run: |
+          flutter build apk --debug --no-pub --dart-define=SUPABASE_URL=https://rziaedugbdwefbefcxjt.supabase.co
+
+      - name: Verify built APK and compute SHA-256
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s build/app/outputs/flutter-apk/app-debug.apk
+          unzip -t build/app/outputs/flutter-apk/app-debug.apk > /dev/null
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-debug.apk dist/TotiChat-Staging-Beta.apk
+          cd dist
+          sha256sum TotiChat-Staging-Beta.apk > SHA256SUMS.txt
+          du -h TotiChat-Staging-Beta.apk
+          cat SHA256SUMS.txt
+
+      - name: Upload installable APK as a private workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-Staging-Beta-Android-APK
+          path: |
+            flutter_app/dist/TotiChat-Staging-Beta.apk
+            flutter_app/dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+      - name: Confirm no production deployment
+        run: |
+          echo 'This workflow uploads a test APK to GitHub Actions artifacts only.'
+          echo 'No production DB, main branch, Google Play or Pages deployments.'
