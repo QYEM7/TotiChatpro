@@ -97,5 +97,17 @@
   "admin_center": "مركز الإدارة",
   "admin_denied": "مركز الإدارة غير متاح لهذا الحساب",
   "admin_error": "تعذر التحقق من صلاحيات الإدارة",
-  "admin_loading": "التحقق من صلاحيات الحساب..."
+  "admin_loading": "التحقق من صلاحيات الحساب...",
+  "admin_reports_permission": "صلاحية الاطلاع على التقارير",
+  "admin_catalog_permission": "صلاحية إدارة المحتوى والكتالوج",
+  "admin_agencies_permission": "صلاحية إدارة وكالات المضيفين",
+  "admin_beta_readonly": "هذه نسخة تجريبية للعرض المصرّح فقط. لن تظهر إجراءات الإدارة حتى تجتاز اختبار الصلاحيات.",
+  "room_moderate_title": "إدارة العضو",
+  "room_moderate_mute": "كتم العضو",
+  "room_moderate_allow": "رفع الكتم الإداري",
+  "room_moderate_release": "إنزال من المقعد",
+  "room_moderate_kick": "إخراج العضو",
+  "room_moderate_failed": "رفض الخادم إجراء الإشراف أو تعذّر الاتصال",
+  "room_moderate_done": "تم تأكيد إجراء الإشراف",
+  "room_moderate_confirm": "هل تؤكد تنفيذ هذا الإجراء على العضو؟"
 }
