@@ -55,7 +55,7 @@
     "gift idempotency key retained for unchanged financial request payload"
   ],
   "latestReliabilityDocument": "docs/BETA_RELIABILITY_FIXES_20261019.md",
-  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39332611573",
+  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333350045",
   "latestReliabilityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39247640294",
   "latestReliabilityCiVerified": true,
   "latestFinancialSafety": {
@@ -152,5 +152,22 @@
     "verifiedAnnouncementCount": 0,
     "settledGiftEventCount": 0,
     "productionChanged": false
+  },
+  "latestVerifiedRoomGiftChat": {
+    "date": "2026-10-20",
+    "sourceCandidate": "supabase/patches/verified_room_gift_chat_candidate.sql",
+    "flutterModelUpdated": true,
+    "flutterRoomDisplayUpdated": true,
+    "sqlFixture": "supabase/tests/verified_room_gift_chat_ephemeral_fixture.sql",
+    "sqlAcceptance": "supabase/tests/verified_room_gift_chat_ephemeral_acceptance.sql",
+    "disposablePostgresTestsPassed": true,
+    "postgresCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333385132",
+    "flutterCiPassed": true,
+    "flutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333350045",
+    "deployedToStaging": false,
+    "twoDeviceSettlementRealtimeVerified": false,
+    "seatGiftCountersImplemented": false,
+    "document": "docs/BETA_VERIFIED_ROOM_GIFT_CHAT_20261020.md",
+    "productionModified": false
   }
 }
