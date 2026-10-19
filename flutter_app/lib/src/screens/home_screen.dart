@@ -3,8 +3,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
 import '../data/room_repository.dart';
+import '../data/gift_repository.dart';
+import '../data/admin_session_repository.dart';
 import 'room_screen.dart';
 import 'create_room_screen.dart';
+import 'direct_inbox_view.dart';
+import 'admin_center_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -145,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: switch (_tab) {
                 0 => _homeBody(),
-                1 => Center(child: Text(UiText.get('message_pending'))),
+                1 => const DirectInboxView(),
                 _ => const _ProfileView(),
               },
             ),
@@ -312,9 +316,16 @@ class _ProfileView extends StatefulWidget {
 }
 
 class _ProfileData {
-  const _ProfileData({required this.name, required this.publicId});
+  const _ProfileData({
+    required this.name,
+    required this.publicId,
+    required this.wallet,
+    required this.admin,
+  });
   final String name;
   final String? publicId;
+  final WalletBalance? wallet;
+  final AdminSession? admin;
 }
 
 class _ProfileViewState extends State<_ProfileView> {
@@ -334,9 +345,23 @@ class _ProfileViewState extends State<_ProfileView> {
       params: {'p_target': uid},
     );
     final data = status as Map<String, dynamic>;
+    WalletBalance? wallet;
+    AdminSession? admin;
+    try {
+      wallet = await GiftRepository(client).balance();
+    } catch (_) {
+      // Keep wallet unknown, not a fabricated zero balance.
+    }
+    try {
+      admin = await AdminSessionRepository(client).current();
+    } catch (_) {
+      // Fail closed: hidden admin entry without authoritative status.
+    }
     return _ProfileData(
       name: profile['display_name'] as String,
       publicId: data['publicId'] as String?,
+      wallet: wallet,
+      admin: admin,
     );
   }
 
@@ -351,30 +376,47 @@ class _ProfileViewState extends State<_ProfileView> {
             return Center(child: Text(UiText.get('profile_load_failed')));
           }
           final profile = snapshot.requireData;
-          return Padding(
+          return ListView(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const CircleAvatar(
-                  radius: 36,
-                  child: Icon(Icons.person, size: 34),
+            children: [
+              const CircleAvatar(
+                radius: 36,
+                child: Icon(Icons.person, size: 34),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                '${UiText.get('profile_name')}: ${profile.name}',
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '${UiText.get('profile_public_id')}: ${profile.publicId ?? UiText.get('profile_public_id_pending')}',
+              ),
+              const SizedBox(height: 22),
+              ListTile(
+                leading: const Icon(Icons.account_balance_wallet_outlined),
+                title: Text(UiText.get('wallet_balance')),
+                subtitle: Text(profile.wallet == null
+                    ? UiText.get('wallet_no_balance')
+                    : '${UiText.get('wallet_coins')}: ${profile.wallet!.coins}    ${UiText.get('wallet_diamonds')}: ${profile.wallet!.diamonds}'),
+              ),
+              if (profile.admin?.canEnterCenter == true)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.admin_panel_settings_outlined),
+                    title: Text(UiText.get('admin_center')),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AdminCenterScreen(),
+                      ),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  '${UiText.get('profile_name')}: ${profile.name}',
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  '${UiText.get('profile_public_id')}: ${profile.publicId ?? UiText.get('profile_public_id_pending')}',
-                ),
-                const Spacer(),
-                OutlinedButton(
-                  onPressed: () => Supabase.instance.client.auth.signOut(),
-                  child: Text(UiText.get('sign_out')),
-                ),
-              ],
-            ),
+              const SizedBox(height: 34),
+              OutlinedButton(
+                onPressed: () => Supabase.instance.client.auth.signOut(),
+                child: Text(UiText.get('sign_out')),
+              ),
+            ],
           );
         },
       );
