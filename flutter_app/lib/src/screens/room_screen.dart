@@ -35,6 +35,8 @@ class RoomScreen extends StatefulWidget {
 
 class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   late Future<List<RoomSeatMember>> _members;
+  late Future<Map<String, int>?> _seatGiftTotals;
+  bool _seatGiftTotalsUnavailable = false;
   late Stream<List<RoomTextMessage>> _messagesStream;
   late Stream<List<GlobalGiftAnnouncement>> _globalGiftStream;
   late final VoiceBridge _voice;
@@ -59,6 +61,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _voice = VoiceBridge(Supabase.instance.client);
     _members = _loadMembers();
+    _seatGiftTotals = _loadSeatGiftTotals();
     _messagesStream = widget.repository.watchMessages(widget.room.id);
     _globalGiftStream = GlobalGiftFeed(Supabase.instance.client).watch();
     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -93,6 +96,22 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         }
       }
       rethrow;
+    }
+  }
+
+  /// Do not display invented zeros if the server RPC has not been deployed.
+  /// The counter appears only after the full authoritative read succeeds.
+  Future<Map<String, int>?> _loadSeatGiftTotals() async {
+    if (_seatGiftTotalsUnavailable) return null;
+    try {
+      return await widget.repository.seatGiftTotals(widget.room.id);
+    } on PostgrestException catch (error) {
+      if (error.code == 'PGRST202' || error.code == '42883') {
+        _seatGiftTotalsUnavailable = true;
+      }
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 
@@ -349,6 +368,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   void _reload() {
     setState(() {
       _members = _loadMembers();
+      _seatGiftTotals = _loadSeatGiftTotals();
     });
   }
 
@@ -557,20 +577,30 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                                     const TextStyle(color: Color(0xFFFDE68A)),
                               ),
                               const SizedBox(height: 22),
-                              GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: 15,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 5,
-                                  mainAxisSpacing: 12,
-                                  crossAxisSpacing: 5,
-                                  childAspectRatio: 0.70,
-                                ),
-                                itemBuilder: (context, index) {
-                                  final number = index + 1;
-                                  return _seat(number, seatMap[number]);
+                              FutureBuilder<Map<String, int>?>(
+                                future: _seatGiftTotals,
+                                builder: (context, totalsSnapshot) {
+                                  final totals = totalsSnapshot.data;
+                                  return GridView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: 15,
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 5,
+                                      mainAxisSpacing: 12,
+                                      crossAxisSpacing: 5,
+                                      childAspectRatio: 0.70,
+                                    ),
+                                    itemBuilder: (context, index) {
+                                      final number = index + 1;
+                                      final occupant = seatMap[number];
+                                      final amount = occupant == null
+                                          ? null
+                                          : totals?[occupant.userId];
+                                      return _seat(number, occupant, amount);
+                                    },
+                                  );
                                 },
                               ),
                               Padding(
@@ -695,7 +725,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _seat(int index, RoomSeatMember? member) {
+  Widget _seat(int index, RoomSeatMember? member, int? verifiedGiftCoins) {
     final occupied = member != null;
     final avatar = member?.avatarUrl;
     return InkWell(
@@ -746,9 +776,31 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: Colors.white, fontSize: 9),
         ),
-        Text(
-          index.toString().padLeft(2, '0'),
-          style: const TextStyle(color: Color(0xFFE9D5FF), fontSize: 9),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              index.toString().padLeft(2, '0'),
+              style: const TextStyle(color: Color(0xFFE9D5FF), fontSize: 9),
+            ),
+            if (occupied && verifiedGiftCoins != null) ...[
+              const SizedBox(width: 3),
+              const Icon(Icons.card_giftcard,
+                  size: 10, color: Color(0xFFFBBF24)),
+              Flexible(
+                child: Text(
+                  '$verifiedGiftCoins',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFFFBBF24),
+                    fontSize: 9,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         ],
       ),
