@@ -58,7 +58,33 @@ void main() {
       expect(message.id, 42);
       expect(message.senderId, 'sender-uuid');
       expect(message.body, 'Test fixture');
+      expect(message.eventKind, 'chat');
       expect(message.createdAt.isUtc, isTrue);
+    });
+  });
+
+  group('Verified gift room chat', () {
+    test('uses server event kind and retains verified notice body', () {
+      final message = RoomTextMessage.fromJson({
+        'id': 72,
+        'sender_id': 'server-sender',
+        'body': 'Gift Sender to Recipient',
+        'event_kind': 'gift',
+        'created_at': '2026-10-20T00:00:00Z',
+      });
+      expect(message.eventKind, 'gift');
+      expect(message.body, 'Gift Sender to Recipient');
+    });
+
+    test('does not render an unknown kind as a verified gift', () {
+      final message = RoomTextMessage.fromJson({
+        'id': 73,
+        'sender_id': 'server-sender',
+        'body': 'Client-written text',
+        'event_kind': 'unverified',
+        'created_at': '2026-10-20T00:00:00Z',
+      });
+      expect(message.eventKind, 'chat');
     });
   });
 
