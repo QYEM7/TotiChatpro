@@ -28,7 +28,7 @@ Future<void> initializeStagingBackend() async {
     throw StateError('Invalid beta configuration');
   }
   await UiText.load().timeout(const Duration(seconds: 8));
-  // This is the public Staging key. Never embed a service_role token.
+  // Use only the public Staging key; no privileged credentials in clients.
   await Supabase.initialize(
     url: StagingConfig.configuredUrl,
     publishableKey: StagingConfig.publishableKey,
