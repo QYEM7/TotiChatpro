@@ -67,6 +67,28 @@ class HomeBanner {
       );
 }
 
+class RoomTextMessage {
+  const RoomTextMessage({
+    required this.id,
+    required this.senderId,
+    required this.body,
+    required this.createdAt,
+  });
+
+  final int id;
+  final String senderId;
+  final String body;
+  final DateTime createdAt;
+
+  factory RoomTextMessage.fromJson(Map<String, dynamic> data) =>
+      RoomTextMessage(
+        id: data['id'] as int,
+        senderId: data['sender_id'] as String,
+        body: data['body'] as String,
+        createdAt: DateTime.parse(data['created_at'] as String),
+      );
+}
+
 class RoomRepository {
   RoomRepository(this.client);
   final SupabaseClient client;
@@ -118,6 +140,55 @@ class RoomRepository {
     return (rows as List)
         .map((row) => RoomSeatMember.fromJson(row as Map<String, dynamic>))
         .toList(growable: false);
+  }
+
+
+  Future<void> takeSeat(String roomId, int number) async {
+    if (number < 1 || number > 15) {
+      throw RangeError.range(number, 1, 15, 'number');
+    }
+    final result = await client.rpc('phase2_room_take_seat', params: {
+      'p_room_id': roomId,
+      'p_seat': number,
+    });
+    if (result != number) {
+      throw StateError('The selected seat was not confirmed by the server');
+    }
+  }
+
+  Future<void> releaseSeat(String roomId) async {
+    await client.rpc('phase2_room_take_seat', params: {
+      'p_room_id': roomId,
+      'p_seat': null,
+    });
+  }
+
+  Stream<List<RoomTextMessage>> watchMessages(String roomId) {
+    return client
+        .from('room_messages')
+        .stream(primaryKey: ['id'])
+        .eq('room_id', roomId)
+        .order('id', ascending: true)
+        .limit(50)
+        .map(
+          (rows) => rows
+              .map((data) => RoomTextMessage.fromJson(data))
+              .toList(growable: false),
+        );
+  }
+
+  Future<void> sendMessage(String roomId, String message) async {
+    final text = message.trim();
+    if (text.isEmpty || text.length > 500) {
+      throw ArgumentError.value(text, 'message', 'Invalid message length');
+    }
+    final createdId = await client.rpc('phase2_room_send_message', params: {
+      'p_room_id': roomId,
+      'p_body': text,
+    });
+    if (createdId is! int) {
+      throw StateError('The message was not confirmed by the server');
+    }
   }
 
   String? coverUrl(RoomSummary room) {
