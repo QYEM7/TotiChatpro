@@ -258,12 +258,12 @@
     "debugSignedReleaseBuild": true,
     "arm64": {
       "artifactId": 12228186544,
-      "byteSize": 21723435,
+      "byteSize": 21723402,
       "sha256": "b4f933e0ee302da67fb295cf67208dcd9dc9f79ae0833df420744a7f01ec6da3"
     },
     "arm32": {
       "artifactId": 12227732054,
-      "byteSize": 19328759,
+      "byteSize": 19328726,
       "sha256": "df12a9ff36d78892f7af5b9e8e6350c548c792aadf53ffbfdf08a8770d74c753"
     },
     "deviceRuntimeConfirmed": false,
