@@ -56,5 +56,15 @@
   "chat_me": "أنا",
   "audio_reserved": "المقعد محجوز فقط؛ ربط الصوت الحقيقي ما زال قيد التنفيذ.",
   "room_member_count": "الأعضاء",
-  "messaging_label": "دردشة الغرفة"
+  "messaging_label": "دردشة الغرفة",
+  "voice_listen": "دخول الصوت",
+  "voice_disconnect": "قطع الاتصال",
+  "voice_mic_on": "فتح المايك",
+  "voice_mic_off": "كتم المايك",
+  "voice_connecting": "جاري الاتصال بخادم الصوت...",
+  "voice_connected_unverified": "اتصل جهازك بخادم الصوت، لكن الصوت بين هاتفين لم يُختبر بعد.",
+  "voice_error": "تعذر اتصال الصوت أو الإذن بالمايك. تحقق من LiveKit والصلاحيات.",
+  "voice_mic_required": "اصعد إلى مقعد أولاً للحصول على صلاحية المايك.",
+  "voice_mic_permission": "يتطلب المايك إذن التسجيل من الهاتف.",
+  "voice_staging_only": "الصوت عبر Staging فقط؛ لا يوجد بث وهمي."
 }
