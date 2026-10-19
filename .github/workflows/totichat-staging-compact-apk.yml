@@ -33,6 +33,8 @@ jobs:
           grep -Fq 'https://rziaedugbdwefbefcxjt.supabase.co' lib/src/core/staging_config.dart
           grep -Fq 'configuredUrl == url' lib/src/core/staging_config.dart
           grep -Fq 'sb_publishable_' lib/src/core/staging_config.dart
+          grep -Fq 'runApp(StartupGate(' lib/main.dart
+          grep -Fq 'io.flutter.embedding.android.EnableImpeller' scripts/prepare_android.sh
           if grep -REn 'sb_secret_|service_role' lib/; then exit 1; fi
 
       - name: Verify this beta build includes latest Staging voice and gift integration
@@ -71,6 +73,7 @@ jobs:
           bash scripts/prepare_android.sh
           grep -Fq 'applicationId = "com.totichat.beta"' android/app/build.gradle.kts
           grep -Fq 'android:label="TotiChat Beta"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:name="io.flutter.embedding.android.EnableImpeller" android:value="false"' android/app/src/main/AndroidManifest.xml
           grep -Fq 'com.totichat.beta' android/app/src/main/AndroidManifest.xml
           # This release-compiled *test* APK must be signed with a disposable
           # DEBUG keystore only; it may never be mistaken for production.
@@ -93,10 +96,10 @@ jobs:
             src="build/app/outputs/flutter-apk/app-${abi}-release.apk"
             test -s "$src"
             unzip -t "$src" > /dev/null
-            cp "$src" "dist/$folder/TotiChat-Staging-Beta-$folder.apk"
+            cp "$src" "dist/$folder/TotiChat-Staging-Beta-StartupFix-$folder.apk"
             (
               cd "dist/$folder"
-              sha256sum "TotiChat-Staging-Beta-$folder.apk" > SHA256SUMS.txt
+              sha256sum "TotiChat-Staging-Beta-StartupFix-$folder.apk" > SHA256SUMS.txt
               cat SHA256SUMS.txt
             )
           done
@@ -105,7 +108,7 @@ jobs:
       - name: Upload ARM64 test APK
         uses: actions/upload-artifact@v4
         with:
-          name: TotiChat-Staging-Beta-ARM64-APK
+          name: TotiChat-Staging-Beta-StartupFix-ARM64-APK
           path: flutter_app/dist/arm64/
           if-no-files-found: error
           compression-level: 0
@@ -114,7 +117,7 @@ jobs:
       - name: Upload ARM32 test APK
         uses: actions/upload-artifact@v4
         with:
-          name: TotiChat-Staging-Beta-ARM32-APK
+          name: TotiChat-Staging-Beta-StartupFix-ARM32-APK
           path: flutter_app/dist/arm32/
           if-no-files-found: error
           compression-level: 0
