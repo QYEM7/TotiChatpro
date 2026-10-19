@@ -18,7 +18,7 @@ for permission in ["android.permission.INTERNET",
     if item not in text:
         if "<application" not in text:
             raise SystemExit("Android application element missing")
-        text = text.replace("<application", item + "\\n    <application", 1)
+        text = text.replace("<application", item + "\n    <application", 1)
 if 'android:scheme="com.totichat.beta"' not in text:
     callback = """
             <!-- Supabase Staging Google OAuth return route. -->
@@ -34,7 +34,7 @@ if 'android:scheme="com.totichat.beta"' not in text:
     if "</activity>" not in text:
         raise SystemExit("MainActivity not found; Android template may have changed")
     text = text.replace("</activity>", callback + "        </activity>", 1)
-    manifest.write_text(text, encoding="utf-8")
+manifest.write_text(text, encoding="utf-8")
 
 assert 'android:scheme="com.totichat.beta"' in text
 assert 'android:host="auth"' in text
