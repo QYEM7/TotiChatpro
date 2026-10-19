@@ -47,6 +47,44 @@ void main() {
     });
   });
 
+  group('RoomSeatGiftTotal', () {
+    test('maps a genuine zero received gift value without fake placeholders', () {
+      final total = RoomSeatGiftTotal.fromJson({
+        'user_id': 'member-uuid',
+        'total_coins': 0,
+      });
+      expect(total.userId, 'member-uuid');
+      expect(total.totalCoins, 0);
+    });
+
+    test('keeps server-provided settled received amount', () {
+      final total = RoomSeatGiftTotal.fromJson({
+        'user_id': 'member-uuid',
+        'total_coins': 7000,
+      });
+      expect(total.totalCoins, 7000);
+    });
+
+    test('rejects missing, negative, fractional and malformed totals', () {
+      for (final value in <Object?>[-1, 3.5, null, '7000', true]) {
+        expect(
+          () => RoomSeatGiftTotal.fromJson({
+            'user_id': 'member-uuid',
+            'total_coins': value,
+          }),
+          throwsFormatException,
+        );
+      }
+      expect(
+        () => RoomSeatGiftTotal.fromJson({
+          'user_id': '',
+          'total_coins': 0,
+        }),
+        throwsFormatException,
+      );
+    });
+  });
+
   group('RoomTextMessage', () {
     test('maps actual server rows without fabricating message state', () {
       final message = RoomTextMessage.fromJson({
