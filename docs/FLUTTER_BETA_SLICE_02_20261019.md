@@ -19,9 +19,18 @@ New, owner-approved Flutter/Dart client on `rebuild/flutter-v1`, with ONLY `mrba
 
 These checks prove presence and grants, **NOT** real logged-in user behavior, audio readiness, LiveKit secrets, or a Flutter device run.
 
+## Verified GitHub CI evidence
+- [Run 39181633594](https://github.com/QYEM7/TotiChatpro/actions/runs/39181633594): **success**.
+- Flutter SDK installation and `flutter pub get`: passed.
+- `flutter analyze lib test`: passed without analyzer findings.
+- `flutter test`: passed.
+- `bash scripts/prepare_android.sh`: generated Android source and verified OAuth deep-link manifest; passed.
+- `flutter-android-host-source` artifact saved (source only).
+- No APK/AAB output produced; explicit guard passed.
+
 ## Gates still NOT verified
 - Native Android deep-link roundtrip through Google consent.
-- `flutter analyze` and `flutter test` final CI outcome (see Actions for current status).
+- The passed CI establishes analyzer/unit-test/native-host-source status only; it is not proof of real Android runtime behavior.
 - Actual sign-in on real Android devices and secure restored session.
 - Two-account room/seat/message end-to-end QA, including dynamic RLS behavior.
 - LiveKit token response, actual two-device microphone/voice audio, mute/permission and reconnection.
