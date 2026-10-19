@@ -7,7 +7,7 @@ Date: 2026-10-20. Branch: `rebuild/flutter-v1`.
 - The existing public moderation RPC and private `phase3.room_moderation_action` were callable by `authenticated` in Staging on the read-only inspection.
 - The Flutter client now uses `phase2-voice-moderate` for `mute`, `release_seat` and `kick`, but an authenticated caller with room moderator privileges could bypass that client and change the DB directly without an SFU disconnect.
 - Source fix prepared: [privileged RPC candidate](../supabase/patches/voice_moderation_relay_acl_candidate.sql) + [matching Edge implementation](../supabase/functions/phase2-voice-moderate/index.ts).
-- [Security contract CI 39325212067](https://github.com/QYEM7/TotiChatpro/actions/runs/39325212067) passed. [Follow-up Deno type check + Node security contract CI 39325376323](https://github.com/QYEM7/TotiChatpro/actions/runs/39325376323) passed. These are source checks, NOT deployed database integration or device tests.
+- [Security contract CI 39325212067](https://github.com/QYEM7/TotiChatpro/actions/runs/39325212067) and [Deno type-check CI 39325376323](https://github.com/QYEM7/TotiChatpro/actions/runs/39325376323) passed. [Latest PostgreSQL 17 integration CI 39331576815](https://github.com/QYEM7/TotiChatpro/actions/runs/39331576815) passed, including role-grant checks and deny/allow paths against synthetic actors. No production or Staging database integration was attempted.
 
 ## Proposed design
 
@@ -31,10 +31,34 @@ This is a **coordinated security-sensitive Staging change**. The repository cand
 ## Release gates
 
 - Source-level authorization design and static security contracts: **PASS**.
-- SQL syntax validated in a disposable database: **NOT VERIFIED**.
+- SQL candidate compiled and actor/ACL test suite passed on disposable PostgreSQL 17 using synthetic users and function stubs: **PASS**. [CI run 39331576815](https://github.com/QYEM7/TotiChatpro/actions/runs/39331576815). This is not a full Supabase schema or physical-device test.
 - Supabase Staging migration applied: **NO**.
 - New Edge function deployed: **NO**.
 - Runtime SFU enforcement with two phones: **NOT VERIFIED**.
 - 90% beta readiness / release permission: **NOT VERIFIED**.
 
 No production mutation, Staging data mutation, APK build, signing or store deployment was performed in this batch.
+
+
+## Additional test details and remaining risks
+
+- Added `supabase/tests/voice_relay_ephemeral_fixture.sql` and
+  `supabase/tests/voice_relay_ephemeral_acceptance.sql`. The CI workflow
+  starts a disposable PostgreSQL 17 service and executes fixture → candidate
+  SQL → privilege/behavior assertions with `ON_ERROR_STOP=1`.
+- Tests assert `authenticated` cannot call `phase3.room_moderation_action`
+  or the new relay; an authenticated room owner still can call the benign
+  `allow_mic` wrapper, but is denied `mute`, `kick`, `ban`, and
+  `release_seat`; the trusted server can relay a voice-impacting action
+  only for a verified user session with the right owner/moderator scope.
+- The Edge relay now forwards only `role`, `sub`, `session_id`, `aal`
+  to the privileged RPC, never full token payload or `user_metadata`.
+- Real Staging `phase3.actor()` has stricter auth.users/MFA checks than the
+  ephemeral fixture's session stub. Matching integration with the full
+  real Staging schema and operational credentials remains unverified.
+- To stage the coordinated cutover safely, verify server-side
+  `SUPABASE_SERVICE_ROLE_KEY` presence without exposing it, test versioned
+  rollback, then stage deployment in a controlled maintenance window.
+- No Staging ACL change was executed: the previously observed direct
+  authenticated `phase3.room_moderation_action` access remains a release
+  blocker until an authorized and verified cutover is complete.
