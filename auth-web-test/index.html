@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>TotiChat — Staging Google Login Test</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="shell">
+  <header>
+    <div class="eyebrow">TOTICHAT • STAGING ONLY</div>
+    <h1>اختبار تسجيل الدخول عبر Google</h1>
+    <p>فحص تقني مستقل عن تطبيق الهاتف، بدون APK، وبدون الاتصال بقاعدة الإنتاج.</p>
+  </header>
+  <section class="panel">
+    <div class="line"><span>بيئة الاختبار</span><strong>Supabase Staging</strong></div>
+    <div class="line"><span>حالة Google OAuth</span><strong id="google-status">لم يتم الاختبار</strong></div>
+    <div class="line"><span>التحقق من جلسة الخادم</span><strong id="backend-status">لم يتم الاختبار</strong></div>
+    <div id="message" class="notice" role="status" aria-live="polite">جاري تهيئة الفحص...</div>
+    <div id="identity" class="identity" hidden></div>
+    <div class="actions">
+      <button id="login" type="button" disabled>الدخول باستخدام Google</button>
+      <button id="recheck" type="button" class="secondary" hidden>إعادة فحص الجلسة</button>
+      <button id="logout" type="button" class="secondary" hidden>تسجيل الخروج</button>
+    </div>
+  </section>
+  <footer>
+    <p>لن تُعرض كلمات المرور أو رموز الدخول. يتم حفظ جلسة الاختبار في تبويب المتصفح الحالي فقط.</p>
+    <p>نجاح هذا الفحص لا يثبت عمل الرجوع إلى تطبيق Android أو اختبار الصوت.</p>
+    <p class="small">ملف اختبار مستقل — ليس واجهة TotiChat الإنتاجية</p>
+  </footer>
+</main>
+<script type="module" src="./auth-test.js"></script>
+</body>
+</html>
