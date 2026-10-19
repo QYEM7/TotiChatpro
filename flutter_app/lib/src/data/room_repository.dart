@@ -54,6 +54,28 @@ class RoomSeatMember {
       );
 }
 
+/// Public room-seat display value, NOT an account wallet balance. The backend
+/// includes only completed gifts proven by both matching ledger entries.
+class RoomSeatGiftTotal {
+  const RoomSeatGiftTotal({required this.userId, required this.totalCoins});
+
+  final String userId;
+  final int totalCoins;
+
+  factory RoomSeatGiftTotal.fromJson(Map<String, dynamic> data) {
+    final userId = data['user_id'];
+    final total = data['total_coins'];
+    if (userId is! String || userId.isEmpty ||
+        total is! num || total < 0 || total != total.truncateToDouble()) {
+      throw const FormatException('Invalid authoritative seat gift total');
+    }
+    return RoomSeatGiftTotal(
+      userId: userId,
+      totalCoins: total.toInt(),
+    );
+  }
+}
+
 class HomeBanner {
   const HomeBanner({required this.id, required this.title, required this.url});
   final String id;
@@ -147,6 +169,30 @@ class RoomRepository {
         .toList(growable: false);
   }
 
+
+  /// Returns only gift totals authorized for active room participants.
+  /// If Staging has not deployed the RPC, callers must hide the counter;
+  /// never fabricate a balance or use wallet rows as a fallback.
+  Future<Map<String, int>> seatGiftTotals(String roomId) async {
+    final rows = await client.rpc('phase2_room_seat_gift_totals',
+        params: {'p_room_id': roomId});
+    if (rows is! List) {
+      throw const FormatException('Unverified seat gift totals response');
+    }
+    final totals = <String, int>{};
+    for (final row in rows) {
+      if (row is! Map) {
+        throw const FormatException('Malformed seat gift total row');
+      }
+      final total = RoomSeatGiftTotal.fromJson(
+          Map<String, dynamic>.from(row));
+      if (totals.containsKey(total.userId)) {
+        throw const FormatException('Duplicate seat gift total');
+      }
+      totals[total.userId] = total.totalCoins;
+    }
+    return totals;
+  }
 
   Future<void> takeSeat(String roomId, int number) async {
     if (number < 1 || number > 15) {
