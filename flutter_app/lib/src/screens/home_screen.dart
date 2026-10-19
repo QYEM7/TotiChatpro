@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/ui_text.dart';
 import '../data/room_repository.dart';
 import 'room_screen.dart';
+import 'create_room_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -72,6 +73,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _createRoom() async {
+    if (_joining) return;
+    final created = await Navigator.of(context).push<RoomSummary>(
+      MaterialPageRoute<RoomSummary>(
+        builder: (_) => const Directionality(
+          textDirection: TextDirection.rtl,
+          child: CreateRoomScreen(),
+        ),
+      ),
+    );
+    if (created == null || !mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: RoomScreen(room: created, repository: _repository),
+        ),
+      ),
+    );
+    if (mounted) await _refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     const mint = Color(0xFF26C096);
@@ -129,6 +152,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      floatingActionButton: _tab == 0
+          ? FloatingActionButton.extended(
+              onPressed: _joining ? null : _createRoom,
+              icon: const Icon(Icons.add),
+              label: Text(UiText.get('room_create')),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (index) => setState(() => _tab = index),
