@@ -5,9 +5,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
 import '../data/room_repository.dart';
+import '../data/voice_bridge.dart';
 
 /// The first vertical slice: real room membership and real seat visibility.
-/// Seats and text chat use real authenticated server data; audio remains separate.
+/// Server-authorized seats, text and LiveKit audio; device QA still required.
 class RoomScreen extends StatefulWidget {
   const RoomScreen({
     super.key,
@@ -25,6 +26,9 @@ class RoomScreen extends StatefulWidget {
 class _RoomScreenState extends State<RoomScreen> {
   late Future<List<RoomSeatMember>> _members;
   late Stream<List<RoomTextMessage>> _messagesStream;
+  late final VoiceBridge _voice;
+  bool _voiceBusy = false;
+  String? _voiceError;
   final TextEditingController _composer = TextEditingController();
   Timer? _refreshTimer;
   bool _savingSeat = false;
@@ -38,6 +42,7 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   void initState() {
     super.initState();
+    _voice = VoiceBridge(Supabase.instance.client);
     _members = widget.repository.members(widget.room.id);
     _messagesStream = widget.repository.watchMessages(widget.room.id);
     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -48,8 +53,102 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    unawaited(_voice.disconnect(widget.room.id).catchError((Object _) {}));
     _composer.dispose();
     super.dispose();
+  }
+
+
+  Future<void> _runVoiceOperation(Future<void> Function() action) async {
+    if (_voiceBusy || _leaving) return;
+    setState(() {
+      _voiceBusy = true;
+      _voiceError = null;
+    });
+    try {
+      await action();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _voiceError = UiText.get('voice_error'));
+    } finally {
+      if (mounted) setState(() => _voiceBusy = false);
+    }
+  }
+
+  Future<void> _toggleVoice() => _runVoiceOperation(() {
+        if (_voice.connected) return _voice.disconnect(widget.room.id);
+        return _voice.connect(widget.room.id);
+      });
+
+  Future<void> _toggleMicrophone() => _runVoiceOperation(() {
+        if (_voice.microphoneOn) {
+          return _voice.disableMicrophone(widget.room.id);
+        }
+        return _voice.enableMicrophone(widget.room.id);
+      });
+
+  Widget _voiceControls() {
+    final status = _voiceError ??
+        (_voice.connected
+            ? UiText.get('voice_connected_unverified')
+            : UiText.get('audio_pending'));
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: const Color(0xCC100724),
+        border: Border.all(color: const Color(0x887C3AED)),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_voiceBusy) const LinearProgressIndicator(minHeight: 2),
+          Row(children: [
+            Expanded(
+              child: TextButton.icon(
+                onPressed: _voiceBusy ? null : _toggleVoice,
+                icon: Icon(
+                  _voice.connected ? Icons.headset_off : Icons.headset,
+                  color: Colors.white,
+                  size: 19,
+                ),
+                label: Text(
+                  _voice.connected
+                      ? UiText.get('voice_disconnect')
+                      : UiText.get('voice_listen'),
+                  style: const TextStyle(fontSize: 11),
+                ),
+              ),
+            ),
+            Expanded(
+              child: TextButton.icon(
+                onPressed: _voiceBusy ? null : _toggleMicrophone,
+                icon: Icon(
+                  _voice.microphoneOn ? Icons.mic_off : Icons.mic,
+                  color: const Color(0xFFFBBF24),
+                  size: 19,
+                ),
+                label: Text(
+                  _voice.microphoneOn
+                      ? UiText.get('voice_mic_off')
+                      : UiText.get('voice_mic_on'),
+                  style: const TextStyle(fontSize: 11),
+                ),
+              ),
+            ),
+          ]),
+          Text(
+            status,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _chooseSeat(int number, RoomSeatMember? occupant) async {
@@ -63,6 +162,10 @@ class _RoomScreenState extends State<RoomScreen> {
     }
     setState(() => _savingSeat = true);
     try {
+      if (_voice.microphoneOn) {
+        // Release local audio before seat state invalidates publishing grants.
+        await _voice.disconnect(widget.room.id);
+      }
       if (occupant?.userId == userId) {
         await widget.repository.releaseSeat(widget.room.id);
       } else {
@@ -128,6 +231,11 @@ class _RoomScreenState extends State<RoomScreen> {
     if (confirmed != true || !mounted) return;
     setState(() => _leaving = true);
     try {
+      try {
+        await _voice.disconnect(widget.room.id);
+      } catch (_) {
+        // Membership must be closed even if the audio transport is unreachable.
+      }
       await widget.repository.leave(widget.room.id);
       if (!mounted) return;
       setState(() => _canPop = true);
@@ -355,24 +463,7 @@ class _RoomScreenState extends State<RoomScreen> {
                                   ),
                                 ]),
                               ),
-                              Container(
-                                margin: const EdgeInsets.all(14),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xBB100724),
-                                  border: Border.all(
-                                      color: const Color(0x887C3AED)),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  UiText.get('audio_pending'),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
+                              _voiceControls(),
                             ],
                           ),
                         );
