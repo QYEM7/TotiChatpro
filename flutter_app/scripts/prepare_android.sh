@@ -43,5 +43,13 @@ assert 'android.intent.category.BROWSABLE' in text
 assert '<uses-permission android:name="android.permission.INTERNET"' in text, (
     "Expected Android INTERNET permission was not found; review generated manifest"
 )
+gradle = Path("android/app/build.gradle.kts")
+if gradle.exists():
+    config = gradle.read_text(encoding="utf-8")
+    if "minSdk = flutter.minSdkVersion" in config:
+        config = config.replace("minSdk = flutter.minSdkVersion", "minSdk = 24")
+        gradle.write_text(config, encoding="utf-8")
+    if "minSdk = 24" not in config:
+        raise SystemExit("Android minSdk compatibility with image picker requires review")
 print("Android host & OAuth callback prepared; no Android application was built.")
 PY
