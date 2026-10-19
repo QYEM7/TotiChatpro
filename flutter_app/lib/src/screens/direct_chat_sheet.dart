@@ -117,7 +117,7 @@ class _DirectChatSheetState extends State<DirectChatSheet> {
                     reverse: true,
                     itemCount: items.length,
                     itemBuilder: (context, index) {
-                      final item = items[items.length - 1 - index];
+                      final item = items[index];
                       final own = item.senderId == userId;
                       return Align(
                         alignment:
