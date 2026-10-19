@@ -22,7 +22,7 @@ Environment: **Supabase Staging only** (`rziaedugbdwefbefcxjt`)
 - Five unit tests: `2fe466d9ba4f6cceca7bfee42209b9db763b0198`
 - Manual-only APK workflow: `a43c66baf3ad6c088ff7c88bd5be8616a7ed95b7`
 - Gift threshold query fix: `003242e3467b62debac4f458d43d3b7495e02a84`
-- Source check for gift fix: https://github.com/QYEM7/TotiChatpro/actions/runs/39315053498 (pending at documentation time; verify conclusion before reporting success).
+- Source check for gift fix: https://github.com/QYEM7/TotiChatpro/actions/runs/39315053498 — **SUCCESS**: Flutter analyze, Dart/Flutter tests, Android OAuth host preparation and no-APK guard all passed.
 
 ## Still unverified
 
