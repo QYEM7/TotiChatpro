@@ -99,10 +99,26 @@ jobs:
           print('DEBUG BUILD ONLY — NOT production-signed, device-tested or approved for release')
           PY
 
+      - name: Inspect actual Android package and label
+        working-directory: flutter_app
+        run: |
+          set -euo pipefail
+          sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$sdk"
+          aapt="$(find "$sdk/build-tools" -type f -name aapt | sort -V | tail -1)"
+          test -n "$aapt"
+          badging="$("$aapt" dump badging build/app/outputs/flutter-apk/app-debug.apk)"
+          printf '%s\n' "$badging" | grep -Fq "package: name='com.totichat.beta'"
+          printf '%s\n' "$badging" | grep -Fq "application-label:'TotiChat Beta'"
+          (cd build/app/outputs/flutter-apk && sha256sum app-debug.apk > SHA256SUMS.txt)
+          echo 'Validated compiled package ID, beta label and APK checksum file.'
+
       - name: Upload ephemeral Android test artifact
         uses: actions/upload-artifact@v4
         with:
           name: totichat-staging-debug-${{ github.sha }}
-          path: flutter_app/build/app/outputs/flutter-apk/app-debug.apk
+          path: |
+            flutter_app/build/app/outputs/flutter-apk/app-debug.apk
+            flutter_app/build/app/outputs/flutter-apk/SHA256SUMS.txt
           retention-days: 7
           if-no-files-found: error
