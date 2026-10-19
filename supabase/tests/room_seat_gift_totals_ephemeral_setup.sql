@@ -9,6 +9,7 @@ create function auth.uid() returns uuid language sql stable set search_path='' a
  select (auth.jwt()->>'sub')::uuid
 $fn$;
 
+insert into auth.users(id) values ('55555555-5555-4555-8555-555555555555');
 create table auth.sessions(id uuid primary key,user_id uuid not null references auth.users(id));
 insert into auth.sessions(id,user_id) values
  ('11111111-aaaa-4aaa-8aaa-111111111111','11111111-1111-4111-8111-111111111111'),
@@ -37,7 +38,6 @@ create table public.room_members(
  primary key(room_id,user_id)
 );
 
-insert into auth.users(id) values ('55555555-5555-4555-8555-555555555555');
 insert into public.rooms(id) values ('44444444-4444-4444-8444-444444444444');
 insert into public.room_members(room_id,user_id,seat_no) values
  ('33333333-3333-4333-8333-333333333333',
