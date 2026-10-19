@@ -93,14 +93,16 @@ jobs:
           emulator-boot-timeout: 600
           disable-animations: true
           script: |
-            set -euo pipefail
+            # android-emulator-runner executes this body with /bin/sh, not bash.
+            set -eu
             mkdir -p android-smoke
             adb shell input keyevent KEYCODE_WAKEUP
             adb shell wm dismiss-keyguard || true
             adb logcat -c
             adb install -r android-smoke/boot-smoke-debug.apk
             adb shell am force-stop com.totichat.beta || true
-            adb shell am start -W -n com.totichat.beta/com.totichat.totichat.MainActivity | tee android-smoke/activity-launch.txt
+            adb shell am start -W -n com.totichat.beta/com.totichat.totichat.MainActivity > android-smoke/activity-launch.txt
+            cat android-smoke/activity-launch.txt
             sleep 24
             adb shell pidof com.totichat.beta | tee android-smoke/pid.txt || true
             adb shell dumpsys activity activities > android-smoke/activity-dumpsys.txt
