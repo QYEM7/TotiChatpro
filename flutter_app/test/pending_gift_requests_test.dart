@@ -118,7 +118,7 @@ void main() {
   test('concurrent sheets persist only one id for the identical gift', () async {
     final disk = BlockingGiftStore();
     var generated = 0;
-    String newId() => 'operation-' + (++generated).toString();
+    String newId() => 'operation-${++generated}';
     final sheetA = PendingGiftRequests(storage: disk, newRequestId: newId);
     final sheetB = PendingGiftRequests(storage: disk, newRequestId: newId);
     final original = sheetA.acquire(key());
@@ -140,11 +140,11 @@ void main() {
     var generated = 0;
     final sheetA = PendingGiftRequests(
       storage: disk,
-      newRequestId: () => 'operation-' + (++generated).toString(),
+      newRequestId: () => 'operation-${++generated}',
     );
     final sheetB = PendingGiftRequests(
       storage: disk,
-      newRequestId: () => 'operation-' + (++generated).toString(),
+      newRequestId: () => 'operation-${++generated}',
     );
     final first = sheetA.acquire(key());
     final second = sheetB.acquire(key());
