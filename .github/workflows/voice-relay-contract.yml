@@ -1,0 +1,32 @@
+name: Voice relay privilege contract
+
+on:
+  push:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - 'supabase/patches/voice_moderation_relay_acl_candidate.sql'
+      - 'supabase/functions/phase2-voice-moderate/**'
+      - 'tests/voice-relay-privilege-gate.test.mjs'
+      - '.github/workflows/voice-relay-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  voice-relay-static-contract:
+    name: Verify fail-closed voice relay source
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run source security contract
+        run: node --test tests/voice-relay-privilege-gate.test.mjs
+      - name: Assert no automatic staging deploy
+        run: echo 'Static source tests only; database SQL and Edge relay are not deployed.'
