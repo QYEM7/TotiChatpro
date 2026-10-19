@@ -6,6 +6,7 @@ on:
       - 'rebuild/flutter-v1'
     paths:
       - 'supabase/patches/voice_moderation_relay_acl_candidate.sql'
+      - 'supabase/patches/room_moderation_public_invoker_candidate.sql'
       - 'supabase/functions/phase2-voice-moderate/**'
       - 'tests/voice-relay-privilege-gate.test.mjs'
       - 'supabase/tests/voice_relay_ephemeral_*.sql'
@@ -64,6 +65,7 @@ jobs:
           fi
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/voice_relay_ephemeral_fixture.sql
           psql -X -v ON_ERROR_STOP=1 -f supabase/patches/voice_moderation_relay_acl_candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/patches/room_moderation_public_invoker_candidate.sql
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/voice_relay_ephemeral_acceptance.sql
       - name: Assert no automatic staging deploy
         run: echo 'Source tests and type check only; database SQL and Edge relay are not deployed.'
