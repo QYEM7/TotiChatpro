@@ -1,3 +1,5 @@
+> **STAGING DEPLOYMENT UPDATE — 2026-10-20:** This document was originally a pre-deployment plan. The relevant changes have now been applied to Staging and verified at the database/schema/permissions level. Real two-device and financial runtime acceptance are still outstanding. See [actual staging cutover report](BETA_STAGING_CUTOVER_20261020.md). The historical preflight discussion below is retained for audit.
+
 # TotiChat Project 01 — Verified room gift chat
 
 Date: 2026-10-20. Branch: `rebuild/flutter-v1`.
