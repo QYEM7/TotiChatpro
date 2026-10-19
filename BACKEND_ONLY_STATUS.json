@@ -48,5 +48,14 @@
   "stagingAuthenticatedDirectWritesBlockedForCriticalTables": true,
   "financialConcurrentGiftQaVerified": false,
   "releaseReadiness90Verified": false,
-  "releaseAllowed": false
+  "releaseAllowed": false,
+  "latestReliabilityWork": [
+    "active-room cleanup before signout, with owner confirmation",
+    "most-recent 50 room chat messages and newest-first DM ordering",
+    "gift idempotency key retained for unchanged financial request payload"
+  ],
+  "latestReliabilityDocument": "docs/BETA_RELIABILITY_FIXES_20261019.md",
+  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39188427349",
+  "latestReliabilityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39247640294",
+  "latestReliabilityCiVerified": false
 }
