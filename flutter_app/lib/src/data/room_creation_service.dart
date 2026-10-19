@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'room_repository.dart';
 
 /// A room is server-created before its image can be uploaded: Storage RLS
-/// allows only /<real room UUID>/cover.webp for the actual room owner.
+/// allows only a server-created room ID followed by /cover.webp.
 /// This client rolls back unfinished creates when possible.
 class RoomCreationService {
   RoomCreationService(this.client);
