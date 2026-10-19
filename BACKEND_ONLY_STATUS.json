@@ -55,7 +55,7 @@
     "gift idempotency key retained for unchanged financial request payload"
   ],
   "latestReliabilityDocument": "docs/BETA_RELIABILITY_FIXES_20261019.md",
-  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333350045",
+  "lastFullyConfirmedFlutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333946888",
   "latestReliabilityCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39247640294",
   "latestReliabilityCiVerified": true,
   "latestFinancialSafety": {
@@ -169,5 +169,25 @@
     "seatGiftCountersImplemented": false,
     "document": "docs/BETA_VERIFIED_ROOM_GIFT_CHAT_20261020.md",
     "productionModified": false
+  },
+  "latestSeatGiftCounter": {
+    "date": "2026-10-20",
+    "clientImplementation": true,
+    "numberOfSeats": 15,
+    "nonScrollingSeatsPreserved": true,
+    "counterMeaning": "settled gifts received in this room by current seated user, summed in coins",
+    "candidateRpc": "supabase/patches/room_seat_verified_gift_totals_candidate.sql",
+    "roomMemberServerAuthorization": true,
+    "includesOnlyVerifiedDoubleLedgerSettlement": true,
+    "countersHideWhenServerRpcUnavailable": true,
+    "refreshIntervalSeconds": 10,
+    "flutterCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39333946888",
+    "flutterAnalyzeAndTestsPassed": true,
+    "postgresCi": "https://github.com/QYEM7/TotiChatpro/actions/runs/39334064037",
+    "postgresAclAndSettlementTestsPassed": true,
+    "stagingDeployed": false,
+    "realDeviceGiftCountersVerified": false,
+    "productionModified": false,
+    "report": "docs/BETA_VERIFIED_SEAT_GIFT_TOTALS_20261020.md"
   }
 }
