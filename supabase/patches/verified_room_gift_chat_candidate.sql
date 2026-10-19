@@ -13,7 +13,7 @@ alter table public.room_messages
 alter table public.room_messages
  add column gift_event_id uuid references public.gift_events(id);
 create unique index room_messages_verified_gift_once
- on public.room_messages(gift_event_id) where gift_event_id is not null;
+ on public.room_messages(gift_event_id);
 
 alter table public.room_messages
  add constraint room_message_gift_origin_check
