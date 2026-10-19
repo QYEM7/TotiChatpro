@@ -214,14 +214,32 @@
   "latestCompactStagingApkBuild": {
     "run": "https://github.com/QYEM7/TotiChatpro/actions/runs/39335237130",
     "sourceCommit": "7591904549efc35cd35b8aa355a6e3d1a078bfce",
-    "statusLastChecked": "in_progress",
-    "compiledApkConfirmed": false,
+    "statusLastChecked": "success",
+    "compiledApkConfirmed": true,
     "sourceAndFlutterUnitTestsPassed": true,
     "releaseSigned": false,
+    "signing": "release-compiled debug-signed for QA only",
     "privateTestOnly": true,
     "packageId": "com.totichat.beta",
     "deviceInstalled": false,
-    "generatedArtifacts": "pending",
+    "arm64": {
+      "artifactId": 12227035170,
+      "artifactName": "TotiChat-Staging-Beta-ARM64-APK",
+      "apkName": "TotiChat-Staging-Beta-arm64.apk",
+      "apkBytes": 21723342,
+      "sha256": "192900c183a32b79622573db7afd57201aa2ae91b9ea49d05832ccd064fe1f88",
+      "archiveVerified": true,
+      "apkZipVerified": true
+    },
+    "arm32": {
+      "artifactId": 12225973370,
+      "artifactName": "TotiChat-Staging-Beta-ARM32-APK",
+      "apkName": "TotiChat-Staging-Beta-arm32.apk",
+      "apkBytes": 19328662,
+      "sha256": "0454bf014b7a29ed01f36a3a56ee90b43f0e3ed15b912c69461b6b232d0c7fda",
+      "archiveVerified": true,
+      "apkZipVerified": true
+    },
     "deviceQaChecklist": "docs/BETA_TWO_PHONE_ACCEPTANCE_20261020.md"
   }
 }
