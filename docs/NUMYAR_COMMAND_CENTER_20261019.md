@@ -81,3 +81,13 @@ Statuses below refer to **end-to-end acceptance evidence**, not source availabil
 
 ## Next checkpoint
 Prepare the device-test matrix and visual screen checklist from the active Flutter client and approved visual reference, then run only the validations actually possible. Do not build or ship a production app as a substitute for missing real-device evidence.
+
+## 2026-10-19 — Staging debug APK build attempt
+
+Owner previously authorized a **test-only** Android APK on Supabase Staging. The dedicated workflow `/.github/workflows/flutter-beta-apk-staging.yml` was committed on the active branch at [commit `639ce3b`](https://github.com/QYEM7/TotiChatpro/commit/639ce3bb4a78db8c9ac9df1cc41b261f6d913704). It runs source analysis/tests, generates Android host source, checks the Staging URL, package `com.totichat.beta`, OAuth callback and microphone/network permissions, then **attempts** `flutter build apk --debug`, verifies ZIP integrity, and uploads the test APK as a 7-day artifact if all steps succeed.
+
+- [Dedicated Android workflow](https://github.com/QYEM7/TotiChatpro/actions/workflows/flutter-beta-apk-staging.yml)
+- **Build status: UNVERIFIED** from the currently available GitHub tool: the workflow file/commit are confirmed, but no build run result, APK artifact, download, installation or device test has been independently confirmed.
+- Do not confuse the historical green *source-only* CI with a successful APK build.
+- Debug APKs are not production-signed or accepted releases. Never deploy them to a public store or production project.
+- If the build succeeds, log its GitHub run ID, SHA256 and Git commit, then perform G1–G6 device acceptance. If it fails, read the exact failed GitHub Actions job logs before modifying code.
