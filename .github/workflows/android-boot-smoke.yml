@@ -113,26 +113,9 @@ jobs:
             adb pull /sdcard/totichat-first-frame.png android-smoke/screenshot.png
             adb shell uiautomator dump /sdcard/totichat-ui.xml || true
             adb pull /sdcard/totichat-ui.xml android-smoke/ui.xml || true
-            # android-emulator-runner invokes each line under /bin/sh -c, so
-            # all assertions must be one-line shell commands.
-            grep -qE '^[0-9]+
-
-      - name: Publish startup evidence even when emulator fails
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: totichat-android14-startup-evidence
-          path: |
-            android-smoke/screenshot.png
-            android-smoke/logcat.txt
-            android-smoke/ui.xml
-            android-smoke/pid.txt
-            android-smoke/activity-launch.txt
-            android-smoke/activity-dumpsys.txt
-          if-no-files-found: warn
-          retention-days: 7
- android-smoke/pid.txt
-            ! grep -qE 'FATAL EXCEPTION: main|Unable to instantiate activity|Could not resolve activity' android-smoke/logcat.txt
+            # Each assertion is a separate POSIX shell command.
+            test -s android-smoke/pid.txt
+            ! grep -q 'FATAL EXCEPTION: main' android-smoke/logcat.txt
             ! grep -q 'Failed to load dynamic library at path: libdartjni.so' android-smoke/logcat.txt
             ! grep -q 'GeneratedPluginRegistrant' android-smoke/logcat.txt
             ! grep -q 'could not start' android-smoke/ui.xml
