@@ -315,7 +315,7 @@ class _RoomScreenState extends State<RoomScreen> {
                                             vertical: 4,
                                           ),
                                           child: Text(
-                                            '${sender}: ${msg.body}',
+                                            '$sender: ${msg.body}',
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.white,
