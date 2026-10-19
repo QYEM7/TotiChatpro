@@ -38,7 +38,10 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   late Stream<List<RoomTextMessage>> _messagesStream;
   late Stream<List<GlobalGiftAnnouncement>> _globalGiftStream;
   late final VoiceBridge _voice;
+  late final RoomModerationRepository _moderation =
+      RoomModerationRepository(Supabase.instance.client);
   bool _voiceBusy = false;
+  bool _moderationBusy = false;
   String? _voiceError;
   final TextEditingController _composer = TextEditingController();
   Timer? _refreshTimer;
@@ -222,7 +225,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _moderateMember(RoomSeatMember member) async {
-    if (!_isOwner || _leaving) return;
+    if (!_isOwner || _leaving || _moderationBusy) return;
     final actions = <String, String>{
       'mute': UiText.get('room_moderate_mute'),
       'allow_mic': UiText.get('room_moderate_allow'),
@@ -265,8 +268,9 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       ),
     );
     if (accepted != true || !mounted) return;
+    setState(() => _moderationBusy = true);
     try {
-      await RoomModerationRepository(Supabase.instance.client).act(
+      await _moderation.act(
         roomId: widget.room.id,
         targetUserId: member.userId,
         action: selected,
@@ -281,6 +285,8 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(UiText.get('room_moderate_failed'))),
       );
+    } finally {
+      if (mounted) setState(() => _moderationBusy = false);
     }
   }
 
