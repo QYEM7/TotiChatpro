@@ -101,6 +101,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _signOutSafely() async {
     if (_signingOut) return;
+    final active = _activeRoom;
+    if (active != null) {
+      final ownsRoom = active.ownerId ==
+          Supabase.instance.client.auth.currentUser?.id;
+      final approved = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          content: Text(ownsRoom
+              ? UiText.get('room_leave_owner_question')
+              : UiText.get('room_leave_question')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(UiText.get('cancel')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(UiText.get('confirm')),
+            ),
+          ],
+        ),
+      );
+      if (approved != true || !mounted) return;
+    }
     setState(() => _signingOut = true);
     try {
       await SessionExit.run(
