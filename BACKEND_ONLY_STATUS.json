@@ -281,6 +281,28 @@
     "previousEmulatorSmokeRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39339720934",
     "previousCiBlocker": "corrupt NDK ZIP download; emulator not started",
     "stgDatabaseUnmodifiedByLaunchDebug": true,
-    "noNewUserApkPromoted": true
+    "noNewUserApkPromoted": true,
+    "emulatorObservedEarlierFailure": "GeneratedPluginRegistrant class missing; libdartjni.so unavailable; SharedPreferences/Supabase initialization failed",
+    "sourceRootCauseFixApplied": true,
+    "androidHostPluginRegistrationRebuiltAfterFlutterCreate": true,
+    "permissionHandlerPinnedVersion": "12.0.3",
+    "newBuildRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39342356938",
+    "newBuildPassed": true,
+    "newBuildSourceCommit": "84113f54cfa8a6b8e649e42691defbee22a3c951",
+    "nativeJniAndFlutterLibsPresentInBothNewApks": true,
+    "arm64": {
+      "path": "TotiChat-Staging-Beta-PluginFix2-arm64.apk",
+      "bytes": 34921486,
+      "sha256": "932f7adb09159cc0e8f44719785bf7609b870bc56714b832a3b9f81c5ef3402c"
+    },
+    "arm32": {
+      "path": "TotiChat-Staging-Beta-PluginFix2-arm32.apk",
+      "bytes": 26968794,
+      "sha256": "a0f136f823ac0ff50e28937114f8ece037bacda0d78fc554c74808c966c8edf5"
+    },
+    "android14RuntimeRetestRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39342340042",
+    "android14RuntimeRetestStatus": "in_progress",
+    "fixedPhysicalUserPhoneVerified": false,
+    "releaseBlocked": true
   }
 }
