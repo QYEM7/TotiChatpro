@@ -210,5 +210,18 @@
     "remainingWarning": "auth_leaked_password_protection",
     "authMethodForBeta": "Google OAuth only"
   },
-  "latestStagingCutoverReport": "docs/BETA_STAGING_CUTOVER_20261020.md"
+  "latestStagingCutoverReport": "docs/BETA_STAGING_CUTOVER_20261020.md",
+  "latestCompactStagingApkBuild": {
+    "run": "https://github.com/QYEM7/TotiChatpro/actions/runs/39335237130",
+    "sourceCommit": "7591904549efc35cd35b8aa355a6e3d1a078bfce",
+    "statusLastChecked": "in_progress",
+    "compiledApkConfirmed": false,
+    "sourceAndFlutterUnitTestsPassed": true,
+    "releaseSigned": false,
+    "privateTestOnly": true,
+    "packageId": "com.totichat.beta",
+    "deviceInstalled": false,
+    "generatedArtifacts": "pending",
+    "deviceQaChecklist": "docs/BETA_TWO_PHONE_ACCEPTANCE_20261020.md"
+  }
 }
