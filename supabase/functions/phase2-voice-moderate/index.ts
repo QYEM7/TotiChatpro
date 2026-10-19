@@ -31,8 +31,17 @@ function userClaims(jwt:string):Record<string,unknown>|null{
   if(!payload||payload.length>5000)return null;
   const raw=atob(payload.replace(/-/g,'+').replace(/_/g,'/'));
   const value=JSON.parse(raw);
-  return value && typeof value==='object' && !Array.isArray(value)
-   ? value as Record<string,unknown> : null;
+  if(!value||typeof value!=='object'||Array.isArray(value))
+   return null;
+  // Only claims needed for actor/session/MFA verification cross the
+  // privileged RPC boundary. Never forward profile or user_metadata.
+  const claims=value as Record<string,unknown>;
+  return {
+   role:claims['role'],
+   sub:claims['sub'],
+   session_id:claims['session_id'],
+   aal:claims['aal']
+  };
  }catch(_){return null;}
 }
 function livekitConfig(){
