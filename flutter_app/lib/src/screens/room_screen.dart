@@ -404,8 +404,8 @@ class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         body: Stack(
           children: [
             Positioned.fill(
-              child: Image.network(
-                'https://raw.githubusercontent.com/mrbalmain11-star/-/main/public/galaxy-room-bg.jpg',
+              child: Image.asset(
+                'assets/images/galaxy-room-bg.jpg',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => const ColoredBox(
                   color: Color(0xFF0D0426),
