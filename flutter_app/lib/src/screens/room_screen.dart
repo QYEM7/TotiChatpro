@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/room_microphone_policy.dart';
 import '../data/room_repository.dart';
 import '../data/voice_bridge.dart';
 import '../data/gift_repository.dart';
@@ -67,10 +68,10 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       final members = await widget.repository.members(widget.room.id);
       final uid = Supabase.instance.client.auth.currentUser?.id;
       if (_voice.microphoneOn &&
-          !members.any((member) =>
-              member.userId == uid &&
-              member.seatNumber != null &&
-              !member.isMuted)) {
+          !RoomMicrophonePolicy.mayPublish(
+            userId: uid,
+            members: members,
+          )) {
         unawaited(_voice.disconnect(widget.room.id)
             .catchError((Object _) {}));
         if (mounted) {
@@ -341,7 +342,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
 
   void _reload() {
     setState(() {
-      _members = widget.repository.members(widget.room.id);
+      _members = _loadMembers();
     });
   }
 
