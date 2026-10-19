@@ -62,10 +62,43 @@ class _GiftSheetState extends State<GiftSheet> {
       setState(() => _error = UiText.get('gift_failed'));
       return;
     }
+    // Protect against accidental high-volume sends. This quote is only an
+    // estimate; the authoritative price and balance are checked by the RPC.
     setState(() {
       _sending = true;
       _error = null;
     });
+    final total = gift.price * _quantity;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(UiText.get('gift_confirm_spend')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(gift.name),
+            Text('${UiText.get('gift_confirm_quantity')}: $_quantity'),
+            Text('${UiText.get('gift_confirm_total')}: $total'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(UiText.get('gift_confirm_cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(UiText.get('gift_send')),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (confirmed != true) {
+      setState(() => _sending = false);
+      return;
+    }
     try {
       final requestKey = PendingGiftRequests.payloadKey(
         senderId: senderId,
