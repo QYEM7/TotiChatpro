@@ -42,6 +42,16 @@ jobs:
       - name: Run Dart and Flutter tests
         working-directory: flutter_app
         run: flutter test
+      - name: Generate Android host files and validate OAuth deep link (no build)
+        working-directory: flutter_app
+        run: bash scripts/prepare_android.sh
+      - name: Store Android host source for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-android-host-source
+          path: flutter_app/android/
+          retention-days: 3
+          if-no-files-found: error
       - name: Confirm no release outputs were produced
         working-directory: flutter_app
         run: |
