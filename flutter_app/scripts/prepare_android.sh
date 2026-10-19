@@ -3,7 +3,11 @@ set -euo pipefail
 
 # Generate the Android host only. Do not build APK/AAB or deploy.
 cd "$(dirname "$0")/.."
-flutter create --platforms=android --org=com.totichat --project-name=totichat --no-pub .
+# A real plugin registry and JNI native assets require pub resolution AFTER the
+# Android host exists. --no-pub previously skipped plugin registration and
+# produced installable APKs missing GeneratedPluginRegistrant/libdartjni.
+flutter create --platforms=android --org=com.totichat --project-name=totichat .
+
 
 python3 - <<'PY'
 from pathlib import Path
@@ -86,5 +90,12 @@ if 'android:label="totichat"' in text:
 if 'android:label="TotiChat Beta"' not in text:
     raise SystemExit("The Android launcher is not clearly identified as beta")
 
-print("Android host & OAuth callback prepared; no Android application was built.")
+# Every beta APK must include registered Android plugins. The old generated
+# host lacked this Java file and Supabase failed before Google login.
+registrant = Path("android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java")
+if not registrant.is_file() or not registrant.read_text(encoding="utf-8").strip():
+    raise SystemExit("Android GeneratedPluginRegistrant missing after flutter create")
+if "sharedpreferences" not in registrant.read_text(encoding="utf-8").lower():
+    raise SystemExit("Android shared_preferences native plugin missing")
+print("Android host, native Flutter plugin registry and OAuth callback prepared.")
 PY
