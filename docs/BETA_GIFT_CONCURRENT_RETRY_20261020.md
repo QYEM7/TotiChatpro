@@ -30,4 +30,4 @@ Required release test: real signed-in Staging accounts on two phones; gift catal
 ## Source tests
 
 - Flutter CI run for latest fix: https://github.com/QYEM7/TotiChatpro/actions/runs/39332611573
-- Outcome: pending confirmation. Do not count as passed until complete.
+- Outcome: **SUCCESS**. Flutter analyze, all Flutter unit/widget tests (including new concurrent request tests), Android host OAuth source check and no-APK guard all passed.
