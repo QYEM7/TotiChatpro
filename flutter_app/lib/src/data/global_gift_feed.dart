@@ -40,6 +40,9 @@ class GlobalGiftFeed {
     // Client additionally enforces approved minimum UNIT price of 7000.
     return client.from('gift_global_announcements')
         .stream(primaryKey: ['id'])
+        // Filter in Postgres BEFORE the top-ten limit, so cheaper recent
+        // gifts never hide qualifying settled announcements.
+        .gte('unit_price', 7000)
         .order('created_at', ascending: false)
         .limit(10)
         .map((rows) => rows
