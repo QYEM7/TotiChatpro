@@ -616,7 +616,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                                       reverse: true,
                                       itemCount: messages.length,
                                       itemBuilder: (context, index) {
-                                        final msg = messages[messages.length - 1 - index];
+                                        final msg = messages[index];
                                         final sender = msg.senderId == me
                                             ? UiText.get('chat_me')
                                             : (names[msg.senderId] ?? msg.senderId.substring(0, 8));
