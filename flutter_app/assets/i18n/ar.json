@@ -109,5 +109,8 @@
   "room_moderate_kick": "إخراج العضو",
   "room_moderate_failed": "رفض الخادم إجراء الإشراف أو تعذّر الاتصال",
   "room_moderate_done": "تم تأكيد إجراء الإشراف",
-  "room_moderate_confirm": "هل تؤكد تنفيذ هذا الإجراء على العضو؟"
+  "room_moderate_confirm": "هل تؤكد تنفيذ هذا الإجراء على العضو؟",
+  "room_minimize": "تصغير الغرفة",
+  "room_leave_first": "غادر غرفتك الحالية قبل دخول غرفة أخرى",
+  "room_restore": "العودة إلى الغرفة"
 }
