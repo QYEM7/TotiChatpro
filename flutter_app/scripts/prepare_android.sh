@@ -51,5 +51,28 @@ if gradle.exists():
         gradle.write_text(config, encoding="utf-8")
     if "minSdk = 24" not in config:
         raise SystemExit("Android minSdk compatibility with image picker requires review")
+# The test package must be isolated from any existing published app.
+# Leave the generated Kotlin namespace unchanged (MainActivity path).
+if not gradle.exists():
+    raise SystemExit("Missing Android Gradle Kotlin configuration")
+config = gradle.read_text(encoding="utf-8")
+if 'applicationId = "com.totichat.totichat"' in config:
+    config = config.replace(
+        'applicationId = "com.totichat.totichat"',
+        'applicationId = "com.totichat.beta"'
+    )
+    gradle.write_text(config, encoding="utf-8")
+if 'applicationId = "com.totichat.beta"' not in config:
+    raise SystemExit("Staging applicationId mismatch; refuse unsafe APK build")
+
+# The launcher is explicitly labeled as a beta so it cannot be confused
+# with a production app on the phone.
+text = manifest.read_text(encoding="utf-8")
+if 'android:label="totichat"' in text:
+    text = text.replace('android:label="totichat"', 'android:label="TotiChat Beta"')
+    manifest.write_text(text, encoding="utf-8")
+if 'android:label="TotiChat Beta"' not in text:
+    raise SystemExit("The Android launcher is not clearly identified as beta")
+
 print("Android host & OAuth callback prepared; no Android application was built.")
 PY
