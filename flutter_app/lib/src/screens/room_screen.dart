@@ -32,7 +32,7 @@ class RoomScreen extends StatefulWidget {
   State<RoomScreen> createState() => _RoomScreenState();
 }
 
-class _RoomScreenState extends State<RoomScreen> {
+class _RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
   late Future<List<RoomSeatMember>> _members;
   late Stream<List<RoomTextMessage>> _messagesStream;
   late Stream<List<GlobalGiftAnnouncement>> _globalGiftStream;
@@ -52,8 +52,9 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _voice = VoiceBridge(Supabase.instance.client);
-    _members = widget.repository.members(widget.room.id);
+    _members = _loadMembers();
     _messagesStream = widget.repository.watchMessages(widget.room.id);
     _globalGiftStream = GlobalGiftFeed(Supabase.instance.client).watch();
     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -61,8 +62,47 @@ class _RoomScreenState extends State<RoomScreen> {
     });
   }
 
+  Future<List<RoomSeatMember>> _loadMembers() async {
+    try {
+      final members = await widget.repository.members(widget.room.id);
+      final uid = Supabase.instance.client.auth.currentUser?.id;
+      if (_voice.microphoneOn &&
+          !members.any((member) =>
+              member.userId == uid &&
+              member.seatNumber != null &&
+              !member.isMuted)) {
+        unawaited(_voice.disconnect(widget.room.id)
+            .catchError((Object _) {}));
+        if (mounted) {
+          setState(() => _voiceError = UiText.get('voice_error'));
+        }
+      }
+      return members;
+    } on PostgrestException catch (error) {
+      if (error.code == '42501') {
+        unawaited(_voice.disconnect(widget.room.id)
+            .catchError((Object _) {}));
+        if (mounted && widget.onLeave != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) widget.onLeave?.call();
+          });
+        }
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused && _voice.microphoneOn) {
+      unawaited(_voice.disconnect(widget.room.id)
+          .catchError((Object _) {}));
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _refreshTimer?.cancel();
     unawaited(_voice.disconnect(widget.room.id).catchError((Object _) {}));
     _composer.dispose();
