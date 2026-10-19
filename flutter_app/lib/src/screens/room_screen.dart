@@ -93,7 +93,7 @@ class _RoomScreenState extends State<RoomScreen> {
               child: Image.network(
                 'https://raw.githubusercontent.com/mrbalmain11-star/-/main/public/galaxy-room-bg.jpg',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const ColoredBox(
+                errorBuilder: (context, error, stackTrace) => const ColoredBox(
                   color: Color(0xFF0D0426),
                 ),
               ),
@@ -261,7 +261,7 @@ class _RoomScreenState extends State<RoomScreen> {
                   ? Image.network(
                       avatar,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.person,
                         color: Colors.white70,
                       ),
