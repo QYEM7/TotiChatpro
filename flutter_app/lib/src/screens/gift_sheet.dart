@@ -26,7 +26,9 @@ class _GiftSheetState extends State<GiftSheet> {
   late Future<_GiftData> _data = _load();
   GiftItem? _selected;
   String? _recipient;
-  String? _requestId;
+  // A retry of the same financial payload must retain its request identity,
+  // even if the user temporarily switches gift/recipient/quantity in the sheet.
+  final Map<(String, String, String, int), String> _requestIds = {};
   int _quantity = 1;
   bool _sending = false;
   String? _error;
@@ -42,7 +44,6 @@ class _GiftSheetState extends State<GiftSheet> {
       if (gift != null) _selected = gift;
       if (recipient != null) _recipient = recipient;
       if (quantity != null) _quantity = quantity;
-      _requestId = null; // New payload => new idempotency identity.
       _error = null;
     });
   }
@@ -54,7 +55,11 @@ class _GiftSheetState extends State<GiftSheet> {
       setState(() => _error = UiText.get('gift_select_recipient'));
       return;
     }
-    final requestId = _requestId ??= _repo.newRequestId();
+    final requestKey = (widget.roomId, recipient, gift.id, _quantity);
+    final requestId = _requestIds.putIfAbsent(
+      requestKey,
+      _repo.newRequestId,
+    );
     setState(() {
       _sending = true;
       _error = null;
