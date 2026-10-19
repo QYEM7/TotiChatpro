@@ -223,11 +223,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 banners[index].url,
                 fit: BoxFit.cover,
                 semanticLabel: banners[index].title,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
               ),
             ),
           ),
-          separatorBuilder: (_, __) => const SizedBox(width: 10),
+          separatorBuilder: (context, index) => const SizedBox(width: 10),
           itemCount: banners.length,
         ),
       );
@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   : Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const ColoredBox(
+                      errorBuilder: (context, error, stackTrace) => const ColoredBox(
                         color: Color(0xFFE2E8F0),
                         child: Icon(Icons.broken_image_outlined),
                       ),
