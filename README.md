@@ -19,6 +19,6 @@ This is the active `rebuild/flutter-v1` development branch.
 - No simulated user, wallet, gift, advertisement or presence state is permitted in LIVE mode.
 
 ## Current proof and pending gates
-- Flutter SDK, dependencies, static analysis, unit tests and **generated Android host source** passed on [CI run 39181891672](https://github.com/QYEM7/TotiChatpro/actions/runs/39181891672). No APK/AAB was built.
+- Flutter SDK, dependencies, static analysis, unit tests and **generated Android host source** passed on [CI run 39188427349](https://github.com/QYEM7/TotiChatpro/actions/runs/39188427349). No APK/AAB was built.
 - See [Beta Slice 03 voice report](docs/FLUTTER_BETA_SLICE_03_VOICE_20261019.md) and [release-readiness G0-G6 matrix](docs/BETA_RELEASE_READINESS_EVIDENCE_20261019.md).
-- Still required: real Google login/deep link on Android; two-account rooms/seats/chat; two-phone LiveKit audio/reconnect/mute; configure and verify Staging LiveKit secrets; room creation and genuine image upload; gift/wallet/admin; exact visual comparison and release approval.
+- Still required: real Google login/deep link on Android; two-account room create/join/minimize/seats/chat; two-phone LiveKit audio/reconnect/mute with Staging secrets; genuine room image upload and gift/wallet/admin transactional QA; exact visual comparison and explicit APK/release approval.
