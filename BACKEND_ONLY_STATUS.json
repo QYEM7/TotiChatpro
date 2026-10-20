@@ -268,14 +268,15 @@
     },
     "deviceRuntimeConfirmed": false,
     "report": "docs/ANDROID_WHITE_SCREEN_RECOVERY_20261020.md",
-    "releaseAllowed": false
+    "releaseAllowed": false,
+    "doNotUseForDeviceQa": true
   },
   "androidLaunchIncident": {
     "date": "2026-10-20",
     "userReports": "Both ARM64 and ARM32 APKs stall on the default Flutter system splash or show blank screen; StartupFix screenshot visibly remains on default Flutter launcher logo.",
     "verifiedUserVisible": "default native Flutter splash visible; first TotiChat frame NOT observed",
     "allLegacyAndStartupFixApksDeviceAccepted": false,
-    "rootCauseConfirmed": false,
+    "rootCauseConfirmed": "Pre-repair native Android plugin registration and libdartjni.so missing from old ARM64/ARM32 APKs; Android emulator log independently reproduced plugin failure",
     "requiresOnDeviceLogcatOrEmulatorEvidence": true,
     "android14EmulatorSmokeRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39340060354",
     "previousEmulatorSmokeRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39339720934",
@@ -301,8 +302,15 @@
       "sha256": "a0f136f823ac0ff50e28937114f8ece037bacda0d78fc554c74808c966c8edf5"
     },
     "android14RuntimeRetestRun": "https://github.com/QYEM7/TotiChatpro/actions/runs/39342340042",
-    "android14RuntimeRetestStatus": "in_progress",
+    "android14RuntimeRetestStatus": "success",
     "fixedPhysicalUserPhoneVerified": false,
-    "releaseBlocked": true
+    "releaseBlocked": true,
+    "userLatestScreenshots": "Native Android compatibility warning plus real TotiChat Beta startup initialization error",
+    "oldStartupFixApksRejected": true,
+    "fixedArm64ApkVerifiedSha256": "932f7adb09159cc0e8f44719785bf7609b870bc56714b832a3b9f81c5ef3402c",
+    "fixedArm32ApkVerifiedSha256": "a0f136f823ac0ff50e28937114f8ece037bacda0d78fc554c74808c966c8edf5",
+    "emulatorActuallyReachedGoogleLogin": true,
+    "emulatorScreenshotEvidence": true,
+    "latestVerifiedStagingOnlyApkBuild": "https://github.com/QYEM7/TotiChatpro/actions/runs/39342356938"
   }
 }
