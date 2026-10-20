@@ -49,6 +49,9 @@ if 'io.flutter.embedding.android.EnableImpeller' not in text:
     text = (text[:match.end()] +
         '\n        <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="false" />' +
         text[match.end():])
+# Show an identifiable native splash while the Flutter engine starts.
+# The previous default Flutter logo gave no indication of engine readiness.
+# Leave engine initialization in Android's normal embedding lifecycle.
 manifest.write_text(text, encoding="utf-8")
 
 assert 'io.flutter.embedding.android.EnableImpeller' in text
