@@ -271,10 +271,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _loading = false;
       });
     } catch (_) {
-      if (mounted) setState(() {
-        _error = UiText.get('profile_load_failed');
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = UiText.get('profile_load_failed');
+          _loading = false;
+        });
+      }
     }
   }
 
