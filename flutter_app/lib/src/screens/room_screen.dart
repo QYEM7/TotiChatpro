@@ -316,15 +316,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     if (_savingSeat || _leaving) return;
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (occupant != null && occupant.userId != userId) {
-      await showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder: (_) => DirectChatSheet(
-          otherUserId: occupant.userId,
-          otherDisplayName: occupant.displayName,
-        ),
-      );
+      await _referenceMemberPopup(occupant);
       return;
     }
     setState(() => _savingSeat = true);
@@ -348,6 +340,114 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     } finally {
       if (mounted) setState(() => _savingSeat = false);
     }
+  }
+
+  Future<void> _referenceMemberPopup(RoomSeatMember member) async {
+    // Only verified seat information is rendered; no invented VIP or CP
+    // status and no account UUID masquerading as a public user ID.
+    final action = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      barrierColor: const Color(0x77000F0D),
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(15, 0, 15, 18),
+            padding: const EdgeInsets.fromLTRB(21, 22, 21, 22),
+            decoration: BoxDecoration(
+              color: ReferencePalette.canvas,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: ReferencePalette.gold.withValues(alpha: .75)),
+              boxShadow: const [
+                BoxShadow(blurRadius: 26, color: Color(0x44002D20)),
+              ],
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Container(
+                width: 98, height: 98,
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(colors: [
+                    ReferencePalette.paleGold,
+                    ReferencePalette.gold,
+                    ReferencePalette.paleGold,
+                  ]),
+                ),
+                child: CircleAvatar(
+                  backgroundColor: ReferencePalette.mint,
+                  backgroundImage: member.avatarUrl == null
+                    ? null : NetworkImage(member.avatarUrl!),
+                  child: member.avatarUrl != null
+                    ? null : const Icon(Icons.person_rounded,
+                        color: ReferencePalette.deep, size: 50),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(member.displayName,
+                key: const Key('reference-member-name'),
+                maxLines: 2, overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: ReferencePalette.ink,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 9),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11, vertical: 6),
+                decoration: BoxDecoration(
+                  color: ReferencePalette.paleMint,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(member.isMuted ? Icons.mic_off_outlined
+                      : Icons.mic_none_rounded,
+                    color: ReferencePalette.teal, size: 16),
+                  const SizedBox(width: 6),
+                  Text(member.isMuted
+                    ? UiText.get('reference_member_muted')
+                    : UiText.get('reference_member_on_seat'),
+                    style: const TextStyle(
+                      color: ReferencePalette.deep, fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    )),
+                ]),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(width: double.infinity, child: FilledButton.icon(
+                key: const Key('reference-member-dm'),
+                onPressed: () => Navigator.pop(sheetContext, true),
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: Text(UiText.get('reference_member_message')),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  backgroundColor: ReferencePalette.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(17)),
+                ),
+              )),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (action != true || !mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => DirectChatSheet(
+        otherUserId: member.userId,
+        otherDisplayName: member.displayName,
+      ),
+    );
   }
 
   Future<void> _referenceRoomActions() async {
