@@ -531,59 +531,199 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
+  Future<void> _showPersonalDetails(_ProfileData profile) async {
+    await showModalBottomSheet<void>(
+      context:context,
+      showDragHandle:true,
+      backgroundColor:ReferencePalette.canvas,
+      builder:(sheetContext)=>SafeArea(child:Padding(
+        padding:const EdgeInsets.fromLTRB(21,4,21,23),
+        child:Column(mainAxisSize:MainAxisSize.min,children:[
+          const Icon(Icons.account_circle_outlined,
+            size:50,color:ReferencePalette.teal),
+          const SizedBox(height:8),
+          Text(profile.name,
+            style:const TextStyle(color:ReferencePalette.ink,
+              fontSize:20,fontWeight:FontWeight.w900)),
+          const SizedBox(height:10),
+          Text('${UiText.get('profile_public_id')}: '
+            '${profile.publicId ?? UiText.get('profile_public_id_pending')}'),
+          const SizedBox(height:14),
+          FilledButton(
+            onPressed:()=>Navigator.pop(sheetContext),
+            child:Text(UiText.get('confirm')),
+          ),
+        ]),
+      )),
+    );
+  }
+
+  Future<void> _showWallet(_ProfileData profile) async {
+    final wallet=profile.wallet;
+    await showModalBottomSheet<void>(
+      context:context,
+      showDragHandle:true,
+      backgroundColor:ReferencePalette.canvas,
+      builder:(sheetContext)=>SafeArea(child:Padding(
+        padding:const EdgeInsets.all(22),
+        child:Column(mainAxisSize:MainAxisSize.min,children:[
+          Text(UiText.get('wallet_balance'),
+            style:const TextStyle(fontSize:20,fontWeight:FontWeight.w900,
+              color:ReferencePalette.ink)),
+          const SizedBox(height:13),
+          if(wallet==null)
+            Text(UiText.get('wallet_no_balance'))
+          else ...[
+            Text('${UiText.get('wallet_coins')}: ${wallet.coins}'),
+            const SizedBox(height:6),
+            Text('${UiText.get('wallet_diamonds')}: ${wallet.diamonds}'),
+          ],
+          const SizedBox(height:13),
+          Text(UiText.get('reference_wallet_agent_notice'),
+            textAlign:TextAlign.center,
+            style:const TextStyle(color:Color(0xFF6E847A),fontSize:12)),
+        ]),
+      )),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => FutureBuilder<_ProfileData>(
-        future: _profile,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text(UiText.get('profile_load_failed')));
-          }
-          final profile = snapshot.requireData;
-          return ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              const CircleAvatar(
-                radius: 36,
-                child: Icon(Icons.person, size: 34),
+  Widget build(BuildContext context)=>FutureBuilder<_ProfileData>(
+    future:_profile,
+    builder:(context,snapshot) {
+      if(snapshot.connectionState!=ConnectionState.done) {
+        return const Center(child:CircularProgressIndicator(color:ReferencePalette.teal));
+      }
+      if(snapshot.hasError) {
+        return Center(child:Text(UiText.get('profile_load_failed')));
+      }
+      final user=snapshot.requireData;
+      return ListView(
+        key:const Key('reference-profile'),
+        padding:const EdgeInsets.fromLTRB(16,7,16,32),
+        children:[
+          Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
+            IconButton(
+              tooltip:UiText.get('reference_settings'),
+              icon:const Icon(Icons.settings_outlined,color:ReferencePalette.ink),
+              onPressed:()=>_showPersonalDetails(user),
+            ),
+            Text(UiText.get('profile'),
+              style:const TextStyle(color:ReferencePalette.ink,
+                fontSize:16,fontWeight:FontWeight.w900)),
+            IconButton(
+              tooltip:UiText.get('refresh'),
+              icon:const Icon(Icons.refresh_rounded,color:ReferencePalette.ink),
+              onPressed:()=>setState((){}),
+            ),
+          ]),
+          const SizedBox(height:11),
+          Center(child:Stack(children:[
+            Container(
+              width:95,height:95,
+              padding:const EdgeInsets.all(5),
+              decoration:const BoxDecoration(
+                shape:BoxShape.circle,
+                gradient:LinearGradient(colors:[
+                  ReferencePalette.paleGold,
+                  ReferencePalette.gold,
+                  ReferencePalette.paleGold,
+                ]),
               ),
-              const SizedBox(height: 24),
-              Text(
-                '${UiText.get('profile_name')}: ${profile.name}',
+              child:const CircleAvatar(
+                backgroundColor:ReferencePalette.mint,
+                child:Icon(Icons.person_rounded,size:50,color:ReferencePalette.deep),
               ),
-              const SizedBox(height: 12),
-              Text(
-                '${UiText.get('profile_public_id')}: ${profile.publicId ?? UiText.get('profile_public_id_pending')}',
-              ),
-              const SizedBox(height: 22),
-              ListTile(
-                leading: const Icon(Icons.account_balance_wallet_outlined),
-                title: Text(UiText.get('wallet_balance')),
-                subtitle: Text(profile.wallet == null
-                    ? UiText.get('wallet_no_balance')
-                    : '${UiText.get('wallet_coins')}: ${profile.wallet!.coins}    ${UiText.get('wallet_diamonds')}: ${profile.wallet!.diamonds}'),
-              ),
-              if (profile.admin?.canEnterCenter == true)
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.admin_panel_settings_outlined),
-                    title: Text(UiText.get('admin_center')),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const AdminCenterScreen(),
-                      ),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 34),
-              OutlinedButton(
-                onPressed: widget.onSignOut,
-                child: Text(UiText.get('sign_out')),
-              ),
-            ],
-          );
-        },
+            ),
+            const Positioned(bottom:1,right:0,child:CircleAvatar(
+              radius:15,backgroundColor:ReferencePalette.teal,
+              child:Icon(Icons.verified_outlined,size:18,color:Colors.white),
+            )),
+          ])),
+          const SizedBox(height:11),
+          Center(child:Text(user.name,
+            maxLines:1,overflow:TextOverflow.ellipsis,
+            style:const TextStyle(fontSize:22,
+              fontWeight:FontWeight.w900,color:ReferencePalette.ink))),
+          const SizedBox(height:6),
+          Center(child:Text(
+            'ID: ${user.publicId ?? UiText.get('profile_public_id_pending')}',
+            style:const TextStyle(fontSize:11,color:Color(0xFF668176)),
+          )),
+          const SizedBox(height:24),
+          Row(children:[
+            Expanded(child:_stat(
+              Icons.monetization_on_outlined,
+              user.wallet?.coins.toString() ?? '—',
+              UiText.get('wallet_coins'))),
+            const SizedBox(width:10),
+            Expanded(child:_stat(
+              Icons.diamond_outlined,
+              user.wallet?.diamonds.toString() ?? '—',
+              UiText.get('wallet_diamonds'))),
+          ]),
+          const SizedBox(height:17),
+          ReferenceVipStrip(
+            title:'TotiChat VIP',
+            description:UiText.get('reference_vip_promo'),
+            onTap:()=>_showPersonalDetails(user),
+          ),
+          const SizedBox(height:20),
+          ReferenceInfoTile(
+            title:UiText.get('wallet_balance'),
+            icon:Icons.account_balance_wallet_outlined,
+            onTap:()=>_showWallet(user),
+            subtitle:UiText.get('reference_wallet_agent_notice'),
+          ),
+          ReferenceInfoTile(
+            title:UiText.get('reference_my_info'),
+            icon:Icons.person_outline,
+            onTap:()=>_showPersonalDetails(user),
+          ),
+          if(user.admin?.canEnterCenter==true)
+            ReferenceInfoTile(
+              title:UiText.get('admin_center'),
+              icon:Icons.shield_outlined,
+              onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(
+                builder:(_)=>const AdminCenterScreen(),
+              )),
+            ),
+          ReferenceInfoTile(
+            title:UiText.get('reference_settings'),
+            icon:Icons.settings_outlined,
+            onTap:()=>_showPersonalDetails(user),
+          ),
+          const SizedBox(height:18),
+          OutlinedButton.icon(
+            onPressed:widget.onSignOut,
+            icon:const Icon(Icons.logout),
+            label:Text(UiText.get('sign_out')),
+            style:OutlinedButton.styleFrom(
+              minimumSize:const Size.fromHeight(49),
+              foregroundColor:ReferencePalette.deep,
+              side:const BorderSide(color:ReferencePalette.teal),
+              shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(18)),
+            ),
+          ),
+        ],
       );
+    },
+  );
+
+  Widget _stat(IconData icon,String value,String label)=>Container(
+    padding:const EdgeInsets.symmetric(horizontal:12,vertical:16),
+    decoration:BoxDecoration(
+      color:Colors.white,
+      borderRadius:BorderRadius.circular(19),
+      border:Border.all(color:const Color(0xFFDDF1E7)),
+    ),
+    child:Column(children:[
+      Icon(icon,color:ReferencePalette.teal,size:25),
+      const SizedBox(height:5),
+      Text(value,style:const TextStyle(
+        fontSize:21,fontWeight:FontWeight.w900,color:ReferencePalette.ink)),
+      const SizedBox(height:3),
+      Text(label,style:const TextStyle(fontSize:11,color:Color(0xFF789488))),
+    ]),
+  );
 }
