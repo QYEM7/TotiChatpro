@@ -96,15 +96,15 @@ class _WalletScreenState extends State<WalletScreen> {
                 padding: EdgeInsets.all(24), child: CircularProgressIndicator(),
               ));
             }
-            if (snapshot.hasError) return PremiumEmptyState(
+            if (snapshot.hasError) {\n              return PremiumEmptyState(
               icon: Icons.error_outline,
               title: UiText.get('wallet_history_error'),
-            );
+            );\n            }
             final rows = snapshot.requireData;
-            if (rows.isEmpty) return PremiumEmptyState(
+            if (rows.isEmpty) {\n              return PremiumEmptyState(
               icon: Icons.receipt_long_outlined,
               title: UiText.get('wallet_history_empty'),
-            );
+            );\n            }
             return Column(children: rows.map((entry) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: PremiumRow(
@@ -114,7 +114,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 trailing: Text('${entry['amount_change'] ?? ''}  ${entry['currency'] ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
-            )).toList()),
+            )).toList());
           },
         ),
       ]),
@@ -187,16 +187,16 @@ class _StoreScreenState extends State<StoreScreen> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.hasError) return PremiumEmptyState(
+            if (snapshot.hasError) {\n              return PremiumEmptyState(
               icon: Icons.wifi_off_outlined,
               title: UiText.get('store_load_failed'),
               action: TextButton(onPressed: _refresh, child: Text(UiText.get('retry'))),
-            );
+            );\n            }
             final all = snapshot.requireData;
             final items = all.where((item) =>
               _category == 'all' || item['category'] == _category).toList();
-            if (items.isEmpty) return PremiumEmptyState(
-              icon: Icons.shopping_bag_outlined, title: UiText.get('store_empty'));
+            if (items.isEmpty) {\n              return PremiumEmptyState(
+              icon: Icons.shopping_bag_outlined, title: UiText.get('store_empty'));\n            }
             return RefreshIndicator(
               onRefresh: _refresh,
               child: GridView.builder(
@@ -278,18 +278,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) return PremiumEmptyState(
+          if (snapshot.hasError) {\n              return PremiumEmptyState(
             icon: Icons.error_outline,
             title: UiText.get('notifications_load_failed'),
             action: TextButton(onPressed: _refresh, child: Text(UiText.get('retry'))),
-          );
+          );\n            }
           final rows = snapshot.requireData.where(
             (x) => !_unreadOnly || x['read_at'] == null,
           ).toList();
-          if (rows.isEmpty) return PremiumEmptyState(
+          if (rows.isEmpty) {\n              return PremiumEmptyState(
             icon: Icons.notifications_none_rounded,
             title: UiText.get('notifications_empty'),
-          );
+          );\n            }
           return RefreshIndicator(
             onRefresh: _refresh,
             child: ListView.separated(
