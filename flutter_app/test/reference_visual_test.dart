@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:totichat/src/core/reference_visuals.dart';
 import 'package:totichat/src/core/ui_text.dart';
 
@@ -10,6 +12,21 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     await UiText.load();
+    // flutter_test defaults to Ahem squares. Load actual Arabic and icon
+    // fonts for a credible raster comparison with the reference boards.
+    final arabic = Platform.environment['TOTICHAT_PREVIEW_FONT'];
+    if (arabic == null || !File(arabic).existsSync()) {
+      throw StateError('Reference screenshot requires a real Arabic font path');
+    }
+    final arabicLoader = FontLoader('ReferenceArabic')
+      ..addFont(File(arabic).readAsBytes().then(ByteData.sublistView));
+    await arabicLoader.load();
+    final icons = Platform.environment['TOTICHAT_ICONS_FONT'];
+    if (icons != null && File(icons).existsSync()) {
+      final iconLoader = FontLoader('MaterialIcons')
+        ..addFont(File(icons).readAsBytes().then(ByteData.sublistView));
+      await iconLoader.load();
+    }
   });
   testWidgets('approved illustrated home components render and export evidence', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -22,7 +39,21 @@ void main() {
       Directionality(
         textDirection: TextDirection.rtl,
         child: MaterialApp(
-          theme: ThemeData(useMaterial3: true),
+          theme: ThemeData(
+            useMaterial3: true,
+            fontFamily: 'ReferenceArabic',
+            scaffoldBackgroundColor: ReferencePalette.canvas,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: ReferencePalette.teal,
+            ).copyWith(
+              primary: ReferencePalette.teal,
+              surface: Colors.white,
+            ),
+            navigationBarTheme: const NavigationBarThemeData(
+              backgroundColor: Colors.white,
+              indicatorColor: ReferencePalette.mint,
+            ),
+          ),
           home: RepaintBoundary(
             key: key,
             child: Scaffold(
