@@ -1,8 +1,12 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
 import '../core/green_theme.dart';
+import '../core/reference_visuals.dart';
+import 'reference_explore.dart';
+import 'reference_notifications.dart';
 import '../core/session_exit.dart';
 import '../data/room_repository.dart';
 import '../data/gift_repository.dart';
@@ -167,6 +171,97 @@ class _HomeScreenState extends State<HomeScreen> {
     _openRoom(created);
   }
 
+  void _openDiscovery({String query = ''}) {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: ReferenceExploreScreen(
+          repository: _repository,
+          initialQuery: query,
+          onJoinRoom: (room) {
+            Navigator.of(context).pop();
+            _enter(room);
+          },
+          onCreateRoom: () {
+            Navigator.of(context).pop();
+            _createRoom();
+          },
+        ),
+      ),
+    ));
+  }
+
+  void _openNotifications() => Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => const Directionality(
+      textDirection: TextDirection.rtl,
+      child: ReferenceNotificationsScreen(),
+    )),
+  );
+
+  Widget _referenceHeader() => Padding(
+    padding: const EdgeInsets.fromLTRB(17, 8, 17, 11),
+    child: Row(children: [
+      const ReferenceBrand(),
+      const Spacer(),
+      IconButton(
+        key: const Key('reference-search-open'),
+        onPressed: _openDiscovery,
+        icon: const Icon(Icons.search_rounded,size:26,color:ReferencePalette.ink),
+        tooltip: UiText.get('home_discover'),
+      ),
+      const SizedBox(width: 3),
+      IconButton(
+        key: const Key('reference-notifications-open'),
+        onPressed: _openNotifications,
+        icon: const Icon(Icons.notifications_none_rounded,size:26,color:ReferencePalette.ink),
+        tooltip: UiText.get('reference_notifications_title'),
+      ),
+    ]),
+  );
+
+  Widget _referenceCategories() {
+    final entries=<({IconData icon,String label,Color color,Color background,VoidCallback tap})>[
+      (
+        icon:Icons.local_fire_department_rounded,
+        label:UiText.get('reference_trending'),
+        color:const Color(0xFFE66F3B),
+        background:const Color(0xFFFFF1E5),
+        tap:_openDiscovery,
+      ),
+      (
+        icon:Icons.diamond_outlined,
+        label:'VIP',
+        color:ReferencePalette.teal,
+        background:ReferencePalette.mint,
+        tap:_openDiscovery,
+      ),
+      (
+        icon:Icons.groups_2_rounded,
+        label:UiText.get('reference_new_rooms'),
+        color:ReferencePalette.teal,
+        background:ReferencePalette.mint,
+        tap:_openDiscovery,
+      ),
+      (
+        icon:Icons.star_rounded,
+        label:UiText.get('reference_featured'),
+        color:const Color(0xFFDAAB33),
+        background:const Color(0xFFFFF5E2),
+        tap:_openDiscovery,
+      ),
+    ];
+    return Padding(
+      padding:const EdgeInsets.only(top:15,bottom:17),
+      child:Row(
+        mainAxisAlignment:MainAxisAlignment.spaceAround,
+        children:entries.map((e)=>Expanded(child:ReferenceCategory(
+          icon:e.icon,label:e.label,color:e.color,
+          background:e.background,onTap:e.tap,
+        ))).toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const mint = GreenTheme.mint;
@@ -181,49 +276,11 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Scaffold(
       key: const Key('totichat-green-home'),
-      backgroundColor: GreenTheme.background,
+      backgroundColor: ReferencePalette.canvas,
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              color: GreenTheme.highlight,
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 15),
-              child: Row(children: [
-                Text(
-                  UiText.get('home_party'),
-                  style: const TextStyle(
-                    color: Color(0xFF064E3B),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Text(
-                  UiText.get('home_royal'),
-                  style: const TextStyle(
-                    color: Color(0xAA064E3B),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Text(
-                  UiText.get('home_discover'),
-                  style: const TextStyle(
-                    color: Color(0xAA064E3B),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.refresh, color: Color(0xFF064E3B)),
-                  onPressed: _refresh,
-                  tooltip: UiText.get('refresh'),
-                ),
-              ]),
-            ),
+            _referenceHeader(),
             Expanded(
               child: switch (_tab) {
                 0 => _homeBody(),
@@ -292,63 +349,98 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _homeBody() => FutureBuilder<_HomeData>(
-        future: _future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    UiText.get('rooms_load_failed'),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: _refresh,
-                  child: Text(UiText.get('retry')),
-                ),
-              ]),
-            );
-          }
-          final data = snapshot.requireData;
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                if (data.banners.isNotEmpty)
-                  SliverToBoxAdapter(child: _bannerStrip(data.banners)),
-                if (data.rooms.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(child: Text(UiText.get('rooms_empty'))),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(14, 16, 14, 24),
-                    sliver: SliverGrid.builder(
-                      itemCount: data.rooms.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 15,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: 0.86,
-                      ),
-                      itemBuilder: (context, index) => _roomCard(
-                        data.rooms[index],
-                      ),
-                    ),
-                  ),
-              ],
+    future:_future,
+    builder:(context,snapshot) {
+      if(snapshot.connectionState!=ConnectionState.done) {
+        return const Center(child:CircularProgressIndicator(color:ReferencePalette.teal));
+      }
+      if(snapshot.hasError) {
+        return Center(child:Column(mainAxisSize:MainAxisSize.min,children:[
+          Text(UiText.get('rooms_load_failed')),
+          const SizedBox(height:12),
+          OutlinedButton(onPressed:_refresh,child:Text(UiText.get('retry'))),
+        ]));
+      }
+      final data=snapshot.requireData;
+      return RefreshIndicator(
+        onRefresh:_refresh,
+        child:CustomScrollView(
+          key:const Key('reference-home-scroll'),
+          physics:const AlwaysScrollableScrollPhysics(),
+          slivers:[
+            SliverPadding(
+              padding:const EdgeInsets.fromLTRB(17,9,17,4),
+              sliver:SliverToBoxAdapter(child:ReferenceWelcomeHero(
+                title:UiText.get('reference_welcome_title'),
+                subtitle:UiText.get('reference_welcome_subtitle'),
+              )),
             ),
-          );
-        },
+            if(data.banners.isNotEmpty)
+              SliverToBoxAdapter(child:_bannerStrip(data.banners)),
+            SliverPadding(
+              padding:const EdgeInsets.symmetric(horizontal:12),
+              sliver:SliverToBoxAdapter(child:_referenceCategories()),
+            ),
+            SliverPadding(
+              padding:const EdgeInsets.fromLTRB(16,0,16,10),
+              sliver:SliverToBoxAdapter(child:ReferenceSection(
+                title:UiText.get('reference_featured_rooms'),
+                actionLabel:UiText.get('reference_show_all'),
+                onAction:_openDiscovery,
+              )),
+            ),
+            if(data.rooms.isEmpty)
+              SliverPadding(
+                padding:const EdgeInsets.symmetric(horizontal:16),
+                sliver:SliverToBoxAdapter(child:ReferenceEmptyRooms(
+                  title:UiText.get('rooms_empty'),
+                  subtitle:UiText.get('reference_no_rooms_explanation'),
+                  actionLabel:UiText.get('room_create'),
+                  onAction:_createRoom,
+                )),
+              )
+            else
+              SliverPadding(
+                padding:const EdgeInsets.fromLTRB(15,0,15,15),
+                sliver:SliverGrid.builder(
+                  itemCount:math.min(data.rooms.length,4),
+                  gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount:2,
+                    mainAxisSpacing:12,
+                    crossAxisSpacing:12,
+                    childAspectRatio:.98,
+                  ),
+                  itemBuilder:(context,index)=>_roomCard(data.rooms[index]),
+                ),
+              ),
+            if(data.rooms.isNotEmpty) ...[
+              SliverPadding(
+                padding:const EdgeInsets.fromLTRB(16,8,16,10),
+                sliver:SliverToBoxAdapter(child:ReferenceSection(
+                  title:UiText.get('reference_suggested_rooms'),
+                  actionLabel:UiText.get('reference_show_all'),
+                  onAction:_openDiscovery,
+                )),
+              ),
+              SliverPadding(
+                padding:const EdgeInsets.fromLTRB(15,0,15,15),
+                sliver:SliverGrid.builder(
+                  itemCount:math.min(data.rooms.length,4),
+                  gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount:2,mainAxisSpacing:12,crossAxisSpacing:12,
+                    childAspectRatio:1.08,
+                  ),
+                  itemBuilder:(context,index)=>_roomCard(
+                    data.rooms[(index+2)%data.rooms.length]),
+                ),
+              ),
+            ],
+            const SliverToBoxAdapter(child:SizedBox(height:96)),
+          ],
+        ),
       );
+    },
+  );
 
   Widget _bannerStrip(List<HomeBanner> banners) => SizedBox(
         height: 150,
@@ -372,46 +464,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
 
-  Widget _roomCard(RoomSummary room) {
-    final imageUrl = _repository.coverUrl(room);
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: _joining ? null : () => _enter(room),
-      child: Column(children: [
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: SizedBox.expand(
-              child: imageUrl == null
-                  ? const ColoredBox(
-                      color: GreenTheme.highlight,
-                      child: Icon(Icons.headphones, color: Color(0xFF64748B)),
-                    )
-                  : Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const ColoredBox(
-                        color: Color(0xFFE2E8F0),
-                        child: Icon(Icons.broken_image_outlined),
-                      ),
-                    ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          room.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: GreenTheme.ink,
-          ),
-        ),
-      ]),
-    );
-  }
+  Widget _roomCard(RoomSummary room) => ReferenceRoomThumbnail(
+    title:room.title,
+    coverUrl:_repository.coverUrl(room),
+    onTap:_joining?null:()=>_enter(room),
+  );
+
 }
 
 class _ProfileView extends StatefulWidget {
