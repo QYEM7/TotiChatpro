@@ -2,6 +2,14 @@
 
 Status: **OPEN — physical-device startup failed**. Scope: TotiChat Flutter Beta on `rebuild/flutter-v1`; Supabase **Staging only**.
 
+## Release fix acceptance evidence (2026-10-21)
+
+- **Android 14 release/AOT emulator test PASS:** [Actions run 39614042988](https://github.com/QYEM7/TotiChatpro/actions/runs/39614042988), source commit `62f3b3d178781002312181007837e113b878f315` on draft PR [#32](https://github.com/QYEM7/TotiChatpro/pull/32), targeting `rebuild/flutter-v1` and **not main**.
+- This job resolved `shared_preferences_android 2.4.28`, built actual release-mode Flutter, cold-launched twice, and confirmed the Google login screen visible in both UI dumps and screenshots. Logs contain **zero** `NoSuchMethodError`, `FATAL EXCEPTION` or `E/flutter` lines.
+- **Only Staging QA:** artifact `TotiChat-Staging-Beta-PreferencesFix-ARM64` ID `12352386710`. Extracted APK: `TotiChat-Staging-Beta-PreferencesFix-ARM64.apk`; SHA-256 `f3d346e4d19daf15983cf02be2b23032d76a0af17ee337ee0df27f19d02882ca`; 34,650,839 bytes. ZIP structure, APK structure and native `libapp.so`, `libflutter.so`, `libdartjni.so` for ARM64 checked.
+- **Status remains OPEN on physical device:** Prior ARM64 PluginFix2 failed on target phone; user has successfully run only the offline renderer diagnostic so far. The new full beta APK needs a fresh target-phone test. This success must not be presented as validated Google OAuth, voice or full beta acceptance.
+- PR #32 remains **draft/unmerged**. No production or main branch updates. This test package is release-compiled but **debug-signed**.
+
 ## Physical device result and release crash isolation (2026-10-21)
 
 - User shared an on-phone screenshot showing the distinct offline diagnostic's dark blue page and **"Flutter frame visible"** text. This confirms that the separately packaged ARM64 diagnostic can render a Flutter frame on the target device. Do not conflate it with the full beta, Google Auth or LiveKit.
