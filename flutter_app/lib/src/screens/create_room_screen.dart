@@ -80,7 +80,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: const Color(0xFFFDFBF7),
+        backgroundColor: const Color(0xFFF4FBF7),
         appBar: AppBar(title: Text(UiText.get('room_create'))),
         body: SafeArea(
           child: Form(
@@ -94,7 +94,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     width: 168,
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE2E8F0),
+                      color: const Color(0xFFE2F8ED),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: _cover == null
