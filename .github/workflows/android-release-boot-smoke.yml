@@ -90,6 +90,11 @@ jobs:
           flutter analyze lib test
           flutter test
           bash scripts/prepare_android.sh
+          # Supabase uses app_links; Flutter's default handler must be off.
+          grep -Fq 'android:name="flutter_deeplinking_enabled" android:value="false"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:scheme="com.totichat.beta"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:host="auth"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:pathPrefix="/callback"' android/app/src/main/AndroidManifest.xml
           grep -Fq 'applicationId = "com.totichat.beta"' android/app/build.gradle.kts
           grep -Fq 'signingConfig = signingConfigs.getByName("debug")' android/app/build.gradle.kts
           grep -Fq 'io.flutter.embedding.android.EnableImpeller' android/app/src/main/AndroidManifest.xml
