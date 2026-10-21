@@ -78,6 +78,9 @@ jobs:
           set -euo pipefail
           flutter --version
           flutter pub get
+          # The 2.5.0 JNI implementation breaks Android release under R8.
+          # Check the actual resolved version, not only pubspec declarations.
+          flutter pub deps --style=compact | grep -E 'shared_preferences_android 2\\.4\\.28($|[[:space:]])'
           flutter analyze lib test
           flutter test
           bash scripts/prepare_android.sh
