@@ -146,5 +146,10 @@
   "reference_settings": "الإعدادات",
   "reference_wallet_agent_notice": "الشحن عبر وكلاء TotiChat المعتمدين فقط",
   "reference_vip_promo": "ميزات وتجارب حصرية لعشاق TotiChat",
-  "reference_my_info": "معلوماتي"
+  "reference_my_info": "معلوماتي",
+  "reference_dm_search": "ابحث في محادثاتك",
+  "reference_dm_all": "الكل",
+  "reference_dm_unread": "غير المقروءة",
+  "reference_dm_failed": "تعذّر تحميل الرسائل حالياً",
+  "reference_dm_empty_details": "عندما تتواصل مع شخص في TotiChat ستظهر محادثتك هنا."
 }
