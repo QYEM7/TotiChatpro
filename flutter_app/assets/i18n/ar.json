@@ -151,5 +151,6 @@
   "reference_dm_all": "الكل",
   "reference_dm_unread": "غير المقروءة",
   "reference_dm_failed": "تعذّر تحميل الرسائل حالياً",
-  "reference_dm_empty_details": "عندما تتواصل مع شخص في TotiChat ستظهر محادثتك هنا."
+  "reference_dm_empty_details": "عندما تتواصل مع شخص في TotiChat ستظهر محادثتك هنا.",
+  "reference_dm_back": "رجوع"
 }
