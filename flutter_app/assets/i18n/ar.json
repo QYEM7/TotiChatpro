@@ -161,5 +161,11 @@
   "reference_room_privacy": "خصوصية الغرفة",
   "reference_room_public": "عامة",
   "reference_room_private": "خاصة",
-  "reference_room_privacy_helper": "تُحفظ خصوصية الغرفة عند إنشائها. الغرفة الخاصة تحتاج دعوة أو صلاحية دخول."
+  "reference_room_privacy_helper": "تُحفظ خصوصية الغرفة عند إنشائها. الغرفة الخاصة تحتاج دعوة أو صلاحية دخول.",
+  "reference_admin_heading": "لوحة التحكم",
+  "reference_admin_secure": "صلاحيات الإدارة محمية من الخادم",
+  "reference_admin_sections": "أقسام الإدارة",
+  "reference_admin_banners": "مقترحات البنرات",
+  "reference_admin_readonly": "عرض الصلاحية الممنوحة للحساب",
+  "reference_admin_no_sections": "لا تتوفر أقسام إدارية إضافية لحسابك"
 }
