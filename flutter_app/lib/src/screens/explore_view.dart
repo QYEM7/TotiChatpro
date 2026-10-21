@@ -184,3 +184,4 @@ class _ExploreViewState extends State<ExploreView> {
           ),
         ),
       ]);
+}
