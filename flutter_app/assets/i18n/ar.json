@@ -139,5 +139,12 @@
   "discover_no_rooms_help_reference": "الغرف التي تظهر هنا حقيقية فقط، ولا توجد بيانات تجريبية.",
   "discover_public_reference": "غرفة عامة",
   "rooms_section_reference": "الغرف الصوتية",
-  "clear": "مسح"
+  "clear": "مسح",
+  "reference_gifts_all": "الكل",
+  "reference_gifts_premium": "فاخر",
+  "reference_gifts_royal": "ملكي",
+  "reference_settings": "الإعدادات",
+  "reference_wallet_agent_notice": "الشحن عبر وكلاء TotiChat المعتمدين فقط",
+  "reference_vip_promo": "ميزات وتجارب حصرية لعشاق TotiChat",
+  "reference_my_info": "معلوماتي"
 }
