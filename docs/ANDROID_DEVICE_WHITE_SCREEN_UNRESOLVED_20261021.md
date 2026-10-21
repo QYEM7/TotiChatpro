@@ -2,6 +2,14 @@
 
 Status: **OPEN — physical-device startup failed**. Scope: TotiChat Flutter Beta on `rebuild/flutter-v1`; Supabase **Staging only**.
 
+## Physical device result and release crash isolation (2026-10-21)
+
+- User shared an on-phone screenshot showing the distinct offline diagnostic's dark blue page and **"Flutter frame visible"** text. This confirms that the separately packaged ARM64 diagnostic can render a Flutter frame on the target device. Do not conflate it with the full beta, Google Auth or LiveKit.
+- Android 14 x86_64 **release/AOT** emulator workflow [39608557363](https://github.com/QYEM7/TotiChatpro/actions/runs/39608557363) reached the beta bootstrap failure screen. Archived logcat for `com.totichat.beta` PID 2871 shows `PlatformException` caused by `java.lang.NoSuchMethodError` for `io.flutter.plugins.sharedpreferences.SharedPreferencesApiRegistrar.getAll(String, List, Continuation)`. Thus Flutter engine first frame works, but **release native prefs initialization breaks** in that environment. The artifact reports the full app failure and does not establish a target-device fix.
+- The documented upstream regression is `shared_preferences_android 2.5.0`: Pigeon JNI interop and release R8 rewrite. `flutter_app/pubspec.yaml` now explicitly pins `shared_preferences_android: 2.4.28`, and release test workflow verifies that the resolved dependency version is 2.4.28. The Flutter SDK, LiveKit voice source, Supabase backend and `main` were not changed.
+- A **new successful Release/AOT emulator cold-start check** plus a real ARM64 device login screen remain mandatory before closing the incident. Do not claim fixed on the user's phone until a fresh full beta is tested there.
+- This report intentionally omits the personal screenshot and account/device identifiers from Git history.
+
 ## Follow-up evidence
 
 - Android 14 **debug** emulator run [39606302117](https://github.com/QYEM7/TotiChatpro/actions/runs/39606302117) passed. This still does not verify the ARM64 release build on a physical phone.
