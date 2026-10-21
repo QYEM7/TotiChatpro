@@ -268,8 +268,11 @@ class _HomeScreenState extends State<HomeScreen> {
               color: GreenTheme.highlight,
               padding: const EdgeInsets.fromLTRB(18, 20, 18, 15),
               child: Row(children: [
-                const Icon(Icons.flutter_dash_rounded,
-                    color: GreenTheme.primaryDark, size: 28),
+                const CircleAvatar(
+                  radius: 16,
+                  backgroundColor: GreenTheme.primaryDark,
+                  backgroundImage: AssetImage('assets/images/toti-login-bg.jpg'),
+                ),
                 const SizedBox(width: 9),
                 const Expanded(
                   child: Text('TotiChat',
