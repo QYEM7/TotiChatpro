@@ -39,8 +39,10 @@ class _RelationshipScreenState extends State<RelationshipScreen> {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError) {\n              return PremiumEmptyState(
-          icon: Icons.error_outline, title: UiText.get('cp_load_failed'));\n            }
+        if (snapshot.hasError) {
+              return PremiumEmptyState(
+          icon: Icons.error_outline, title: UiText.get('cp_load_failed'));
+            }
         final relationships = snapshot.requireData;
         return ListView(padding: const EdgeInsets.all(16), children: [
           PremiumSurface(child: Row(children: [
@@ -77,9 +79,13 @@ class _RelationshipScreenState extends State<RelationshipScreen> {
               if (typeSnapshot.connectionState != ConnectionState.done) {
                 return const LinearProgressIndicator();
               }
-              if (!typeSnapshot.hasData) {\n      return Text(UiText.get('cp_load_failed'));\n    }
+              if (!typeSnapshot.hasData) {
+      return Text(UiText.get('cp_load_failed'));
+    }
               final types = typeSnapshot.requireData;
-              if (types.isEmpty) {\n              return Text(UiText.get('cp_no_active_types'));\n            }
+              if (types.isEmpty) {
+              return Text(UiText.get('cp_no_active_types'));
+            }
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -140,14 +146,18 @@ class _AgencyScreenState extends State<AgencyScreen> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.hasError) {\n              return PremiumEmptyState(
-              icon: Icons.error_outline, title: UiText.get('agency_load_failed'));\n            }
+            if (snapshot.hasError) {
+              return PremiumEmptyState(
+              icon: Icons.error_outline, title: UiText.get('agency_load_failed'));
+            }
             final rows = snapshot.requireData;
-            if (rows.isEmpty) {\n              return PremiumEmptyState(
+            if (rows.isEmpty) {
+              return PremiumEmptyState(
               icon: Icons.apartment_outlined,
               title: UiText.get('agency_empty'),
               subtitle: UiText.get('agency_notice'),
-            );\n            }
+            );
+            }
             return Column(children: rows.map((a) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: PremiumRow(
@@ -203,11 +213,15 @@ class _MusicQueueScreenState extends State<MusicQueueScreen> {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {\n              return PremiumEmptyState(
-            icon: Icons.error_outline, title: UiText.get('music_load_failed'));\n            }
+          if (snapshot.hasError) {
+              return PremiumEmptyState(
+            icon: Icons.error_outline, title: UiText.get('music_load_failed'));
+            }
           final rows = snapshot.requireData;
-          if (rows.isEmpty) {\n              return PremiumEmptyState(
-            icon: Icons.queue_music_rounded, title: UiText.get('music_empty'));\n            }
+          if (rows.isEmpty) {
+              return PremiumEmptyState(
+            icon: Icons.queue_music_rounded, title: UiText.get('music_empty'));
+            }
           return Column(children: rows.map((entry) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: PremiumRow(
