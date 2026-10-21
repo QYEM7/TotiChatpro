@@ -46,17 +46,17 @@ class _AdminCenterScreenState extends State<AdminCenterScreen> {
                 ),
                 if (authority.canReadReports)
                   PremiumRow(
-                    icon: const Icon(Icons.assessment_outlined),
+                    icon: Icons.assessment_outlined,
                     title: UiText.get('admin_reports_permission'),
                   ),
                 if (authority.canManageCatalogs)
-                  ListTile(
-                    leading: const Icon(Icons.inventory_2_outlined),
+                  PremiumRow(
+                    icon: Icons.inventory_2_outlined,
                     title: UiText.get('admin_catalog_permission'),
                   ),
                 if (authority.canManageHostAgencies)
-                  ListTile(
-                    leading: const Icon(Icons.groups_outlined),
+                  PremiumRow(
+                    icon: Icons.groups_outlined,
                     title: UiText.get('admin_agencies_permission'),
                   ),
                 const Divider(),
