@@ -18,6 +18,9 @@ dependencies:
   flutter_image_compress: ^2.5.1
   uuid: ^4.5.1
   shared_preferences: 2.5.5
+  # Android 2.5.0 uses Pigeon JNI that is broken by R8 in release mode.
+  # Pin the endorsed platform implementation until its upstream fix lands.
+  shared_preferences_android: 2.4.28
 
 dev_dependencies:
   flutter_test:
