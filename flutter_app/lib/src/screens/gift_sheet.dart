@@ -154,7 +154,7 @@ class _GiftSheetState extends State<GiftSheet> {
     return Container(
       height: MediaQuery.sizeOf(context).height * 0.69,
       decoration: const BoxDecoration(
-        color: Color(0xF2180F2E),
+        color: Color(0xEF062D27),
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),
       child: SafeArea(
@@ -196,7 +196,7 @@ class _GiftSheetState extends State<GiftSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: DropdownButtonFormField<String>(
                   initialValue: _recipient,
-                  dropdownColor: const Color(0xFF24143C),
+                  dropdownColor: const Color(0xFF0E4B3F),
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     label: Text(UiText.get('gift_select_recipient'),
