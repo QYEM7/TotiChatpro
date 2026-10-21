@@ -10,6 +10,12 @@ on:
     paths:
       - '.github/workflows/android-release-boot-smoke.yml'
       - 'flutter_app/**'
+  pull_request:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/android-release-boot-smoke.yml'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +28,7 @@ concurrency:
 jobs:
   android14-release-first-frame:
     name: Android 14 release/AOT login screen (x86_64 emulator)
-    if: github.ref == 'refs/heads/rebuild/flutter-v1'
+    if: github.ref == 'refs/heads/rebuild/flutter-v1' || github.base_ref == 'rebuild/flutter-v1'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -37,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1'
+          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1' || test "${GITHUB_BASE_REF:-}" = 'rebuild/flutter-v1'
           grep -Fq 'https://rziaedugbdwefbefcxjt.supabase.co' lib/src/core/staging_config.dart
           grep -Fq 'configuredUrl == url' lib/src/core/staging_config.dart
           grep -Fq 'runApp(StartupGate(' lib/main.dart
@@ -151,11 +157,11 @@ jobs:
               echo "FAIL: Flutter bootstrap error screen (pass ${pass})"
               exit 1
             fi
-            if ! grep -q 'Toti Chat' "android-release-smoke/ui-${pass}.xml"; then
+            if ! grep -q 'TotiChat' "android-release-smoke/ui-${pass}.xml"; then
               echo "FAIL: Google login not visible to accessibility (pass ${pass})"
               exit 1
             fi
-            echo "PASS: release/AOT Google login visible, cold launch ${pass}"
+            echo "PASS: release/AOT green Google login visible, cold launch ${pass}"
           done
           EOSH
           sh -n android-release-smoke/run-release-test.sh
@@ -185,6 +191,32 @@ jobs:
             android-release-smoke/release-apk-sha256.txt
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Stage test-only ARM64 green-shell APK after two emulator passes
+        if: success()
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ../android-release-smoke/ui-1.xml
+          test -f ../android-release-smoke/ui-2.xml
+          grep -q 'TotiChat' ../android-release-smoke/ui-1.xml
+          grep -q 'TotiChat' ../android-release-smoke/ui-2.xml
+          test -s build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          mkdir -p ../dist/green-staging
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ../dist/green-staging/TotiChat-Staging-Green-ARM64.apk
+          unzip -t ../dist/green-staging/TotiChat-Staging-Green-ARM64.apk >/dev/null
+          (cd ../dist/green-staging && sha256sum TotiChat-Staging-Green-ARM64.apk > SHA256SUMS.txt)
+
+      - name: Upload green interface phone acceptance candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-Staging-Green-ARM64
+          path: dist/green-staging/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
 
       - name: No distribution or production changes
         run: echo 'Emulator-only release-mode diagnosis; no artifact APK published, no Play deployment and no backend writes.'
