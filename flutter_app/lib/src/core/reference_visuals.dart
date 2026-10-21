@@ -19,10 +19,11 @@ class ReferenceBrand extends StatelessWidget {
   const ReferenceBrand({super.key, this.compact = false});
   final bool compact;
   @override
-  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
+  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min,
+    textDirection: TextDirection.ltr, children: [
         ClipOval(
           child: Image.asset(
-            'assets/images/toti-login-bg.jpg',
+            'assets/images/reference_approved_falcon.webp',
             width: compact ? 30 : 37,
             height: compact ? 30 : 37,
             fit: BoxFit.cover,
@@ -107,38 +108,42 @@ class ReferenceWelcomeHero extends StatelessWidget {
   });
   final String title;
   final String subtitle;
+
+  /// The image below is a verified crop from the exact concept sheet
+  /// approved by the user, rather than a new generic visual approximation.
   @override
   Widget build(BuildContext context) => Container(
     height: 146,
     clipBehavior: Clip.antiAlias,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(22),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF002A24),Color(0xFF135D4D),Color(0xFF002B27)],
-      ),
-      boxShadow: const [BoxShadow(color:Color(0x33045640),blurRadius:16,offset:Offset(0,8))],
+      boxShadow: const [
+        BoxShadow(color: Color(0x33045640),blurRadius:16,offset:Offset(0,8)),
+      ],
     ),
-    child: Stack(children: [
-      const Positioned.fill(child: CustomPaint(painter: WelcomeIllumination())),
-      Positioned.fill(child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 45),
-        child: Center(child: Column(mainAxisSize:MainAxisSize.min,children:[
-          Text(title,maxLines:2,textAlign:TextAlign.center,
-            style: const TextStyle(color:Colors.white,fontSize:19,
-              fontWeight:FontWeight.w900,shadows:[Shadow(color:Colors.black45,blurRadius:8)])),
-          const SizedBox(height:5),
-          Text(subtitle,maxLines:2,textAlign:TextAlign.center,
-            style: const TextStyle(color:Color(0xFFFBEFD5),fontSize:13,fontWeight:FontWeight.w600)),
-        ])),
-      )),
-      Positioned(bottom:9,left:0,right:0,child:Row(mainAxisAlignment:MainAxisAlignment.center,
-        children:List.generate(3,(i)=>Container(
-          margin:const EdgeInsets.symmetric(horizontal:3),height:6,width:6,
-          decoration:BoxDecoration(shape:BoxShape.circle,color:i==0?Colors.white:Colors.white54),
-        )))),
-    ]),
+    child: Semantics(
+      label: '$title. $subtitle',
+      child: Image.asset(
+        'assets/images/reference_approved_welcome.webp',
+        fit: BoxFit.fill,
+        width: double.infinity,
+        errorBuilder: (context,error,stackTrace) => Stack(children: [
+          const Positioned.fill(child:ColoredBox(color:ReferencePalette.deep)),
+          const Positioned.fill(child:CustomPaint(painter:WelcomeIllumination())),
+          Center(child:Padding(
+            padding:const EdgeInsets.symmetric(horizontal:42),
+            child:Column(mainAxisSize:MainAxisSize.min,children:[
+              Text(title,textAlign:TextAlign.center,
+                style:const TextStyle(fontWeight:FontWeight.w900,
+                  color:Colors.white,fontSize:18)),
+              const SizedBox(height:7),
+              Text(subtitle,textAlign:TextAlign.center,
+                style:const TextStyle(color:ReferencePalette.paleGold,fontSize:13)),
+            ]),
+          )),
+        ]),
+      ),
+    ),
   );
 }
 
