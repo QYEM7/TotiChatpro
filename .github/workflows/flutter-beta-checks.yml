@@ -42,6 +42,19 @@ jobs:
       - name: Resolve Dart dependencies
         working-directory: flutter_app
         run: flutter pub get
+      - name: Load real fonts for Arabic visual accuracy
+        shell: bash
+        run: |
+          set -euo pipefail
+          arabic_font="$(fc-match -f '%{file}\n' ':lang=ar' | head -n 1)"
+          test -s "$arabic_font"
+          echo "TOTICHAT_PREVIEW_FONT=$arabic_font" >> "$GITHUB_ENV"
+          if test -n "${FLUTTER_ROOT:-}"; then
+            icon_font="$(find "$FLUTTER_ROOT/bin/cache/artifacts/material_fonts" -name 'MaterialIcons-Regular.otf' -print -quit 2>/dev/null || true)"
+            if test -n "$icon_font" && test -s "$icon_font"; then
+              echo "TOTICHAT_ICONS_FONT=$icon_font" >> "$GITHUB_ENV"
+            fi
+          fi
       - name: Analyze Flutter source and tests
         working-directory: flutter_app
         run: flutter analyze lib test
