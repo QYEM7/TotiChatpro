@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/green_theme.dart';
 import '../core/session_exit.dart';
 import '../data/room_repository.dart';
 import '../data/gift_repository.dart';
@@ -168,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const mint = Color(0xFF26C096);
+    const mint = GreenTheme.mint;
     return PopScope(
       canPop: _activeRoom == null,
       onPopInvokedWithResult: (didPop, result) {
@@ -179,13 +180,14 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           Scaffold(
-      backgroundColor: const Color(0xFFFDFBF7),
+      key: const Key('totichat-green-home'),
+      backgroundColor: GreenTheme.background,
       body: SafeArea(
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              color: mint,
+              color: GreenTheme.highlight,
               padding: const EdgeInsets.fromLTRB(18, 20, 18, 15),
               child: Row(children: [
                 Text(
@@ -382,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SizedBox.expand(
               child: imageUrl == null
                   ? const ColoredBox(
-                      color: Color(0xFFE2E8F0),
+                      color: GreenTheme.highlight,
                       child: Icon(Icons.headphones, color: Color(0xFF64748B)),
                     )
                   : Image.network(
@@ -404,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF1E293B),
+            color: GreenTheme.ink,
           ),
         ),
       ]),
