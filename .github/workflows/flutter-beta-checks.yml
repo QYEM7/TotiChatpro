@@ -48,12 +48,18 @@ jobs:
       - name: Run Dart and Flutter tests
         working-directory: flutter_app
         run: flutter test
+      - name: Render approved UI composition as a real Flutter golden image
+        working-directory: flutter_app
+        env:
+          TOTICHAT_CAPTURE_GOLDEN: '1'
+        run: flutter test --update-goldens test/reference_visual_test.dart
+
       - name: Upload actual Flutter reference composition for visual review
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: totichat-reference-home-flutter-screenshot
-          path: flutter_app/build/design_previews/reference-home-empty.png
+          path: flutter_app/test/goldens/reference-home-empty.png
           retention-days: 7
           if-no-files-found: error
 
