@@ -15,7 +15,7 @@ class RelationshipScreen extends StatefulWidget {
 }
 
 class _RelationshipScreenState extends State<RelationshipScreen> {
-  late Future<List<Map<String, dynamic>>> _relationships = _load();
+  late final Future<List<Map<String, dynamic>>> _relationships = _load();
 
   Future<List<Map<String, dynamic>>> _load() async {
     final id = Supabase.instance.client.auth.currentUser?.id;
@@ -39,8 +39,8 @@ class _RelationshipScreenState extends State<RelationshipScreen> {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError) return PremiumEmptyState(
-          icon: Icons.error_outline, title: UiText.get('cp_load_failed'));
+        if (snapshot.hasError) {\n              return PremiumEmptyState(
+          icon: Icons.error_outline, title: UiText.get('cp_load_failed'));\n            }
         final relationships = snapshot.requireData;
         return ListView(padding: const EdgeInsets.all(16), children: [
           PremiumSurface(child: Row(children: [
@@ -77,9 +77,9 @@ class _RelationshipScreenState extends State<RelationshipScreen> {
               if (typeSnapshot.connectionState != ConnectionState.done) {
                 return const LinearProgressIndicator();
               }
-              if (!typeSnapshot.hasData) return Text(UiText.get('cp_load_failed'));
+              if (!typeSnapshot.hasData) {\n      return Text(UiText.get('cp_load_failed'));\n    }
               final types = typeSnapshot.requireData;
-              if (types.isEmpty) return Text(UiText.get('cp_no_active_types'));
+              if (types.isEmpty) {\n              return Text(UiText.get('cp_no_active_types'));\n            }
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -140,14 +140,14 @@ class _AgencyScreenState extends State<AgencyScreen> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.hasError) return PremiumEmptyState(
-              icon: Icons.error_outline, title: UiText.get('agency_load_failed'));
+            if (snapshot.hasError) {\n              return PremiumEmptyState(
+              icon: Icons.error_outline, title: UiText.get('agency_load_failed'));\n            }
             final rows = snapshot.requireData;
-            if (rows.isEmpty) return PremiumEmptyState(
+            if (rows.isEmpty) {\n              return PremiumEmptyState(
               icon: Icons.apartment_outlined,
               title: UiText.get('agency_empty'),
               subtitle: UiText.get('agency_notice'),
-            );
+            );\n            }
             return Column(children: rows.map((a) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: PremiumRow(
@@ -173,7 +173,7 @@ class MusicQueueScreen extends StatefulWidget {
 }
 
 class _MusicQueueScreenState extends State<MusicQueueScreen> {
-  late Future<List<Map<String, dynamic>>> _queue = _load();
+  late final Future<List<Map<String, dynamic>>> _queue = _load();
 
   Future<List<Map<String, dynamic>>> _load() async {
     final rows = await Supabase.instance.client.from('room_music_queue')
@@ -203,11 +203,11 @@ class _MusicQueueScreenState extends State<MusicQueueScreen> {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) return PremiumEmptyState(
-            icon: Icons.error_outline, title: UiText.get('music_load_failed'));
+          if (snapshot.hasError) {\n              return PremiumEmptyState(
+            icon: Icons.error_outline, title: UiText.get('music_load_failed'));\n            }
           final rows = snapshot.requireData;
-          if (rows.isEmpty) return PremiumEmptyState(
-            icon: Icons.queue_music_rounded, title: UiText.get('music_empty'));
+          if (rows.isEmpty) {\n              return PremiumEmptyState(
+            icon: Icons.queue_music_rounded, title: UiText.get('music_empty'));\n            }
           return Column(children: rows.map((entry) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: PremiumRow(
