@@ -316,7 +316,7 @@ class ReferenceInfoTile extends StatelessWidget {
       color:Colors.white,
       border:Border.all(color:const Color(0xFFE6F3EC)),
     ),
-    child:ListTile(
+    child:Material(type:MaterialType.transparency,child:ListTile(
       leading:Container(
         width:38,height:38,
         decoration:BoxDecoration(
@@ -328,6 +328,6 @@ class ReferenceInfoTile extends StatelessWidget {
       subtitle:subtitle==null?null:Text(subtitle!,style:const TextStyle(fontSize:11)),
       trailing:onTap==null?null:const Icon(Icons.chevron_left,size:20),
       onTap:onTap,
-    ),
+    )),
   );
 }
