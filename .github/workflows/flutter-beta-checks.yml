@@ -48,6 +48,15 @@ jobs:
       - name: Run Dart and Flutter tests
         working-directory: flutter_app
         run: flutter test
+      - name: Upload actual Flutter reference composition for visual review
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-reference-home-flutter-screenshot
+          path: flutter_app/build/design_previews/reference-home-empty.png
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Generate Android host files and validate OAuth deep link (no build)
         working-directory: flutter_app
         run: bash scripts/prepare_android.sh
