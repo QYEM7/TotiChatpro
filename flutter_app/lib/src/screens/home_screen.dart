@@ -8,6 +8,7 @@ import '../core/reference_visuals.dart';
 import 'reference_explore.dart';
 import 'reference_notifications.dart';
 import 'reference_wallet.dart';
+import 'reference_services.dart';
 import '../core/session_exit.dart';
 import '../data/room_repository.dart';
 import '../data/gift_repository.dart';
@@ -655,6 +656,24 @@ class _ProfileViewState extends State<_ProfileView> {
             icon:Icons.account_balance_wallet_outlined,
             onTap:_showWallet,
             subtitle:UiText.get('reference_wallet_agent_notice'),
+          ),
+          ReferenceInfoTile(
+            title:UiText.get('reference_store_title'),
+            icon:Icons.storefront_outlined,
+            onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(
+              builder:(_)=>const ReferenceStoreScreen())),
+          ),
+          ReferenceInfoTile(
+            title:UiText.get('reference_cp_title'),
+            icon:Icons.favorite_outline,
+            onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(
+              builder:(_)=>const ReferenceCpScreen())),
+          ),
+          ReferenceInfoTile(
+            title:UiText.get('reference_agencies_title'),
+            icon:Icons.apartment_outlined,
+            onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(
+              builder:(_)=>const ReferenceAgenciesScreen())),
           ),
           ReferenceInfoTile(
             title:UiText.get('reference_my_info'),
