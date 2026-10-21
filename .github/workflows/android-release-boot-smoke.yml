@@ -10,6 +10,11 @@ on:
     paths:
       - '.github/workflows/android-release-boot-smoke.yml'
       - 'flutter_app/**'
+  pull_request:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - '.github/workflows/android-release-boot-smoke.yml'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +27,7 @@ concurrency:
 jobs:
   android14-release-first-frame:
     name: Android 14 release/AOT login screen (x86_64 emulator)
-    if: github.ref == 'refs/heads/rebuild/flutter-v1'
+    if: github.ref == 'refs/heads/rebuild/flutter-v1' || github.base_ref == 'rebuild/flutter-v1'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -37,7 +42,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1'
+          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1' || test "${GITHUB_BASE_REF:-}" = 'rebuild/flutter-v1'
           grep -Fq 'https://rziaedugbdwefbefcxjt.supabase.co' lib/src/core/staging_config.dart
           grep -Fq 'configuredUrl == url' lib/src/core/staging_config.dart
           grep -Fq 'runApp(StartupGate(' lib/main.dart
@@ -186,5 +191,36 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+      # This is only a test installation candidate. Release-compiled with
+      # the generated disposable debug key; never uploaded to the Play Store.
+      # Publish only after both emulator cold launches pass.
+      - name: Stage and checksum isolated ARM64 Staging APK
+        if: success()
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ../android-release-smoke/ui-1.xml
+          test -f ../android-release-smoke/ui-2.xml
+          grep -q 'Toti Chat' ../android-release-smoke/ui-1.xml
+          grep -q 'Toti Chat' ../android-release-smoke/ui-2.xml
+          test -f build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          mkdir -p ../dist/android-release-fix
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
+             ../dist/android-release-fix/TotiChat-Staging-Beta-PreferencesFix-ARM64.apk
+          unzip -t ../dist/android-release-fix/*.apk >/dev/null
+          (cd ../dist/android-release-fix && sha256sum *.apk > SHA256SUMS.txt)
+          echo 'Release/AOT candidate validated in Android 14 x86_64 emulator; physical ARM64 runtime is still not verified.'
+
+      - name: Upload Staging-only ARM64 acceptance candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-Staging-Beta-PreferencesFix-ARM64
+          path: dist/android-release-fix/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
+
       - name: No distribution or production changes
-        run: echo 'Emulator-only release-mode diagnosis; no artifact APK published, no Play deployment and no backend writes.'
+        run: echo 'Test-only debug-signed release/AOT APK; no Play deployment and no backend writes.'
