@@ -103,6 +103,60 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      # android-emulator-runner executes each line as an independent shell
+      # command. A multi-line for-loop directly in its script property breaks
+      # with "expecting done". Use one standalone POSIX script instead.
+      - name: Prepare self-contained emulator test script
+        shell: bash
+        run: |
+          mkdir -p android-release-smoke
+          cat > android-release-smoke/run-release-test.sh <<'EOSH'
+          #!/bin/sh
+          set -eu
+          adb shell input keyevent KEYCODE_WAKEUP
+          adb shell wm dismiss-keyguard || true
+          adb install -r android-release-smoke/boot-smoke-release.apk
+          for pass in 1 2; do
+            adb shell am force-stop com.totichat.beta || true
+            adb logcat -c
+            adb shell am start -W -n com.totichat.beta/com.totichat.totichat.MainActivity > "android-release-smoke/launch-${pass}.txt"
+            if [ "$pass" = 1 ]; then sleep 30; else sleep 18; fi
+            adb shell pidof com.totichat.beta > "android-release-smoke/pid-${pass}.txt" || true
+            adb shell screencap -p /sdcard/totichat-release.png
+            adb pull /sdcard/totichat-release.png "android-release-smoke/screenshot-${pass}.png"
+            adb shell uiautomator dump /sdcard/totichat-release.xml || true
+            adb pull /sdcard/totichat-release.xml "android-release-smoke/ui-${pass}.xml" || true
+            adb logcat -d -v time > "android-release-smoke/logcat-${pass}.txt"
+            if ! test -s "android-release-smoke/pid-${pass}.txt"; then
+              echo "FAIL: release application process not running (pass ${pass})"
+              exit 1
+            fi
+            test -s "android-release-smoke/screenshot-${pass}.png"
+            if ! test -s "android-release-smoke/ui-${pass}.xml"; then
+              echo "FAIL: no Android UI dump (pass ${pass})"
+              exit 1
+            fi
+            if grep -q 'FATAL EXCEPTION: main' "android-release-smoke/logcat-${pass}.txt"; then
+              echo "FAIL: fatal Android exception (pass ${pass})"
+              exit 1
+            fi
+            if grep -q 'Failed to load dynamic library at path: libdartjni.so' "android-release-smoke/logcat-${pass}.txt"; then
+              echo "FAIL: missing JNI runtime library (pass ${pass})"
+              exit 1
+            fi
+            if grep -q 'could not start' "android-release-smoke/ui-${pass}.xml"; then
+              echo "FAIL: Flutter bootstrap error screen (pass ${pass})"
+              exit 1
+            fi
+            if ! grep -q 'Toti Chat' "android-release-smoke/ui-${pass}.xml"; then
+              echo "FAIL: Google login not visible to accessibility (pass ${pass})"
+              exit 1
+            fi
+            echo "PASS: release/AOT Google login visible, cold launch ${pass}"
+          done
+          EOSH
+          sh -n android-release-smoke/run-release-test.sh
+
       - name: Cold-launch release app twice and capture evidence
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -112,34 +166,7 @@ jobs:
           profile: pixel_2
           emulator-boot-timeout: 600
           disable-animations: true
-          script: |
-            # This script runs with /bin/sh, not Bash.
-            set -eu
-            mkdir -p android-release-smoke
-            adb shell input keyevent KEYCODE_WAKEUP
-            adb shell wm dismiss-keyguard || true
-            adb install -r android-release-smoke/boot-smoke-release.apk
-            for pass in 1 2; do
-              adb shell am force-stop com.totichat.beta || true
-              adb logcat -c
-              adb shell am start -W -n com.totichat.beta/com.totichat.totichat.MainActivity > "android-release-smoke/launch-${pass}.txt"
-              if [ "$pass" = 1 ]; then sleep 30; else sleep 18; fi
-              adb shell pidof com.totichat.beta > "android-release-smoke/pid-${pass}.txt" || true
-              adb shell screencap -p /sdcard/totichat-release.png
-              adb pull /sdcard/totichat-release.png "android-release-smoke/screenshot-${pass}.png"
-              adb shell uiautomator dump /sdcard/totichat-release.xml || true
-              adb pull /sdcard/totichat-release.xml "android-release-smoke/ui-${pass}.xml" || true
-              adb logcat -d -v time | grep -E 'com.totichat.beta|flutter|Flutter|AndroidRuntime|libdartjni|EGL|OpenGLRenderer' | tail -n 800 > "android-release-smoke/logcat-${pass}.txt" || true
-              test -s "android-release-smoke/pid-${pass}.txt"
-              test -s "android-release-smoke/screenshot-${pass}.png"
-              test -s "android-release-smoke/ui-${pass}.xml"
-              ! grep -q 'FATAL EXCEPTION: main' "android-release-smoke/logcat-${pass}.txt"
-              ! grep -q 'Failed to load dynamic library at path: libdartjni.so' "android-release-smoke/logcat-${pass}.txt"
-              ! grep -q 'could not start' "android-release-smoke/ui-${pass}.xml"
-              # A running process by itself is NOT a startup pass.
-              grep -q 'Toti Chat' "android-release-smoke/ui-${pass}.xml"
-              echo "PASS: release/AOT reached actual Google login, cold launch ${pass}"
-            done
+          script: sh android-release-smoke/run-release-test.sh
 
       - name: Retain release runtime evidence even on failure
         if: always()
