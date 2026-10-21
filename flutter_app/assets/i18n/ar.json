@@ -167,5 +167,9 @@
   "reference_admin_sections": "أقسام الإدارة",
   "reference_admin_banners": "مقترحات البنرات",
   "reference_admin_readonly": "عرض الصلاحية الممنوحة للحساب",
-  "reference_admin_no_sections": "لا تتوفر أقسام إدارية إضافية لحسابك"
+  "reference_admin_no_sections": "لا تتوفر أقسام إدارية إضافية لحسابك",
+  "reference_wallet_total": "رصيد حسابك",
+  "reference_wallet_history": "سجل المعاملات",
+  "reference_wallet_no_history": "ما عندك معاملات مسجلة بعد",
+  "reference_wallet_failed": "تعذّر تحميل المحفظة، جرّب مرة ثانية"
 }
