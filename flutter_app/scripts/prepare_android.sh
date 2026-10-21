@@ -88,9 +88,9 @@ if 'applicationId = "com.totichat.beta"' not in config:
 # with a production app on the phone.
 text = manifest.read_text(encoding="utf-8")
 if 'android:label="totichat"' in text:
-    text = text.replace('android:label="totichat"', 'android:label="TotiChat Beta"')
+    text = text.replace('android:label="totichat"', 'android:label="TotiChat Green Beta"')
     manifest.write_text(text, encoding="utf-8")
-if 'android:label="TotiChat Beta"' not in text:
+if 'android:label="TotiChat Green Beta"' not in text:
     raise SystemExit("The Android launcher is not clearly identified as beta")
 
 # Every beta APK must include registered Android plugins. The old generated
