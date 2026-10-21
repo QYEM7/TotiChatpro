@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:totichat/src/core/reference_visuals.dart';
+import 'package:totichat/src/core/ui_text.dart';
 
 /// Captures real Flutter-rendered components against approved board #02.
 /// Zero data deliberately: no fake rooms or balances are published to users.
 void main() {
   testWidgets('approved illustrated home components render and export evidence', (tester) async {
+    await UiText.load();
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -40,24 +42,24 @@ void main() {
                   Expanded(child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
                     children: [
-                      const ReferenceWelcomeHero(
-                        title: 'Welcome to TotiChat',
-                        subtitle: 'Where voices meet friends',
+                      ReferenceWelcomeHero(
+                        title: UiText.get('reference_welcome_title'),
+                        subtitle: UiText.get('reference_welcome_subtitle'),
                       ),
                       const SizedBox(height: 18),
                       Row(children: [
-                        _category(Icons.local_fire_department_rounded, 'Popular', const Color(0xFFDA6835)),
+                        _category(Icons.local_fire_department_rounded, UiText.get('reference_trending'), const Color(0xFFDA6835)),
                         _category(Icons.diamond_outlined, 'VIP', ReferencePalette.teal),
-                        _category(Icons.groups_rounded, 'New rooms', ReferencePalette.teal),
-                        _category(Icons.star_rounded, 'Featured', ReferencePalette.gold),
+                        _category(Icons.groups_rounded, UiText.get('reference_new_rooms'), ReferencePalette.teal),
+                        _category(Icons.star_rounded, UiText.get('reference_featured'), ReferencePalette.gold),
                       ]),
                       const SizedBox(height: 16),
-                      const ReferenceSection(title: 'Featured rooms'),
+                      ReferenceSection(title: UiText.get('reference_featured_rooms')),
                       const SizedBox(height: 7),
                       ReferenceEmptyRooms(
-                        title: 'No public rooms',
-                        subtitle: 'Live rooms will appear here when available.',
-                        actionLabel: 'Create room',
+                        title: UiText.get('rooms_empty'),
+                        subtitle: UiText.get('reference_no_rooms_explanation'),
+                        actionLabel: UiText.get('room_create'),
                         onAction: () {},
                       ),
                       const SizedBox(height: 20),
@@ -68,9 +70,9 @@ void main() {
               bottomNavigationBar: NavigationBar(
                 selectedIndex: 0,
                 destinations: const [
-                  NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-                  NavigationDestination(icon: Icon(Icons.chat_bubble_outline), label: 'Messages'),
-                  NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profile'),
+                  NavigationDestination(icon: Icon(Icons.home), label: 'الرئيسية'),
+                  NavigationDestination(icon: Icon(Icons.chat_bubble_outline), label: 'الرسائل'),
+                  NavigationDestination(icon: Icon(Icons.person_outline), label: 'أنا'),
                 ],
               ),
             ),
