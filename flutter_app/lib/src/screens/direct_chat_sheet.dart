@@ -83,7 +83,7 @@ class _DirectChatSheetState extends State<DirectChatSheet> {
   Widget build(BuildContext context) => Container(
         height: MediaQuery.sizeOf(context).height * 0.76,
         decoration: const BoxDecoration(
-          color: Color(0xFFFDFBF7),
+          color: Color(0xFFF4FBF7),
           borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
         ),
         child: SafeArea(
@@ -131,8 +131,8 @@ class _DirectChatSheetState extends State<DirectChatSheet> {
                           ),
                           decoration: BoxDecoration(
                             color: own
-                                ? const Color(0xFFD1FAE5)
-                                : const Color(0xFFE2E8F0),
+                                ? const Color(0xFFD5F5E5)
+                                : const Color(0xFFFFFFFF),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(item.body),

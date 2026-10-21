@@ -38,6 +38,22 @@ if 'android:scheme="com.totichat.beta"' not in text:
     if "</activity>" not in text:
         raise SystemExit("MainActivity not found; Android template may have changed")
     text = text.replace("</activity>", callback + "        </activity>", 1)
+# supabase_flutter uses app_links to process OAuth completion URIs. Since
+# Flutter 3.27 the framework has its own enabled-by-default deep-link handler,
+# which competes with third-party plugins unless explicitly disabled.
+# Flutter documentation requires this metadata INSIDE the activity.
+if 'android:name="flutter_deeplinking_enabled"' not in text:
+    import re
+    activity_match = re.search(r'<activity\b[^>]*>', text, flags=re.S)
+    if activity_match is None:
+        raise SystemExit("Android MainActivity missing; cannot configure OAuth routing")
+    text = (
+        text[:activity_match.end()]
+        + '\n            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />'
+        + text[activity_match.end():]
+    )
+assert 'android:name="flutter_deeplinking_enabled" android:value="false"' in text
+assert text.index('android:name="flutter_deeplinking_enabled"') < text.index('</activity>')
 # Work around devices whose Vulkan/Impeller startup shows only a white
 # surface. This is a QA compatibility setting; it does not change LiveKit.
 # Keep within <application>, never next to <uses-permission> in <manifest>.
@@ -88,9 +104,9 @@ if 'applicationId = "com.totichat.beta"' not in config:
 # with a production app on the phone.
 text = manifest.read_text(encoding="utf-8")
 if 'android:label="totichat"' in text:
-    text = text.replace('android:label="totichat"', 'android:label="TotiChat Beta"')
+    text = text.replace('android:label="totichat"', 'android:label="TotiChat Green Beta"')
     manifest.write_text(text, encoding="utf-8")
-if 'android:label="TotiChat Beta"' not in text:
+if 'android:label="TotiChat Green Beta"' not in text:
     raise SystemExit("The Android launcher is not clearly identified as beta")
 
 # Every beta APK must include registered Android plugins. The old generated

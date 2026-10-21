@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/premium_ui.dart';
 import '../data/admin_session_repository.dart';
 
 /// Authorized, read-only beta admin entry. Mutating admin actions are not
@@ -38,27 +39,25 @@ class _AdminCenterScreenState extends State<AdminCenterScreen> {
                 await next;
               },
               child: ListView(padding: const EdgeInsets.all(18), children: [
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.verified_user_outlined),
-                    title: Text(UiText.get('admin_center')),
-                    subtitle: Text(authority.role),
-                  ),
+                PremiumRow(
+                  icon: Icons.verified_user_outlined,
+                  title: UiText.get('admin_center'),
+                  subtitle: authority.role,
                 ),
                 if (authority.canReadReports)
-                  ListTile(
-                    leading: const Icon(Icons.assessment_outlined),
-                    title: Text(UiText.get('admin_reports_permission')),
+                  PremiumRow(
+                    icon: Icons.assessment_outlined,
+                    title: UiText.get('admin_reports_permission'),
                   ),
                 if (authority.canManageCatalogs)
-                  ListTile(
-                    leading: const Icon(Icons.inventory_2_outlined),
-                    title: Text(UiText.get('admin_catalog_permission')),
+                  PremiumRow(
+                    icon: Icons.inventory_2_outlined,
+                    title: UiText.get('admin_catalog_permission'),
                   ),
                 if (authority.canManageHostAgencies)
-                  ListTile(
-                    leading: const Icon(Icons.groups_outlined),
-                    title: Text(UiText.get('admin_agencies_permission')),
+                  PremiumRow(
+                    icon: Icons.groups_outlined,
+                    title: UiText.get('admin_agencies_permission'),
                   ),
                 const Divider(),
                 Text(UiText.get('admin_beta_readonly'),

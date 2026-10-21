@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/green_theme.dart';
+import '../core/premium_ui.dart';
+import 'explore_view.dart';
+import 'premium_account_screens.dart';
+import 'premium_social_screens.dart';
 import '../core/session_exit.dart';
 import '../data/room_repository.dart';
 import '../data/gift_repository.dart';
@@ -166,9 +171,83 @@ class _HomeScreenState extends State<HomeScreen> {
     _openRoom(created);
   }
 
+  void _openPage(Widget page) {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: page,
+      ),
+    ));
+  }
+
+  void _openExplore() => _openPage(
+    Scaffold(
+      backgroundColor: GreenTheme.background,
+      appBar: AppBar(title: Text(UiText.get('discover_title'))),
+      body: ExploreView(
+        repository: _repository,
+        onRoomSelected: (room) {
+          Navigator.of(context).pop();
+          _enter(room);
+        },
+        onCreateRoom: () {
+          Navigator.of(context).pop();
+          _createRoom();
+        },
+      ),
+    ),
+  );
+
+  Widget _quickActions() {
+    final actions = <({IconData icon, String label, VoidCallback call})>[
+      (icon: Icons.explore_outlined, label: UiText.get('discover_title'), call: _openExplore),
+      (icon: Icons.storefront_outlined, label: UiText.get('store_title'), call: () => _openPage(const StoreScreen())),
+      (icon: Icons.account_balance_wallet_outlined, label: UiText.get('wallet_title'), call: () => _openPage(const WalletScreen())),
+      (icon: Icons.favorite_border, label: UiText.get('cp_title'), call: () => _openPage(const RelationshipScreen())),
+      (icon: Icons.apartment_outlined, label: UiText.get('agency_title'), call: () => _openPage(const AgencyScreen())),
+    ];
+    return SizedBox(
+      height: 102,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        itemCount: actions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 9),
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return InkWell(
+            onTap: action.call,
+            borderRadius: BorderRadius.circular(19),
+            child: SizedBox(
+              width: 86,
+              child: PremiumSurface(
+                padding: const EdgeInsets.all(9),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(action.icon, color: GreenTheme.primaryDark, size: 26),
+                    const SizedBox(height: 6),
+                    Text(action.label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11, color: GreenTheme.primaryDark,
+                        fontWeight: FontWeight.w800,
+                      )),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    const mint = Color(0xFF26C096);
+    const mint = GreenTheme.mint;
     return PopScope(
       canPop: _activeRoom == null,
       onPopInvokedWithResult: (didPop, result) {
@@ -179,44 +258,44 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           Scaffold(
-      backgroundColor: const Color(0xFFFDFBF7),
+      key: const Key('totichat-green-home'),
+      backgroundColor: GreenTheme.background,
       body: SafeArea(
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              color: mint,
+              color: GreenTheme.highlight,
               padding: const EdgeInsets.fromLTRB(18, 20, 18, 15),
               child: Row(children: [
-                Text(
-                  UiText.get('home_party'),
-                  style: const TextStyle(
-                    color: Color(0xFF064E3B),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                  ),
+                const CircleAvatar(
+                  radius: 16,
+                  backgroundColor: GreenTheme.primaryDark,
+                  backgroundImage: AssetImage('assets/images/toti-login-bg.jpg'),
                 ),
-                const SizedBox(width: 20),
-                Text(
-                  UiText.get('home_royal'),
-                  style: const TextStyle(
-                    color: Color(0xAA064E3B),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                const SizedBox(width: 9),
+                const Expanded(
+                  child: Text('TotiChat',
+                    style: TextStyle(
+                      color: GreenTheme.primaryDark,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    )),
                 ),
-                const SizedBox(width: 20),
-                Text(
-                  UiText.get('home_discover'),
-                  style: const TextStyle(
-                    color: Color(0xAA064E3B),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.refresh, color: Color(0xFF064E3B)),
+                  key: const Key('premium-search'),
+                  icon: const Icon(Icons.search, color: GreenTheme.primaryDark),
+                  onPressed: _openExplore,
+                  tooltip: UiText.get('discover_title'),
+                ),
+                IconButton(
+                  key: const Key('premium-notifications'),
+                  icon: const Icon(Icons.notifications_none, color: GreenTheme.primaryDark),
+                  onPressed: () => _openPage(const NotificationsScreen()),
+                  tooltip: UiText.get('notifications_title'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: GreenTheme.primaryDark),
                   onPressed: _refresh,
                   tooltip: UiText.get('refresh'),
                 ),
@@ -318,12 +397,34 @@ class _HomeScreenState extends State<HomeScreen> {
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
+                SliverToBoxAdapter(child: _quickActions()),
                 if (data.banners.isNotEmpty)
                   SliverToBoxAdapter(child: _bannerStrip(data.banners)),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                    child: PremiumHeader(
+                      title: UiText.get('rooms_section'),
+                      trailing: TextButton(
+                        onPressed: _openExplore,
+                        child: Text(UiText.get('view_all')),
+                      ),
+                    ),
+                  ),
+                ),
                 if (data.rooms.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Center(child: Text(UiText.get('rooms_empty'))),
+                    child: PremiumEmptyState(
+                      icon: Icons.headphones_outlined,
+                      title: UiText.get('rooms_empty'),
+                      subtitle: UiText.get('discover_empty_help'),
+                      action: FilledButton.icon(
+                        onPressed: _createRoom,
+                        icon: const Icon(Icons.add),
+                        label: Text(UiText.get('room_create')),
+                      ),
+                    ),
                   )
                 else
                   SliverPadding(
@@ -382,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SizedBox.expand(
               child: imageUrl == null
                   ? const ColoredBox(
-                      color: Color(0xFFE2E8F0),
+                      color: GreenTheme.highlight,
                       child: Icon(Icons.headphones, color: Color(0xFF64748B)),
                     )
                   : Image.network(
@@ -404,7 +505,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF1E293B),
+            color: GreenTheme.ink,
           ),
         ),
       ]),
@@ -435,7 +536,7 @@ class _ProfileData {
 }
 
 class _ProfileViewState extends State<_ProfileView> {
-  late final Future<_ProfileData> _profile = _loadProfile();
+  late Future<_ProfileData> _profile = _loadProfile();
 
   Future<_ProfileData> _loadProfile() async {
     final client = Supabase.instance.client;
@@ -517,6 +618,49 @@ class _ProfileViewState extends State<_ProfileView> {
                     ),
                   ),
                 ),
+              const SizedBox(height: 16),
+              PremiumHeader(title: UiText.get('profile_services')),
+              const SizedBox(height: 12),
+              PremiumRow(
+                icon: Icons.edit_outlined,
+                title: UiText.get('profile_edit'),
+                onTap: () async {
+                  final changed = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute<bool>(builder: (_) => const EditProfileScreen()),
+                  );
+                  if (changed == true && mounted) {
+                    setState(() => _profile = _loadProfile());
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+              PremiumRow(
+                icon: Icons.account_balance_wallet_outlined,
+                title: UiText.get('wallet_title'),
+                onTap: () => Navigator.push(context,
+                  MaterialPageRoute<void>(builder: (_) => const WalletScreen())),
+              ),
+              const SizedBox(height: 10),
+              PremiumRow(
+                icon: Icons.storefront_outlined,
+                title: UiText.get('store_title'),
+                onTap: () => Navigator.push(context,
+                  MaterialPageRoute<void>(builder: (_) => const StoreScreen())),
+              ),
+              const SizedBox(height: 10),
+              PremiumRow(
+                icon: Icons.favorite_border,
+                title: UiText.get('cp_title'),
+                onTap: () => Navigator.push(context,
+                  MaterialPageRoute<void>(builder: (_) => const RelationshipScreen())),
+              ),
+              const SizedBox(height: 10),
+              PremiumRow(
+                icon: Icons.apartment_outlined,
+                title: UiText.get('agency_title'),
+                onTap: () => Navigator.push(context,
+                  MaterialPageRoute<void>(builder: (_) => const AgencyScreen())),
+              ),
               const SizedBox(height: 34),
               OutlinedButton(
                 onPressed: widget.onSignOut,
