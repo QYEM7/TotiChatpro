@@ -19,8 +19,10 @@ void main() {
     ));
 
     expect(find.byType(TextFormField), findsNWidgets(2));
-    expect(find.byIcon(Icons.add_photo_alternate_outlined), findsOneWidget);
+    expect(find.byKey(const Key('reference-room-cover-picker')), findsOneWidget);
     expect(find.text(UiText.get('room_welcome_label')), findsOneWidget);
+    expect(find.byKey(const Key('reference-room-name')), findsOneWidget);
+    expect(find.byKey(const Key('reference-room-welcome')), findsOneWidget);
     expect(find.text(UiText.get('room_name_label')), findsOneWidget);
   });
 
@@ -31,7 +33,7 @@ void main() {
         child: CreateRoomScreen(),
       ),
     ));
-    await tester.tap(find.byIcon(Icons.add_circle_outline));
+    await tester.tap(find.byKey(const Key('reference-submit-room')));
     await tester.pump();
     expect(find.text(UiText.get('room_name_required')), findsOneWidget);
     expect(find.text(UiText.get('room_welcome_required')), findsOneWidget);
