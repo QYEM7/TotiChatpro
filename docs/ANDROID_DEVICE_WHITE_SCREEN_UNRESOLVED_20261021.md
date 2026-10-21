@@ -2,6 +2,13 @@
 
 Status: **OPEN — physical-device startup failed**. Scope: TotiChat Flutter Beta on `rebuild/flutter-v1`; Supabase **Staging only**.
 
+## Follow-up evidence
+
+- Android 14 **debug** emulator run [39606302117](https://github.com/QYEM7/TotiChatpro/actions/runs/39606302117) passed. This still does not verify the ARM64 release build on a physical phone.
+- Offline ARM64 diagnostics workflow [39606373247](https://github.com/QYEM7/TotiChatpro/actions/runs/39606373247) passed, artifact ID `12348413731`. The extracted `TotiChat-Device-Test-ARM64.apk` is **54,078,542 bytes** and its SHA-256 is `aa0ad41a72b211acfbb400f843817cd5dc44b1daa6ea7d4b9137242994f0cd3f`. APK ZIP integrity and SHA256SUMS verification succeeded. Physical-device execution remains **untested**.
+- Android 14 **release-mode** emulator run [39606302101](https://github.com/QYEM7/TotiChatpro/actions/runs/39606302101) compiled and installed the release APK, then failed because the runner split a multi-line `for` loop across shell invocations (`Syntax error: end of file unexpected (expecting "done")`). This is a **CI script failure, not evidence that the app crashed**. Commit `2207ff6196c4b51a4e7ba2951134ef33a10beae8` fixes that by invoking a standalone POSIX shell script. The corrected emulator runtime result must be verified in a subsequent run before making any success claim.
+- The offline diagnostic APK still bundles third-party native libraries through the Flutter app's plugin registry. It isolates the **Dart UI from backend initialization**, but cannot conclusively isolate the engine from all plugin or platform crashes.
+
 ## Confirmed evidence
 
 - The user reported that the initial ARM32/ARM64 builds showed a white screen or froze.
