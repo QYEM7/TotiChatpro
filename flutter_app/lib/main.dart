@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'src/core/green_theme.dart';
 import 'src/core/staging_config.dart';
 import 'src/core/ui_text.dart';
 import 'src/screens/login_screen.dart';
@@ -214,13 +215,7 @@ class TotiChatApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'TotiChat',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF26C096),
-          ),
-          fontFamily: 'sans-serif',
-        ),
+        theme: GreenTheme.light,
         home: const Directionality(
           textDirection: TextDirection.rtl,
           child: AuthGate(),
@@ -239,6 +234,8 @@ class _AuthGateState extends State<AuthGate> {
   StreamSubscription<AuthState>? _subscription;
   bool _checking = true;
   bool _verified = false;
+  String? _verifiedUserId;
+  String? _checkingUserId;
   String? _error;
   int _verificationGeneration = 0;
 
@@ -246,17 +243,47 @@ class _AuthGateState extends State<AuthGate> {
   void initState() {
     super.initState();
     _subscription = Supabase.instance.client.auth.onAuthStateChange.listen(
-      (_) => _verifySession(),
+      _handleAuthEvent,
       onError: (Object error, StackTrace stackTrace) {
         if (!mounted) return;
         setState(() {
           _checking = false;
-          _verified = false;
+          _checkingUserId = null;
           _error = UiText.get('auth_failed');
         });
       },
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _verifySession());
+    // Supabase emits initialSession, but also check the already restored
+    // session so that a missed early event never leaves a spinner forever.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _checkingUserId == null) _verifySession();
+    });
+  }
+
+  void _handleAuthEvent(AuthState state) {
+    if (!mounted) return;
+    final session = state.session;
+    if (session == null || state.event == AuthChangeEvent.signedOut) {
+      ++_verificationGeneration;
+      setState(() {
+        _checking = false;
+        _checkingUserId = null;
+        _verified = false;
+        _verifiedUserId = null;
+        _error = null;
+      });
+      return;
+    }
+
+    // Token rotation or duplicate initial notifications must not bounce a
+    // successfully authenticated user back through the login/loading UI.
+    if (state.event == AuthChangeEvent.tokenRefreshed &&
+        _verified &&
+        _verifiedUserId == session.user.id) {
+      return;
+    }
+    if (_checking && _checkingUserId == session.user.id) return;
+    _verifySession();
   }
 
   Future<void> _verifySession() async {
@@ -268,34 +295,52 @@ class _AuthGateState extends State<AuthGate> {
     if (session == null) {
       setState(() {
         _checking = false;
+        _checkingUserId = null;
         _verified = false;
+        _verifiedUserId = null;
         _error = null;
+      });
+      return;
+    }
+
+    // Never reuse the verified state for a different account.
+    if (_verified && _verifiedUserId == session.user.id) {
+      setState(() {
+        _checking = false;
+        _checkingUserId = null;
       });
       return;
     }
 
     setState(() {
       _checking = true;
+      _checkingUserId = session.user.id;
       _verified = false;
+      _verifiedUserId = null;
       _error = null;
     });
+
     try {
-      // RLS/authenticated alone is not sufficient: require backend verified
-      // session (confirmed account, session row, MFA policy) to accept a login.
+      // Only the server-verified identity may access the authenticated shell.
       final verifiedId = await client.rpc('phase4_verified_session');
       if (!mounted || generation != _verificationGeneration) return;
-      if (verifiedId.toString() != session.user.id) {
+      if (client.auth.currentSession?.user.id != session.user.id ||
+          verifiedId.toString() != session.user.id) {
         throw StateError('Server session identity mismatch');
       }
       setState(() {
         _checking = false;
+        _checkingUserId = null;
         _verified = true;
+        _verifiedUserId = session.user.id;
       });
     } catch (_) {
       if (!mounted || generation != _verificationGeneration) return;
       setState(() {
         _checking = false;
+        _checkingUserId = null;
         _verified = false;
+        _verifiedUserId = null;
         _error = UiText.get('auth_failed');
       });
     }
@@ -317,7 +362,7 @@ class _AuthGateState extends State<AuthGate> {
     if (_checking) {
       return _GateMessage(message: UiText.get('auth_pending'));
     }
-    if (_verified) {
+    if (_verified && _verifiedUserId == client.auth.currentUser?.id) {
       return const HomeScreen();
     }
     return Scaffold(
