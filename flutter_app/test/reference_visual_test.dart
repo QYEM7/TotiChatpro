@@ -84,14 +84,21 @@ void main() {
     expect(find.byType(ReferenceWelcomeHero), findsOneWidget);
     expect(find.byType(ReferenceEmptyRooms), findsOneWidget);
     final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(key));
-    final shot = await boundary.toImage(pixelRatio: 2);
-    final bytes = await shot.toByteData(format: ui.ImageByteFormat.png);
-    expect(bytes, isNotNull);
-    final output = File('build/design_previews/reference-home-empty.png');
-    await output.parent.create(recursive: true);
-    await output.writeAsBytes(bytes!.buffer.asUint8List());
-    shot.dispose();
-    expect(output.lengthSync(), greaterThan(2000));
+    // Screenshot rasterization is a real async GPU operation. Avoid awaiting it
+    // in TestWidgetsFlutterBinding's fake async zone, which may deadlock CI.
+    await tester.runAsync(() async {
+      final shot = await boundary.toImage(pixelRatio: 2);
+      try {
+        final bytes = await shot.toByteData(format: ui.ImageByteFormat.png);
+        expect(bytes, isNotNull);
+        final output = File('build/design_previews/reference-home-empty.png');
+        await output.parent.create(recursive: true);
+        await output.writeAsBytes(bytes!.buffer.asUint8List());
+        expect(output.lengthSync(), greaterThan(2000));
+      } finally {
+        shot.dispose();
+      }
+    });
   });
 }
 
