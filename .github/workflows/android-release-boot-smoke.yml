@@ -130,6 +130,13 @@ jobs:
           adb shell input keyevent KEYCODE_WAKEUP
           adb shell wm dismiss-keyguard || true
           adb install -r android-release-smoke/boot-smoke-release.apk
+          # Confirm Android resolves the OAuth URI to the Flutter application,
+          # not to a browser. No token or real Google account is used here.
+          adb shell cmd package resolve-activity --brief -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d 'com.totichat.beta://auth/callback' > android-release-smoke/oauth-deeplink-resolver.txt
+          if ! grep -q 'com.totichat.beta/com.totichat.totichat.MainActivity' android-release-smoke/oauth-deeplink-resolver.txt; then
+            echo "FAIL: OAuth callback does not resolve to TotiChat Beta"
+            exit 1
+          fi
           for pass in 1 2; do
             adb shell am force-stop com.totichat.beta || true
             adb logcat -c
@@ -188,6 +195,7 @@ jobs:
         with:
           name: totichat-android14-release-startup-evidence
           path: |
+            android-release-smoke/oauth-deeplink-resolver.txt
             android-release-smoke/launch-*.txt
             android-release-smoke/pid-*.txt
             android-release-smoke/ui-*.xml
