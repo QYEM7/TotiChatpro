@@ -5,6 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:totichat/main.dart';
 
 void main() {
+  testWidgets('offline native-render diagnostics use no backend screen',
+      (tester) async {
+    await tester.pumpWidget(const StartupDiagnosticsApp());
+
+    expect(find.text('TotiChat Device Test'), findsOneWidget);
+    expect(find.text('Flutter frame visible'), findsOneWidget);
+    expect(find.textContaining('No login, rooms'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
   testWidgets('first frame is visible while native initialization is pending',
       (tester) async {
     final pending = Completer<void>();
