@@ -152,5 +152,14 @@
   "reference_dm_unread": "غير المقروءة",
   "reference_dm_failed": "تعذّر تحميل الرسائل حالياً",
   "reference_dm_empty_details": "عندما تتواصل مع شخص في TotiChat ستظهر محادثتك هنا.",
-  "reference_dm_back": "رجوع"
+  "reference_dm_back": "رجوع",
+  "reference_create_cover_label": "صورة الغرفة",
+  "reference_room_name_hint": "اكتب اسماً مميزاً لغرفتك",
+  "reference_room_welcome_hint": "أهلاً بكم في جلستنا الصوتية، نورتوا الغرفة...",
+  "reference_room_category": "تصنيف الغرفة",
+  "reference_voice_category": "غرفة دردشة صوتية",
+  "reference_room_privacy": "خصوصية الغرفة",
+  "reference_room_public": "عامة",
+  "reference_room_private": "خاصة",
+  "reference_room_privacy_helper": "تُحفظ خصوصية الغرفة عند إنشائها. الغرفة الخاصة تحتاج دعوة أو صلاحية دخول."
 }
