@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/reference_visuals.dart';
 import '../data/gift_repository.dart';
 import '../data/pending_gift_requests.dart';
 import '../data/room_repository.dart';
@@ -32,6 +33,7 @@ class _GiftSheetState extends State<GiftSheet> {
     newRequestId: _repo.newRequestId,
   );
   int _quantity = 1;
+  int _priceTier = 0;
   bool _sending = false;
   String? _error;
 
@@ -153,9 +155,16 @@ class _GiftSheetState extends State<GiftSheet> {
         .toList(growable: false);
     return Container(
       height: MediaQuery.sizeOf(context).height * 0.69,
-      decoration: const BoxDecoration(
-        color: Color(0xF2180F2E),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin:Alignment.topCenter,
+          end:Alignment.bottomCenter,
+          colors:[Color(0xF208493D),Color(0xF000241D)],
+        ),
+        borderRadius:const BorderRadius.vertical(top:Radius.circular(26)),
+        border:Border(
+          top:BorderSide(color:ReferencePalette.gold.withValues(alpha:.65)),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -196,7 +205,7 @@ class _GiftSheetState extends State<GiftSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: DropdownButtonFormField<String>(
                   initialValue: _recipient,
-                  dropdownColor: const Color(0xFF24143C),
+                  dropdownColor: const Color(0xFF174E41),
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     label: Text(UiText.get('gift_select_recipient'),
@@ -216,22 +225,42 @@ class _GiftSheetState extends State<GiftSheet> {
                 ),
               ),
               const SizedBox(height: 8),
+              SizedBox(
+                height: 42,
+                child: Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[
+                  _tierButton(0,UiText.get('reference_gifts_all')),
+                  _tierButton(1,UiText.get('reference_gifts_premium')),
+                  _tierButton(2,UiText.get('reference_gifts_royal')),
+                ]),
+              ),
+              const SizedBox(height: 4),
               Expanded(
                 child: model.items.isEmpty
                     ? Center(child: Text(UiText.get('gift_no_catalog'),
                         style: const TextStyle(color: Colors.white)))
-                    : GridView.builder(
+                    : Builder(builder: (context) {
+                        final filtered = model.items.where((item) =>
+                          _priceTier == 0 ||
+                          (_priceTier == 1 && item.price >= 1000) ||
+                          (_priceTier == 2 && item.price >= 7000)).toList();
+                        if(filtered.isEmpty) {
+                          return Center(child:Text(
+                            UiText.get('gift_no_catalog'),
+                            style:const TextStyle(color:Colors.white70),
+                          ));
+                        }
+                        return GridView.builder(
                         padding: const EdgeInsets.all(12),
-                        itemCount: model.items.length,
+                        itemCount: filtered.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          childAspectRatio: 0.91,
+                          crossAxisCount: 4,
+                          childAspectRatio: 0.76,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
                         ),
                         itemBuilder: (context, index) {
-                          final gift = model.items[index];
+                          final gift = filtered[index];
                           final selected = gift.id == _selected?.id;
                           return InkWell(
                             onTap: _sending ? null :
@@ -239,7 +268,7 @@ class _GiftSheetState extends State<GiftSheet> {
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                color: const Color(0xFF2F1A4C),
+                                color: const Color(0xFF0D4439),
                                 border: Border.all(
                                   color: selected
                                     ? const Color(0xFFFBBF24)
@@ -266,7 +295,8 @@ class _GiftSheetState extends State<GiftSheet> {
                             ),
                           );
                         },
-                      ),
+                      );
+                    }),
               ),
               Wrap(
                 alignment: WrapAlignment.center,
@@ -304,4 +334,18 @@ class _GiftSheetState extends State<GiftSheet> {
       ),
     );
   }
+  Widget _tierButton(int id,String label) => ChoiceChip(
+    selected:_priceTier==id,
+    label:Text(label),
+    onSelected:(_)=>setState(()=>_priceTier=id),
+    selectedColor:ReferencePalette.teal,
+    backgroundColor:const Color(0xFF195247),
+    labelStyle:TextStyle(
+      color:_priceTier==id?Colors.white:const Color(0xFFE0F5E9),
+      fontWeight:FontWeight.w700,
+    ),
+    side:BorderSide(color:ReferencePalette.gold.withValues(alpha:.4)),
+    shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(11)),
+  );
+
 }

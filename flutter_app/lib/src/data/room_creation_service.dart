@@ -51,6 +51,7 @@ class RoomCreationService {
     required String title,
     required String welcomeMessage,
     required Uint8List cover,
+    bool isPrivate = false,
   }) async {
     final cleanedTitle = title.trim();
     final cleanedWelcome = welcomeMessage.trim();
@@ -61,7 +62,7 @@ class RoomCreationService {
     }
     final created = await client.rpc('phase2_room_create', params: {
       'p_title': cleanedTitle,
-      'p_is_private': false,
+      'p_is_private': isPrivate,
     });
     if (created is! String || created.isEmpty) {
       throw StateError('Room create was not confirmed');
