@@ -114,6 +114,22 @@ void main() {
         ),
       ),
     );
+    // Decode the two real approved-design WebP assets before golden capture.
+    // Without pre-caching, flutter_test can snapshot a placeholder frame
+    // before ImageStreamCodec has produced the first image.
+    final previewContext = tester.element(find.byType(ReferenceWelcomeHero));
+    await tester.runAsync(() async {
+      await Future.wait([
+        precacheImage(
+          const AssetImage('assets/images/reference_approved_falcon.webp'),
+          previewContext,
+        ),
+        precacheImage(
+          const AssetImage('assets/images/reference_approved_welcome.webp'),
+          previewContext,
+        ),
+      ]);
+    });
     await tester.pumpAndSettle();
     expect(find.byType(ReferenceWelcomeHero), findsOneWidget);
     expect(find.byType(ReferenceEmptyRooms), findsOneWidget);
