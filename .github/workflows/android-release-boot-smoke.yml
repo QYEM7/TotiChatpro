@@ -1,0 +1,160 @@
+name: Android 14 release-mode startup diagnosis
+
+# PluginFix2 ran on a physical ARM phone as a release/AOT binary, but the
+# previous emulator smoke test used a debug/JIT binary. Test the release path
+# independently before claiming the white-screen incident is resolved.
+on:
+  push:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - '.github/workflows/android-release-boot-smoke.yml'
+      - 'flutter_app/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release-boot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android14-release-first-frame:
+    name: Android 14 release/AOT login screen (x86_64 emulator)
+    if: github.ref == 'refs/heads/rebuild/flutter-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FLUTTER_SUPPRESS_ANALYTICS: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Enforce isolated Staging configuration
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1'
+          grep -Fq 'https://rziaedugbdwefbefcxjt.supabase.co' lib/src/core/staging_config.dart
+          grep -Fq 'configuredUrl == url' lib/src/core/staging_config.dart
+          grep -Fq 'runApp(StartupGate(' lib/main.dart
+          if grep -REn 'sb_secret_|service_role' lib/; then exit 1; fi
+          echo 'Staging-only assertions passed.'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Android NDK with retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          ndk_dir="$ANDROID_HOME/ndk/28.2.13676358"
+          for attempt in 1 2 3; do
+            if test -s "$ndk_dir/source.properties"; then exit 0; fi
+            rm -rf "$ndk_dir"
+            if "$sdkmanager" --install "ndk;28.2.13676358" </dev/null; then
+              test -s "$ndk_dir/source.properties" && exit 0
+            fi
+            sleep 5
+          done
+          echo 'Android NDK installation failed; runtime was not tested'
+          exit 1
+
+      - name: Build actual release/AOT binary for Android 14 emulator
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter pub get
+          flutter analyze lib test
+          flutter test
+          bash scripts/prepare_android.sh
+          grep -Fq 'applicationId = "com.totichat.beta"' android/app/build.gradle.kts
+          grep -Fq 'signingConfig = signingConfigs.getByName("debug")' android/app/build.gradle.kts
+          grep -Fq 'io.flutter.embedding.android.EnableImpeller' android/app/src/main/AndroidManifest.xml
+          flutter build apk --release --split-per-abi --no-pub \
+            --dart-define=SUPABASE_URL=https://rziaedugbdwefbefcxjt.supabase.co
+          apk=build/app/outputs/flutter-apk/app-x86_64-release.apk
+          test -s "$apk"
+          unzip -t "$apk" >/dev/null
+          unzip -Z1 "$apk" | grep -Fq 'lib/x86_64/libdartjni.so'
+          unzip -Z1 "$apk" | grep -Fq 'lib/x86_64/libapp.so'
+          unzip -Z1 "$apk" | grep -Fq 'lib/x86_64/libflutter.so'
+          mkdir -p ../android-release-smoke
+          cp "$apk" ../android-release-smoke/boot-smoke-release.apk
+          sha256sum "$apk" > ../android-release-smoke/release-apk-sha256.txt
+          echo 'Compiled release/AOT APK, not a debug-mode substitute.'
+
+      - name: Enable emulator virtualization
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Cold-launch release app twice and capture evidence
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          emulator-boot-timeout: 600
+          disable-animations: true
+          script: |
+            # This script runs with /bin/sh, not Bash.
+            set -eu
+            mkdir -p android-release-smoke
+            adb shell input keyevent KEYCODE_WAKEUP
+            adb shell wm dismiss-keyguard || true
+            adb install -r android-release-smoke/boot-smoke-release.apk
+            for pass in 1 2; do
+              adb shell am force-stop com.totichat.beta || true
+              adb logcat -c
+              adb shell am start -W -n com.totichat.beta/com.totichat.totichat.MainActivity > "android-release-smoke/launch-${pass}.txt"
+              if [ "$pass" = 1 ]; then sleep 30; else sleep 18; fi
+              adb shell pidof com.totichat.beta > "android-release-smoke/pid-${pass}.txt" || true
+              adb shell screencap -p /sdcard/totichat-release.png
+              adb pull /sdcard/totichat-release.png "android-release-smoke/screenshot-${pass}.png"
+              adb shell uiautomator dump /sdcard/totichat-release.xml || true
+              adb pull /sdcard/totichat-release.xml "android-release-smoke/ui-${pass}.xml" || true
+              adb logcat -d -v time | grep -E 'com.totichat.beta|flutter|Flutter|AndroidRuntime|libdartjni|EGL|OpenGLRenderer' | tail -n 800 > "android-release-smoke/logcat-${pass}.txt" || true
+              test -s "android-release-smoke/pid-${pass}.txt"
+              test -s "android-release-smoke/screenshot-${pass}.png"
+              test -s "android-release-smoke/ui-${pass}.xml"
+              ! grep -q 'FATAL EXCEPTION: main' "android-release-smoke/logcat-${pass}.txt"
+              ! grep -q 'Failed to load dynamic library at path: libdartjni.so' "android-release-smoke/logcat-${pass}.txt"
+              ! grep -q 'could not start' "android-release-smoke/ui-${pass}.xml"
+              # A running process by itself is NOT a startup pass.
+              grep -q 'Toti Chat' "android-release-smoke/ui-${pass}.xml"
+              echo "PASS: release/AOT reached actual Google login, cold launch ${pass}"
+            done
+
+      - name: Retain release runtime evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-android14-release-startup-evidence
+          path: |
+            android-release-smoke/launch-*.txt
+            android-release-smoke/pid-*.txt
+            android-release-smoke/ui-*.xml
+            android-release-smoke/screenshot-*.png
+            android-release-smoke/logcat-*.txt
+            android-release-smoke/release-apk-sha256.txt
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: No distribution or production changes
+        run: echo 'Emulator-only release-mode diagnosis; no artifact APK published, no Play deployment and no backend writes.'
