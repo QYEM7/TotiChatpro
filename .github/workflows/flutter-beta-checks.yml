@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: flutter-beta-source-${{ github.ref }}
+  group: flutter-beta-source-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
