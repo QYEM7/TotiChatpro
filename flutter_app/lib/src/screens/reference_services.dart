@@ -235,12 +235,14 @@ class _ReferenceCpScreenState extends State<ReferenceCpScreen> {
             return Text(UiText.get('reference_cp_failed'));
           }
           final rows=snapshot.requireData;
-          if(rows.isEmpty) return Container(
-            padding:const EdgeInsets.all(18),
-            decoration:BoxDecoration(
-              color:Colors.white,borderRadius:BorderRadius.circular(17)),
-            child:Text(UiText.get('reference_cp_empty'),
-              textAlign:TextAlign.center));
+          if(rows.isEmpty) {
+            return Container(
+              padding:const EdgeInsets.all(18),
+              decoration:BoxDecoration(
+                color:Colors.white,borderRadius:BorderRadius.circular(17)),
+              child:Text(UiText.get('reference_cp_empty'),
+                textAlign:TextAlign.center));
+          }
           return Column(children:[
             for(final row in rows)
               ReferenceInfoTile(
