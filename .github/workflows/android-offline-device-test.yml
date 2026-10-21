@@ -1,0 +1,116 @@
+name: Isolated Android ARM64 Flutter renderer diagnostic
+
+# Generates a small, visibly labeled, OFFLINE device test. This APK is not a
+# replacement for the real beta and cannot access accounts or rooms.
+on:
+  push:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - '.github/workflows/android-offline-device-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-device-diagnostic-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-isolated-device-test:
+    if: github.ref == 'refs/heads/rebuild/flutter-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Confirm separate offline entry point
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1'
+          grep -Fq 'TOTICHAT_DIAGNOSTIC_ONLY' lib/main.dart
+          grep -Fq 'Flutter frame visible' lib/main.dart
+          grep -Fq 'runApp(const StartupDiagnosticsApp())' lib/main.dart
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Analyze and test code before packaging
+        working-directory: flutter_app
+        run: |
+          flutter pub get
+          flutter analyze lib test
+          flutter test test/startup_gate_test.dart
+
+      - name: Prepare Android host with separate diagnostic identity
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/prepare_android.sh
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          gradle = Path("android/app/build.gradle.kts")
+          data = gradle.read_text()
+          assert 'applicationId = "com.totichat.beta"' in data
+          assert 'signingConfig = signingConfigs.getByName("debug")' in data
+          gradle.write_text(data.replace(
+              'applicationId = "com.totichat.beta"',
+              'applicationId = "com.totichat.beta.diagnostic"'))
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          data = manifest.read_text()
+          assert 'android:label="TotiChat Beta"' in data
+          data = data.replace('android:label="TotiChat Beta"',
+                              'android:label="TotiChat Device Test"')
+          # This offline test must NOT claim the OAuth callback used by beta.
+          data, n = re.subn(
+              r'\s*<intent-filter>\s*<action android:name="android.intent.action.VIEW" />.*?</intent-filter>',
+              '', data, flags=re.S)
+          assert n == 1, "Unexpected beta callback shape"
+          assert 'android:scheme="com.totichat.beta"' not in data
+          manifest.write_text(data)
+          assert 'applicationId = "com.totichat.beta.diagnostic"' in gradle.read_text()
+          assert 'android:label="TotiChat Device Test"' in manifest.read_text()
+          PY
+
+      - name: Build offline renderer check for ARM64 only
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build apk --release --target-platform android-arm64 --no-pub \
+            --dart-define=TOTICHAT_DIAGNOSTIC_ONLY=true \
+            --dart-define=SUPABASE_URL=https://rziaedugbdwefbefcxjt.supabase.co
+          src=build/app/outputs/flutter-apk/app-release.apk
+          test -s "$src"
+          unzip -t "$src" >/dev/null
+          unzip -Z1 "$src" | grep -Fq 'lib/arm64-v8a/libapp.so'
+          unzip -Z1 "$src" | grep -Fq 'lib/arm64-v8a/libflutter.so'
+          mkdir -p dist/offline-test
+          cp "$src" dist/offline-test/TotiChat-Device-Test-ARM64.apk
+          (cd dist/offline-test && sha256sum TotiChat-Device-Test-ARM64.apk > SHA256SUMS.txt)
+
+      - name: Retain explicitly labeled test APK (not a release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-OFFLINE-Device-Test-ARM64
+          path: flutter_app/dist/offline-test/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Confirm no publish or backend writes
+        run: echo 'Standalone offline AOT renderer test; separate Android package, no login/audio, no production changes.'
