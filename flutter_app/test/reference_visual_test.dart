@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:totichat/src/core/reference_visuals.dart';
 import 'package:totichat/src/core/ui_text.dart';
@@ -9,8 +7,11 @@ import 'package:totichat/src/core/ui_text.dart';
 /// Captures real Flutter-rendered components against approved board #02.
 /// Zero data deliberately: no fake rooms or balances are published to users.
 void main() {
-  testWidgets('approved illustrated home components render and export evidence', (tester) async {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
     await UiText.load();
+  });
+  testWidgets('approved illustrated home components render and export evidence', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -83,22 +84,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ReferenceWelcomeHero), findsOneWidget);
     expect(find.byType(ReferenceEmptyRooms), findsOneWidget);
-    final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(key));
-    // Screenshot rasterization is a real async GPU operation. Avoid awaiting it
-    // in TestWidgetsFlutterBinding's fake async zone, which may deadlock CI.
-    await tester.runAsync(() async {
-      final shot = await boundary.toImage(pixelRatio: 2);
-      try {
-        final bytes = await shot.toByteData(format: ui.ImageByteFormat.png);
-        expect(bytes, isNotNull);
-        final output = File('build/design_previews/reference-home-empty.png');
-        await output.parent.create(recursive: true);
-        await output.writeAsBytes(bytes!.buffer.asUint8List());
-        expect(output.lengthSync(), greaterThan(2000));
-      } finally {
-        shot.dispose();
-      }
-    });
+    if (Platform.environment['TOTICHAT_CAPTURE_GOLDEN'] == '1') {
+      // Flutter's built-in golden pipeline owns rasterization and timing.
+      // CI runs this separately with --update-goldens and uploads its PNG.
+      await expectLater(
+        find.byKey(key),
+        matchesGoldenFile('goldens/reference-home-empty.png'),
+      );
+    }
   });
 }
 
