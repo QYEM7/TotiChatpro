@@ -44,12 +44,12 @@ if 'android:scheme="com.totichat.beta"' not in text:
 # Flutter documentation requires this metadata INSIDE the activity.
 if 'android:name="flutter_deeplinking_enabled"' not in text:
     import re
-    activity_match = re.search(r'<activity\\b[^>]*>', text, flags=re.S)
+    activity_match = re.search(r'<activity\b[^>]*>', text, flags=re.S)
     if activity_match is None:
         raise SystemExit("Android MainActivity missing; cannot configure OAuth routing")
     text = (
         text[:activity_match.end()]
-        + '\\n            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />'
+        + '\n            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />'
         + text[activity_match.end():]
     )
 assert 'android:name="flutter_deeplinking_enabled" android:value="false"' in text
