@@ -9,6 +9,14 @@ Scope: user-reported rejected UI after real Google sign-in in Android beta.
 - Physical Google OAuth *return into the intended green Flutter package* is **unverified**.
 - User expects the light-green Flutter experience, not the old dark/purple React prototype or previously published web UI.
 
+## Physical OAuth fallback observed (second device report)
+
+- User installed `TotiChat Green Beta`, confirmed the new green login UI is visible, then Google sign-in opened the **deprecated purple web email/password page in Chrome**, with a `*.pages.dev` preview domain in the address bar. This is a **browser redirect issue**, not evidence that the Flutter green home rendered as purple.
+- The Flutter caller already specifies `redirectTo: com.totichat.beta://auth/callback` for Staging.
+- Supabase Auth documentation requires that exact callback to be present in Staging **Authentication → URL Configuration → Redirect URLs**. If the callback is disallowed/misrouted, GoTrue may return to the Site URL instead. Exact configured allowlist/Site URL are not accessible through the connected Supabase project-management tools. The owner must verify and add the exact callback in the Staging dashboard; leave other URLs and production unchanged.
+- Android Flutter 3.27+ enables its framework deep-link handler by default, which conflicts with third-party handlers such as `app_links` used by `supabase_flutter`. The Android preparation script now explicitly inserts `flutter_deeplinking_enabled=false` inside `MainActivity` and fails if missing. The Release emulator smoke workflow checks this manifest entry and resolves the deep link to `com.totichat.beta/com.totichat.totichat.MainActivity` without exchanging tokens or signing into Google.
+- These are **two separate necessary acceptance conditions**: native Android callback routing and Supabase server redirect allowlist. A green login screenshot or emulator first-frame pass alone does not prove either real Google callback or session persistence.
+
 ## Code changes under review
 Draft PR: https://github.com/QYEM7/TotiChatpro/pull/33
 Base: `rebuild/flutter-v1`; **no main or production edits**.
@@ -29,7 +37,7 @@ Base: `rebuild/flutter-v1`; **no main or production edits**.
 - [ ] Flutter analyze and tests successful on PR head.
 - [ ] Release/AOT Android 14 emulator: login visually green, no native exceptions, two cold starts.
 - [ ] ARM64 APK artifact hashes verified and downloaded; **not production-signed**.
-- [ ] Physical-device check: launcher displays `TotiChat Green Beta`, Google browser returns to that same app, green home visible; no old purple UI.
+- [ ] Staging Auth Redirect URLs includes exact `com.totichat.beta://auth/callback`; configuration checked in Supabase dashboard (no wildcard required).\n- [ ] Android emulator resolves callback URI to native TotiChat Green Beta `MainActivity`.\n- [ ] Physical-device check: launcher displays `TotiChat Green Beta`, Google browser returns to that same app, green home visible; no old purple UI.
 - [ ] Kill/relaunch app and confirm persisted Google session, same real account and no logout loop.
 - [ ] Real room permissions and 15-seat/voice tests between two physical phones.
 - [ ] Gifts and wallet ledger idempotency, Admin Center permissions, no fake data.
