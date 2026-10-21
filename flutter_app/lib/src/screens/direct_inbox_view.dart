@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/premium_ui.dart';
 import '../data/direct_message_repository.dart';
 import 'direct_chat_sheet.dart';
 
@@ -62,7 +63,10 @@ class _DirectInboxViewState extends State<DirectInboxView> {
                 ? ListView(children: [
                     SizedBox(
                       height: MediaQuery.sizeOf(context).height * .45,
-                      child: Center(child: Text(UiText.get('dm_inbox_empty'))),
+                      child: PremiumEmptyState(
+                        icon: Icons.chat_bubble_outline,
+                        title: UiText.get('dm_inbox_empty'),
+                      ),
                     ),
                   ])
                 : ListView.builder(
