@@ -194,5 +194,8 @@
   "reference_agencies_intro": "وكالات المضيفين والشحن المعتمدة",
   "reference_agencies_available": "الوكالات المتاحة",
   "reference_agencies_failed": "تعذّر تحميل بيانات الوكالات",
-  "reference_agencies_empty": "ما توجد وكالات نشطة حالياً"
+  "reference_agencies_empty": "ما توجد وكالات نشطة حالياً",
+  "reference_member_muted": "الميكروفون مكتوم",
+  "reference_member_on_seat": "موجود على المقعد",
+  "reference_member_message": "إرسال رسالة خاصة"
 }
