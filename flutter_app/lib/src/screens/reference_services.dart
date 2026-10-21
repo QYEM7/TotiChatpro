@@ -176,7 +176,7 @@ class ReferenceCpScreen extends StatefulWidget {
 }
 
 class _ReferenceCpScreenState extends State<ReferenceCpScreen> {
-  late Future<List<Map<String,dynamic>>> _relationships = _load();
+  late final Future<List<Map<String,dynamic>>> _relationships = _load();
 
   Future<List<Map<String,dynamic>>> _load() async {
     final uid=Supabase.instance.client.auth.currentUser?.id;
@@ -231,7 +231,9 @@ class _ReferenceCpScreenState extends State<ReferenceCpScreen> {
             return const Center(child:LinearProgressIndicator(
               color:ReferencePalette.teal));
           }
-          if(snapshot.hasError) return Text(UiText.get('reference_cp_failed'));
+          if(snapshot.hasError) {
+            return Text(UiText.get('reference_cp_failed'));
+          }
           final rows=snapshot.requireData;
           if(rows.isEmpty) return Container(
             padding:const EdgeInsets.all(18),
@@ -261,7 +263,7 @@ class ReferenceAgenciesScreen extends StatefulWidget {
 }
 
 class _ReferenceAgenciesState extends State<ReferenceAgenciesScreen> {
-  late Future<List<Map<String,dynamic>>> _agencies=_load();
+  late final Future<List<Map<String,dynamic>>> _agencies=_load();
 
   Future<List<Map<String,dynamic>>> _load() async {
     final rows=await Supabase.instance.client.from('agencies')
@@ -285,8 +287,9 @@ class _ReferenceAgenciesState extends State<ReferenceAgenciesScreen> {
           return const Center(child:CircularProgressIndicator(
             color:ReferencePalette.teal));
         }
-        if(snapshot.hasError) return Center(
-          child:Text(UiText.get('reference_agencies_failed')));
+        if(snapshot.hasError) {
+          return Center(child:Text(UiText.get('reference_agencies_failed')));
+        }
         final rows=snapshot.requireData;
         return ListView(padding:const EdgeInsets.all(17),children:[
           Container(
