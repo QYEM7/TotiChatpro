@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/staging_config.dart';
+import '../core/green_theme.dart';
 import '../core/ui_text.dart';
 
 /// Approved first-opening screen from the original 8-screen TotiChat board.
@@ -46,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
         key: const Key('totichat-green-login'),
-        backgroundColor: const Color(0xFFF4FFF9),
+        backgroundColor: GreenTheme.background,
         body: Stack(children: [
           const Positioned.fill(child: CustomPaint(
             painter: _MintLandscapePainter(),
