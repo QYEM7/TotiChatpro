@@ -8,11 +8,79 @@ import 'src/core/ui_text.dart';
 import 'src/screens/login_screen.dart';
 import 'src/screens/home_screen.dart';
 
+// A compile-time, offline diagnostic is intentionally separate from the
+// beta experience. It bypasses Supabase, OAuth, assets and LiveKit entirely,
+// so a white screen here points to the Android/Flutter rendering path rather
+// than the network or auth setup. This must never masquerade as a beta app.
+const bool startupDiagnosticOnly = bool.fromEnvironment(
+  'TOTICHAT_DIAGNOSTIC_ONLY',
+  defaultValue: false,
+);
+
+class StartupDiagnosticsApp extends StatelessWidget {
+  const StartupDiagnosticsApp({super.key});
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'TotiChat Device Test',
+        home: Scaffold(
+          backgroundColor: const Color(0xFF103A57),
+          body: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_outline,
+                      color: Color(0xFFFBBF24),
+                      size: 68,
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'TotiChat Device Test',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Flutter frame visible',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Color(0xFFFBBF24),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Offline renderer check only. No login, rooms, audio or account access.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
 // Render the first Flutter frame immediately. A slow native-plugin or local
 // credential-store initialization must never leave Android on its blank
 // launch theme with no visible diagnostic state.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  if (startupDiagnosticOnly) {
+    runApp(const StartupDiagnosticsApp());
+    return;
+  }
   ErrorWidget.builder = (details) => const Material(
         color: Color(0xFFFDFBF7),
         child: Center(child: Text('TotiChat screen failed to load')),
