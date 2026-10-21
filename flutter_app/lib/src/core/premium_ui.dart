@@ -170,7 +170,9 @@ class PremiumRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => PremiumSurface(
         padding: EdgeInsets.zero,
-        child: ListTile(
+        child: Material(
+          type: MaterialType.transparency,
+          child: ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
           leading: Container(
             height: 42,
@@ -188,6 +190,7 @@ class PremiumRow extends StatelessWidget {
                   ? null
                   : const Icon(Icons.chevron_left, color: GreenTheme.primaryDark)),
           onTap: onTap,
+          ),
         ),
       );
 }
