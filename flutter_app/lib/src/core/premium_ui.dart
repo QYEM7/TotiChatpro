@@ -69,7 +69,7 @@ class PremiumHeader extends StatelessWidget {
             ],
           ),
         ),
-        if (trailing != null) trailing!,
+        ?trailing,
       ]);
 }
 
