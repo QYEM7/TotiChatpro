@@ -111,6 +111,27 @@ jobs:
           sha256sum "$apk" > ../android-release-smoke/release-apk-sha256.txt
           echo 'Compiled release/AOT APK, not a debug-mode substitute.'
 
+      - name: Package built ARM64 staging candidate independently of emulator instability
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          test -s "$apk"
+          unzip -t "$apk" >/dev/null
+          mkdir -p ../dist/first-entry-staging
+          cp "$apk" ../dist/first-entry-staging/TotiChat-Approved-First-Screen-ARM64.apk
+          (cd ../dist/first-entry-staging && sha256sum TotiChat-Approved-First-Screen-ARM64.apk > SHA256SUMS.txt)
+
+      - name: Upload ARM64 staging candidate for physical-device acceptance
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-Approved-First-Screen-ARM64
+          path: dist/first-entry-staging/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
+
       - name: Enable emulator virtualization
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -142,6 +163,15 @@ jobs:
             adb logcat -c
             adb shell am start -W -n com.totichat.beta/com.totichat.totichat.MainActivity > "android-release-smoke/launch-${pass}.txt"
             if [ "$pass" = 1 ]; then sleep 30; else sleep 18; fi
+            # Android 14 Google APIs emulator can show an unrelated
+            # "Pixel Launcher isn't responding" system modal. Dismiss ONLY
+            # that exact launcher dialog before evaluating the TotiChat UI.
+            adb shell uiautomator dump /sdcard/totichat-precheck.xml >/dev/null 2>&1 || true
+            if adb shell cat /sdcard/totichat-precheck.xml 2>/dev/null | grep -Fq "Pixel Launcher isn't responding"; then
+              echo 'Dismissing unrelated Pixel Launcher ANR dialog'
+              adb shell input tap 540 958
+              sleep 4
+            fi
             adb shell pidof com.totichat.beta > "android-release-smoke/pid-${pass}.txt" || true
             adb shell screencap -p /sdcard/totichat-release.png
             adb pull /sdcard/totichat-release.png "android-release-smoke/screenshot-${pass}.png"
