@@ -1,6 +1,4 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../core/green_theme.dart';
 
 /// The 2026 approved illustrated TotiChat boards define these proportions.
 /// Not a generic Material card kit: dedicated branded components for the
