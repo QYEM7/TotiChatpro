@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:ui';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/reference_visuals.dart';
 import '../core/room_microphone_policy.dart';
 import '../data/room_repository.dart';
 import '../data/voice_bridge.dart';
@@ -170,8 +173,8 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: const Color(0xCC100724),
-        border: Border.all(color: const Color(0x887C3AED)),
+        color: const Color(0xD4032B24),
+        border: Border.all(color: const Color(0x884DBEA0)),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -313,15 +316,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     if (_savingSeat || _leaving) return;
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (occupant != null && occupant.userId != userId) {
-      await showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder: (_) => DirectChatSheet(
-          otherUserId: occupant.userId,
-          otherDisplayName: occupant.displayName,
-        ),
-      );
+      await _referenceMemberPopup(occupant);
       return;
     }
     setState(() => _savingSeat = true);
@@ -345,6 +340,212 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
     } finally {
       if (mounted) setState(() => _savingSeat = false);
     }
+  }
+
+  Future<void> _referenceMemberPopup(RoomSeatMember member) async {
+    // Only verified seat information is rendered; no invented VIP or CP
+    // status and no account UUID masquerading as a public user ID.
+    final action = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      barrierColor: const Color(0x77000F0D),
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(15, 0, 15, 18),
+            padding: const EdgeInsets.fromLTRB(21, 22, 21, 22),
+            decoration: BoxDecoration(
+              color: ReferencePalette.canvas,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: ReferencePalette.gold.withValues(alpha: .75)),
+              boxShadow: const [
+                BoxShadow(blurRadius: 26, color: Color(0x44002D20)),
+              ],
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Container(
+                width: 98, height: 98,
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(colors: [
+                    ReferencePalette.paleGold,
+                    ReferencePalette.gold,
+                    ReferencePalette.paleGold,
+                  ]),
+                ),
+                child: CircleAvatar(
+                  backgroundColor: ReferencePalette.mint,
+                  backgroundImage: member.avatarUrl == null
+                    ? null : NetworkImage(member.avatarUrl!),
+                  child: member.avatarUrl != null
+                    ? null : const Icon(Icons.person_rounded,
+                        color: ReferencePalette.deep, size: 50),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(member.displayName,
+                key: const Key('reference-member-name'),
+                maxLines: 2, overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: ReferencePalette.ink,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 9),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11, vertical: 6),
+                decoration: BoxDecoration(
+                  color: ReferencePalette.paleMint,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(member.isMuted ? Icons.mic_off_outlined
+                      : Icons.mic_none_rounded,
+                    color: ReferencePalette.teal, size: 16),
+                  const SizedBox(width: 6),
+                  Text(member.isMuted
+                    ? UiText.get('reference_member_muted')
+                    : UiText.get('reference_member_on_seat'),
+                    style: const TextStyle(
+                      color: ReferencePalette.deep, fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    )),
+                ]),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(width: double.infinity, child: FilledButton.icon(
+                key: const Key('reference-member-dm'),
+                onPressed: () => Navigator.pop(sheetContext, true),
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: Text(UiText.get('reference_member_message')),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  backgroundColor: ReferencePalette.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(17)),
+                ),
+              )),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (action != true || !mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => DirectChatSheet(
+        otherUserId: member.userId,
+        otherDisplayName: member.displayName,
+      ),
+    );
+  }
+
+  Future<void> _referenceRoomActions() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0x99000D0A),
+      builder: (sheetContext) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            margin: const EdgeInsets.all(17),
+            padding: const EdgeInsets.fromLTRB(19, 24, 19, 25),
+            decoration: BoxDecoration(
+              color: const Color(0xE60D352D),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: ReferencePalette.gold.withValues(alpha:.5)),
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              SizedBox(width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const Key('reference-room-leave'),
+                  onPressed: () => Navigator.pop(sheetContext, 'leave'),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: Text(UiText.get('room_leave')),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFFFC5C5),
+                    minimumSize: const Size.fromHeight(55),
+                    side: const BorderSide(color: Color(0xFFCA6868)),
+                    backgroundColor: const Color(0x55391B1B),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(width: double.infinity,
+                child: FilledButton.icon(
+                  key: const Key('reference-room-minimize'),
+                  onPressed: widget.onMinimize == null
+                    ? null
+                    : () => Navigator.pop(sheetContext, 'minimize'),
+                  icon: const Icon(Icons.picture_in_picture_alt_outlined),
+                  label: Text(UiText.get('room_minimize')),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ReferencePalette.teal,
+                    minimumSize: const Size.fromHeight(55),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (action == 'leave') {
+      await _leave();
+    } else if (action == 'minimize') {
+      widget.onMinimize?.call();
+    }
+  }
+
+  Widget _referenceSeatRows(
+    Map<int, RoomSeatMember> seatMap, Map<String,int>? totals,
+  ) {
+    // Exactly 15 server-authorized seats; the hero row follows board #04.
+    const rows = <List<int>>[
+      [1,2,3],
+      [4,5,6,7],
+      [8,9,10,11],
+      [12,13,14,15],
+    ];
+    return LayoutBuilder(builder: (context, constraints) {
+      final seatWidth = math.min((constraints.maxWidth - 30) / 4, 85.0);
+      return Column(children: [
+        for (var rowIndex=0; rowIndex<rows.length; rowIndex++) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              for(final seatNumber in rows[rowIndex])
+                SizedBox(
+                  width:rowIndex==0 ? seatWidth + 7 : seatWidth,
+                  height:rowIndex==0 ? 111 : 92,
+                  child: _seat(
+                    seatNumber,
+                    seatMap[seatNumber],
+                    seatMap[seatNumber] == null ? null :
+                      totals?[seatMap[seatNumber]!.userId],
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: rowIndex==0 ? 11 : 4),
+        ],
+      ]);
+    });
   }
 
   Future<void> _sendMessage() async {
@@ -439,33 +640,31 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
         if (!didPop && widget.onLeave == null) _leave();
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF0D0426),
+        backgroundColor: const Color(0xFF002720),
         body: Stack(
           children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/galaxy-room-bg.jpg',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const ColoredBox(
-                  color: Color(0xFF0D0426),
-                ),
-              ),
-            ),
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xCC0A031E),
-                      Color(0x660A031E),
-                      Color(0xEE0A031E),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            const Positioned.fill(child: DecoratedBox(
+              decoration: BoxDecoration(gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF00281F),
+                  Color(0xFF005041),
+                  Color(0xFF001B18),
+                ],
+              )),
+            )),
+            const Positioned.fill(child: CustomPaint(
+              painter: WelcomeIllumination(),
+            )),
+            const Positioned.fill(child: DecoratedBox(
+              decoration: BoxDecoration(gradient: LinearGradient(
+                begin:Alignment.topCenter,
+                end:Alignment.bottomCenter,
+                colors: [Color(0x10000403),Color(0x9D001E19)],
+                stops:[0.2,1],
+              )),
+            )),
             SafeArea(
               child: Column(
                 children: [
@@ -489,17 +688,11 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                         tooltip: UiText.get('refresh'),
                         icon: const Icon(Icons.refresh, color: Colors.white),
                       ),
-                      if (widget.onMinimize != null)
-                        IconButton(
-                          onPressed: widget.onMinimize,
-                          tooltip: UiText.get('room_minimize'),
-                          icon: const Icon(Icons.keyboard_arrow_down,
-                              color: Colors.white),
-                        ),
                       IconButton(
-                        onPressed: _leaving ? null : _leave,
+                        key: const Key('reference-room-menu'),
+                        onPressed: _leaving ? null : _referenceRoomActions,
                         tooltip: UiText.get('room_leave'),
-                        icon: const Icon(Icons.logout, color: Colors.white),
+                        icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
                       ),
                     ]),
                   ),
@@ -511,7 +704,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                       ),
                       child: Text(
                         widget.room.welcomeMessage,
-                        style: const TextStyle(color: Color(0xFFE9D5FF)),
+                        style: const TextStyle(color: Color(0xFFE6F9EF)),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -530,7 +723,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                             vertical: 5, horizontal: 12),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xDD432273),
+                          color: const Color(0xDD114D3E),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: Text(
@@ -581,26 +774,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                                 future: _seatGiftTotals,
                                 builder: (context, totalsSnapshot) {
                                   final totals = totalsSnapshot.data;
-                                  return GridView.builder(
-                                    shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: 15,
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 5,
-                                      mainAxisSpacing: 12,
-                                      crossAxisSpacing: 5,
-                                      childAspectRatio: 0.70,
-                                    ),
-                                    itemBuilder: (context, index) {
-                                      final number = index + 1;
-                                      final occupant = seatMap[number];
-                                      final amount = occupant == null
-                                          ? null
-                                          : totals?[occupant.userId];
-                                      return _seat(number, occupant, amount);
-                                    },
-                                  );
+                                  return _referenceSeatRows(seatMap, totals);
                                 },
                               ),
                               Padding(
@@ -695,7 +869,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
                                         hintText: UiText.get('chat_hint'),
                                         hintStyle: const TextStyle(color: Colors.white54),
                                         filled: true,
-                                        fillColor: const Color(0xBB100724),
+                                        fillColor: const Color(0xDD113E34),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(24),
                                         ),
@@ -743,12 +917,12 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xAA1B0D3A),
+              color: const Color(0xAA124E40),
               shape: BoxShape.circle,
               border: Border.all(
                 color: occupied
                     ? const Color(0xFFFBBF24)
-                    : const Color(0x667C3AED),
+                    : const Color(0x8865D1AF),
               ),
             ),
             child: ClipOval(
@@ -782,7 +956,7 @@ class RoomScreenState extends State<RoomScreen> with WidgetsBindingObserver {
           children: [
             Text(
               index.toString().padLeft(2, '0'),
-              style: const TextStyle(color: Color(0xFFE9D5FF), fontSize: 9),
+              style: const TextStyle(color: Color(0xFFE6F9EF), fontSize: 9),
             ),
             if (occupied && verifiedGiftCoins != null) ...[
               const SizedBox(width: 3),

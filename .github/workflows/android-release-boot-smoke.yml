@@ -10,6 +10,12 @@ on:
     paths:
       - '.github/workflows/android-release-boot-smoke.yml'
       - 'flutter_app/**'
+  pull_request:
+    branches:
+      - 'rebuild/flutter-v1'
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/android-release-boot-smoke.yml'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +28,7 @@ concurrency:
 jobs:
   android14-release-first-frame:
     name: Android 14 release/AOT login screen (x86_64 emulator)
-    if: github.ref == 'refs/heads/rebuild/flutter-v1'
+    if: github.ref == 'refs/heads/rebuild/flutter-v1' || github.base_ref == 'rebuild/flutter-v1'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -37,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1'
+          test "$GITHUB_REF_NAME" = 'rebuild/flutter-v1' || test "${GITHUB_BASE_REF:-}" = 'rebuild/flutter-v1'
           grep -Fq 'https://rziaedugbdwefbefcxjt.supabase.co' lib/src/core/staging_config.dart
           grep -Fq 'configuredUrl == url' lib/src/core/staging_config.dart
           grep -Fq 'runApp(StartupGate(' lib/main.dart
@@ -84,6 +90,11 @@ jobs:
           flutter analyze lib test
           flutter test
           bash scripts/prepare_android.sh
+          # Supabase uses app_links; Flutter's default handler must be off.
+          grep -Fq 'android:name="flutter_deeplinking_enabled" android:value="false"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:scheme="com.totichat.beta"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:host="auth"' android/app/src/main/AndroidManifest.xml
+          grep -Fq 'android:pathPrefix="/callback"' android/app/src/main/AndroidManifest.xml
           grep -Fq 'applicationId = "com.totichat.beta"' android/app/build.gradle.kts
           grep -Fq 'signingConfig = signingConfigs.getByName("debug")' android/app/build.gradle.kts
           grep -Fq 'io.flutter.embedding.android.EnableImpeller' android/app/src/main/AndroidManifest.xml
@@ -99,6 +110,27 @@ jobs:
           cp "$apk" ../android-release-smoke/boot-smoke-release.apk
           sha256sum "$apk" > ../android-release-smoke/release-apk-sha256.txt
           echo 'Compiled release/AOT APK, not a debug-mode substitute.'
+
+      - name: Package built ARM64 staging candidate independently of emulator instability
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          test -s "$apk"
+          unzip -t "$apk" >/dev/null
+          mkdir -p ../dist/first-entry-staging
+          cp "$apk" ../dist/first-entry-staging/TotiChat-Approved-First-Screen-ARM64.apk
+          (cd ../dist/first-entry-staging && sha256sum TotiChat-Approved-First-Screen-ARM64.apk > SHA256SUMS.txt)
+
+      - name: Upload ARM64 staging candidate for physical-device acceptance
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-Approved-First-Screen-ARM64
+          path: dist/first-entry-staging/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
 
       - name: Enable emulator virtualization
         run: |
@@ -119,11 +151,27 @@ jobs:
           adb shell input keyevent KEYCODE_WAKEUP
           adb shell wm dismiss-keyguard || true
           adb install -r android-release-smoke/boot-smoke-release.apk
+          # Confirm Android resolves the OAuth URI to the Flutter application,
+          # not to a browser. No token or real Google account is used here.
+          adb shell cmd package resolve-activity --brief -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d 'com.totichat.beta://auth/callback' > android-release-smoke/oauth-deeplink-resolver.txt
+          if ! grep -q 'com.totichat.beta/com.totichat.totichat.MainActivity' android-release-smoke/oauth-deeplink-resolver.txt; then
+            echo "FAIL: OAuth callback does not resolve to TotiChat Beta"
+            exit 1
+          fi
           for pass in 1 2; do
             adb shell am force-stop com.totichat.beta || true
             adb logcat -c
             adb shell am start -W -n com.totichat.beta/com.totichat.totichat.MainActivity > "android-release-smoke/launch-${pass}.txt"
             if [ "$pass" = 1 ]; then sleep 30; else sleep 18; fi
+            # Android 14 Google APIs emulator can show an unrelated
+            # "Pixel Launcher isn't responding" system modal. Dismiss ONLY
+            # that exact launcher dialog before evaluating the TotiChat UI.
+            adb shell uiautomator dump /sdcard/totichat-precheck.xml >/dev/null 2>&1 || true
+            if adb shell cat /sdcard/totichat-precheck.xml 2>/dev/null | grep -Fq "Pixel Launcher isn't responding"; then
+              echo 'Dismissing unrelated Pixel Launcher ANR dialog'
+              adb shell input tap 540 958
+              sleep 4
+            fi
             adb shell pidof com.totichat.beta > "android-release-smoke/pid-${pass}.txt" || true
             adb shell screencap -p /sdcard/totichat-release.png
             adb pull /sdcard/totichat-release.png "android-release-smoke/screenshot-${pass}.png"
@@ -151,11 +199,11 @@ jobs:
               echo "FAIL: Flutter bootstrap error screen (pass ${pass})"
               exit 1
             fi
-            if ! grep -q 'Toti Chat' "android-release-smoke/ui-${pass}.xml"; then
+            if ! grep -q 'TotiChat' "android-release-smoke/ui-${pass}.xml"; then
               echo "FAIL: Google login not visible to accessibility (pass ${pass})"
               exit 1
             fi
-            echo "PASS: release/AOT Google login visible, cold launch ${pass}"
+            echo "PASS: release/AOT green Google login visible, cold launch ${pass}"
           done
           EOSH
           sh -n android-release-smoke/run-release-test.sh
@@ -177,6 +225,7 @@ jobs:
         with:
           name: totichat-android14-release-startup-evidence
           path: |
+            android-release-smoke/oauth-deeplink-resolver.txt
             android-release-smoke/launch-*.txt
             android-release-smoke/pid-*.txt
             android-release-smoke/ui-*.xml
@@ -185,6 +234,32 @@ jobs:
             android-release-smoke/release-apk-sha256.txt
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Stage test-only ARM64 green-shell APK after two emulator passes
+        if: success()
+        working-directory: flutter_app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ../android-release-smoke/ui-1.xml
+          test -f ../android-release-smoke/ui-2.xml
+          grep -q 'TotiChat' ../android-release-smoke/ui-1.xml
+          grep -q 'TotiChat' ../android-release-smoke/ui-2.xml
+          test -s build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          mkdir -p ../dist/green-staging
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ../dist/green-staging/TotiChat-Staging-Green-ARM64.apk
+          unzip -t ../dist/green-staging/TotiChat-Staging-Green-ARM64.apk >/dev/null
+          (cd ../dist/green-staging && sha256sum TotiChat-Staging-Green-ARM64.apk > SHA256SUMS.txt)
+
+      - name: Upload green interface phone acceptance candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TotiChat-Staging-Green-ARM64
+          path: dist/green-staging/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
 
       - name: No distribution or production changes
         run: echo 'Emulator-only release-mode diagnosis; no artifact APK published, no Play deployment and no backend writes.'

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/ui_text.dart';
+import '../core/reference_visuals.dart';
 import '../data/direct_message_repository.dart';
 
 /// Overlay: opening this does NOT disconnect or minimize the LiveKit room.
@@ -81,18 +82,50 @@ class _DirectChatSheetState extends State<DirectChatSheet> {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: MediaQuery.sizeOf(context).height * 0.76,
+        height: MediaQuery.sizeOf(context).height * 0.82,
         decoration: const BoxDecoration(
-          color: Color(0xFFFDFBF7),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+          color: ReferencePalette.canvas,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
         ),
         child: SafeArea(
           top: false,
           child: Column(children: [
-            const SizedBox(height: 14),
-            Text(widget.otherDisplayName,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            const Divider(),
+            Container(
+              margin: const EdgeInsets.fromLTRB(15, 15, 15, 9),
+              padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 6),
+              child: Row(children: [
+                IconButton(
+                  tooltip: UiText.get('reference_dm_back'),
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.chevron_right,
+                    color: ReferencePalette.ink),
+                ),
+                const CircleAvatar(
+                  radius: 22,
+                  backgroundColor: ReferencePalette.mint,
+                  child: Icon(Icons.person_outline_rounded,
+                    color: ReferencePalette.deep,size:26),
+                ),
+                const SizedBox(width: 11),
+                Expanded(child: Text(
+                  widget.otherDisplayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: ReferencePalette.ink,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 17,
+                  ),
+                )),
+                IconButton(
+                  onPressed: _refresh,
+                  icon: const Icon(Icons.refresh_rounded,
+                    color: ReferencePalette.teal),
+                  tooltip: UiText.get('refresh'),
+                ),
+              ]),
+            ),
+            const Divider(height: 1, color: Color(0xFFD6EAE0)),
             Expanded(
               child: FutureBuilder<List<DirectMessage>>(
                 future: _messages,
@@ -131,11 +164,40 @@ class _DirectChatSheetState extends State<DirectChatSheet> {
                           ),
                           decoration: BoxDecoration(
                             color: own
-                                ? const Color(0xFFD1FAE5)
-                                : const Color(0xFFE2E8F0),
-                            borderRadius: BorderRadius.circular(16),
+                                ? const Color(0xFF128D73)
+                                : Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(16),
+                              topRight: const Radius.circular(16),
+                              bottomLeft: Radius.circular(own ? 16 : 4),
+                              bottomRight: Radius.circular(own ? 4 : 16),
+                            ),
+                            border: own ? null : Border.all(
+                              color: const Color(0xFFDFEEE6)),
+                            boxShadow: const [BoxShadow(
+                              color: Color(0x100B6549), blurRadius: 10,
+                              offset: Offset(0, 3))],
                           ),
-                          child: Text(item.body),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(item.body,style:TextStyle(
+                                color: own ? Colors.white : ReferencePalette.ink,
+                                fontSize: 13.5, height:1.3,
+                              )),
+                              const SizedBox(height: 5),
+                              Text(
+                                TimeOfDay.fromDateTime(item.createdAt.toLocal())
+                                    .format(context),
+                                style: TextStyle(
+                                  color: own ? Colors.white70 :
+                                    const Color(0xFF85998F),
+                                  fontSize: 9,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -147,7 +209,7 @@ class _DirectChatSheetState extends State<DirectChatSheet> {
               Text(_error!, style: const TextStyle(color: Colors.red)),
             Padding(
               padding: EdgeInsets.fromLTRB(
-                12, 6, 12, MediaQuery.viewInsetsOf(context).bottom + 12),
+                12, 10, 12, MediaQuery.viewInsetsOf(context).bottom + 13),
               child: Row(children: [
                 Expanded(
                   child: TextField(
@@ -158,13 +220,28 @@ class _DirectChatSheetState extends State<DirectChatSheet> {
                     onSubmitted: (_) => _send(),
                     decoration: InputDecoration(
                       hintText: UiText.get('chat_hint'),
-                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.chat_bubble_outline_rounded,
+                        color: ReferencePalette.teal),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(22),
+                        borderSide: const BorderSide(color:Color(0xFFE1EEE6)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(22),
+                        borderSide: const BorderSide(color:Color(0xFFE1EEE6)),
+                      ),
                     ),
                   ),
                 ),
                 IconButton(
                   onPressed: _sending ? null : _send,
-                  icon: const Icon(Icons.send),
+                  style: IconButton.styleFrom(
+                    backgroundColor: ReferencePalette.teal,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.send_rounded),
                   tooltip: UiText.get('chat_send'),
                 ),
               ]),
