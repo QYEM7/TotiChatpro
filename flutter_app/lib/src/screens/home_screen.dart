@@ -7,6 +7,7 @@ import '../core/green_theme.dart';
 import '../core/reference_visuals.dart';
 import 'reference_explore.dart';
 import 'reference_notifications.dart';
+import 'reference_wallet.dart';
 import '../core/session_exit.dart';
 import '../data/room_repository.dart';
 import '../data/gift_repository.dart';
@@ -558,33 +559,13 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
-  Future<void> _showWallet(_ProfileData profile) async {
-    final wallet=profile.wallet;
-    await showModalBottomSheet<void>(
-      context:context,
-      showDragHandle:true,
-      backgroundColor:ReferencePalette.canvas,
-      builder:(sheetContext)=>SafeArea(child:Padding(
-        padding:const EdgeInsets.all(22),
-        child:Column(mainAxisSize:MainAxisSize.min,children:[
-          Text(UiText.get('wallet_balance'),
-            style:const TextStyle(fontSize:20,fontWeight:FontWeight.w900,
-              color:ReferencePalette.ink)),
-          const SizedBox(height:13),
-          if(wallet==null)
-            Text(UiText.get('wallet_no_balance'))
-          else ...[
-            Text('${UiText.get('wallet_coins')}: ${wallet.coins}'),
-            const SizedBox(height:6),
-            Text('${UiText.get('wallet_diamonds')}: ${wallet.diamonds}'),
-          ],
-          const SizedBox(height:13),
-          Text(UiText.get('reference_wallet_agent_notice'),
-            textAlign:TextAlign.center,
-            style:const TextStyle(color:Color(0xFF6E847A),fontSize:12)),
-        ]),
-      )),
-    );
+  Future<void> _showWallet() async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => const ReferenceWalletScreen(),
+    ));
+    if (mounted) {
+      setState(() => _profile = _loadProfile());
+    }
   }
 
   @override
@@ -672,7 +653,7 @@ class _ProfileViewState extends State<_ProfileView> {
           ReferenceInfoTile(
             title:UiText.get('wallet_balance'),
             icon:Icons.account_balance_wallet_outlined,
-            onTap:()=>_showWallet(user),
+            onTap:_showWallet,
             subtitle:UiText.get('reference_wallet_agent_notice'),
           ),
           ReferenceInfoTile(
