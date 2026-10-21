@@ -497,7 +497,7 @@ class _ProfileData {
 }
 
 class _ProfileViewState extends State<_ProfileView> {
-  late final Future<_ProfileData> _profile = _loadProfile();
+  late Future<_ProfileData> _profile = _loadProfile();
 
   Future<_ProfileData> _loadProfile() async {
     final client = Supabase.instance.client;
