@@ -11,6 +11,9 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     await UiText.load();
+    if (Platform.environment['TOTICHAT_CAPTURE_GOLDEN'] != '1') {
+      return; // Normal unit tests and Android CI require no OS font assets.
+    }
     // flutter_test defaults to Ahem squares. Load actual Arabic and icon
     // fonts for a credible raster comparison with the reference boards.
     final arabic = Platform.environment['TOTICHAT_PREVIEW_FONT'];
