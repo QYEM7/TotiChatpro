@@ -1,0 +1,39 @@
+name: Android staging build diagnostics
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Toolchain
+        run: |
+          flutter --version
+          java -version
+          ls -la flutter_app/android || true
+      - name: Dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+      - name: Analyze (diagnostic)
+        working-directory: flutter_app
+        run: flutter analyze --no-fatal-infos
+      - name: Android debug build (staging diagnostics only)
+        working-directory: flutter_app
+        run: flutter build apk --debug --verbose > /tmp/flutter-build.log 2>&1 || { tail -n 250 /tmp/flutter-build.log; exit 1; }
+      - name: Upload APK only if build succeeds
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totichat-staging-debug-apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
